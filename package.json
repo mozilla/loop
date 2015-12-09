@@ -1,29 +1,30 @@
 {
-  "name": "loop-client",
+  "name": "loop",
   "description": "Video conferencing app powered by WebRTC",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "git@github.com:mozilla/loop-client.git"
+    "url": "git@github.com:mozilla/loop.git"
   },
   "engines": {
-    "node": "0.10.x",
-    "npm": "2.14.x"
+    "node": "0.10.39",
+    "npm": "2.14.1"
   },
   "dependencies": {},
   "devDependencies": {
-    "classnames": "2.2.x",
-    "compression": "1.5.x",
-    "eslint": "1.10.x",
-    "eslint-plugin-mozilla": "../../../../testing/eslint-plugin-mozilla",
-    "eslint-plugin-react": "3.10.x",
-    "exports-loader": "0.6.x",
+    "babel": "5.8.34",
+    "classnames": "2.2.0",
+    "compression": "1.5.2",
+    "eslint": "1.10.3",
+    "eslint-plugin-react": "3.10.0",
+    "exports-loader": "0.6.2",
     "expose-loader": "0.7.x",
-    "express": "4.x",
-    "imports-loader": "0.6.x",
+    "express": "4.13.3",
+    "imports-loader": "0.6.5",
+    "nodemon": "1.8.1",
     "react": "0.13.3",
-    "script-loader": "0.6.x",
-    "webpack": "1.12.x"
+    "script-loader": "0.6.1",
+    "webpack": "1.12.4"
   },
   "scripts": {
     "test": "make test",

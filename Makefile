@@ -13,8 +13,11 @@ LOOP_DOWNLOAD_FIREFOX_URL := $(shell echo $${LOOP_DOWNLOAD_FIREFOX_URL-"https://
 LOOP_PRIVACY_WEBSITE_URL := $(shell echo $${LOOP_PRIVACY_WEBSITE_URL-"https://www.mozilla.org/privacy/firefox-hello/"})
 LOOP_LEGAL_WEBSITE_URL := $(shell echo $${LOOP_LEGAL_WEBSITE_URL-"https://www.mozilla.org/about/legal/terms/firefox-hello/"})
 LOOP_PRODUCT_HOMEPAGE_URL := $(shell echo $${LOOP_PRODUCT_HOMEPAGE_URL-"https://www.firefox.com/hello/"})
+FIREFOX_VERSION=45.0
 
-NODE_LOCAL_BIN=./node_modules/.bin
+NODE_LOCAL_BIN := ./node_modules/.bin
+REPO_BIN_DIR := ./bin
+RSYNC := rsync --archive --exclude='*.jsx'
 
 install: npm_install
 
@@ -26,7 +29,7 @@ npm_install:
 .PHONY: dist
 dist:
 	mkdir -p dist
-	cp -pR content/* dist
+	$(RSYNC) content/* dist
 	NODE_ENV="production" $(NODE_LOCAL_BIN)/webpack \
 		-p -v --display-errors
 	sed 's#webappEntryPoint.js#js/standalone.js#' \
@@ -40,11 +43,100 @@ distclean:
 distserver: remove_old_config dist
 	LOOP_CONTENT_DIR=dist node server.js
 
-test:
-	@echo "Not implemented yet."
+BUILT := ./built
+VENV := $(BUILT)/.venv
+BABEL := $(NODE_LOCAL_BIN)/babel --extensions '.jsx'
+ESLINT := $(NODE_LOCAL_BIN)/eslint
+FLAKE8 := $(NODE_LOCAL_BIN)/flake8
 
+.PHONY: .venv
+.venv:
+	virtualenv -p python2.7 $(VENV)
+	. $(VENV)/bin/activate && pip install -r bin/require.pip
+
+# XXX maybe just build one copy of shared in standalone, and then use
+# server.js magic to redirect?
+# XXX ecma3 transform for IE?
+.PHONY: ui
+ui:
+	mkdir -p $(BUILT)/$@
+	$(RSYNC) $@ $(BUILT)
+	$(BABEL) $@ --out-dir $(BUILT)/$@
+	mkdir -p $(BUILT)/$@/shared
+	$(RSYNC) shared $(BUILT)/$@
+	$(BABEL) shared --out-dir $(BUILT)/$@/shared
+
+.PHONY: standalone
+standalone:
+	mkdir -p $(BUILT)/$@
+	$(RSYNC) $@ $(BUILT)
+	$(BABEL) $@ --out-dir $(BUILT)/$@
+	mkdir -p $(BUILT)/$@/content/shared
+	$(RSYNC) shared $(BUILT)/$@/content
+	$(BABEL) shared --out-dir $(BUILT)/$@/content/shared
+
+.PHONY: add-on
+add-on:
+	mkdir -p $(BUILT)/$@
+	$(RSYNC) $@/chrome.manifest $@/bootstrap.js $(BUILT)/$@
+	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \
+		grep -v "#filter substitution" > $(BUILT)/$@/install.rdf
+	mkdir -p $(BUILT)/$@/chrome/content/panels
+	$(RSYNC) $@/panels $(BUILT)/$@/chrome/content
+	$(BABEL) $@/panels --out-dir $(BUILT)/$@/chrome/content/panels
+	mkdir -p $(BUILT)/$@/chrome/content/modules
+	$(RSYNC) $@/chrome/modules $(BUILT)/$@/chrome/content
+	mkdir -p $(BUILT)/$@/chrome/test
+	$(RSYNC) $@/chrome/test $(BUILT)/$@/chrome
+	mkdir -p $(BUILT)/$@/chrome/content/preferences
+	$(RSYNC) $@/preferences $(BUILT)/$@/chrome/content
+	mkdir -p $(BUILT)/$@/chrome/content/shared
+	$(RSYNC) shared $(BUILT)/$@/chrome/content
+	$(BABEL) shared --out-dir $(BUILT)/$@/chrome/content/shared
+	$(RSYNC) $@/chrome/skin $(BUILT)/$@/chrome/
+
+#
+# Tests
+#
+
+eslint:
+	$(ESLINT) --ext .js --ext .jsm --ext .jsx add-on shared standalone
+
+flake8: .venv
+	. $(VENV)/bin/activate && flake8 .
+
+.PHONY: lint
+lint: eslint flake8
+
+
+#
+# Build & run
+#
+
+XPI_FILE := built/loop@mozilla.org.xpi
+
+# so we can type "make xpi" without depend on the file directly
+.PHONY: xpi
+xpi: $(XPI_FILE)
+
+$(XPI_FILE): $(REPO_BIN_DIR)/build_extension.sh build
+		@$(REPO_BIN_DIR)/build_extension.sh $(@F) add-on
+
+.PHONY: build
+build: add-on standalone ui
+
+.PHONY: clean
+clean:
+	rm -rf $(BUILT)
+
+.PHONY: cleanbuild
+cleanbuild: clean build
+
+test: lint
+
+.PHONY: runserver
 runserver: remove_old_config
-	node server.js
+	$(REPO_BIN_DIR)/run-server.sh
 
 frontend:
 	@echo "Not implemented yet."

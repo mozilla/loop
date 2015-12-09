@@ -4,12 +4,12 @@ import threading
 import SimpleHTTPServer
 import SocketServer
 import BaseHTTPServer
-import socket
 import urllib
 import urlparse
 import os
 
 DEBUG = False
+
 
 # XXX Once we're on a branch with bug 993478 landed, we may want to get
 # rid of this HTTP server and just use the built-in one from Marionette,
@@ -122,8 +122,9 @@ class BaseTestFrontendUnits(MarionetteTestCase):
         # but not from marionette, uncomment the two lines below to break
         # on failing tests, so that the browsers won't be torn down, and you
         # can use the browser debugging facilities to see what's going on.
-        #from ipdb import set_trace
-        #set_trace()
+        #
+        # from ipdb import set_trace
+        # set_trace()
 
         raise AssertionError(self.get_failure_details(page))
 

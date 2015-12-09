@@ -1,0 +1,22 @@
+# This file currently uses a non-standard (and not on a standards track)
+# if statement within catch.
+add-on/chrome/modules/MozLoopWorker.js
+
+# This file currently uses es7 features eslint issue:
+# https://github.com/eslint/espree/issues/125
+add-on/chrome/modules/MozLoopAPI.jsm
+
+# Libs we don't need to check
+add-on/panels/vendor
+shared/vendor
+shared/test/vendor
+standalone/content/vendor
+node_modules
+test/shared/vendor
+
+# Coverage files
+test/coverage
+
+# Don't need to check the built trees
+built
+dist

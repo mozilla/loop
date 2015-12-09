@@ -122,7 +122,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
               }
             </div>
             <ToSView dispatcher={this.props.dispatcher} />
-            <img className="mozilla-logo" src="img/mozilla-logo.svg#logo" />
+            <img className="mozilla-logo" src="/img/mozilla-logo.svg#logo" />
           </div>
         </div>
       );
@@ -660,7 +660,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
         <div className="standalone-overlay-wrapper">
           <div className="hello-logo"></div>
           <GeneralSupportURL dispatcher={this.props.dispatcher} />
-          <img className="standalone-moz-logo" src="img/mozilla-logo.svg#logo-white" />
+          <img className="standalone-moz-logo" src="/img/mozilla-logo.svg#logo-white" />
         </div>
       );
     }

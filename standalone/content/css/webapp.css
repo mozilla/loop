@@ -34,7 +34,7 @@ body,
 }
 
 .loop-logo {
-  background: url("../shared/img/helloicon.svg") no-repeat;
+  background: url("../../shared/img/helloicon.svg") no-repeat;
   width: 100px;
   height: 100px;
 }
@@ -58,7 +58,7 @@ body,
 .standalone-overlay-wrapper > .hello-logo {
   width: 120px;
   height: 19px;
-  background-image: url("../shared/img/hello_logo.svg");
+  background-image: url("../../shared/img/hello_logo.svg");
   background-size: contain;
   background-repeat: no-repeat;
   position: absolute;

@@ -10,48 +10,48 @@ module.exports = function(config) {
 
   // List of files / patterns to load in the browser.
   baseConfig.files = baseConfig.files.concat([
-    "standalone/content/vendor/l10n-gaia-02ca67948fe8.js",
-    "content/shared/vendor/lodash-3.9.3.js",
-    "content/shared/vendor/backbone-1.2.1.js",
-    "content/shared/vendor/react-0.13.3.js",
-    "content/shared/vendor/classnames-2.2.0.js",
-    "content/shared/vendor/sdk.js",
-    "test/shared/vendor/*.js",
-    "test/shared/loop_mocha_utils.js",
+    "built/standalone/content/vendor/l10n-gaia-02ca67948fe8.js",
+    "built/standalone/content/shared/vendor/lodash-3.9.3.js",
+    "built/standalone/content/shared/vendor/backbone-1.2.1.js",
+    "built/standalone/content/shared/vendor/react-0.13.3.js",
+    "built/standalone/content/shared/vendor/classnames-2.2.0.js",
+    "built/standalone/content/shared/vendor/sdk.js",
+    "shared/test/vendor/*.js",
+    "shared/test/loop_mocha_utils.js",
     "test/karma/head.js", // Add test fixture container
-    "content/shared/js/loopapi-client.js",
-    "content/shared/js/utils.js",
-    "content/shared/js/store.js",
-    "content/shared/js/models.js",
-    "content/shared/js/mixins.js",
-    "content/shared/js/crypto.js",
-    "content/shared/js/validate.js",
-    "content/shared/js/actions.js",
-    "content/shared/js/dispatcher.js",
-    "content/shared/js/otSdkDriver.js",
-    "content/shared/js/activeRoomStore.js",
-    "content/shared/js/views.js",
-    "content/shared/js/textChatStore.js",
-    "content/shared/js/textChatView.js",
-    "content/shared/js/urlRegExps.js",
-    "content/shared/js/linkifiedTextView.js",
-    "standalone/content/js/standaloneAppStore.js",
-    "standalone/content/js/standaloneMozLoop.js",
-    "standalone/content/js/standaloneRoomViews.js",
-    "standalone/content/js/standaloneMetricsStore.js",
-    "standalone/content/js/webapp.js",
-    "test/shared/*.js",
-    "test/standalone/*.js"
+    "built/standalone/content/shared/js/loopapi-client.js",
+    "built/standalone/content/shared/js/utils.js",
+    "built/standalone/content/shared/js/store.js",
+    "built/standalone/content/shared/js/models.js",
+    "built/standalone/content/shared/js/mixins.js",
+    "built/standalone/content/shared/js/crypto.js",
+    "built/standalone/content/shared/js/validate.js",
+    "built/standalone/content/shared/js/actions.js",
+    "built/standalone/content/shared/js/dispatcher.js",
+    "built/standalone/content/shared/js/otSdkDriver.js",
+    "built/standalone/content/shared/js/activeRoomStore.js",
+    "built/standalone/content/shared/js/views.js",
+    "built/standalone/content/shared/js/textChatStore.js",
+    "built/standalone/content/shared/js/textChatView.js",
+    "built/standalone/content/shared/js/urlRegExps.js",
+    "built/standalone/content/shared/js/linkifiedTextView.js",
+    "built/standalone/content/js/standaloneAppStore.js",
+    "built/standalone/content/js/standaloneMozLoop.js",
+    "built/standalone/content/js/standaloneRoomViews.js",
+    "built/standalone/content/js/standaloneMetricsStore.js",
+    "built/standalone/content/js/webapp.js",
+    "shared/test/*.js",
+    "standalone/test/*.js"
   ]);
 
   // Preprocess matching files before serving them to the browser.
   // Available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor .
   baseConfig.preprocessors = {
-    "content/shared/js/*.js": ["coverage"],
-    "standalone/content/js/*.js": ["coverage"]
+    "built/standalone/content/shared/js/*.js": ["coverage"],
+    "built/standalone/content/js/*.js": ["coverage"]
   };
 
-  baseConfig.coverageReporter.dir = "test/coverage/shared_standalone";
+  baseConfig.coverageReporter.dir = "built/coverage/shared_standalone";
 
   config.set(baseConfig);
 };

@@ -17,7 +17,13 @@ var app = express();
 var compression = require("compression");
 app.use(compression());
 
+/* global __dirname */
 var path = require("path");
+// TODO audit for all uses which use __dirname instead of topDir and see if
+// they can be gotten rid of
+// XXX the reason for .. here is because we're depending on the current
+// reality of server.js being started from ./bin in the repo.
+var topDir = path.join(__dirname, "..");
 
 var port = process.env.PORT || 3000;
 var feedbackApiUrl = process.env.LOOP_FEEDBACK_API_URL ||
@@ -27,7 +33,8 @@ var loopServerUrl = process.env.LOOP_SERVER_URL || "http://localhost:5000";
 
 // This is typically overridden with "dist" so that it's possible to test the
 // optimized version, once it's been built to the "dist" directory
-var standaloneContentDir = process.env.LOOP_CONTENT_DIR || "content";
+var standaloneContentDir = process.env.LOOP_CONTENT_DIR ||
+  path.join(topDir, "built", "standalone", "content");
 
 // Remove trailing slashes as double slashes in the url can confuse the server
 // responses.
@@ -58,53 +65,46 @@ function getConfigFile(req, res) {
   ].join("\n"));
 }
 
-app.get("/content/config.js", getConfigFile);
-app.get("/content/c/config.js", getConfigFile);
-
-// Various mappings to let us end up with:
-// /test - for the test files
-// /ui - for the ui showcase
-// /content - for the standalone files.
-
-app.use("/ui", express.static(path.join(__dirname, "..", "ui")));
-app.use("/ui/img/", express.static(path.join(__dirname, "..", "standalone", "content", "img")));
-app.use("/ui/loop/", express.static(path.join(__dirname, "..", "content")));
-app.use("/ui/shared/", express.static(path.join(__dirname, "..", "content",
-                                                "shared")));
-
-// This exists exclusively for the unit tests. They are served the
-// whole loop/ directory structure and expect some files in the standalone directory.
-app.use("/standalone/content", express.static(path.join(__dirname, "content")));
-
-// We load /content this from  both /content *and* /../content. The first one
-// does what we need for running in the github loop-client context, the second one
-// handles running in the hg repo under mozilla-central and is used so that the shared
-// files are in the right location.
-app.use("/content", express.static(path.join(__dirname, standaloneContentDir)));
-app.use("/content", express.static(path.join(__dirname, "..", "content")));
-// These two are based on the above, but handle call urls, that have a /c/ in them.
-app.use("/content/c", express.static(path.join(__dirname,
-  standaloneContentDir)));
-app.use("/content/c", express.static(path.join(__dirname, "..", "content")));
-
-// Two lines for the same reason as /content above.
-app.use("/test", express.static(path.join(__dirname, "test")));
-app.use("/test", express.static(path.join(__dirname, "..", "test")));
-// Hacks for desktop to stop errors being raised in the tests for content loading.
-app.use("/test/shared/shared", express.static(path.join(__dirname, "..", "content/shared")));
-app.use("/test/desktop-local/shared", express.static(path.join(__dirname, "..", "content/shared")));
-
-
 // As we don't have hashes on the urls, the best way to serve the index files
 // appears to be to be to closely filter the url and match appropriately.
 function serveIndex(req, res) {
   "use strict";
 
-  return res.sendFile(path.join(__dirname, standaloneContentDir, "index.html"));
+  return res.sendFile(path.join(standaloneContentDir, "index.html"));
 }
 
-app.get(/^\/content\/[\w\-]+$/, serveIndex);
-app.get(/^\/content\/c\/[\w\-]+$/, serveIndex);
+//
+// This section is for loading the standalone UI files. Some of these files are
+// also loaded for unit tests.
+//
+app.get("/config.js", getConfigFile);
+
+app.get(/^\/[\w\-]+$/, serveIndex);
+
+app.use("/", express.static(standaloneContentDir));
+
+// Various mappings to let us end up with:
+// /test - for the test files.
+// /ui - for the ui showcase.
+// /add-on - used for tests & ui-showcases; hosts the add-on files.
+
+app.use("/ui", express.static(path.join(topDir, "built", "ui")));
+app.use("/add-on", express.static(
+  path.join(topDir, "built", "add-on", "chrome", "content")));
+
+// We want to make the top-level test directory available...
+app.use("/test", express.static(path.join(topDir, "test")));
+app.use("/test/coverage", express.static(path.join(topDir, "built", "coverage")));
+
+// ...and it points to stuff we want for testing.  Note that the shared unit
+// tests get all their resources from /standalone/shared in the
+// built directory.  The tests themselves, however, come out of the source
+// tree.
+app.use("/shared/test", express.static(path.join(topDir, "shared", "test")));
+app.use("/standalone/test", express.static(path.join(topDir, "standalone",
+  "test")));
+app.use("/add-on/panels/test", express.static(path.join(topDir, "add-on",
+  "panels", "test")));
 
 var server = app.listen(port);
 

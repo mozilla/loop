@@ -450,7 +450,7 @@
       return (
         <img className="svg-icon"
              height={sizeUnit[1]}
-             src={"../content/shared/img/icons-" + this.props.size + ".svg#" + this.props.shapeId}
+             src={"shared/img/icons-" + this.props.size + ".svg#" + this.props.shapeId}
              width={sizeUnit[0]} />
       );
     }

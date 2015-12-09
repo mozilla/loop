@@ -25,7 +25,7 @@ module.exports = function(config) {
     // Test results reporter to use.
     // Possible values: "dots", "progress".
     // Available reporters: https://npmjs.org/browse/keyword/karma-reporter .
-    reporters: ["progress", "coverage"],
+    reporters: ["dots", "coverage"],
 
     coverageReporter: {
       dir: "test/coverage/",

@@ -78,7 +78,7 @@ standalone:
 .PHONY: add-on
 add-on:
 	mkdir -p $(BUILT)/$@
-	$(RSYNC) $@/chrome.manifest $@/bootstrap.js $(BUILT)/$@
+	$(RSYNC) $@/chrome.manifest $@/chrome/bootstrap.js $(BUILT)/$@
 	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \
 		grep -v "#filter substitution" > $(BUILT)/$@/install.rdf
 	mkdir -p $(BUILT)/$@/chrome/content/panels
@@ -124,7 +124,7 @@ XPI_FILE := built/loop@mozilla.org.xpi
 xpi: $(XPI_FILE)
 
 $(XPI_FILE): $(REPO_BIN_DIR)/build_extension.sh build
-		@$(REPO_BIN_DIR)/build_extension.sh $(@F) add-on
+	@$(REPO_BIN_DIR)/build_extension.sh $(@F) add-on
 
 .PHONY: build
 build: add-on standalone ui

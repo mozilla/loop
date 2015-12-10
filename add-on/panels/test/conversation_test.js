@@ -43,8 +43,6 @@ describe("loop.conversation", function() {
           }
         };
       },
-      StartAlerting: sinon.stub(),
-      StopAlerting: sinon.stub(),
       EnsureRegistered: sinon.stub(),
       GetAppVersionInfo: function() {
         return {

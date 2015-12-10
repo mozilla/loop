@@ -164,10 +164,6 @@ var fakeRooms = [
     HasEncryptionKey: true,
     SetLoopPref: function() {},
     CopyString: function() {},
-    GetUserAvatar: function(emailAddress) {
-      var avatarUrl = "http://www.gravatar.com/avatar/0a996f0fe2727ef1668bdb11897e4459.jpg?default=blank&s=40";
-      return Math.ceil(Math.random() * 3) === 2 ? avatarUrl : null;
-    },
     GetSelectedTabMetadata: function() {
       return {
         previews: ["chrome://branding/content/about-logo.png"],
@@ -178,8 +174,6 @@ var fakeRooms = [
     "Rooms:GetAll": function(version) {
       return [].concat(fakeRooms);
     },
-    StartAlerting: function() {},
-    StopAlerting: function() {},
     GetUserProfile: function() { return null; },
     "Rooms:PushSubscription": function() {}
   });

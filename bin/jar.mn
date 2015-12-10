@@ -149,7 +149,6 @@
   content/shared/vendor/classnames-2.2.0.js        (content/shared/vendor/classnames-2.2.0.js)
 
   # Shared sounds
-  content/shared/sounds/ringtone.ogg               (content/shared/sounds/ringtone.ogg)
   content/shared/sounds/connecting.ogg             (content/shared/sounds/connecting.ogg)
   content/shared/sounds/connected.ogg              (content/shared/sounds/connected.ogg)
   content/shared/sounds/terminated.ogg             (content/shared/sounds/terminated.ogg)

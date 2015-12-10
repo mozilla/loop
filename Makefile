@@ -218,6 +218,10 @@ test: lint karma
 runserver: remove_old_config
 	$(REPO_BIN_DIR)/run-server.sh
 
+.PHONY: runfx
+runfx:
+	bin/runfx.js ${ARGS}
+
 frontend:
 	@echo "Not implemented yet."
 

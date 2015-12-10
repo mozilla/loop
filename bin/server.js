@@ -1,13 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
+"use strict";
 
 /* eslint-env node */
 
 /* XXX We should enable these and fix the warnings, but at the time of this
  * writing, we're just bootstrapping the linting infrastructure.
  */
-/* eslint-disable no-path-concat,no-process-exit */
 
 var express = require("express");
 var app = express();
@@ -17,7 +17,6 @@ var app = express();
 var compression = require("compression");
 app.use(compression());
 
-/* global __dirname */
 var path = require("path");
 // TODO audit for all uses which use __dirname instead of topDir and see if
 // they can be gotten rid of
@@ -43,8 +42,6 @@ if (loopServerUrl[loopServerUrl.length - 1] === "/") {
 }
 
 function getConfigFile(req, res) {
-  "use strict";
-
   res.set("Content-Type", "text/javascript");
   res.send([
     "var loop = loop || {};",
@@ -68,8 +65,6 @@ function getConfigFile(req, res) {
 // As we don't have hashes on the urls, the best way to serve the index files
 // appears to be to be to closely filter the url and match appropriately.
 function serveIndex(req, res) {
-  "use strict";
-
   return res.sendFile(path.join(standaloneContentDir, "index.html"));
 }
 
@@ -115,8 +110,6 @@ console.log("Use this for development only.");
 
 // Handle SIGTERM signal.
 function shutdown(cb) {
-  "use strict";
-
   try {
     server.close(function() {
       process.exit(0);

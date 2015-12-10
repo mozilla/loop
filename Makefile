@@ -100,7 +100,7 @@ add-on:
 #
 
 eslint:
-	$(ESLINT) --ext .js --ext .jsm --ext .jsx add-on shared standalone
+	$(ESLINT) --ext .js --ext .jsm --ext .jsx .
 
 flake8: .venv
 	. $(VENV)/bin/activate && flake8 .

@@ -1,4 +1,5 @@
 content loop chrome/content/ contentaccessible=yes
+locale loop en-US chrome/locale/en-US/
 override chrome://loop/skin/menuPanel.png       chrome://loop/skin/menuPanel-aero.png           os=WINNT osversion=6
 override chrome://loop/skin/menuPanel.png       chrome://loop/skin/menuPanel-aero.png           os=WINNT osversion=6.1
 override chrome://loop/skin/menuPanel.png       chrome://loop/skin/menuPanel-yosemite.png       os=Darwin osversion>=10.10

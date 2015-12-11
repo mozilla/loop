@@ -775,7 +775,7 @@ var MozLoopServiceInternal = {
     }
 
     let stringBundle =
-      Services.strings.createBundle("chrome://browser/locale/loop/loop.properties");
+      Services.strings.createBundle("chrome://loop/locale/loop.properties");
 
     let enumerator = stringBundle.getSimpleEnumeration();
     while (enumerator.hasMoreElements()) {

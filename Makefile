@@ -20,6 +20,7 @@ REPO_BIN_DIR := ./bin
 RSYNC := rsync --archive --exclude='*.jsx'
 
 install: npm_install
+	pip install -r virtualenv
 
 npm_install:
 	@npm install
@@ -49,8 +50,7 @@ BABEL := $(NODE_LOCAL_BIN)/babel --extensions '.jsx'
 ESLINT := $(NODE_LOCAL_BIN)/eslint
 FLAKE8 := $(NODE_LOCAL_BIN)/flake8
 
-.PHONY: .venv
-.venv:
+$(VENV): bin/require.pip
 	virtualenv -p python2.7 $(VENV)
 	. $(VENV)/bin/activate && pip install -r bin/require.pip
 
@@ -102,7 +102,7 @@ add-on:
 eslint:
 	$(ESLINT) --ext .js --ext .jsm --ext .jsx .
 
-flake8: .venv
+flake8: $(VENV)
 	. $(VENV)/bin/activate && flake8 .
 
 .PHONY: lint

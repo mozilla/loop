@@ -1,10 +1,13 @@
 {
   "name": "loop",
-  "description": "Video conferencing app powered by WebRTC",
+  "description": "Web sharing application powered by WebRTC",
   "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "git@github.com:mozilla/loop.git"
+  },
+  "bugs": {
+    "url": "https://bugzilla.mozilla.org/"
   },
   "engines": {
     "node": "0.10.39",

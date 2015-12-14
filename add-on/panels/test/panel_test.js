@@ -53,7 +53,10 @@ describe("loop.panel", function() {
       },
       GetPluralRule: sinon.stub(),
       SetLoopPref: sinon.stub(),
-      GetLoopPref: function() {
+      GetLoopPref: function(prefName) {
+        if (prefName === "debug.dispatcher") {
+          return false;
+        }
         return 1;
       },
       SetPanelHeight: function() { return null; },

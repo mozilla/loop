@@ -11,11 +11,11 @@ describe("loop.shared.views", function() {
   var sharedActions = loop.shared.actions;
   var sharedModels = loop.shared.models;
   var sharedViews = loop.shared.views;
-  var sandbox, dispatcher, OS, OSVersion;
+  var sandbox, clock, dispatcher, OS, OSVersion;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
-    sandbox.useFakeTimers(); // exposes sandbox.clock as a fake timer
+    clock = sandbox.useFakeTimers(); // exposes sandbox.clock as a fake timer
     sandbox.stub(l10n, "get", function(x) {
       return "translated:" + x;
     });
@@ -257,7 +257,7 @@ describe("loop.shared.views", function() {
   });
 
   describe("ConversationToolbar", function() {
-    var clock, hangup, publishStream;
+    var hangup, publishStream;
 
     function mountTestComponent(props) {
       props = _.extend({
@@ -271,11 +271,6 @@ describe("loop.shared.views", function() {
     beforeEach(function() {
       hangup = sandbox.stub();
       publishStream = sandbox.stub();
-      clock = sinon.useFakeTimers();
-    });
-
-    afterEach(function() {
-      clock.restore();
     });
 
     it("should not render the component when 'show' is false", function() {
@@ -727,7 +722,7 @@ describe("loop.shared.views", function() {
       expect(element.className).eql("no-video");
     });
 
-    it("should display a video element if a source object is supplied", function() {
+    it("should display a video element if a source object is supplied", function(done) {
       view = mountTestComponent({
         displayAvatar: false,
         mediaType: "local",
@@ -742,7 +737,18 @@ describe("loop.shared.views", function() {
 
       expect(element).not.eql(null);
       expect(element.className).eql("local-video");
-      expect(element.muted).eql(true);
+
+      // Google Chrome doesn't seem to set "muted" on the element at creation
+      // time, so we need to do the test as async.
+      clock.restore();
+      setTimeout(function() {
+        try {
+          expect(element.muted).eql(true);
+          done();
+        } catch (ex) {
+          done(ex);
+        }
+      }, 10);
     });
 
     // We test this function by itself, as otherwise we'd be into creating fake

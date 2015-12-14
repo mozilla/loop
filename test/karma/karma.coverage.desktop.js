@@ -11,16 +11,16 @@ module.exports = function(config) {
   // List of files / patterns to load in the browser.
   // We have to list these manually to ensure dependencies are correct.
   baseConfig.files = baseConfig.files.concat([
+    "built/add-on/chrome/content/shared/vendor/lodash.js",
+    "shared/test/loop_mocha_utils.js",
+    "test/karma/head.js",
     "built/add-on/chrome/content/shared/vendor/react.js",
     "built/add-on/chrome/content/shared/vendor/classnames.js",
-    "built/add-on/chrome/content/shared/vendor/lodash.js",
     "built/add-on/chrome/content/shared/vendor/backbone.js",
     "built/test/vendor/chai.js",
     "built/test/vendor/chai-as-promised.js",
     "built/test/vendor/mocha.js",
     "built/test/vendor/sinon.js",
-    "shared/test/loop_mocha_utils.js",
-    "test/karma/head.js", // Stub out DOM event listener due to races.
     "built/add-on/chrome/content/panels/vendor/l10n.js",
     "built/add-on/chrome/content/shared/js/loopapi-client.js",
     "built/add-on/chrome/content/shared/js/utils.js",
@@ -40,12 +40,9 @@ module.exports = function(config) {
     "built/add-on/chrome/content/panels/js/roomStore.js",
     "built/add-on/chrome/content/panels/js/roomViews.js",
     "built/add-on/chrome/content/panels/js/conversation.js",
-    "add-on/panels/test/*.js"
-  ]);
-
-  // List of files to exclude.
-  baseConfig.exclude = baseConfig.exclude.concat([
-    "add-on/panels/test/panel_test.js"
+    "built/add-on/chrome/content/panels/js/panel.js",
+    "add-on/panels/test/*.js",
+    "test/karma/tail.js"
   ]);
 
   // Preprocess matching files before serving them to the browser.

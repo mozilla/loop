@@ -10,8 +10,10 @@ module.exports = function(config) {
 
   // List of files / patterns to load in the browser.
   baseConfig.files = baseConfig.files.concat([
-    "built/standalone/content/vendor/l10n-gaia-02ca67948fe8.js",
     "built/standalone/content/shared/vendor/lodash.js",
+    "shared/test/loop_mocha_utils.js",
+    "test/karma/head.js",
+    "built/standalone/content/vendor/l10n-gaia-02ca67948fe8.js",
     "built/standalone/content/shared/vendor/backbone.js",
     "built/standalone/content/shared/vendor/react.js",
     "built/standalone/content/shared/vendor/classnames.js",
@@ -20,8 +22,6 @@ module.exports = function(config) {
     "built/test/vendor/chai-as-promised.js",
     "built/test/vendor/mocha.js",
     "built/test/vendor/sinon.js",
-    "shared/test/loop_mocha_utils.js",
-    "test/karma/head.js", // Add test fixture container
     "built/standalone/content/shared/js/loopapi-client.js",
     "built/standalone/content/shared/js/utils.js",
     "built/standalone/content/shared/js/store.js",
@@ -44,7 +44,8 @@ module.exports = function(config) {
     "built/standalone/content/js/standaloneMetricsStore.js",
     "built/standalone/content/js/webapp.js",
     "shared/test/*.js",
-    "standalone/test/*.js"
+    "standalone/test/*.js",
+    "test/karma/tail.js"
   ]);
 
   // Preprocess matching files before serving them to the browser.
@@ -53,6 +54,13 @@ module.exports = function(config) {
     "built/standalone/content/shared/js/*.js": ["coverage"],
     "built/standalone/content/js/*.js": ["coverage"]
   };
+
+  // For the standalone/shared unit tests, we run in Firefox and Chrome.
+  if (process.env.TRAVIS) {
+    baseConfig.browsers = ["Firefox", "Chrome_travis_ci"];
+  } else {
+    baseConfig.browsers = ["Firefox", "Chrome"];
+  }
 
   baseConfig.coverageReporter.dir = "built/coverage/shared_standalone";
 

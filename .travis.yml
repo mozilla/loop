@@ -2,6 +2,8 @@ language: node_js
 addons:
   firefox: latest
 
+sudo: required
+
 node_js:
   - "0.10"
 
@@ -20,6 +22,15 @@ install:
   - npm install
 
 before_install:
+  # Get the code signing key from Google.
+  - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+  # Add the Google package list to the package manager.
+  - sudo sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+  # Get new package lists (-qq = very quiet).
+  - sudo apt-get update -qq
+  # Install the Google Chrome stable package.
+  - sudo apt-get install -qq google-chrome-stable
+  - "export CHROME_BIN=google-chrome"
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start

@@ -12,7 +12,27 @@ module.exports = function(config) {
     basePath: "../../",
 
     // List of files / patterns to load in the browser.
-    files: [],
+    files: [
+      {
+        pattern: "shared/img/*.*",
+        watched: false,
+        included: false,
+        nocache: false,
+        served: true
+      },
+      {
+        pattern: "standalone/content/img/*.*",
+        watched: false,
+        included: false,
+        nocache: false,
+        served: true
+      }
+    ],
+
+    proxies: {
+      "/shared/img/": "http://localhost:9876/base/shared/img/",
+      "/img/": "http://localhost:9876/base/standalone/content/img/"
+    },
 
     // List of files to exclude.
     exclude: [
@@ -58,6 +78,13 @@ module.exports = function(config) {
     // Available browser launchers: https://npmjs.org/browse/keyword/karma-launcher .
     browsers: ["Firefox"],
 
+    customLaunchers: {
+      Chrome_travis_ci: {
+        base: "Chrome",
+        flags: ["--no-sandbox"]
+      }
+    },
+
     // Continuous Integration mode.
     // If true, Karma captures browsers, runs the tests and exits.
     singleRun: true,
@@ -70,7 +97,8 @@ module.exports = function(config) {
     plugins: [
       "karma-coverage",
       "karma-mocha",
-      "karma-firefox-launcher"
+      "karma-firefox-launcher",
+      "karma-chrome-launcher"
     ]
   };
 };

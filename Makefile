@@ -24,6 +24,7 @@ install: node_modules
 	pip install -r require.pip
 
 node_modules: package.json
+	@mkdir -p node_modules
 	npm install
 	@touch node_modules
 

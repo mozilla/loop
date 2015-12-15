@@ -19,11 +19,13 @@ NODE_LOCAL_BIN := ./node_modules/.bin
 REPO_BIN_DIR := ./bin
 RSYNC := rsync --archive --exclude='*.jsx'
 
-install: npm_install
-	pip install -r virtualenv
+.PHONY: install
+install: node_modules
+	pip install -r require.pip
 
-npm_install:
-	@npm install
+node_modules: package.json
+	npm install
+	@touch node_modules
 
 # build the dist dir, which contains a production version of the code and
 # assets
@@ -58,7 +60,7 @@ $(VENV): bin/require.pip
 # server.js magic to redirect?
 # XXX ecma3 transform for IE?
 .PHONY: ui
-ui:
+ui: node_modules
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@ $(BUILT)
 	$(BABEL) $@ --out-dir $(BUILT)/$@
@@ -67,7 +69,7 @@ ui:
 	$(BABEL) shared --out-dir $(BUILT)/$@/shared
 
 .PHONY: standalone
-standalone:
+standalone: node_modules
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@ $(BUILT)
 	$(BABEL) $@ --out-dir $(BUILT)/$@
@@ -76,7 +78,7 @@ standalone:
 	$(BABEL) shared --out-dir $(BUILT)/$@/content/shared
 
 .PHONY: add-on
-add-on:
+add-on: node_modules
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@/chrome.manifest $@/chrome/bootstrap.js $(BUILT)/$@
 	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \

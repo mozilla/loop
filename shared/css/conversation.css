@@ -915,23 +915,23 @@ body[platform="win"] .share-service-dropdown.overflow > .dropdown-menu-item {
   /* aligns paragraph to right side */
   justify-content: flex-end;
   margin-left: 0;
-  margin-right: 4px;
+  margin-right: 10px;
 }
 
 .text-chat-entry.received {
-  margin-left: 2px;
+  margin-left: 10px;
   margin-right: 0;
 }
 
 html[dir="rtl"] .text-chat-entry.sent {
-  margin-left: 5px;
+  margin-left: 10px;
   margin-right: 0;
 }
 
 
 html[dir="rtl"] .text-chat-entry.received {
   margin-left: 0;
-  margin-right: 5px;
+  margin-right: 10px;
 }
 
 .text-chat-entry > p {
@@ -946,6 +946,11 @@ html[dir="rtl"] .text-chat-entry.received {
   border: 1px solid #5cccee;
   background: #fff;
   word-wrap: break-word;
+  flex: 0 1 auto;
+  order: 1;
+}
+
+.text-chat-entry > .context-wrapper {
   flex: 0 1 auto;
   order: 1;
 }
@@ -1064,6 +1069,21 @@ html[dir="rtl"] .text-chat-entry.received .text-chat-arrow {
   /* Reset margin. */
   margin-right: 0;
   margin-left: -10px;
+}
+
+/* Context updated */
+.text-chat-entry > .context-content > .context-wrapper {
+  max-width: 300px;
+  min-height: 50px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 1px 1px rgba(0,0,0,.15);
+}
+
+.text-chat-entry.received > .context-content > .context-wrapper {
+  max-width: 180px;
 }
 
 .text-chat-header.special.room-name {

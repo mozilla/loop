@@ -355,6 +355,15 @@
     receivedTimestamp: "2015-06-23T22:25:45.590Z"
   }));
   dispatcher.dispatch(new sharedActions.SendTextChatMessage({
+    contentType: loop.shared.utils.CHAT_CONTENT_TYPES.CONTEXT_TILE,
+    message: "A marvelous page!",
+    extraData: {
+      roomToken: "fake",
+      newRoomURL: "http://marvelous.invalid"
+    },
+    sentTimestamp: "2015-06-23T22:25:46.590Z"
+  }));
+  dispatcher.dispatch(new sharedActions.SendTextChatMessage({
     contentType: loop.shared.utils.CHAT_CONTENT_TYPES.TEXT,
     message: "What time should we meet?",
     sentTimestamp: "2015-06-23T22:27:45.590Z"

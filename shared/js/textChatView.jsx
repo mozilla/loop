@@ -22,10 +22,13 @@ loop.shared.views.chat = (function(mozL10n) {
 
     propTypes: {
       contentType: React.PropTypes.string.isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher),
+      extraData: React.PropTypes.object,
       message: React.PropTypes.string.isRequired,
       showTimestamp: React.PropTypes.bool.isRequired,
       timestamp: React.PropTypes.string.isRequired,
-      type: React.PropTypes.string.isRequired
+      type: React.PropTypes.string.isRequired,
+      useDesktopPaths: React.PropTypes.bool
     },
 
     /**
@@ -61,6 +64,21 @@ loop.shared.views.chat = (function(mozL10n) {
         optionalProps.linkClickHandler = function(url) {
           loop.request("OpenURL", url);
         };
+      }
+
+      if (this.props.contentType === CHAT_CONTENT_TYPES.CONTEXT_TILE) {
+        return (
+          <div className={classes}>
+            <sharedViews.ContextUrlView
+              allowClick={true}
+              description={this.props.message}
+              dispatcher={this.props.dispatcher}
+              thumbnail={this.props.extraData.newRoomThumbnail}
+              url={this.props.extraData.newRoomURL}
+              useDesktopPaths={this.props.useDesktopPaths} />
+            {this.props.showTimestamp ? this._renderTimestamp() : null}
+          </div>
+        );
       }
 
       return (
@@ -217,11 +235,14 @@ loop.shared.views.chat = (function(mozL10n) {
 
                 return (
                   <TextChatEntry contentType={entry.contentType}
+                                 dispatcher={this.props.dispatcher}
+                                 extraData={entry.extraData}
                                  key={i}
                                  message={entry.message}
                                  showTimestamp={shouldShowTimestamp}
                                  timestamp={timestamp}
-                                 type={entry.type} />
+                                 type={entry.type}
+                                 useDesktopPaths={this.props.useDesktopPaths} />
                   );
               }, this)
             }

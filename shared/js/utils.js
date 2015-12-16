@@ -105,7 +105,8 @@ var inChrome = typeof Components != "undefined" && "utils" in Components;
   var CHAT_CONTENT_TYPES = {
     CONTEXT: "chat-context",
     TEXT: "chat-text",
-    ROOM_NAME: "room-name"
+    ROOM_NAME: "room-name",
+    CONTEXT_TILE: "context-tile"
   };
 
   /**

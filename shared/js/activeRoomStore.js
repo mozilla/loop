@@ -925,7 +925,8 @@ loop.store.ActiveRoomStore = (function() {
 
       // The browser being shared changed, so update to the new context
       loop.request("GetSelectedTabMetadata").then(function(meta) {
-        if (!meta) {
+        // Avoid sending the event if there is no data nor participants nor url
+        if (!meta || !meta.url || !this._hasParticipants()) {
           return;
         }
 
@@ -1220,6 +1221,24 @@ loop.store.ActiveRoomStore = (function() {
      */
     sendTextChatMessage: function(actionData) {
       this._handleTextChatMessage(actionData);
+    },
+
+    /**
+     * Checks if the room is empty or has participants.
+     *
+     */
+    _hasParticipants: function() {
+      // Update the participants to just the owner.
+      var participants = this.getStoreState("participants");
+      if (participants) {
+        participants = participants.filter(function(participant) {
+          return !participant.owner;
+        });
+
+        return participants.length > 0;
+      }
+
+      return false;
     }
   });
 

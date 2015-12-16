@@ -8,13 +8,11 @@ describe("loop.panel", function() {
   var expect = chai.expect;
   var TestUtils = React.addons.TestUtils;
   var sharedActions = loop.shared.actions;
-  var sharedUtils = loop.shared.utils;
 
   var sandbox, notifications, requestStubs;
   var fakeXHR, fakeWindow, fakeEvent;
   var requests = [];
   var roomData, roomData2, roomList, roomName;
-  var mozL10nGetSpy;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
@@ -65,7 +63,7 @@ describe("loop.panel", function() {
       GetPluralForm: function() {
         return "fakeText";
       },
-      "Rooms:GetAll": function(version) {
+      "Rooms:GetAll": function() {
         return [];
       },
       "Rooms:PushSubscription": sinon.stub(),
@@ -187,14 +185,9 @@ describe("loop.panel", function() {
   });
 
   describe("loop.panel.PanelView", function() {
-    var dispatcher, roomStore, callUrlData;
+    var dispatcher, roomStore;
 
     beforeEach(function() {
-      callUrlData = {
-        callUrl: "http://call.invalid/",
-        expiresAt: 1000
-      };
-
       dispatcher = new loop.Dispatcher();
       roomStore = new loop.store.RoomStore(dispatcher, {
         constants: {}
@@ -281,7 +274,7 @@ describe("loop.panel", function() {
          function() {
           var warnstub = sandbox.stub(console, "warn");
 
-          var view = TestUtils.renderIntoDocument(React.createElement(
+          TestUtils.renderIntoDocument(React.createElement(
             loop.panel.AccountLink, {
               fxAEnabled: false,
               userProfile: []
@@ -297,7 +290,7 @@ describe("loop.panel", function() {
          function() {
           var warnstub = sandbox.stub(console, "warn");
 
-          var view = TestUtils.renderIntoDocument(React.createElement(
+          TestUtils.renderIntoDocument(React.createElement(
             loop.panel.AccountLink, {
               fxAEnabled: false,
               userProfile: {}
@@ -314,7 +307,7 @@ describe("loop.panel", function() {
           React.createElement(loop.panel.SettingsDropdown));
       }
 
-      var loginToFxAStub, logoutFromFxAStub, openFxASettingsStub;
+      var openFxASettingsStub;
 
       beforeEach(function() {
         openFxASettingsStub = sandbox.stub();
@@ -362,7 +355,7 @@ describe("loop.panel", function() {
       it("should show a signout entry when user is authenticated", function() {
         loop.storedRequests.GetUserProfile = { email: "test@example.com" };
 
-        var view = mountTestComponent();
+        mountTestComponent();
 
         sinon.assert.calledWithExactly(document.mozL10n.get,
                                        "settings_menu_item_signout");
@@ -375,7 +368,7 @@ describe("loop.panel", function() {
           GetUserProfile: function() { return { email: "test@example.com" }; }
         });
 
-        var view = mountTestComponent();
+        mountTestComponent();
 
         sinon.assert.calledWithExactly(document.mozL10n.get,
                                        "settings_menu_item_settings");
@@ -813,22 +806,6 @@ describe("loop.panel", function() {
       });
     });
 
-    describe("Room Entry click", function() {
-      var roomEntry, roomEntryNode;
-
-      beforeEach(function() {
-        sandbox.stub(dispatcher, "dispatch");
-
-        roomEntry = mountRoomEntry({
-          dispatcher: dispatcher,
-          isOpenedRoom: false,
-          room: new loop.store.Room(roomData)
-        });
-        roomEntryNode = roomEntry.getDOMNode();
-      });
-
-    });
-
     describe("Room name updated", function() {
       it("should update room name", function() {
         var roomEntry = mountRoomEntry({
@@ -953,7 +930,7 @@ describe("loop.panel", function() {
     });
 
     it("should close the panel once a room is created and there is no error", function() {
-      var view = createTestComponent();
+      createTestComponent();
 
       roomStore.setStoreState({ pendingCreation: true });
 
@@ -972,7 +949,7 @@ describe("loop.panel", function() {
     });
 
     it("should call mozL10n.get for room empty strings", function() {
-      var view = createTestComponent();
+      createTestComponent();
 
       sinon.assert.calledWithExactly(document.mozL10n.get,
                                      "no_conversations_message_heading2");

@@ -773,6 +773,7 @@ const kMessageHandlers = {
     let win = Services.wm.getMostRecentWindow("navigator:browser");
     let url = message.data[0] ? message.data[0] : "about:home";
     win.openDialog("chrome://browser/content/", "_blank", "chrome,all,dialog=no,non-remote", url);
+    reply();
   },
 
   /**

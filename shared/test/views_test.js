@@ -11,8 +11,7 @@ describe("loop.shared.views", function() {
   var sharedActions = loop.shared.actions;
   var sharedModels = loop.shared.models;
   var sharedViews = loop.shared.views;
-  var getReactElementByClass = TestUtils.findRenderedDOMComponentWithClass;
-  var sandbox, fakeAudioXHR, dispatcher, OS, OSVersion;
+  var sandbox, dispatcher, OS, OSVersion;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
@@ -27,20 +26,6 @@ describe("loop.shared.views", function() {
 
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
-
-    fakeAudioXHR = {
-      open: sinon.spy(),
-      send: function() {},
-      abort: function() {},
-      getResponseHeader: function(header) {
-        if (header === "Content-Type") {
-          return "audio/ogg";
-        }
-      },
-      responseType: null,
-      response: new ArrayBuffer(10),
-      onload: null
-    };
 
     OS = "mac";
     OSVersion = { major: 10, minor: 10 };
@@ -244,7 +229,6 @@ describe("loop.shared.views", function() {
     });
 
     it("should call onClick method when the edit context menu item is clicked", function() {
-      var onClickCalled = false;
       var settingsMenuItems = [
         {
           id: "edit",

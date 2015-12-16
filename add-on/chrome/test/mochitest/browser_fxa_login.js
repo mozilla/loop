@@ -219,7 +219,7 @@ add_task(function* registrationWithInvalidState() {
   Services.prefs.setCharPref(fxASessionPref, "X".repeat(HAWK_TOKEN_LENGTH));
 
   let tokenPromise = MozLoopServiceInternal.promiseFxAOAuthToken("code1", "state");
-  yield tokenPromise.then(body => {
+  yield tokenPromise.then(() => {
     ok(false, "Promise should have rejected");
   },
   error => {
@@ -242,7 +242,7 @@ add_task(function* registrationWith401() {
   yield promiseOAuthParamsSetup(BASE_URL, params);
 
   let tokenPromise = MozLoopServiceInternal.promiseFxAOAuthToken("code1", "state");
-  yield tokenPromise.then(body => {
+  yield tokenPromise.then(() => {
     ok(false, "Promise should have rejected");
   },
   error => {
@@ -358,7 +358,7 @@ add_task(function* loginWithParams401() {
   yield MozLoopService.promiseRegisteredWithServers();
 
   let loginPromise = MozLoopService.logInToFxA();
-  yield loginPromise.then(tokenData => {
+  yield loginPromise.then(() => {
     ok(false, "Promise should have rejected");
   },
   error => {
@@ -380,7 +380,7 @@ add_task(function* logoutWithIncorrectPushURL() {
   is(registrationResponse.response.simplePushURLs.rooms, pushURL, "Check registered push URL");
   MozLoopServiceInternal.pushURLs.get(LOOP_SESSION_TYPE.FXA).rooms = "http://www.example.com/invalid";
   let caught = false;
-  yield MozLoopService.logOutFromFxA().catch((error) => {
+  yield MozLoopService.logOutFromFxA().catch(() => {
     caught = true;
   });
   ok(caught, "Should have caught an error logging out with a mismatched push URL");
@@ -419,7 +419,7 @@ add_task(function* loginWithRegistration401() {
   yield promiseOAuthParamsSetup(BASE_URL, params);
 
   let loginPromise = MozLoopService.logInToFxA();
-  yield loginPromise.then(tokenData => {
+  yield loginPromise.then(() => {
     ok(false, "Promise should have rejected");
   },
   error => {
@@ -448,7 +448,7 @@ add_task(function* openFxASettings() {
   };
   yield promiseOAuthParamsSetup(BASE_URL, params);
 
-  yield new Promise((resolve, reject) => {
+  yield new Promise((resolve) => {
     let progressListener = {
       onLocationChange: function onLocationChange(aBrowser) {
         if (aBrowser.currentURI.spec == BASE_URL) {

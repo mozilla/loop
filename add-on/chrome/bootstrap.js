@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 "use strict";
 
+/* exported startup, shutdown, install, uninstall */
+
 const { interfaces: Ci, utils: Cu, classes: Cc } = Components;
 
 const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
@@ -408,7 +410,7 @@ var WindowListener = {
         }
 
         let notification = new window.Notification(options.title, notificationOptions);
-        notification.addEventListener("click", e => {
+        notification.addEventListener("click", () => {
           if (window.closed) {
             return;
           }
@@ -669,9 +671,7 @@ var WindowListener = {
     window.LoopUI = LoopUI;
   },
 
-  tearDownBrowserUI: function(window) {
-    let document = window.document;
-
+  tearDownBrowserUI: function() {
     // Take any steps to remove UI or anything from the browser window
     // document.getElementById() etc. will work here
     // XXX Add in tear-down of the panel.
@@ -694,10 +694,10 @@ var WindowListener = {
     }, false);
   },
 
-  onCloseWindow: function(xulWindow) {
+  onCloseWindow: function() {
   },
 
-  onWindowTitleChange: function(xulWindow, newTitle) {
+  onWindowTitleChange: function() {
   }
 };
 

@@ -171,7 +171,7 @@ var fakeRooms = [
         url: "https://www.example.com"
       };
     },
-    "Rooms:GetAll": function(version) {
+    "Rooms:GetAll": function() {
       return [].concat(fakeRooms);
     },
     GetUserProfile: function() { return null; },

@@ -54,7 +54,7 @@ var gBadBackChannel;
 // Loads the specified URI in a new tab and waits for it to send us data on our
 // test web-channel and resolves with that data.
 function promiseNewChannelResponse(uri, channel, hash) {
-  let waitForChannelPromise = new Promise((resolve, reject) => {
+  let waitForChannelPromise = new Promise((resolve) => {
     if (channel.receivedData) {
       let data = channel.receivedData;
       channel.receivedData = null;

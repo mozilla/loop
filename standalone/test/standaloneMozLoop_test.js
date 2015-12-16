@@ -6,8 +6,12 @@ describe("loop.StandaloneMozLoop", function() {
   "use strict";
 
   var expect = chai.expect;
-  var sandbox, fakeXHR, requests, callback, mozLoop;
-  var fakeToken, fakeBaseServerUrl, fakeServerErrorDescription;
+  var sandbox, fakeXHR, requests;
+  var fakeBaseServerUrl, fakeServerErrorDescription;
+  /* eslint-disable no-unused-vars */
+  // This is used for side-effects - to simulate the message passing handling.
+  var standaloneMozLoop;
+  /* eslint-enable no-unused-vars */
 
   beforeEach(function() {
     sandbox = sinon.sandbox.create();
@@ -26,9 +30,7 @@ describe("loop.StandaloneMozLoop", function() {
       info: "error info"
     };
 
-    callback = sinon.spy();
-
-    mozLoop = new loop.StandaloneMozLoop({
+    standaloneMozLoop = new loop.StandaloneMozLoop({
       baseServerUrl: fakeBaseServerUrl
     });
   });
@@ -166,13 +168,9 @@ describe("loop.StandaloneMozLoop", function() {
   });
 
   describe("#rooms.refreshMembership", function() {
-    var standaloneMozLoop, fakeServerErrDescription;
+    var fakeServerErrDescription;
 
     beforeEach(function() {
-      standaloneMozLoop = new loop.StandaloneMozLoop({
-        baseServerUrl: fakeBaseServerUrl
-      });
-
       fakeServerErrDescription = {
         code: 401,
         errno: 101,

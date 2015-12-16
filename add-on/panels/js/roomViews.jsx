@@ -534,11 +534,6 @@ loop.roomViews = (function(mozL10n) {
         return null;
       }
 
-      var url = this._getURL();
-      var thumbnail = url && url.thumbnail || "shared/img/icons-16x16.svg#globe";
-      var urlDescription = url && url.description || "";
-      var location = url && url.location || "";
-
       var cx = classNames;
       var availableContext = this.state.availableContext;
       return (

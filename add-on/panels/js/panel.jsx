@@ -11,7 +11,6 @@ loop.panel = (function(_, mozL10n) {
   var sharedMixins = loop.shared.mixins;
   var sharedActions = loop.shared.actions;
   var Button = sharedViews.Button;
-  var Checkbox = sharedViews.Checkbox;
 
   var GettingStartedView = React.createClass({
     mixins: [sharedMixins.WindowCloseMixin],
@@ -55,7 +54,7 @@ loop.panel = (function(_, mozL10n) {
       this.closeWindow();
     },
 
-    handleGuestClick: function(event) {
+    handleGuestClick: function() {
       loop.request("LogoutFromFxA");
     },
 
@@ -751,7 +750,7 @@ loop.panel = (function(_, mozL10n) {
                 "rooms_list_recently_browsed" :
                 "rooms_list_currently_browsing")}</h1>
           <div className="room-list">{
-            this.state.rooms.map(function(room, i) {
+            this.state.rooms.map(function(room) {
               if (this.state.openedRoom !== null &&
                 room.roomToken !== this.state.openedRoom) {
                 return null;
@@ -910,7 +909,7 @@ loop.panel = (function(_, mozL10n) {
       };
     },
 
-    _serviceErrorToShow: function(callback) {
+    _serviceErrorToShow: function() {
       return new Promise(function(resolve) {
         loop.request("GetErrors").then(function(errors) {
           if (!errors || !Object.keys(errors).length) {
@@ -985,7 +984,7 @@ loop.panel = (function(_, mozL10n) {
       e.preventDefault();
     },
 
-    launchNonE10sWindow: function(e) {
+    launchNonE10sWindow: function() {
       loop.request("GetSelectedTabMetadata").then(function(metadata) {
         loop.request("OpenNonE10sWindow", metadata.url);
       });

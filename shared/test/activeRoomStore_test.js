@@ -548,7 +548,7 @@ describe("loop.store.ActiveRoomStore", function() {
         // easier.
         sandbox.stub(loop.crypto, "decryptBytes", function() {
           return {
-            then: function(resolve, reject) {
+            then: function(resolve) {
               resolve(JSON.stringify(roomContext));
             }
           };

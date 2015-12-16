@@ -7,10 +7,8 @@ describe("loop.roomViews", function() {
   var expect = chai.expect;
   var TestUtils = React.addons.TestUtils;
   var sharedActions = loop.shared.actions;
-  var sharedUtils = loop.shared.utils;
   var sharedViews = loop.shared.views;
   var ROOM_STATES = loop.store.ROOM_STATES;
-  var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
 
   var sandbox, dispatcher, roomStore, activeRoomStore, view;
@@ -21,7 +19,7 @@ describe("loop.roomViews", function() {
     sandbox = LoopMochaUtils.createSandbox();
 
     LoopMochaUtils.stubLoopRequest(requestStubs = {
-      GetAudioBlob: sinon.spy(function(name) {
+      GetAudioBlob: sinon.spy(function() {
         return new Blob([new ArrayBuffer(10)], { type: "audio/ogg" });
       }),
       GetLoopPref: sinon.stub(),
@@ -412,7 +410,7 @@ describe("loop.roomViews", function() {
     });
 
     describe("#componentWillUpdate", function() {
-      function expectActionDispatched(component) {
+      function expectActionDispatched() {
         sinon.assert.calledOnce(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
           sinon.match.instanceOf(sharedActions.SetupStreamElements));
@@ -420,29 +418,29 @@ describe("loop.roomViews", function() {
 
       it("should dispatch a `SetupStreamElements` action when the MEDIA_WAIT state is entered", function() {
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.READY });
-          var component = mountTestComponent();
+          mountTestComponent();
 
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.MEDIA_WAIT });
 
-          expectActionDispatched(component);
+          expectActionDispatched();
         });
 
       it("should dispatch a `SetupStreamElements` action on MEDIA_WAIT state is re-entered", function() {
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.ENDED });
-          var component = mountTestComponent();
+          mountTestComponent();
 
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.MEDIA_WAIT });
 
-          expectActionDispatched(component);
+          expectActionDispatched();
         });
 
       it("should dispatch a `StartBrowserShare` action when the SESSION_CONNECTED state is entered", function() {
         activeRoomStore.setStoreState({ roomState: ROOM_STATES.READY });
-        var component = mountTestComponent();
+        mountTestComponent();
 
         activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
 
-        expectActionDispatched("startBrowserShare");
+        expectActionDispatched();
       });
     });
 
@@ -659,7 +657,6 @@ describe("loop.roomViews", function() {
       });
 
       describe("Room name priority", function() {
-        var roomEntry;
         beforeEach(function() {
           activeRoomStore.setStoreState({
             participants: [{}],

@@ -11,7 +11,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
   var ROOM_STATES = loop.store.ROOM_STATES;
   var sharedActions = loop.shared.actions;
   var sharedMixins = loop.shared.mixins;
-  var sharedUtils = loop.shared.utils;
   var sharedViews = loop.shared.views;
 
   var ToSView = React.createClass({

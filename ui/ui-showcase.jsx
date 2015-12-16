@@ -36,17 +36,7 @@
 
   // Store constants
   var ROOM_STATES = loop.store.ROOM_STATES;
-  var CALL_TYPES = loop.shared.utils.CALL_TYPES;
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
-
-  // Local helpers
-  function returnTrue() {
-    return true;
-  }
-
-  function returnFalse() {
-    return false;
-  }
 
   function noop() {}
 
@@ -260,11 +250,6 @@
 
   var failedRoomStore = makeActiveRoomStore({
     roomState: ROOM_STATES.FAILED
-  });
-
-  var endedRoomStore = makeActiveRoomStore({
-    roomState: ROOM_STATES.ENDED,
-    roomUsed: true
   });
 
   var invitationRoomStore = new loop.store.RoomStore(dispatcher, {

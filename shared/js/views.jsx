@@ -8,7 +8,6 @@ loop.shared.views = (function(_, mozL10n) {
   "use strict";
 
   var sharedActions = loop.shared.actions;
-  var sharedModels = loop.shared.models;
   var sharedMixins = loop.shared.mixins;
 
   /**
@@ -83,7 +82,7 @@ loop.shared.views = (function(_, mozL10n) {
       return cx(classesObj);
     },
 
-    _getTitle: function(enabled) {
+    _getTitle: function() {
       if (this.props.title) {
         return this.props.title;
       }

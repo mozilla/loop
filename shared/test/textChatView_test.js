@@ -6,18 +6,16 @@ describe("loop.shared.views.TextChatView", function() {
 
   var expect = chai.expect;
   var sharedActions = loop.shared.actions;
-  var sharedUtils = loop.shared.utils;
-  var sharedViews = loop.shared.views;
   var TestUtils = React.addons.TestUtils;
   var CHAT_MESSAGE_TYPES = loop.store.CHAT_MESSAGE_TYPES;
   var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
   var fixtures = document.querySelector("#fixtures");
 
-  var dispatcher, fakeSdkDriver, sandbox, store, fakeClock;
+  var dispatcher, fakeSdkDriver, sandbox, store;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
-    fakeClock = sandbox.useFakeTimers();
+    sandbox.useFakeTimers();
 
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");

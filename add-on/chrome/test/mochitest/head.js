@@ -3,6 +3,11 @@
 
 "use strict";
 
+/* exported HAWK_TOKEN_LENGTH, LoopRooms, promiseWaitForCondition,
+            loadLoopPanel, promiseOAuthParamsSetup, resetFxA, checkLoggedOutState,
+            promiseDeletedOAuthParams, promiseOAuthGetRegistration,
+            getLoopString, mockPushHandler, channelID, mockDb */
+
 const HAWK_TOKEN_LENGTH = 64;
 const {
   LOOP_SESSION_TYPE,
@@ -17,7 +22,7 @@ const { LoopRooms } = Cu.import("chrome://loop/content/modules/LoopRooms.jsm", {
 const WAS_OFFLINE = Services.io.offline;
 
 function promisePanelLoaded() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     let loopPanel = document.getElementById("loop-notification-panel");
     let btn = document.getElementById("loop-button");
 
@@ -42,7 +47,7 @@ function promisePanelLoaded() {
           iframe.contentDocument.readyState == "complete") {
         resolve();
       } else {
-        iframe.addEventListener("load", function panelOnLoad(e) {
+        iframe.addEventListener("load", function panelOnLoad() {
           iframe.removeEventListener("load", panelOnLoad, true);
           // We do this in an execute soon to allow any other event listeners to
           // be handled, just in case.
@@ -88,7 +93,7 @@ function waitForCondition(condition, nextTest, errorMsg) {
 }
 
 function promiseWaitForCondition(aConditionFn) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     waitForCondition(aConditionFn, resolve, "Condition didn't pass.");
   });
 }
@@ -174,7 +179,7 @@ function promiseDeletedOAuthParams(baseURL) {
 }
 
 function promiseObserverNotified(aTopic, aExpectedData = null) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     Services.obs.addObserver(function onNotification(aSubject, topic, aData) {
       Services.obs.removeObserver(onNotification, topic);
       is(aData, aExpectedData, "observer data should match expected data");
@@ -234,7 +239,7 @@ var mockPushHandler = {
     setTimeout(registerCallback(this.registrationResult, this.registeredChannels[channelId], channelId), 0);
   },
 
-  unregister: function(channelID) {
+  unregister: function() {
     return;
   },
 

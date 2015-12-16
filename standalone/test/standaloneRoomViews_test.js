@@ -9,9 +9,7 @@ describe("loop.standaloneRoomViews", function() {
   var TestUtils = React.addons.TestUtils;
 
   var ROOM_STATES = loop.store.ROOM_STATES;
-  var FEEDBACK_STATES = loop.store.FEEDBACK_STATES;
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
-  var ROOM_INFO_FAILURES = loop.shared.utils.ROOM_INFO_FAILURES;
   var sharedActions = loop.shared.actions;
   var sharedUtils = loop.shared.utils;
   var fixtures = document.querySelector("#fixtures");

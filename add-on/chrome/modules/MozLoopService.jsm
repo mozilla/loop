@@ -4,11 +4,7 @@
 
 "use strict";
 
-const { classes: Cc, interfaces: Ci, utils: Cu, results: Cr } = Components;
-
-// Invalid auth token as per
-// https://github.com/mozilla-services/loop-server/blob/45787d34108e2f0d87d74d4ddf4ff0dbab23501c/loop/errno.json#L6
-const INVALID_AUTH_TOKEN = 110;
+const { interfaces: Ci, utils: Cu, results: Cr } = Components;
 
 const LOOP_SESSION_TYPE = {
   GUEST: 1,
@@ -200,7 +196,6 @@ var gFxAEnabled = true;
 var gFxAOAuthClientPromise = null;
 var gFxAOAuthClient = null;
 var gErrors = new Map();
-var gLastWindowId = 0;
 var gConversationWindowData = new Map();
 
 /**
@@ -1672,8 +1667,6 @@ this.MozLoopService = {
       return MozLoopServiceInternal.promiseFxAOAuthToken(response.code, response.state);
     }).then(tokenData => {
       MozLoopServiceInternal.fxAOAuthTokenData = tokenData;
-      return tokenData;
-    }).then(tokenData => {
       return MozLoopServiceInternal.promiseRegisteredWithServers(LOOP_SESSION_TYPE.FXA).then(() => {
         MozLoopServiceInternal.clearError("login");
         MozLoopServiceInternal.clearError("profile");

@@ -555,8 +555,16 @@ body[platform="win"] .share-service-dropdown.overflow > .dropdown-menu-item {
 .room-context-header {
   color: #333;
   font-size: 1.2rem;
-  font-weight: bold;
   margin: 1rem auto;
+}
+
+.room-context-header {
+  font-weight: bold;
+}
+
+.room-invitation-content > p {
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .room-context > form {

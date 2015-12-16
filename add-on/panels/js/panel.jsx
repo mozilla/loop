@@ -763,8 +763,8 @@ loop.panel = (function(_, mozL10n) {
         <div className="rooms">
           {this._renderNewRoomButton()}
           <h1>{mozL10n.get(this.state.openedRoom === null ?
-                "rooms_list_recently_browsed" :
-                "rooms_list_currently_browsing")}</h1>
+                "rooms_list_recently_browsed2" :
+                "rooms_list_currently_browsing2")}</h1>
           <div className="room-list">{
             this.state.rooms.map(function(room) {
               if (this.state.openedRoom !== null &&

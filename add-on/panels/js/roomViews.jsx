@@ -331,7 +331,8 @@ loop.roomViews = (function(mozL10n) {
         <div className="room-invitation-overlay">
           <div className="room-invitation-content">
             <p className={cx({ hide: this.props.showEditContext })}>
-              {mozL10n.get("invite_header_text2")}
+              <span className="room-context-header">{mozL10n.get("invite_header_text_bold")}</span>&nbsp;
+              <span>{mozL10n.get("invite_header_text3")}</span>
             </p>
           </div>
           <div className={cx({

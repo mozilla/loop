@@ -95,6 +95,7 @@ app.use("/add-on", express.static(
 // We want to make the top-level test directory available...
 app.use("/test", express.static(path.join(topDir, "test")));
 app.use("/test/coverage", express.static(path.join(topDir, "built", "coverage")));
+app.use("/test/vendor", express.static(path.join(topDir, "built", "test", "vendor")));
 
 // ...and it points to stuff we want for testing.  Note that the shared unit
 // tests get all their resources from /standalone/shared in the
@@ -103,8 +104,6 @@ app.use("/test/coverage", express.static(path.join(topDir, "built", "coverage"))
 app.use("/shared/test", express.static(path.join(topDir, "shared", "test")));
 app.use("/standalone/test", express.static(path.join(topDir, "standalone",
   "test")));
-app.use("/add-on/panels/test", express.static(path.join(topDir, "add-on",
-  "panels", "test")));
 
 var server = app.listen(port);
 

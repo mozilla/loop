@@ -57,6 +57,26 @@ $(VENV): bin/require.pip
 	virtualenv -p python2.7 $(VENV)
 	. $(VENV)/bin/activate && pip install -r bin/require.pip
 
+$(BUILT)/test/vendor:
+	mkdir -p $@
+
+$(BUILT)/test/vendor/sinon.js: node_modules/sinon/pkg/sinon.js
+	$(RSYNC) $< $(BUILT)/test/vendor
+
+$(BUILT)/test/vendor/mocha.%: node_modules/mocha/mocha.%
+	$(RSYNC) $< $(BUILT)/test/vendor
+
+$(BUILT)/test/vendor/chai.js: node_modules/chai/chai.js
+	$(RSYNC) $< $(BUILT)/test/vendor
+
+$(BUILT)/test/vendor/chai-as-promised.js: node_modules/chai-as-promised/lib/chai-as-promised.js
+	$(RSYNC) $< $(BUILT)/test/vendor
+
+.PHONY: vendor_libs
+vendor_libs: $(BUILT)/test/vendor $(BUILT)/test/vendor/sinon.js \
+             $(BUILT)/test/vendor/mocha.js $(BUILT)/test/vendor/mocha.css \
+             $(BUILT)/test/vendor/chai.js $(BUILT)/test/vendor/chai-as-promised.js
+
 # XXX maybe just build one copy of shared in standalone, and then use
 # server.js magic to redirect?
 # XXX ecma3 transform for IE?
@@ -134,7 +154,7 @@ $(XPI_FILE): $(REPO_BIN_DIR)/build_extension.sh build
 	@$(REPO_BIN_DIR)/build_extension.sh $(@F) add-on
 
 .PHONY: build
-build: add-on standalone ui
+build: add-on standalone ui vendor_libs
 
 .PHONY: clean
 clean:

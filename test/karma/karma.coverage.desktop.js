@@ -15,7 +15,10 @@ module.exports = function(config) {
     "built/add-on/chrome/content/shared/vendor/classnames-2.2.0.js",
     "built/add-on/chrome/content/shared/vendor/lodash-3.9.3.js",
     "built/add-on/chrome/content/shared/vendor/backbone-1.2.1.js",
-    "shared/test/vendor/*.js",
+    "built/test/vendor/chai.js",
+    "built/test/vendor/chai-as-promised.js",
+    "built/test/vendor/mocha.js",
+    "built/test/vendor/sinon.js",
     "shared/test/loop_mocha_utils.js",
     "test/karma/head.js", // Stub out DOM event listener due to races.
     "built/add-on/chrome/content/panels/vendor/l10n.js",

@@ -16,7 +16,10 @@ module.exports = function(config) {
     "built/standalone/content/shared/vendor/react-0.13.3.js",
     "built/standalone/content/shared/vendor/classnames-2.2.0.js",
     "built/standalone/content/shared/vendor/sdk.js",
-    "shared/test/vendor/*.js",
+    "built/test/vendor/chai.js",
+    "built/test/vendor/chai-as-promised.js",
+    "built/test/vendor/mocha.js",
+    "built/test/vendor/sinon.js",
     "shared/test/loop_mocha_utils.js",
     "test/karma/head.js", // Add test fixture container
     "built/standalone/content/shared/js/loopapi-client.js",

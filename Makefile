@@ -57,6 +57,46 @@ $(VENV): bin/require.pip
 	virtualenv -p python2.7 $(VENV)
 	. $(VENV)/bin/activate && pip install -r bin/require.pip
 
+BACKBONE_OBJS = \
+	$(BUILT)/add-on/chrome/content/shared/vendor/backbone.js \
+	$(BUILT)/standalone/content/shared/vendor/backbone.js \
+	$(BUILT)/ui/shared/vendor/backbone.js
+
+$(BACKBONE_OBJS): node_modules/backbone/backbone.js
+	$(RSYNC) $< $@
+
+CLASSNAME_OBJS = \
+	$(BUILT)/add-on/chrome/content/shared/vendor/classnames.js \
+	$(BUILT)/standalone/content/shared/vendor/classnames.js \
+	$(BUILT)/ui/shared/vendor/classnames.js
+
+$(CLASSNAME_OBJS): node_modules/classnames/index.js
+	$(RSYNC) $< $@
+
+LODASH_OBJS = \
+	$(BUILT)/add-on/chrome/content/shared/vendor/lodash.js \
+	$(BUILT)/standalone/content/shared/vendor/lodash.js \
+	$(BUILT)/ui/shared/vendor/lodash.js
+
+$(LODASH_OBJS): node_modules/lodash/index.js
+	$(RSYNC) $< $@
+
+REACT_OBJS = \
+	$(BUILT)/add-on/chrome/content/shared/vendor/react.js \
+	$(BUILT)/standalone/content/shared/vendor/react.js \
+	$(BUILT)/ui/shared/vendor/react.js
+
+$(REACT_OBJS): node_modules/react/dist/react-with-addons.js
+	$(RSYNC) $< $@
+
+REACT_PROD_OBJECTS = \
+	$(BUILT)/add-on/chrome/content/shared/vendor/react-prod.js \
+	$(BUILT)/standalone/content/shared/vendor/react-prod.js \
+	$(BUILT)/ui/shared/vendor/react-prod.js
+
+$(REACT_PROD_OBJECTS): node_modules/react/dist/react-with-addons.min.js
+	$(RSYNC) $< $@
+
 $(BUILT)/test/vendor:
 	mkdir -p $@
 
@@ -73,7 +113,9 @@ $(BUILT)/test/vendor/chai-as-promised.js: node_modules/chai-as-promised/lib/chai
 	$(RSYNC) $< $(BUILT)/test/vendor
 
 .PHONY: vendor_libs
-vendor_libs: $(BUILT)/test/vendor $(BUILT)/test/vendor/sinon.js \
+vendor_libs: $(BACKBONE_OBJS) $(CLASSNAME_OBJS) $(LODASH_OBJS) $(REACT_OBJS) \
+             $(REACT_PROD_OBJECTS) \
+             $(BUILT)/test/vendor $(BUILT)/test/vendor/sinon.js \
              $(BUILT)/test/vendor/mocha.js $(BUILT)/test/vendor/mocha.css \
              $(BUILT)/test/vendor/chai.js $(BUILT)/test/vendor/chai-as-promised.js
 

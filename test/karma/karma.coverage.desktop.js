@@ -11,10 +11,10 @@ module.exports = function(config) {
   // List of files / patterns to load in the browser.
   // We have to list these manually to ensure dependencies are correct.
   baseConfig.files = baseConfig.files.concat([
-    "built/add-on/chrome/content/shared/vendor/react-0.13.3.js",
-    "built/add-on/chrome/content/shared/vendor/classnames-2.2.0.js",
-    "built/add-on/chrome/content/shared/vendor/lodash-3.9.3.js",
-    "built/add-on/chrome/content/shared/vendor/backbone-1.2.1.js",
+    "built/add-on/chrome/content/shared/vendor/react.js",
+    "built/add-on/chrome/content/shared/vendor/classnames.js",
+    "built/add-on/chrome/content/shared/vendor/lodash.js",
+    "built/add-on/chrome/content/shared/vendor/backbone.js",
     "built/test/vendor/chai.js",
     "built/test/vendor/chai-as-promised.js",
     "built/test/vendor/mocha.js",

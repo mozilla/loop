@@ -24,13 +24,13 @@ require("imports?require=>false!shared/vendor/sdk.js");
 // "source" versions of libraries rather than built artifacts.  We probably do
 // want to minify them ourselves since this allows for better dead-code
 // elimination, but that can be a bit of judgement call.
-require("exports?_!shared/vendor/lodash-3.9.3.js");
+require("exports?_!shared/vendor/lodash.js");
 
 // Disable Backbone's AMD auto-detection, as described at:
 //
 // https://github.com/jashkenas/backbone/wiki/Using-Backbone-without-jQuery
 //
-require("expose?Backbone!imports?define=>false!shared/vendor/backbone-1.2.1.js");
+require("expose?Backbone!imports?define=>false!shared/vendor/backbone.js");
 
 /* global: __PROD__ */
 if (typeof __PROD__ !== "undefined") {
@@ -41,8 +41,8 @@ if (typeof __PROD__ !== "undefined") {
   require("expose?classNames!classnames");
 } else {
   // our development server setup doesn't yet handle real modules, so for now...
-  require("shared/vendor/react-0.13.3.js");
-  require("shared/vendor/classnames-2.2.0.js");
+  require("shared/vendor/react.js");
+  require("shared/vendor/classnames.js");
 }
 
 

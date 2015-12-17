@@ -11,10 +11,10 @@ module.exports = function(config) {
   // List of files / patterns to load in the browser.
   baseConfig.files = baseConfig.files.concat([
     "built/standalone/content/vendor/l10n-gaia-02ca67948fe8.js",
-    "built/standalone/content/shared/vendor/lodash-3.9.3.js",
-    "built/standalone/content/shared/vendor/backbone-1.2.1.js",
-    "built/standalone/content/shared/vendor/react-0.13.3.js",
-    "built/standalone/content/shared/vendor/classnames-2.2.0.js",
+    "built/standalone/content/shared/vendor/lodash.js",
+    "built/standalone/content/shared/vendor/backbone.js",
+    "built/standalone/content/shared/vendor/react.js",
+    "built/standalone/content/shared/vendor/classnames.js",
     "built/standalone/content/shared/vendor/sdk.js",
     "built/test/vendor/chai.js",
     "built/test/vendor/chai-as-promised.js",

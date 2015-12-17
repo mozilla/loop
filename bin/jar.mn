@@ -140,13 +140,13 @@
 
   # Shared libs
 #ifdef DEBUG
-  content/shared/vendor/react-0.13.3.js            (content/shared/vendor/react-0.13.3.js)
+  content/shared/vendor/react.js                   (content/shared/vendor/react.js)
 #else
-  content/shared/vendor/react-0.13.3.js            (content/shared/vendor/react-0.13.3-prod.js)
+  content/shared/vendor/react.js                   (content/shared/vendor/react-prod.js)
 #endif
-  content/shared/vendor/lodash-3.9.3.js            (content/shared/vendor/lodash-3.9.3.js)
-  content/shared/vendor/backbone-1.2.1.js          (content/shared/vendor/backbone-1.2.1.js)
-  content/shared/vendor/classnames-2.2.0.js        (content/shared/vendor/classnames-2.2.0.js)
+  content/shared/vendor/lodash.js                  (content/shared/vendor/lodash.js)
+  content/shared/vendor/backbone.js                (content/shared/vendor/backbone.js)
+  content/shared/vendor/classnames.js              (content/shared/vendor/classnames.js)
 
   # Shared sounds
   content/shared/sounds/connecting.ogg             (content/shared/sounds/connecting.ogg)

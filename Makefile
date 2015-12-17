@@ -49,7 +49,7 @@ XPI_NAME := loop@mozilla.org.xpi
 XPI_FILE := $(BUILT)/$(XPI_NAME)
 
 VENV := $(BUILT)/.venv
-BABEL := $(NODE_LOCAL_BIN)/babel --extensions '.jsx'
+BABEL := $(NODE_LOCAL_BIN)/babel
 ESLINT := $(NODE_LOCAL_BIN)/eslint
 FLAKE8 := $(NODE_LOCAL_BIN)/flake8
 
@@ -57,6 +57,9 @@ $(VENV): bin/require.pip
 	virtualenv -p python2.7 $(VENV)
 	. $(VENV)/bin/activate && pip install -r bin/require.pip
 
+#
+# Pull in our vendor libraries from node_modules
+#
 BACKBONE_OBJS = \
 	$(BUILT)/add-on/chrome/content/shared/vendor/backbone.js \
 	$(BUILT)/standalone/content/shared/vendor/backbone.js \
@@ -132,45 +135,110 @@ $(DIST)/add-on/chrome/content/preferences/prefs.js: $(VENV) add-on/preferences/p
 	         -o $@ add-on/preferences/prefs.js
 
 
+# Build our jsx files into appropriately placed js files.  Note that the rules
+# are somewhat repetitive, and less elegant than they might be.  We _could_
+# use more terse make syntax here, but the idea is that it's better to
+# keep the feel readable/maintainable by non Make-experts, even at the cost
+# of some repetition.
+
+# The shared files currently get built once for each destination; we could
+# optimize this away.  We used the shared_jsx_temporary to make this code more
+# readable.
+shared_jsx_files=$(wildcard shared/js/*.jsx)
+built_ui_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/ui/%.js)
+built_add_on_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/add-on/chrome/content/%.js)
+built_standalone_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/standalone/content/%.js)
+
+$(BUILT)/standalone/content/shared/js:
+	@mkdir -p $@
+
+# We can't use $(shared_jsx_files) here because % rules don't accept that.
+$(BUILT)/standalone/content/shared/js/%.js: shared/js/%.jsx $(BUILT)/standalone/content/shared/js
+	$(BABEL) $< --out-file $@
+
+$(BUILT)/add-on/chrome/content/shared/js:
+	@mkdir -p $@
+
+# We can't use $(shared_jsx_files) here because % rules don't accept that.
+$(BUILT)/add-on/chrome/content/shared/js/%.js: shared/js/%.jsx $(BUILT)/add-on/chrome/content/shared/js
+	$(BABEL) $< --out-file $@
+
+$(BUILT)/ui/shared/js:
+	@mkdir -p $@
+
+# We can't use $(shared_jsx_files) here because % rules don't accept that.
+$(BUILT)/ui/shared/js/%.js: shared/js/%.jsx $(BUILT)/ui/shared/js
+	$(BABEL) $< --out-file $@
+
+#
+# The following sections are for the non-shared assets:
+#
+
+# ui-showcase
+ui_jsx_files=$(wildcard ui/*.jsx)
+built_ui_js_files=$(ui_jsx_files:%.jsx=$(BUILT)/%.js)
+
+$(BUILT)/ui:
+	@mkdir -p $@
+
+$(BUILT)/ui/%.js: ui/%.jsx $(BUILT)/ui
+	$(BABEL) $< --out-file $@
+
+# standalone
+standalone_jsx_files=$(wildcard standalone/content/js/*.jsx)
+built_standalone_js_files=$(standalone_jsx_files:%.jsx=$(BUILT)/%.js)
+
+$(BUILT)/standalone/content/js:
+	@mkdir -p $@
+
+$(BUILT)/standalone/content/js/%.js: standalone/content/js/%.jsx $(BUILT)/standalone/content/js
+	$(BABEL) $< --out-file $@
+
+# add-on
+add_on_jsx_files=$(wildcard add-on/panels/js/*.jsx)
+built_add_on_js_files=$(patsubst add-on/panels/js/%.jsx, \
+	 $(BUILT)/add-on/chrome/content/panels/js/%.js, \
+	 $(add_on_jsx_files))
+
+$(BUILT)/add-on/chrome/content/panels/js:
+	@mkdir -p $@
+
+$(BUILT)/add-on/chrome/content/panels/js/%.js: add-on/panels/js/%.jsx $(BUILT)/add-on/chrome/content/panels/js
+	$(BABEL) $< --out-file $@
+
 # XXX maybe just build one copy of shared in standalone, and then use
 # server.js magic to redirect?
 # XXX ecma3 transform for IE?
 .PHONY: ui
-ui: node_modules
+ui: node_modules $(built_ui_js_files) $(built_ui_shared_js_files)
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@ $(BUILT)
-	$(BABEL) $@ --out-dir $(BUILT)/$@
 	mkdir -p $(BUILT)/$@/shared
 	$(RSYNC) shared $(BUILT)/$@
-	$(BABEL) shared --out-dir $(BUILT)/$@/shared
 
 .PHONY: standalone
-standalone: node_modules
+standalone: node_modules $(built_standalone_js_files) $(built_standalone_shared_js_files)
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@ $(BUILT)
-	$(BABEL) $@ --out-dir $(BUILT)/$@
 	mkdir -p $(BUILT)/$@/content/shared
 	$(RSYNC) shared $(BUILT)/$@/content
-	$(BABEL) shared --out-dir $(BUILT)/$@/content/shared
 	mkdir -p $(BUILT)/$@/content/l10n/en-US
 	cat locale/en-US/$@.properties locale/en-US/shared.properties > $(BUILT)/$@/content/l10n/en-US/loop.properties
 
 .PHONY: add-on
-add-on: node_modules $(BUILT)/$(ADD-ON)/chrome.manifest $(BUILT)/add-on/chrome/content/preferences/prefs.js
+add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(BUILT)/$(ADD-ON)/chrome.manifest $(BUILT)/add-on/chrome/content/preferences/prefs.js
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@/chrome/bootstrap.js $(BUILT)/$@
 	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \
 		grep -v "#filter substitution" > $(BUILT)/$@/install.rdf
 	mkdir -p $(BUILT)/$@/chrome/content/panels
 	$(RSYNC) $@/panels $(BUILT)/$@/chrome/content
-	$(BABEL) $@/panels --out-dir $(BUILT)/$@/chrome/content/panels
 	mkdir -p $(BUILT)/$@/chrome/content/modules
 	$(RSYNC) $@/chrome/modules $(BUILT)/$@/chrome/content
 	mkdir -p $(BUILT)/$@/chrome/test
 	$(RSYNC) $@/chrome/test $(BUILT)/$@/chrome
 	mkdir -p $(BUILT)/$@/chrome/content/shared
 	$(RSYNC) shared $(BUILT)/$@/chrome/content
-	$(BABEL) shared --out-dir $(BUILT)/$@/chrome/content/shared
 	$(RSYNC) $@/chrome/skin $(BUILT)/$@/chrome/
 	mkdir -p $(BUILT)/$@/chrome/locale/en-US
 	cat locale/en-US/$@.properties locale/en-US/shared.properties > $(BUILT)/$@/chrome/locale/en-US/loop.properties

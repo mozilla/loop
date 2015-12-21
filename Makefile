@@ -48,6 +48,7 @@ distserver: remove_old_config dist
 	LOOP_CONTENT_DIR=dist node server.js
 
 BUILT := ./built
+ADD-ON := add-on
 VENV := $(BUILT)/.venv
 BABEL := $(NODE_LOCAL_BIN)/babel --extensions '.jsx'
 ESLINT := $(NODE_LOCAL_BIN)/eslint
@@ -143,9 +144,9 @@ standalone: node_modules
 	cat locale/en-US/$@.properties locale/en-US/shared.properties > $(BUILT)/$@/content/l10n/en-US/loop.properties
 
 .PHONY: add-on
-add-on: node_modules
+add-on: node_modules $(BUILT)/$(ADD-ON)/chrome.manifest
 	mkdir -p $(BUILT)/$@
-	$(RSYNC) $@/chrome.manifest $@/chrome/bootstrap.js $(BUILT)/$@
+	$(RSYNC) $@/chrome/bootstrap.js $(BUILT)/$@
 	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \
 		grep -v "#filter substitution" > $(BUILT)/$@/install.rdf
 	mkdir -p $(BUILT)/$@/chrome/content/panels
@@ -163,6 +164,12 @@ add-on: node_modules
 	$(RSYNC) $@/chrome/skin $(BUILT)/$@/chrome/
 	mkdir -p $(BUILT)/$@/chrome/locale/en-US
 	cat locale/en-US/$@.properties locale/en-US/shared.properties > $(BUILT)/$@/chrome/locale/en-US/loop.properties
+
+$(BUILT)/$(ADD-ON)/chrome.manifest: $(ADD-ON)/jar.mn
+	mkdir -p $(BUILT)/$(ADD-ON)
+	sed -n -e '/^%/p' $(ADD-ON)/jar.mn | \
+	sed -e "s/^% //g" | sed -e "s/%/chrome\//g" \
+	> $(BUILT)/$(ADD-ON)/chrome.manifest
 
 #
 # Tests

@@ -4,6 +4,7 @@
 
 [.] chrome.jar:
 % content loop %content/ contentaccessible=yes
+% locale loop en-US %locale/en-US/
 % skin loop classic/1.0 %skin/linux/ os=Linux
 % skin loop classic/1.0 %skin/osx/ os=Darwin
 % skin loop classic/1.0 %skin/windows/ os=WINNT

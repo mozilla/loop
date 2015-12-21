@@ -1,1 +1,2 @@
 flake8
+mozbuild==0.2

@@ -31,16 +31,10 @@ node_modules: package.json
 # build the dist dir, which contains a production version of the code and
 # assets
 .PHONY: dist
-dist:
-	mkdir -p dist
-	$(RSYNC) content/* dist
-	NODE_ENV="production" $(NODE_LOCAL_BIN)/webpack \
-		-p -v --display-errors
-	sed 's#webappEntryPoint.js#js/standalone.js#' \
-		< content/index.html > dist/index.html
+dist: build dist_xpi
 
 .PHONY: distclean
-distclean:
+distclean: clean
 	rm -fr dist
 
 .PHONY: distserver
@@ -49,6 +43,11 @@ distserver: remove_old_config dist
 
 BUILT := ./built
 ADD-ON := add-on
+BUILT_ADD_ON := $(BUILT)/$(ADD-ON)
+DIST := ./dist
+XPI_NAME := loop@mozilla.org.xpi
+XPI_FILE := $(BUILT)/$(XPI_NAME)
+
 VENV := $(BUILT)/.venv
 BABEL := $(NODE_LOCAL_BIN)/babel --extensions '.jsx'
 ESLINT := $(NODE_LOCAL_BIN)/eslint
@@ -120,6 +119,19 @@ vendor_libs: $(BACKBONE_OBJS) $(CLASSNAME_OBJS) $(LODASH_OBJS) $(REACT_OBJS) \
              $(BUILT)/test/vendor/mocha.js $(BUILT)/test/vendor/mocha.css \
              $(BUILT)/test/vendor/chai.js $(BUILT)/test/vendor/chai-as-promised.js
 
+$(BUILT)/add-on/chrome/content/preferences/prefs.js: $(VENV) add-on/preferences/prefs.js
+	mkdir -p $(@D)
+	. $(VENV)/bin/activate && \
+	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
+	         -D DEBUG=1 -o $@ add-on/preferences/prefs.js
+
+$(DIST)/add-on/chrome/content/preferences/prefs.js: $(VENV) add-on/preferences/prefs.js
+	mkdir -p $(@D)
+	. $(VENV)/bin/activate && \
+	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
+	         -o $@ add-on/preferences/prefs.js
+
+
 # XXX maybe just build one copy of shared in standalone, and then use
 # server.js magic to redirect?
 # XXX ecma3 transform for IE?
@@ -144,7 +156,7 @@ standalone: node_modules
 	cat locale/en-US/$@.properties locale/en-US/shared.properties > $(BUILT)/$@/content/l10n/en-US/loop.properties
 
 .PHONY: add-on
-add-on: node_modules $(BUILT)/$(ADD-ON)/chrome.manifest
+add-on: node_modules $(BUILT)/$(ADD-ON)/chrome.manifest $(BUILT)/add-on/chrome/content/preferences/prefs.js
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@/chrome/bootstrap.js $(BUILT)/$@
 	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \
@@ -156,8 +168,6 @@ add-on: node_modules $(BUILT)/$(ADD-ON)/chrome.manifest
 	$(RSYNC) $@/chrome/modules $(BUILT)/$@/chrome/content
 	mkdir -p $(BUILT)/$@/chrome/test
 	$(RSYNC) $@/chrome/test $(BUILT)/$@/chrome
-	mkdir -p $(BUILT)/$@/chrome/content/preferences
-	$(RSYNC) $@/preferences $(BUILT)/$@/chrome/content
 	mkdir -p $(BUILT)/$@/chrome/content/shared
 	$(RSYNC) shared $(BUILT)/$@/chrome/content
 	$(BABEL) shared --out-dir $(BUILT)/$@/chrome/content/shared
@@ -170,6 +180,51 @@ $(BUILT)/$(ADD-ON)/chrome.manifest: $(ADD-ON)/jar.mn
 	sed -n -e '/^%/p' $(ADD-ON)/jar.mn | \
 	sed -e "s/^% //g" | sed -e "s/%/chrome\//g" \
 	> $(BUILT)/$(ADD-ON)/chrome.manifest
+
+# In this RSYNC, the order of exclude and includes generally matters.
+# The items below are:
+# - Don't copy prefs.js as we generate that in the dependencies.
+# - Copy all the relevant js, html, css etc files that we need.
+# - Copy the add-on "support files".
+# - Exclude all other files.
+# - Exclude all test files.
+# - Exclude and editor temp files.
+RSYNC_DIST := $(RSYNC) -r \
+  --exclude="**/prefs.js" \
+  --include="*.jsm" --include="*.js" \
+  --include="*.html" --include="*.css" \
+  --include="*.ogg" --include="*.svg" --include="*.png" --include="*.gif" \
+  --include="*.properties" --include="*.manifest" --include="*.rdf" \
+  --exclude="*.*" --exclude "**/test" --exclude "*~"
+
+.PHONY: add-on_dist
+add-on_dist: $(DIST)/add-on/chrome/content/preferences/prefs.js
+	mkdir -p $(DIST)/add-on
+	# Copy just the files we need.
+	$(RSYNC_DIST) $(BUILT_ADD_ON)/ $(DIST)/add-on/
+	mv $(DIST)/add-on/chrome/content/shared/vendor/react-prod.js \
+	   $(DIST)/add-on/chrome/content/shared/vendor/react.js
+
+.PHONY: standalone_dist
+standalone_dist:
+	mkdir -p $(DIST)
+	$(RSYNC) content/* $(DIST)
+	NODE_ENV="production" $(NODE_LOCAL_BIN)/webpack \
+	  -p -v --display-errors
+	sed 's#webappEntryPoint.js#js/standalone.js#' \
+	  < content/index.html > $(DIST)/index.html
+
+# so we can type "make xpi" without depend on the file directly
+.PHONY: xpi
+xpi: $(XPI_FILE)
+
+$(XPI_FILE): $(REPO_BIN_DIR)/build_extension.sh build
+	@$(REPO_BIN_DIR)/build_extension.sh $(XPI_NAME) $(BUILT) add-on
+
+.PHONY: dist_xpi
+dist_xpi: add-on_dist
+	rm -f $(DIST)/$(XPI_NAME)
+	@$(REPO_BIN_DIR)/build_extension.sh $(XPI_NAME) $(DIST) add-on
 
 #
 # Tests
@@ -192,15 +247,6 @@ karma: build
 #
 # Build & run
 #
-
-XPI_FILE := built/loop@mozilla.org.xpi
-
-# so we can type "make xpi" without depend on the file directly
-.PHONY: xpi
-xpi: $(XPI_FILE)
-
-$(XPI_FILE): $(REPO_BIN_DIR)/build_extension.sh build
-	@$(REPO_BIN_DIR)/build_extension.sh $(@F) add-on
 
 .PHONY: build
 build: add-on standalone ui vendor_libs

@@ -3,6 +3,7 @@
 .DS_Store*
 *.pyc
 built
+dist
 node_modules
 test/coverage/desktop
 test/coverage/shared_standalone

@@ -2,6 +2,8 @@
 node_modules
 **/vendor
 
+add-on/preferences/prefs.js
+
 # Don't need to check the built trees
 built
 dist

@@ -417,7 +417,7 @@ const kMessageHandlers = {
     let name = message.data[0];
     let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
                         .createInstance(Ci.nsIXMLHttpRequest);
-    let url = `chrome://browser/content/loop/shared/sounds/${name}.ogg`;
+    let url = `chrome://loop/content/shared/sounds/${name}.ogg`;
 
     request.open("GET", url, true);
     request.responseType = "arraybuffer";

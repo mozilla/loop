@@ -132,10 +132,6 @@ loop.roomViews = (function(mozL10n) {
     },
 
     render: function() {
-      var settingsMenuItems = [
-        { id: "help" }
-      ];
-
       var btnTitle;
       if (this.props.failureReason === FAILURE_DETAILS.ICE_FAILED) {
         btnTitle = mozL10n.get("retry_call_button");
@@ -152,9 +148,6 @@ loop.roomViews = (function(mozL10n) {
               {btnTitle}
             </button>
           </div>
-          <loop.shared.views.SettingsControlButton
-            menuBelow={true}
-            menuItems={settingsMenuItems} />
         </div>
       );
     }
@@ -242,13 +235,9 @@ loop.roomViews = (function(mozL10n) {
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       error: React.PropTypes.object,
-      onAddContextClick: React.PropTypes.func,
-      onEditContextClose: React.PropTypes.func,
       // This data is supplied by the activeRoomStore.
       roomData: React.PropTypes.object.isRequired,
-      savingContext: React.PropTypes.bool,
       show: React.PropTypes.bool.isRequired,
-      showEditContext: React.PropTypes.bool.isRequired,
       socialShareProviders: React.PropTypes.array
     },
 
@@ -315,12 +304,6 @@ loop.roomViews = (function(mozL10n) {
       this.toggleDropdownMenu();
     },
 
-    handleEditContextClose: function() {
-      if (this.props.onEditContextClose) {
-        this.props.onEditContextClose();
-      }
-    },
-
     render: function() {
       if (!this.props.show || !this.props.roomData.roomUrl) {
         return null;
@@ -330,15 +313,14 @@ loop.roomViews = (function(mozL10n) {
       return (
         <div className="room-invitation-overlay">
           <div className="room-invitation-content">
-            <p className={cx({ hide: this.props.showEditContext })}>
+            <p>
               <span className="room-context-header">{mozL10n.get("invite_header_text_bold")}</span>&nbsp;
               <span>{mozL10n.get("invite_header_text3")}</span>
             </p>
           </div>
           <div className={cx({
             "btn-group": true,
-            "call-action-group": true,
-            hide: this.props.showEditContext
+            "call-action-group": true
           })}>
             <div className={cx({
                 "btn-copy": true,
@@ -363,215 +345,6 @@ loop.roomViews = (function(mozL10n) {
             roomUrl={this.props.roomData.roomUrl}
             show={this.state.showMenu}
             socialShareProviders={this.props.socialShareProviders} />
-          <DesktopRoomEditContextView
-            dispatcher={this.props.dispatcher}
-            error={this.props.error}
-            onClose={this.handleEditContextClose}
-            roomData={this.props.roomData}
-            savingContext={this.props.savingContext}
-            show={this.props.showEditContext} />
-        </div>
-      );
-    }
-  });
-
-  var DesktopRoomEditContextView = React.createClass({
-    mixins: [React.addons.LinkedStateMixin],
-    maxRoomNameLength: 124,
-
-    propTypes: {
-      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      error: React.PropTypes.object,
-      onClose: React.PropTypes.func,
-      // This data is supplied by the activeRoomStore.
-      roomData: React.PropTypes.object.isRequired,
-      savingContext: React.PropTypes.bool.isRequired,
-      show: React.PropTypes.bool.isRequired
-    },
-
-    componentWillMount: function() {
-      this._fetchMetadata();
-    },
-
-    componentWillReceiveProps: function(nextProps) {
-      var newState = {};
-      // When the 'show' prop is changed from outside this component, we do need
-      // to update the state.
-      if (("show" in nextProps) && nextProps.show !== this.props.show) {
-        newState.show = nextProps.show;
-        if (nextProps.show) {
-          this._fetchMetadata();
-        }
-      }
-      // When we receive an update for the `roomData` property, make sure that
-      // the current form fields reflect reality. This is necessary, because the
-      // form state is maintained in the components' state.
-      if (nextProps.roomData) {
-        // Right now it's only necessary to update the form input states when
-        // they contain no text yet.
-        if (!this.state.newRoomName && nextProps.roomData.roomName) {
-          newState.newRoomName = nextProps.roomData.roomName;
-        }
-        var url = this._getURL(nextProps.roomData);
-        if (url) {
-          if (!this.state.newRoomURL && url.location) {
-            newState.newRoomURL = url.location;
-          }
-          if (!this.state.newRoomDescription && url.description) {
-            newState.newRoomDescription = url.description;
-          }
-          if (!this.state.newRoomThumbnail && url.thumbnail) {
-            newState.newRoomThumbnail = url.thumbnail;
-          }
-        }
-      }
-
-      // Feature support: when a context save completed without error, we can
-      // close the context edit form.
-      if (("savingContext" in nextProps) && this.props.savingContext &&
-          this.props.savingContext !== nextProps.savingContext && this.state.show
-          && !this.props.error && !nextProps.error) {
-        newState.show = false;
-        if (this.props.onClose) {
-          this.props.onClose();
-        }
-      }
-
-      if (Object.getOwnPropertyNames(newState).length) {
-        this.setState(newState);
-      }
-    },
-
-    getInitialState: function() {
-      var url = this._getURL();
-      return {
-        // `availableContext` prop only used in tests.
-        availableContext: null,
-        show: this.props.show,
-        newRoomName: this.props.roomData.roomName || "",
-        newRoomURL: url && url.location || "",
-        newRoomDescription: url && url.description || "",
-        newRoomThumbnail: url && url.thumbnail || ""
-      };
-    },
-
-    _fetchMetadata: function() {
-      loop.request("GetSelectedTabMetadata").then(function(metadata) {
-        var previewImage = metadata.favicon || "";
-        var description = metadata.title || metadata.description;
-        var metaUrl = metadata.url;
-        this.setState({
-          availableContext: {
-            previewImage: previewImage,
-            description: description,
-            url: metaUrl
-          }
-       });
-      }.bind(this));
-    },
-
-    handleCloseClick: function(event) {
-      event.stopPropagation();
-      event.preventDefault();
-
-      this.setState({ show: false });
-      if (this.props.onClose) {
-        this.props.onClose();
-      }
-    },
-
-    handleContextClick: function(event) {
-      event.stopPropagation();
-      event.preventDefault();
-
-      var url = this._getURL();
-      if (!url || !url.location) {
-        return;
-      }
-
-      loop.requestMulti(
-        ["OpenURL", url.location],
-        ["TelemetryAddValue", "LOOP_ROOM_CONTEXT_CLICK", 1]);
-    },
-
-    handleFormSubmit: function(event) {
-      event && event.preventDefault();
-
-      this.props.dispatcher.dispatch(new sharedActions.UpdateRoomContext({
-        roomToken: this.props.roomData.roomToken,
-        newRoomName: this.state.newRoomName,
-        newRoomURL: this.state.newRoomURL,
-        newRoomDescription: this.state.newRoomDescription,
-        newRoomThumbnail: this.state.newRoomThumbnail
-      }));
-    },
-
-    handleTextareaKeyDown: function(event) {
-      // Submit the form as soon as the user press Enter in that field
-      // Note: We're using a textarea instead of a simple text input to display
-      // placeholder and entered text on two lines, to circumvent l10n
-      // rendering/UX issues for some locales.
-      if (event.which === 13) {
-        this.handleFormSubmit(event);
-      }
-    },
-
-    /**
-     * Utility function to extract URL context data from the `roomData` property
-     * that can also be supplied as an argument.
-     *
-     * @param  {Object} roomData Optional room data object to use, equivalent to
-     *                           the activeRoomStore state.
-     * @return {Object} The first context URL found on the `roomData` object.
-     */
-    _getURL: function(roomData) {
-      roomData = roomData || this.props.roomData;
-      return this.props.roomData.roomContextUrls &&
-        this.props.roomData.roomContextUrls[0];
-    },
-
-    render: function() {
-      if (!this.state.show) {
-        return null;
-      }
-
-      var cx = classNames;
-      var availableContext = this.state.availableContext;
-      return (
-        <div className="room-context">
-          <p className={cx({ "error": !!this.props.error,
-                            "error-display-area": true })}>
-            {mozL10n.get("rooms_change_failed_label")}
-          </p>
-          <h2 className="room-context-header">{mozL10n.get("context_inroom_header")}</h2>
-          <form onSubmit={this.handleFormSubmit}>
-            <input className="room-context-name"
-              maxLength={this.maxRoomNameLength}
-              onKeyDown={this.handleTextareaKeyDown}
-              placeholder={mozL10n.get("context_edit_name_placeholder")}
-              type="text"
-              valueLink={this.linkState("newRoomName")} />
-            <input className="room-context-url"
-              disabled={availableContext && availableContext.url === this.state.newRoomURL}
-              onKeyDown={this.handleTextareaKeyDown}
-              placeholder="https://"
-              type="text"
-              valueLink={this.linkState("newRoomURL")} />
-            <textarea className="room-context-comments"
-              onKeyDown={this.handleTextareaKeyDown}
-              placeholder={mozL10n.get("context_edit_comments_placeholder")}
-              rows="2" type="text"
-              valueLink={this.linkState("newRoomDescription")} />
-            <sharedViews.ButtonGroup>
-              <sharedViews.Button additionalClass="button-cancel"
-                caption={mozL10n.get("context_cancel_label")}
-                onClick={this.handleCloseClick} />
-              <sharedViews.Button additionalClass="button-accept"
-                caption={mozL10n.get("context_done_label")}
-                disabled={this.props.savingContext}
-                onClick={this.handleFormSubmit} />
-            </sharedViews.ButtonGroup>
-          </form>
         </div>
       );
     }
@@ -597,12 +370,6 @@ loop.roomViews = (function(mozL10n) {
       onCallTerminated: React.PropTypes.func.isRequired,
       remotePosterUrl: React.PropTypes.string,
       roomStore: React.PropTypes.instanceOf(loop.store.RoomStore).isRequired
-    },
-
-    getInitialState: function() {
-      return {
-        showEditContext: false
-      };
     },
 
     componentWillUpdate: function(nextProps, nextState) {
@@ -736,18 +503,6 @@ loop.roomViews = (function(mozL10n) {
                 !this.state.mediaConnected);
     },
 
-    handleAddContextClick: function() {
-      this.setState({ showEditContext: true });
-    },
-
-    handleEditContextClick: function() {
-      this.setState({ showEditContext: !this.state.showEditContext });
-    },
-
-    handleEditContextClose: function() {
-      this.setState({ showEditContext: false });
-    },
-
     componentDidUpdate: function(prevProps, prevState) {
       // Handle timestamp and window closing only when the call has terminated.
       if (prevState.roomState === ROOM_STATES.ENDED &&
@@ -769,7 +524,6 @@ loop.roomViews = (function(mozL10n) {
       }
 
       var shouldRenderInvitationOverlay = this._shouldRenderInvitationOverlay();
-      var shouldRenderEditContextView = this.state.showEditContext;
       var roomData = this.props.roomStore.getStoreState("activeRoom");
 
       switch (this.state.roomState) {
@@ -789,15 +543,6 @@ loop.roomViews = (function(mozL10n) {
           return null;
         }
         default: {
-          var settingsMenuItems = [
-            {
-              id: "edit",
-              enabled: !this.state.showEditContext,
-              visible: true,
-              onClick: this.handleEditContextClick
-            },
-            { id: "help" }
-          ];
           return (
             <div className="room-conversation-wrapper desktop-room-wrapper"
               onContextMenu={this.handleContextMenu}>
@@ -823,27 +568,14 @@ loop.roomViews = (function(mozL10n) {
                   dispatcher={this.props.dispatcher}
                   hangup={this.leaveRoom}
                   publishStream={this.publishStream}
-                  settingsMenuItems={settingsMenuItems}
-                  show={!shouldRenderEditContextView}
                   showHangup={this.props.chatWindowDetached}
                   video={{ enabled: !this.state.videoMuted, visible: true }} />
                 <DesktopRoomInvitationView
                   dispatcher={this.props.dispatcher}
                   error={this.state.error}
-                  onAddContextClick={this.handleAddContextClick}
-                  onEditContextClose={this.handleEditContextClose}
                   roomData={roomData}
-                  savingContext={this.state.savingContext}
                   show={shouldRenderInvitationOverlay}
-                  showEditContext={shouldRenderInvitationOverlay && shouldRenderEditContextView}
                   socialShareProviders={this.state.socialShareProviders} />
-                <DesktopRoomEditContextView
-                  dispatcher={this.props.dispatcher}
-                  error={this.state.error}
-                  onClose={this.handleEditContextClose}
-                  roomData={roomData}
-                  savingContext={this.state.savingContext}
-                  show={!shouldRenderInvitationOverlay && shouldRenderEditContextView} />
               </sharedViews.MediaLayoutView>
             </div>
           );
@@ -857,7 +589,6 @@ loop.roomViews = (function(mozL10n) {
     FailureInfoView: FailureInfoView,
     RoomFailureView: RoomFailureView,
     SocialShareDropdown: SocialShareDropdown,
-    DesktopRoomEditContextView: DesktopRoomEditContextView,
     DesktopRoomConversationView: DesktopRoomConversationView,
     DesktopRoomInvitationView: DesktopRoomInvitationView
   };

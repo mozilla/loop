@@ -18,7 +18,6 @@
   var PanelView = loop.panel.PanelView;
   var SignInRequestView = loop.panel.SignInRequestView;
   // 1.2. Conversation Window
-  var DesktopRoomEditContextView = loop.roomViews.DesktopRoomEditContextView;
   var RoomFailureView = loop.roomViews.RoomFailureView;
   var DesktopRoomConversationView = loop.roomViews.DesktopRoomConversationView;
 
@@ -860,22 +859,6 @@
                   onCallTerminated={function() {}}
                   roomState={ROOM_STATES.INIT}
                   roomStore={invitationRoomStore} />
-              </div>
-            </FramedExample>
-
-            <FramedExample height={288}
-                           onContentsRendered={invitationRoomStore.activeRoomStore.forcedUpdate}
-                           summary="Desktop room Edit Context w/Error"
-                           width={348}>
-              <div className="fx-embedded room-invitation-overlay">
-                <DesktopRoomEditContextView
-                  dispatcher={dispatcher}
-                  error={{}}
-                  onClose={function() {}}
-                  roomData={{}}
-                  savingContext={false}
-                  show={true}
-                  />
               </div>
             </FramedExample>
 

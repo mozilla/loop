@@ -103,177 +103,6 @@ loop.shared.views = (function(_, mozL10n) {
   });
 
   /**
-   * Settings control button.
-   */
-  var SettingsControlButton = React.createClass({
-    propTypes: {
-      // Set to true if the menu should be below the button rather than above.
-      menuBelow: React.PropTypes.bool,
-      menuItems: React.PropTypes.array
-    },
-
-    mixins: [
-      sharedMixins.DropdownMenuMixin(),
-      React.addons.PureRenderMixin
-    ],
-
-    getDefaultProps: function() {
-      return {
-        menuBelow: false
-      };
-    },
-
-    /**
-     * Reposition Menu if cropped
-     *
-     * Added to reposition the menu if it is cropped on the left side because of
-     * a long text string. This function measures how much the menu is cropped
-     * on the left or right and adjusts the coordinates so the menu isn't cropped.
-     * Also, sets the left style to auto, to prevent complexity in calculations
-     *
-     * The dropdownmenu mixin needs to be revamped, along with all components
-     * using dropdown menus. Components should be utilizing a global function
-     * for menu positions and it should be consistent throughout.
-     *
-     */
-    _repositionMenu: function() {
-      if (this.refs.menu && this.state.showMenu) {
-        var menuNode = this.refs.menu && this.refs.menu.getDOMNode();
-
-        if (menuNode) {
-          // Amount of pixels that the dropdown needs to stay away from the edges
-          // of the page body. Copied from the mixin.
-          var boundOffset = 4;
-          var menuNodeRect = menuNode.getBoundingClientRect();
-          var menuComputedStyle = window.getComputedStyle(menuNode);
-          var documentBody = this.getDOMNode().ownerDocument.body;
-          var bodyRect = documentBody.getBoundingClientRect();
-          var menuLeft = parseFloat(menuNodeRect.left);
-          var menuRight = parseFloat(menuNodeRect.right);
-          var bodyRight = parseFloat(bodyRect.right);
-
-          menuNode.style.left = "auto";
-
-          // If menu is too close or cropped on left, move right
-          if (menuLeft < -boundOffset) {
-            menuNode.style.right =
-              (parseFloat(menuComputedStyle.right) + menuLeft - boundOffset) + "px";
-          }
-          // If menu is too close or cropped on right, move left
-          if (menuRight > bodyRight - boundOffset) {
-            menuNode.style.right =
-              (parseFloat(menuComputedStyle.right) + (menuRight - bodyRight) + boundOffset) + "px";
-          }
-        }
-      }
-    },
-
-    /**
-     * Return the function that Show or hide the edit context edition form
-     */
-    getHandleToggleEdit: function(editItem) {
-      return function _handleToglleEdit(event) {
-          event.preventDefault();
-          if (editItem.onClick) {
-            editItem.onClick(!editItem.enabled);
-          }
-        };
-    },
-
-    /**
-     * Load on the browser the help (support) url from prefs
-     */
-    handleHelpEntry: function(event) {
-      event.preventDefault();
-      loop.request("GetLoopPref", "support_url").then(function(helloSupportUrl) {
-        loop.request("OpenURL", helloSupportUrl);
-      });
-    },
-
-    /**
-     * Recover the needed info for generating an specific menu Item
-     */
-    getItemInfo: function(menuItem) {
-      var cx = classNames;
-      switch (menuItem.id) {
-        case "help":
-          return {
-            cssClasses: "dropdown-menu-item",
-            handler: this.handleHelpEntry,
-            label: mozL10n.get("help_label")
-          };
-        case "edit":
-          return {
-            cssClasses: cx({
-              "dropdown-menu-item": true,
-              "entry-settings-edit": true,
-              "hide": !menuItem.visible
-            }),
-            handler: this.getHandleToggleEdit(menuItem),
-            label: mozL10n.get(menuItem.enabled ?
-              "conversation_settings_menu_edit_context" :
-              "conversation_settings_menu_hide_context"),
-            scope: "local",
-            type: "edit"
-          };
-        default:
-          console.error("Invalid menu item", menuItem);
-          return null;
-       }
-    },
-
-    /**
-     * Generate a menu item after recover its info
-     */
-    generateMenuItem: function(menuItem) {
-      var itemInfo = this.getItemInfo(menuItem);
-      if (!itemInfo) {
-        return null;
-      }
-      return (
-        <li className={itemInfo.cssClasses}
-            key={menuItem.id}
-            onClick={itemInfo.handler}
-            scope={itemInfo.scope || ""}
-            type={itemInfo.type || ""} >
-          {itemInfo.label}
-        </li>
-        );
-    },
-
-    render: function() {
-      if (!this.props.menuItems || !this.props.menuItems.length) {
-        return null;
-      }
-      var menuItemRows = this.props.menuItems.map(this.generateMenuItem)
-        .filter(function(item) { return item; });
-
-      if (!menuItemRows || !menuItemRows.length) {
-        return null;
-      }
-
-      var cx = classNames;
-      var settingsDropdownMenuClasses = cx({
-        "settings-menu": true,
-        "dropdown-menu": true,
-        "menu-below": this.props.menuBelow,
-        "hide": !this.state.showMenu
-      });
-      return (
-        <div className="settings-control">
-          <button className="btn btn-settings transparent-button"
-             onClick={this.toggleDropdownMenu}
-             ref="anchor"
-             title={mozL10n.get("settings_menu_button_tooltip")} />
-          <ul className={settingsDropdownMenuClasses} ref="menu">
-            {menuItemRows}
-          </ul>
-        </div>
-      );
-    }
-  });
-
-  /**
    * Conversation controls.
    */
   var ConversationToolbar = React.createClass({
@@ -281,7 +110,6 @@ loop.shared.views = (function(_, mozL10n) {
       return {
         video: { enabled: true, visible: true },
         audio: { enabled: true, visible: true },
-        settingsMenuItems: null,
         showHangup: true
       };
     },
@@ -297,8 +125,6 @@ loop.shared.views = (function(_, mozL10n) {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       hangup: React.PropTypes.func.isRequired,
       publishStream: React.PropTypes.func.isRequired,
-      settingsMenuItems: React.PropTypes.array,
-      show: React.PropTypes.bool.isRequired,
       showHangup: React.PropTypes.bool,
       video: React.PropTypes.object.isRequired
     },
@@ -377,10 +203,6 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     render: function() {
-      if (!this.props.show) {
-        return null;
-      }
-
       var cx = classNames;
       var conversationToolbarCssClasses = cx({
         "conversation-toolbar": true,
@@ -412,9 +234,6 @@ loop.shared.views = (function(_, mozL10n) {
                                     scope="local" type="audio"
                                     visible={this.props.audio.visible}/>
             </div>
-          </li>
-          <li className="conversation-toolbar-btn-box btn-edit-entry">
-            <SettingsControlButton menuItems={this.props.settingsMenuItems} />
           </li>
         </ul>
       );
@@ -1023,7 +842,6 @@ loop.shared.views = (function(_, mozL10n) {
     MediaLayoutView: MediaLayoutView,
     MediaView: MediaView,
     LoadingView: LoadingView,
-    SettingsControlButton: SettingsControlButton,
     NotificationListView: NotificationListView
   };
 })(_, navigator.mozL10n || document.mozL10n);

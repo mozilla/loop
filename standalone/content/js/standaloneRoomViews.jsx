@@ -640,7 +640,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
               dispatcher={this.props.dispatcher}
               hangup={this.leaveRoom}
               publishStream={this.publishStream}
-              show={true}
+              showHangup={true}
               video={{ enabled: !this.state.videoMuted,
                       visible: this._roomIsActive() }} />
           </sharedViews.MediaLayoutView>

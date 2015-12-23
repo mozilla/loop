@@ -809,8 +809,11 @@ body[platform="win"] .share-service-dropdown.overflow > .dropdown-menu-item {
   }
 }
 
-/* e.g. very narrow widths similar to conversation window */
-@media screen and (max-width:350px) {
+/* e.g. very narrow widths similar to conversation window.
+   Note: on some displays (e.g. windows / medium size) the width
+   may be very slightly over the expected width, so we add on 2px
+   just in case. */
+@media screen and (max-width:352px) {
   .media-layout > .media-wrapper {
     flex-flow: column nowrap;
   }
@@ -1127,8 +1130,11 @@ html[dir="rtl"] .text-chat-entry.received .text-chat-arrow {
   border-top: 1px solid #66c9f2;
 }
 
-/* e.g. very narrow widths similar to conversation window */
-@media screen and (max-width:350px) {
+/* e.g. very narrow widths similar to conversation window.
+   Note: on some displays (e.g. windows / medium size) the width
+   may be very slightly over the expected width, so we add on 2px
+   just in case. */
+@media screen and (max-width:352px) {
   .text-chat-view {
     display: flex;
     flex-flow: column nowrap;

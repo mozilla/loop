@@ -212,7 +212,7 @@ describe("loop.panel", function() {
       var view = TestUtils.renderIntoDocument(
         React.createElement(loop.panel.SettingsDropdown));
 
-      expect(view.getDOMNode().querySelectorAll(".icon-account"))
+      expect(view.getDOMNode().querySelectorAll(".entry-settings-account"))
         .to.have.length.of(0);
     });
 
@@ -338,7 +338,7 @@ describe("loop.panel", function() {
            function() {
              var view = mountTestComponent();
 
-             expect(view.getDOMNode().querySelectorAll(".icon-account"))
+             expect(view.getDOMNode().querySelectorAll(".entry-settings-account"))
                .to.have.length.of(0);
            });
 
@@ -350,50 +350,80 @@ describe("loop.panel", function() {
 
           sinon.assert.calledOnce(requestStubs.LoginToFxA);
         });
-      });
 
-      it("should show a signout entry when user is authenticated", function() {
-        loop.storedRequests.GetUserProfile = { email: "test@example.com" };
+        it("should close the menu on clicking sign in", function() {
+          var view = mountTestComponent();
 
-        mountTestComponent();
+          TestUtils.Simulate.click(view.getDOMNode()
+                                     .querySelector(".entry-settings-signin"));
 
-        sinon.assert.calledWithExactly(document.mozL10n.get,
-                                       "settings_menu_item_signout");
-        sinon.assert.neverCalledWith(document.mozL10n.get,
-                                     "settings_menu_item_signin");
-      });
-
-      it("should show an account entry when user is authenticated", function() {
-        LoopMochaUtils.stubLoopRequest({
-          GetUserProfile: function() { return { email: "test@example.com" }; }
+          expect(view.state.showMenu).eql(false);
         });
 
-        mountTestComponent();
+        it("should close the panel on clicking sign in", function() {
+          var view = mountTestComponent();
 
-        sinon.assert.calledWithExactly(document.mozL10n.get,
-                                       "settings_menu_item_settings");
+          TestUtils.Simulate.click(view.getDOMNode()
+                                     .querySelector(".entry-settings-signin"));
+
+          sinon.assert.calledOnce(fakeWindow.close);
+        });
       });
 
-      it("should open the FxA settings when the account entry is clicked",
-         function() {
-           loop.storedRequests.GetUserProfile = { email: "test@example.com" };
+      describe("UserLoggedIn", function() {
+        var view;
 
-           var view = mountTestComponent();
+        beforeEach(function() {
+          loop.storedRequests.GetUserProfile = { email: "test@example.com" };
+          view = mountTestComponent();
+        });
 
-           TestUtils.Simulate.click(view.getDOMNode()
-                                      .querySelector(".entry-settings-account"));
+        it("should show a signout entry when user is authenticated", function() {
+          expect(view.getDOMNode().querySelectorAll(".entry-settings-signout"))
+              .to.have.length.of(1);
+          expect(view.getDOMNode().querySelectorAll(".entry-settings-signin"))
+              .to.have.length.of(0);
+        });
 
-           sinon.assert.calledOnce(openFxASettingsStub);
-         });
+        it("should show an account entry when user is authenticated", function() {
+          expect(view.getDOMNode().querySelectorAll(".entry-settings-account"))
+              .to.have.length.of(1);
+        });
 
-      it("should sign out the user on click when authenticated", function() {
-        loop.storedRequests.GetUserProfile = { email: "test@example.com" };
-        var view = mountTestComponent();
+        it("should open the FxA settings when the account entry is clicked",
+            function() {
+              TestUtils.Simulate.click(view.getDOMNode()
+                                         .querySelector(".entry-settings-account"));
 
-        TestUtils.Simulate.click(view.getDOMNode()
-                                   .querySelector(".entry-settings-signout"));
+              sinon.assert.calledOnce(openFxASettingsStub);
+            });
 
-        sinon.assert.calledOnce(requestStubs.LogoutFromFxA);
+        it("should sign out the user on click when authenticated", function() {
+          TestUtils.Simulate.click(view.getDOMNode()
+                                     .querySelector(".entry-settings-signout"));
+
+          sinon.assert.calledOnce(requestStubs.LogoutFromFxA);
+        });
+
+        it("should close the dropdown menu on clicking sign out", function() {
+          LoopMochaUtils.stubLoopRequest({
+            GetUserProfile: function() { return { email: "test@example.com" }; }
+          });
+
+          view.setState({ showMenu: true });
+
+          TestUtils.Simulate.click(view.getDOMNode()
+                                     .querySelector(".entry-settings-signout"));
+
+          expect(view.state.showMenu).eql(false);
+        });
+
+        it("should not close the panel on clicking sign out", function() {
+          TestUtils.Simulate.click(view.getDOMNode()
+                                     .querySelector(".entry-settings-signout"));
+
+          sinon.assert.notCalled(fakeWindow.close);
+        });
       });
 
       describe("Toggle Notifications", function() {
@@ -952,12 +982,10 @@ describe("loop.panel", function() {
     });
 
     it("should call mozL10n.get for room empty strings", function() {
-      createTestComponent();
+      var view = createTestComponent();
 
-      sinon.assert.calledWithExactly(document.mozL10n.get,
-                                     "no_conversations_message_heading2");
-      sinon.assert.calledWithExactly(document.mozL10n.get,
-                                     "no_conversations_start_message2");
+      expect(view.getDOMNode().querySelectorAll(".room-list-empty").length).to.eql(1);
+      expect(view.getDOMNode().querySelectorAll(".panel-text-medium").length).to.eql(2);
     });
 
     it("should display a loading animation when rooms are pending", function() {

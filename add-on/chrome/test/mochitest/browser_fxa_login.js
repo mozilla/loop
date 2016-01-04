@@ -52,7 +52,7 @@ add_task(function* setup() {
     }
   });
   registerCleanupFunction(function* () {
-    info("cleanup time");
+    info("cleanup specific to setup test");
     yield promiseDeletedOAuthParams(BASE_URL);
     Services.prefs.clearUserPref("loop.gettingStarted.latestFTUVersion");
     MozLoopServiceInternal.mocks.pushHandler = undefined;
@@ -437,6 +437,17 @@ add_task(function* openFxASettings() {
   // blank tab.
   gBrowser.selectedTab = gBrowser.addTab(BASE_URL);
 
+  let fxASampleToken = {
+    token_type: "bearer",
+    access_token: "1bad3e44b12f77a88fe09f016f6a37c42e40f974bc7a8b432bb0d2f0e37e1752",
+    scope: "profile"
+  };
+
+  let fxASampleProfile = {
+    email: "test@example.com",
+    uid: "abcd1234"
+  };
+
   let params = {
     client_id: "client_id",
     content_uri: BASE_URL + "/content",
@@ -445,7 +456,18 @@ add_task(function* openFxASettings() {
     state: "state",
     test_error: "token_401"
   };
+
+  Services.prefs.setCharPref("loop.fxa_oauth.profile", JSON.stringify(fxASampleProfile));
+  Services.prefs.setCharPref("loop.fxa_oauth.tokendata", JSON.stringify(fxASampleToken));
+
   yield promiseOAuthParamsSetup(BASE_URL, params);
+
+  registerCleanupFunction(function* () {
+    info("cleanup specific to openFxASettings test");
+    yield promiseDeletedOAuthParams(BASE_URL);
+    Services.prefs.clearUserPref("loop.fxa_oauth.profile");
+    Services.prefs.clearUserPref("loop.fxa_oauth.tokendata");
+  });
 
   yield new Promise((resolve) => {
     let progressListener = {
@@ -456,7 +478,7 @@ add_task(function* openFxASettings() {
         }
         gBrowser.removeTabsProgressListener(progressListener);
         let contentURI = Services.io.newURI(params.content_uri, null, null);
-        is(aBrowser.currentURI.spec, Services.io.newURI("/settings", null, contentURI).spec,
+        is(aBrowser.currentURI.spec, Services.io.newURI("/settings?uid=abcd1234", null, contentURI).spec,
            "Check settings tab URL");
         resolve();
       }

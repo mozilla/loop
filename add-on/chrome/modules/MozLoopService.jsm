@@ -1760,6 +1760,13 @@ this.MozLoopService = {
         return;
       }
       let url = new URL("/settings", fxAOAuthClient.parameters.content_uri);
+
+      if (this.userProfile) {
+        // fxA User profile is present, open settings for the correct profile. Bug: 1070208
+        let fxAProfileUid = MozLoopService.userProfile.uid;
+        url = new URL("/settings?uid=" + fxAProfileUid, fxAOAuthClient.parameters.content_uri);
+      }
+
       let win = Services.wm.getMostRecentWindow("navigator:browser");
       win.switchToTabHavingURI(url.toString(), true);
     } catch (ex) {

@@ -31,7 +31,7 @@ node_modules: package.json
 # build the dist dir, which contains a production version of the code and
 # assets
 .PHONY: dist
-dist: build dist_xpi
+dist: build dist_xpi dist_export
 
 .PHONY: distclean
 distclean: clean
@@ -45,6 +45,7 @@ BUILT := ./built
 ADD-ON := add-on
 BUILT_ADD_ON := $(BUILT)/$(ADD-ON)
 DIST := ./dist
+DIST_EXPORT_DIR := ./dist/export-gecko
 XPI_NAME := loop@mozilla.org.xpi
 XPI_FILE := $(BUILT)/$(XPI_NAME)
 
@@ -282,6 +283,27 @@ dist_xpi: add-on_dist
 	rm -f $(DIST)/$(XPI_NAME)
 	@$(REPO_BIN_DIR)/build_extension.sh $(XPI_NAME) $(DIST) add-on
 
+.PHONY: dist_export
+dist_export:
+	rm -rf $(DIST_EXPORT_DIR)
+	# Do a basic copy of the add-on.
+	$(RSYNC) $(BUILT)/$(ADD-ON)/* $(DIST_EXPORT_DIR)
+	# Use the install.rdf.in rather than install.rdf.
+	rm -f $(DIST_EXPORT_DIR)/install.rdf
+	$(RSYNC) $(ADD-ON)/install.rdf.in $(DIST_EXPORT_DIR)
+	# jar.mn is used for Firefox build
+	rm -f $(DIST_EXPORT_DIR)/chrome.manifest
+	# Add the jar file.
+	$(RSYNC) $(ADD-ON)/jar.mn $(DIST_EXPORT_DIR)
+	# Use the original prefs.js.
+	$(RSYNC) $(ADD-ON)/preferences/prefs.js $(DIST_EXPORT_DIR)/chrome/content/preferences/prefs.js
+	# Copy the vendor files that support the unit tests.
+	$(RSYNC) $(BUILT)/test/vendor/* $(DIST_EXPORT_DIR)/chrome/content/shared/test/vendor
+	# and the functional tests.
+	@mkdir -p $(DIST_EXPORT_DIR)/test/functional
+	$(RSYNC) test/functional/* $(DIST_EXPORT_DIR)/test/functional
+
+
 #
 # Tests
 #
@@ -306,6 +328,30 @@ karma: build
 
 .PHONY: build
 build: add-on standalone ui vendor_libs
+
+GIT_EXPORT_LOCATION := ../gecko-dev
+GIT_EXPORT_DIR := $(GIT_EXPORT_LOCATION)/browser/extensions/loop
+
+.PHONY: git-export
+git-export: build dist_export
+	find -E $(GIT_EXPORT_DIR) -type f ! -regex \
+	  '.*/(moz.build|README.txt|.gitignore|run-all-loop-tests.sh|manifest.ini)' -delete
+	$(RSYNC) $(DIST_EXPORT_DIR)/* $(GIT_EXPORT_DIR)
+	# XXX Bug 1239828 - TEMPORARY ITEMS to get l10n to work the "traditional" way
+	# in m-c whilst we sort out a proper fix.
+	# Drop locales from the jar file.
+	grep -v 'locale' $(ADD-ON)/jar.mn > $(GIT_EXPORT_DIR)/jar.mn
+	# Don't load our copy of loop.properties, load the browser's one instead.
+	sed -e "s|loop/locale/loop\.properties|browser/locale/loop/loop\.properties|g" \
+	  < $(BUILT)/$(ADD-ON)/chrome/content/modules/LoopRooms.jsm \
+	  > $(GIT_EXPORT_DIR)/chrome/content/modules/LoopRooms.jsm
+	sed -e "s|loop/locale/loop.properties|browser/locale/loop/loop.properties|g" \
+	  < $(BUILT)/$(ADD-ON)/chrome/content/modules/MozLoopService.jsm \
+	  > $(GIT_EXPORT_DIR)/chrome/content/modules/MozLoopService.jsm
+
+	@echo "*****"
+	@echo "You will need to manually move/add/remove files to create the commit."
+	@echo "*****"
 
 .PHONY: clean
 clean:

@@ -19,5 +19,5 @@ for an existing issue before filing [a new one](https://bugzilla.mozilla.org/ent
 Contributing
 ============
 
-Please see the [Contributing](docs/Contributing.md) documentation before
+Please see the [Contributing](CONTRIBUTING.md) documentation before
 submitting a pull request.

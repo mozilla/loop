@@ -594,7 +594,7 @@ const kMessageHandlers = {
       win.messageManager.removeMessageListener("PageMetadata:PageDataResult", onPageDataResult);
       let pageData = msg.json;
       win.LoopUI.getFavicon(function(err, favicon) {
-        if (err) {
+        if (err && err !== "favicon not found for uri") {
           MozLoopService.log.error("Error occurred whilst fetching favicon", err);
           // We don't return here intentionally to make sure the callback is
           // invoked at all times. We just report the error here.

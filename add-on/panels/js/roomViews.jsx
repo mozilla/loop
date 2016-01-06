@@ -269,6 +269,15 @@ loop.roomViews = (function(mozL10n) {
         }));
     },
 
+    handleFacebookButtonClick: function(event) {
+      event.preventDefault();
+
+      this.props.dispatcher.dispatch(new sharedActions.FacebookShareRoomUrl({
+        from: "conversation",
+        roomUrl: this.props.roomData.roomUrl
+      }));
+    },
+
     handleCopyButtonClick: function(event) {
       event.preventDefault();
 
@@ -288,20 +297,6 @@ loop.roomViews = (function(mozL10n) {
       if (this.state.copiedUrl) {
         this.setState({ copiedUrl: false });
       }
-    },
-
-    handleShareButtonClick: function(event) {
-      event.preventDefault();
-
-      var providers = this.props.socialShareProviders;
-      // If there are no providers available currently, save a click by dispatching
-      // the 'AddSocialShareProvider' right away.
-      if (!providers || !providers.length) {
-        this.props.dispatcher.dispatch(new sharedActions.AddSocialShareProvider());
-        return;
-      }
-
-      this.toggleDropdownMenu();
     },
 
     render: function() {
@@ -337,6 +332,12 @@ loop.roomViews = (function(mozL10n) {
               onMouseOver={this.resetTriggeredButtons}>
               <img src="shared/img/glyph-email-16x16.svg" />
               <p>{mozL10n.get("invite_email_link_button")}</p>
+            </div>
+            <div className="btn-facebook invite-button"
+              onClick={this.handleFacebookButtonClick}
+              onMouseOver={this.resetTriggeredButtons}>
+              <img src="shared/img/glyph-facebook-16x16.svg" />
+              <p>{mozL10n.get("invite_facebook_button3")}</p>
             </div>
           </div>
           <SocialShareDropdown

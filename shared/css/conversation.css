@@ -210,6 +210,7 @@ html[dir="rtl"] .conversation-toolbar-media-btn-group-box > button:first-child:h
   margin: .5rem 0 0;
   position: absolute;
   right: -10rem;
+  font-size: 0.8rem;
 }
 
 .call-action-group > .invite-button.triggered > p,
@@ -501,7 +502,7 @@ body[platform="win"] .share-service-dropdown.overflow > .dropdown-menu-item {
 
 .room-invitation-content {
   color: #333;
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin: 1rem auto;
 }
 

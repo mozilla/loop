@@ -262,14 +262,6 @@ describe("loop.panel", function() {
         expect(view.getDOMNode()).to.be.null;
       });
 
-      it("should add ellipsis to text over 24chars", function() {
-        loop.storedRequests.GetUserProfile = { email: "reallyreallylongtext@example.com" };
-        var view = createTestPanelView();
-        var node = view.getDOMNode().querySelector(".user-identity");
-
-        expect(node.textContent).to.eql("reallyreallylongtext@exa…");
-      });
-
       it("should warn when user profile is different from {} or null",
          function() {
           var warnstub = sandbox.stub(console, "warn");

@@ -533,9 +533,8 @@ html[dir="rtl"] .generate-url-spinner {
 /* Sign in/up link */
 
 .signin-link {
-  flex: 2 1 auto;
+  flex: 1;
   margin: 0;
-  text-align: right;
 }
 
 .signin-link > a {
@@ -559,15 +558,6 @@ html[dir="rtl"] .generate-url-spinner {
   background-repeat: no-repeat;
   background-size: cover;
   -moz-margin-start: .5em;
-}
-
-.user-details .dropdown-menu {
-  bottom: 1.3rem; /* Just above the text. */
-  left: -5px; /* Compensate for button padding. */
-}
-
-html[dir="rtl"] .user-details .dropdown-menu {
-  right: -5px;
 }
 
 .settings-menu .dropdown-menu {
@@ -610,15 +600,18 @@ html[dir="rtl"] .settings-menu .dropdown-menu {
   height: 42px;
 }
 
-.footer .signin-details {
+.footer > .signin-details {
   align-items: center;
-  display: flex;
 }
 
-.footer .user-identity {
+.footer > .user-identity {
+  flex: 1;
   color: #000;
   font-weight: bold;
   margin: 0;
+  margin-inline-end: 1rem;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
 }
 
 /* First time use */

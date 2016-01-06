@@ -344,7 +344,7 @@ loop.panel = (function(_, mozL10n) {
       if (this.props.userProfile && this.props.userProfile.email) {
         return (
           <div className="user-identity">
-            {loop.shared.utils.truncate(this.props.userProfile.email, 24)}
+            {this.props.userProfile.email}
           </div>
         );
       }
@@ -1031,10 +1031,8 @@ loop.panel = (function(_, mozL10n) {
             <RoomList dispatcher={this.props.dispatcher}
               store={this.props.roomStore} />
           <div className="footer">
-            <div className="user-details">
               <AccountLink fxAEnabled={this.state.fxAEnabled}
                            userProfile={this.props.userProfile || this.state.userProfile}/>
-            </div>
             <div className="signin-details">
               <SettingsDropdown />
             </div>

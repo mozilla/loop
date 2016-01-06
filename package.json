@@ -20,7 +20,9 @@
     "react": "0.13.3"
   },
   "devDependencies": {
-    "babel": "5.8.34",
+    "babel-cli": "6.3.17",
+    "babel-plugin-transform-react-display-name": "6.3.13",
+    "babel-plugin-transform-react-jsx": "6.3.13",
     "chai": "3.0.0",
     "chai-as-promised": "5.1.0",
     "commander": "2.9.0",

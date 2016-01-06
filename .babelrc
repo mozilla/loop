@@ -1,0 +1,6 @@
+{
+  "plugins": [
+    "transform-react-display-name",
+    "transform-react-jsx"
+  ]
+}

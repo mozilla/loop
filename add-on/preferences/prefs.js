@@ -29,5 +29,5 @@ pref("loop.CSP", "default-src 'self' about: file: chrome:; img-src * data:; font
 #endif
 pref("loop.fxa_oauth.tokendata", "");
 pref("loop.fxa_oauth.profile", "");
-pref("loop.support_url", "https://support.mozilla.org/kb/group-conversations-firefox-hello-webrtc");
+pref("loop.support_url", "https://support.mozilla.org/1/firefox/%VERSION%/%OS%/%LOCALE%/cobrowsing");
 pref("loop.browserSharing.showInfoBar", true);

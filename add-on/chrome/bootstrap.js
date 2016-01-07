@@ -187,14 +187,13 @@ var WindowListener = {
             this.LoopAPI.initialize();
 
             let anchor = event ? event.target : this.toolbarButton.anchor;
-            let setHeight = 410;
-            if (gBrowser.selectedBrowser.getAttribute("remote") === "true") {
-              setHeight = 262;
-            }
-            this.PanelFrame.showPopup(window, anchor,
-              "loop", null, "about:looppanel",
-              // Loop wants a fixed size for the panel. This also stops it dynamically resizing.
-              { width: 330, height: setHeight },
+            this.PanelFrame.showPopup(
+              window,
+              anchor,
+              "loop", // Notification Panel Type
+              null,   // Origin
+              "about:looppanel", // Source
+              null, // Size
               callback);
           });
         });

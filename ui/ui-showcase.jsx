@@ -456,42 +456,50 @@
     },
 
     shapes: {
-      "10x10": ["close", "close-active", "close-disabled", "dropdown",
-        "dropdown-white", "dropdown-active", "dropdown-disabled", "edit",
-        "edit-active", "edit-disabled", "edit-white", "expand", "expand-active",
-        "expand-disabled", "minimize", "minimize-active", "minimize-disabled",
-        "settings-cog-grey", "settings-cog-white"
+      "10x10": ["close", "close-active", "close-disabled", "close-darkergrey",
+        "dropdown", "dropdown-white", "dropdown-active", "dropdown-disabled",
+        "edit", "edit-active", "edit-disabled", "edit-white", "edit-darkgrey",
+        "expand", "expand-active", "expand-disabled", "minimize",
+        "minimize-active", "minimize-disabled", "settings-cog"
       ],
-      "14x14": ["audio", "audio-active", "audio-disabled", "facemute",
-        "facemute-active", "facemute-disabled", "hangup", "hangup-active",
-        "hangup-disabled", "hello", "hello-hover", "hello-active",
-        "incoming", "incoming-active", "incoming-disabled",
-        "link", "link-active", "link-disabled", "mute", "mute-active",
-        "mute-disabled", "pause", "pause-active", "pause-disabled", "video",
-        "video-white", "video-active", "video-disabled", "volume", "volume-active",
+      "14x14": ["audio", "audio-active", "audio-disabled", "audio-still",
+        "audio-white", "exit", "exit-active", "exit-white", "facemute",
+        "facemute-active", "facemute-disabled", "facemute-still", "facemute-white",
+        "hangup", "hangup-active", "hangup-disabled", "hangup-white", "hello",
+        "hello-hover", "hello-active", "incoming", "incoming-active",
+        "incoming-disabled", "link", "link-active", "link-disabled", "mute",
+        "mute-active", "mute-disabled", "mute-still", "mute-white", "pause",
+        "pause-active", "pause-disabled", "screen-white", "screen-hover",
+        "screen-disabled", "screenmute-white", "video", "video-white",
+        "video-active", "video-disabled", "video-still", "volume", "volume-active",
         "volume-disabled", "clear", "magnifier"
       ],
-      "16x16": ["add", "add-hover", "add-active", "audio", "audio-hover", "audio-active",
-        "block", "block-red", "block-hover", "block-active", "copy", "checkmark",
-        "delete", "globe", "google", "google-hover",
-        "google-active", "history", "history-hover", "history-active", "leave",
-        "screen-white", "screenmute-white", "settings", "settings-hover", "settings-active",
-        "share-darkgrey", "tag", "tag-hover", "tag-active", "trash", "unblock",
-        "unblock-hover", "unblock-active", "video", "video-hover", "video-active"
+      "16x16": ["add", "add-hover", "add-active", "audio", "block", "block-red",
+        "block-hover", "block-active", "copy", "checkmark", "delete", "globe",
+        "google", "google-hover", "google-active", "history", "history-hover",
+        "history-active", "leave", "loop-icon-still", "loop-icon-white",
+        "settings", "settings-hover", "settings-active", "share-darkgrey",
+        "tag", "tag-hover", "tag-active", "trash", "unblock", "unblock-hover",
+        "unblock-active", "video"
       ]
     },
 
     render: function() {
       var icons = this.shapes[this.props.size].map(function(shapeId, i) {
         return (
-          <li className="svg-icon-entry" key={this.props.size + "-" + i}>
-            <p><SVGIcon shapeId={shapeId} size={this.props.size} /></p>
+          <div className="svg-icon-list-item" key={this.props.size + "-" + i}>
+            <p className="svg-icon svg-icon-white-background">
+              <SVGIcon shapeId={shapeId} size={this.props.size} />
+            </p>
+            <p className="svg-icon">
+              <SVGIcon shapeId={shapeId} size={this.props.size} />
+            </p>
             <p>{shapeId}</p>
-          </li>
+          </div>
         );
       }, this);
       return (
-        <ul className="svg-icon-list">{icons}</ul>
+        <div className="svg-icon-list">{icons}</div>
       );
     }
   });
@@ -509,6 +517,48 @@
 
     makeId: function(prefix) {
       return (prefix || "") + this.props.summary.toLowerCase().replace(/\s/g, "-");
+    },
+
+    /* Need to wait until the content is loaded and rendered before we can get
+      the Height of the content and set the iFrame to that height */
+    componentDidMount: function() {
+      this._checkFrameContentLoaded();
+    },
+
+    /* Check to see if content has been rendered, use timeout to run check again if
+    rendering content not complete */
+    _checkFrameContentLoaded: function() {
+      if (this.props.height) {
+        return;
+      }
+
+      var frameDOMNode = React.findDOMNode(this.refs.frameNode);
+      // For multi-browser compatibility allow for both contentDoc and contentWin
+      var contentDoc = frameDOMNode.contentDocument || frameDOMNode.contentWindow.document;
+
+      if (contentDoc.readyState && contentDoc.readyState === "complete") {
+        this._resizeFrame();
+      } else {
+        setTimeout(function() {
+          this._checkFrameContentLoaded();
+        }.bind(this), 1000);
+      }
+    },
+
+    _resizeFrame: function() {
+      if (this.props.height) {
+        return;
+      }
+
+      /* setTimeout added to allow for objects to adjust within the iframe,
+      after being rendered, before grabbing height */
+      setTimeout(function() {
+        var frameDOMNode = React.findDOMNode(this.refs.frameNode);
+        // For multi-browser compatibility allow for both contentDoc and contentWin
+        var contentDoc = frameDOMNode.contentDocument || frameDOMNode.contentWindow.document;
+        // + 2 pixels for the 1 pixel border on top and bottom
+        frameDOMNode.height = contentDoc.body.offsetHeight + 2;
+      }.bind(this), 2000);
     },
 
     render: function() {
@@ -533,6 +583,7 @@
                    cssClass={this.props.cssClass}
                    height={height}
                    onContentsRendered={this.props.onContentsRendered}
+                   ref="frameNode"
                    width={width}>
               {this.props.children}
             </Frame>
@@ -630,7 +681,6 @@
             </p>
             <FramedExample cssClass="fx-embedded-panel"
                            dashed={true}
-                           height={553}
                            summary="First time experience view"
                            width={330}>
               <div className="panel ftu-panel" height="553">
@@ -643,7 +693,6 @@
 
             <FramedExample cssClass="fx-embedded-panel"
               dashed={true}
-              height={410}
               summary="Re-sign-in view"
               width={332}>
               <div className="panel">
@@ -653,7 +702,6 @@
 
             <FramedExample cssClass="fx-embedded-panel"
                            dashed={true}
-                           height={410}
                            summary="Room list"
                            width={330}>
               <div className="panel">
@@ -666,7 +714,6 @@
 
             <FramedExample cssClass="fx-embedded-panel"
                            dashed={true}
-                           height={410}
                            summary="Room list (active view)"
                            width={330}>
               <div className="panel">
@@ -678,7 +725,6 @@
 
             <FramedExample cssClass="fx-embedded-panel"
                            dashed={true}
-                           height={410}
                            summary="Room list (no rooms)"
                            width={330}>
               <div className="panel">
@@ -690,7 +736,6 @@
 
             <FramedExample cssClass="fx-embedded-panel"
                            dashed={true}
-                           height={410}
                            summary="Room list (loading view)"
                            width={330}>
               <div className="panel">
@@ -702,7 +747,6 @@
 
             <FramedExample cssClass="fx-embedded-panel"
                            dashed={true}
-                           height={410}
                            summary="Error Notification"
                            width={330}>
               <div className="panel">
@@ -713,7 +757,6 @@
             </FramedExample>
             <FramedExample cssClass="fx-embedded-panel"
                            dashed={true}
-                           height={410}
                            summary="Error Notification - authenticated"
                            width={330}>
               <div className="panel">
@@ -1242,19 +1285,19 @@
           </Section>
 
           <Section className="svg-icons" name="SVG icons preview">
-            <FramedExample height={240}
+            <FramedExample height={308}
                            summary="10x10"
-                           width={800}>
+                           width={730}>
               <SVGIcons size="10x10"/>
             </FramedExample>
-            <FramedExample height={350}
-                            summary="14x14"
-                            width={800}>
+            <FramedExample height={768}
+                           summary="14x14"
+                            width={730}>
               <SVGIcons size="14x14" />
             </FramedExample>
-            <FramedExample height={480}
-                            summary="16x16"
-                            width={800}>
+            <FramedExample height={550}
+                           summary="16x16"
+                            width={730}>
               <SVGIcons size="16x16"/>
             </FramedExample>
           </Section>

@@ -722,24 +722,6 @@ loop.panel = (function(_, mozL10n) {
       );
     },
 
-    _renderNoRoomsView: function() {
-      return (
-        <div className="rooms">
-          {this._renderNewRoomButton()}
-          <div className="room-list-empty">
-            <div className="no-conversations-message">
-              <p className="panel-text-medium">
-                {mozL10n.get("no_conversations_message_heading2")}
-              </p>
-              <p className="panel-text-medium">
-                {mozL10n.get("no_conversations_start_message2")}
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    },
-
     _renderNewRoomButton: function() {
       return (
         <NewRoomView dispatcher={this.props.dispatcher}
@@ -759,32 +741,32 @@ loop.panel = (function(_, mozL10n) {
         return this._renderLoadingRoomsView();
       }
 
-      if (!this.state.rooms.length) {
-        return this._renderNoRoomsView();
-      }
-
       return (
         <div className="rooms">
           {this._renderNewRoomButton()}
-          <h1>{mozL10n.get(this.state.openedRoom === null ?
-                "rooms_list_recently_browsed2" :
-                "rooms_list_currently_browsing2")}</h1>
-          <div className="room-list">{
-            this.state.rooms.map(function(room) {
-              if (this.state.openedRoom !== null &&
-                room.roomToken !== this.state.openedRoom) {
-                return null;
-              }
+          {!this.state.rooms.length ? null :
+            <h1>{mozL10n.get(this.state.openedRoom === null ?
+              "rooms_list_recently_browsed2" :
+              "rooms_list_currently_browsing2")}</h1>
+          }
+          {!this.state.rooms.length ? null :
+            <div className="room-list">{
+              this.state.rooms.map(function(room) {
+                if (this.state.openedRoom !== null &&
+                    room.roomToken !== this.state.openedRoom) {
+                  return null;
+                }
 
-              return (
-                <RoomEntry
-                  dispatcher={this.props.dispatcher}
-                  isOpenedRoom={room.roomToken === this.state.openedRoom}
-                  key={room.roomToken}
-                  room={room} />
-              );
-            }, this)
-          }</div>
+                return (
+                  <RoomEntry
+                    dispatcher={this.props.dispatcher}
+                    isOpenedRoom={room.roomToken === this.state.openedRoom}
+                    key={room.roomToken}
+                    room={room} />
+                );
+              }, this)
+            }</div>
+          }
         </div>
       );
     }

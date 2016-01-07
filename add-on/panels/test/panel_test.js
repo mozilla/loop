@@ -974,18 +974,10 @@ describe("loop.panel", function() {
       sinon.assert.calledOnce(fakeWindow.close);
     });
 
-    it("should render the no rooms view when no rooms available", function() {
+    it("should not render the room list view when no rooms available", function() {
       var view = createTestComponent();
       var node = view.getDOMNode();
-
-      expect(node.querySelectorAll(".room-list-empty").length).to.eql(1);
-    });
-
-    it("should call mozL10n.get for room empty strings", function() {
-      var view = createTestComponent();
-
-      expect(view.getDOMNode().querySelectorAll(".room-list-empty").length).to.eql(1);
-      expect(view.getDOMNode().querySelectorAll(".panel-text-medium").length).to.eql(2);
+      expect(node.querySelectorAll(".room-list").length).to.eql(0);
     });
 
     it("should display a loading animation when rooms are pending", function() {

@@ -149,25 +149,19 @@ built_ui_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/ui/%.js)
 built_add_on_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/add-on/chrome/content/%.js)
 built_standalone_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/standalone/content/%.js)
 
-$(BUILT)/standalone/content/shared/js:
-	@mkdir -p $@
-
 # We can't use $(shared_jsx_files) here because % rules don't accept that.
-$(BUILT)/standalone/content/shared/js/%.js: shared/js/%.jsx $(BUILT)/standalone/content/shared/js
+$(BUILT)/standalone/content/shared/js/%.js: shared/js/%.jsx
+	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
-$(BUILT)/add-on/chrome/content/shared/js:
-	@mkdir -p $@
-
 # We can't use $(shared_jsx_files) here because % rules don't accept that.
-$(BUILT)/add-on/chrome/content/shared/js/%.js: shared/js/%.jsx $(BUILT)/add-on/chrome/content/shared/js
+$(BUILT)/add-on/chrome/content/shared/js/%.js: shared/js/%.jsx
+	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
-$(BUILT)/ui/shared/js:
-	@mkdir -p $@
-
 # We can't use $(shared_jsx_files) here because % rules don't accept that.
-$(BUILT)/ui/shared/js/%.js: shared/js/%.jsx $(BUILT)/ui/shared/js
+$(BUILT)/ui/shared/js/%.js: shared/js/%.jsx
+	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
 #
@@ -178,20 +172,16 @@ $(BUILT)/ui/shared/js/%.js: shared/js/%.jsx $(BUILT)/ui/shared/js
 ui_jsx_files=$(wildcard ui/*.jsx)
 built_ui_js_files=$(ui_jsx_files:%.jsx=$(BUILT)/%.js)
 
-$(BUILT)/ui:
-	@mkdir -p $@
-
-$(BUILT)/ui/%.js: ui/%.jsx $(BUILT)/ui
+$(BUILT)/ui/%.js: ui/%.jsx
+	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
 # standalone
 standalone_jsx_files=$(wildcard standalone/content/js/*.jsx)
 built_standalone_js_files=$(standalone_jsx_files:%.jsx=$(BUILT)/%.js)
 
-$(BUILT)/standalone/content/js:
-	@mkdir -p $@
-
-$(BUILT)/standalone/content/js/%.js: standalone/content/js/%.jsx $(BUILT)/standalone/content/js
+$(BUILT)/standalone/content/js/%.js: standalone/content/js/%.jsx
+	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
 # add-on
@@ -200,10 +190,8 @@ built_add_on_js_files=$(patsubst add-on/panels/js/%.jsx, \
 	 $(BUILT)/add-on/chrome/content/panels/js/%.js, \
 	 $(add_on_jsx_files))
 
-$(BUILT)/add-on/chrome/content/panels/js:
-	@mkdir -p $@
-
-$(BUILT)/add-on/chrome/content/panels/js/%.js: add-on/panels/js/%.jsx $(BUILT)/add-on/chrome/content/panels/js
+$(BUILT)/add-on/chrome/content/panels/js/%.js: add-on/panels/js/%.jsx
+	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
 # XXX maybe just build one copy of shared in standalone, and then use

@@ -234,8 +234,12 @@ loop.panel = (function(_, mozL10n) {
     handleClickAuthEntry: function() {
       if (this.state.signedIn) {
         loop.request("LogoutFromFxA");
+        // Close the menu but leave the panel open
+        this.hideDropdownMenu();
       } else {
         loop.request("LoginToFxA");
+        // Close the panel, the menu will be closed by on blur listener of DropdownMenuMixin
+        this.closeWindow();
       }
     },
 

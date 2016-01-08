@@ -318,6 +318,19 @@ describe("loop.store.RoomStore", function() {
             }));
         });
 
+      it("should dispatch a CreateRoomError action if the operation fails with no result",
+        function() {
+          requestStubs["Rooms:Create"].returns();
+
+          store.createRoom(new sharedActions.CreateRoom(fakeRoomCreationData));
+
+          sinon.assert.calledOnce(dispatcher.dispatch);
+          sinon.assert.calledWithExactly(dispatcher.dispatch,
+            new sharedActions.CreateRoomError({
+              error: new Error("no result")
+            }));
+        });
+
       it("should log a telemetry event when the operation is successful", function() {
         store.createRoom(new sharedActions.CreateRoom(fakeRoomCreationData));
 
@@ -330,6 +343,16 @@ describe("loop.store.RoomStore", function() {
         var err = new Error("fake");
         err.isError = true;
         requestStubs["Rooms:Create"].returns(err);
+
+        store.createRoom(new sharedActions.CreateRoom(fakeRoomCreationData));
+
+        sinon.assert.calledOnce(requestStubs.TelemetryAddValue);
+        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue,
+          "LOOP_ROOM_CREATE", 1);
+      });
+
+      it("should log a telemetry event when the operation fails with no result", function() {
+        requestStubs["Rooms:Create"].returns();
 
         store.createRoom(new sharedActions.CreateRoom(fakeRoomCreationData));
 

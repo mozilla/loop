@@ -74,7 +74,14 @@ function serveIndex(req, res) {
 //
 app.get("/config.js", getConfigFile);
 
-app.get(/^\/[\w\-]+$/, serveIndex);
+var roomRouteRegexp = new RegExp(
+  "^\\/" + // starts with a /
+  "[" +
+    "\\w" + // non-whitespace characters
+    "\\-" + // used in crypto bits and possibly room tokens
+  "]" +
+  "+$"); // at least one more character before the end
+app.get(roomRouteRegexp, serveIndex);
 
 app.use("/", express.static(standaloneContentDir));
 

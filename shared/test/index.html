@@ -25,8 +25,9 @@
   <script src="/shared/vendor/classnames.js"></script>
   <script src="/shared/vendor/backbone.js"></script>
 
-  <!-- accessing this like a real standalone client -->
-  <script src="/vendor/l10n-gaia-02ca67948fe8.js"></script>
+  <!-- Use desktop's l10n.js, since that's all we have when we export to
+       mozilla-central. -->
+  <script src="/add-on/panels/vendor/l10n.js"></script>
 
   <!-- test dependencies -->
   <script src="/test/vendor/mocha.js"></script>

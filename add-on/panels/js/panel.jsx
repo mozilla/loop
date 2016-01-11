@@ -125,7 +125,7 @@ loop.panel = (function(_, mozL10n) {
     },
 
     render: function() {
-      var locale = mozL10n.getLanguage();
+      var locale = mozL10n.language.code;
       var tosHTML = mozL10n.get("legal_text_and_links3", {
         "clientShortname": mozL10n.get("clientShortname2"),
         "terms_of_use": React.renderToStaticMarkup(
@@ -1103,8 +1103,8 @@ loop.panel = (function(_, mozL10n) {
         notifications={notifications}
         roomStore={roomStore} />, document.querySelector("#main"));
 
-      document.documentElement.setAttribute("lang", mozL10n.getLanguage());
-      document.documentElement.setAttribute("dir", mozL10n.getDirection());
+      document.documentElement.setAttribute("lang", mozL10n.language.code);
+      document.documentElement.setAttribute("dir", mozL10n.language.direction);
       document.body.setAttribute("platform", loop.shared.utils.getPlatform());
 
       // Notify the window that we've finished initalization and initial layout

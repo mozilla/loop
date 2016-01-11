@@ -38,12 +38,10 @@ loop.shared.views.chat = (function(mozL10n) {
      */
     _renderTimestamp: function() {
       var date = new Date(this.props.timestamp);
-      var language = mozL10n.language ? mozL10n.language.code
-                                      : mozL10n.getLanguage();
 
       return (
         <span className="text-chat-entry-timestamp">
-          {date.toLocaleTimeString(language,
+          {date.toLocaleTimeString(mozL10n.language.code,
                                    { hour: "numeric", minute: "numeric",
                                    hour12: false })}
         </span>

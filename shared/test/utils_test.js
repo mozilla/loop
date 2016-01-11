@@ -6,6 +6,7 @@ describe("loop.shared.utils", function() {
   "use strict";
 
   var expect = chai.expect;
+  var mozL10n = navigator.mozL10n || document.mozL10n;
   var sandbox;
   var sharedUtils = loop.shared.utils;
 
@@ -333,7 +334,7 @@ describe("loop.shared.utils", function() {
 
     beforeEach(function() {
       // fake mozL10n
-      sandbox.stub(navigator.mozL10n, "get", function(id) {
+      sandbox.stub(mozL10n, "get", function(id) {
         switch (id) {
           case "share_email_subject7":
             return "subject";

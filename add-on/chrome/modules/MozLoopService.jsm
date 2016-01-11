@@ -1865,7 +1865,7 @@ this.MozLoopService = {
    */
   openURL: function(url) {
     let win = Services.wm.getMostRecentWindow("navigator:browser");
-    win.openUILinkIn(url, "tab");
+    win.openUILinkIn(Services.urlFormatter.formatURL(url), "tab");
   },
 
   /**

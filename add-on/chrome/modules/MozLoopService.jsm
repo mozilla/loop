@@ -866,15 +866,30 @@ var MozLoopServiceInternal = {
     return "about:loopconversation#" + chatWindowId;
   },
 
+  getChatWindows() {
+    let isLoopURL = ({ src }) => /^about:loopconversation#/.test(src);
+    return [...Chat.chatboxes].filter(isLoopURL);
+  },
+
   /**
    * Hangup and close all chat windows that are open.
    */
   hangupAllChatWindows() {
-    let isLoopURL = ({ src }) => /^about:loopconversation#/.test(src);
-    let loopChatWindows = [...Chat.chatboxes].filter(isLoopURL);
-    for (let chatbox of loopChatWindows) {
+    for (let chatbox of this.getChatWindows()) {
       let window = chatbox.content.contentWindow;
       window.dispatchEvent(new window.CustomEvent("LoopHangupNow"));
+    }
+  },
+
+  /**
+   * Pause or resume all chat windows that are open.
+   */
+  toggleBrowserSharing(on = true) {
+    for (let chatbox of this.getChatWindows()) {
+      let window = chatbox.content.contentWindow;
+      window.dispatchEvent(new window.CustomEvent("ToggleBrowserSharing", {
+        detail: on
+      }));
     }
   },
 
@@ -1412,6 +1427,10 @@ this.MozLoopService = {
    */
   hangupAllChatWindows() {
     return MozLoopServiceInternal.hangupAllChatWindows();
+  },
+
+  toggleBrowserSharing(on) {
+    return MozLoopServiceInternal.toggleBrowserSharing(on);
   },
 
   /**

@@ -41,7 +41,7 @@ loop.store.ConversationAppStore = (function() {
 
     // Start listening for specific events, coming from the window object.
     this._eventHandlers = {};
-    ["unload", "LoopHangupNow", "socialFrameAttached", "socialFrameDetached"]
+    ["unload", "LoopHangupNow", "socialFrameAttached", "socialFrameDetached", "ToggleBrowserSharing"]
       .forEach(function(eventName) {
         var handlerName = eventName + "Handler";
         this._eventHandlers[eventName] = this[handlerName].bind(this);
@@ -158,6 +158,17 @@ loop.store.ConversationAppStore = (function() {
           loop.shared.mixins.WindowCloseMixin.closeWindow();
           break;
       }
+    },
+
+    /**
+     * Event handler; invoked when the 'PauseScreenShare' event is dispatched from
+     * the window object.
+     * It'll attempt to pause or resume the screen share as appropriate.
+     */
+    ToggleBrowserSharingHandler: function(actionData) {
+      this._dispatcher.dispatch(new loop.shared.actions.ToggleBrowserSharing({
+        enabled: !actionData.detail
+      }));
     },
 
     /**

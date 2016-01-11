@@ -570,6 +570,7 @@ var WindowListener = {
               buttonNode.accessKey = this._getString(this._browserSharePaused ?
                                                      "infobar_button_resume_accesskey" :
                                                      "infobar_button_pause_accesskey");
+              LoopUI.MozLoopService.toggleBrowserSharing(this._browserSharePaused);
               return true;
             },
             type: "pause"

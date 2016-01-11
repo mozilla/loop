@@ -200,8 +200,8 @@ loop.conversation = (function(mozL10n) {
           dispatcher={dispatcher}
           roomStore={roomStore} />, document.querySelector("#main"));
 
-      document.documentElement.setAttribute("lang", mozL10n.getLanguage());
-      document.documentElement.setAttribute("dir", mozL10n.getDirection());
+      document.documentElement.setAttribute("lang", mozL10n.language.code);
+      document.documentElement.setAttribute("dir", mozL10n.language.direction);
       document.body.setAttribute("platform", loop.shared.utils.getPlatform());
 
       dispatcher.dispatch(new sharedActions.GetWindowData({

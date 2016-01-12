@@ -34,7 +34,7 @@
     "express": "4.13.3",
     "firefox-profile": "0.3.11",
     "fs-promise": "0.3.1",
-    "fx-runner": "0.0.10",
+    "fx-runner": "1.0.0",
     "imports-loader": "0.6.5",
     "karma": "0.12.37",
     "karma-chrome-launcher": "0.2.2",

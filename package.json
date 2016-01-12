@@ -47,7 +47,7 @@
     "script-loader": "0.6.1",
     "sinon": "1.16.1",
     "rimraf": "2.4.4",
-    "webpack": "1.12.10",
+    "webpack": "1.12.11",
     "when": "3.7.5"
   },
   "scripts": {

@@ -527,6 +527,9 @@ loop.roomViews = (function(mozL10n) {
         var roomTitle = this.state.roomName ||
                         this.state.roomContextUrls[0].description ||
                         this.state.roomContextUrls[0].location;
+        if (!roomTitle) {
+          roomTitle = mozL10n.get("room_name_untitled_page");
+        }
         this.setTitle(roomTitle);
       }
 

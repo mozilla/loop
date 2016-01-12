@@ -770,14 +770,20 @@ var MozLoopServiceInternal = {
       return gLocalizedStrings;
     }
 
-    let stringBundle =
-      Services.strings.createBundle("chrome://loop/locale/loop.properties");
-
-    let enumerator = stringBundle.getSimpleEnumeration();
-    while (enumerator.hasMoreElements()) {
-      let string = enumerator.getNext().QueryInterface(Ci.nsIPropertyElement);
-      gLocalizedStrings.set(string.key, string.value);
+    // Load all strings from a bundle location preferring strings loaded later.
+    function loadAllStrings(location) {
+      let bundle = Services.strings.createBundle(location);
+      let enumerator = bundle.getSimpleEnumeration();
+      while (enumerator.hasMoreElements()) {
+        let string = enumerator.getNext().QueryInterface(Ci.nsIPropertyElement);
+        gLocalizedStrings.set(string.key, string.value);
+      }
     }
+
+    // Load fallback/en-US strings then prefer the localized ones if available.
+    loadAllStrings("chrome://loop-locale-fallback/content/loop.properties");
+    loadAllStrings("chrome://loop/locale/loop.properties");
+
     // Supply the strings from the branding bundle on a per-need basis.
     let brandBundle =
       Services.strings.createBundle("chrome://branding/locale/brand.properties");

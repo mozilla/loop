@@ -185,6 +185,15 @@ $(BUILT)/standalone/content/js/%.js: standalone/content/js/%.jsx
 	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
+standalone_l10n_files=$(wildcard locale/*/standalone.properties)
+built_standalone_l10n_files=$(patsubst locale/%/standalone.properties, \
+	$(BUILT)/standalone/content/l10n/%/loop.properties, \
+	$(standalone_l10n_files))
+
+$(BUILT)/standalone/content/l10n/%/loop.properties: locale/%/standalone.properties locale/%/shared.properties
+	@mkdir -p $(@D)
+	cat $^ > $@
+
 # add-on
 add_on_jsx_files=$(wildcard add-on/panels/js/*.jsx)
 built_add_on_js_files=$(patsubst add-on/panels/js/%.jsx, \
@@ -194,6 +203,15 @@ built_add_on_js_files=$(patsubst add-on/panels/js/%.jsx, \
 $(BUILT)/add-on/chrome/content/panels/js/%.js: add-on/panels/js/%.jsx
 	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
+
+add_on_l10n_files=$(wildcard locale/*/add-on.properties)
+built_add_on_l10n_files=$(patsubst locale/%/add-on.properties, \
+	$(BUILT)/add-on/chrome/locale/%/loop.properties, \
+	$(add_on_l10n_files))
+
+$(BUILT)/add-on/chrome/locale/%/loop.properties: locale/%/add-on.properties locale/%/shared.properties
+	@mkdir -p $(@D)
+	cat $^ > $@
 
 # XXX maybe just build one copy of shared in standalone, and then use
 # server.js magic to redirect?
@@ -206,16 +224,14 @@ ui: node_modules $(built_ui_js_files) $(built_ui_shared_js_files)
 	$(RSYNC) shared $(BUILT)/$@
 
 .PHONY: standalone
-standalone: node_modules $(built_standalone_js_files) $(built_standalone_shared_js_files)
+standalone: node_modules $(built_standalone_js_files) $(built_standalone_shared_js_files) $(built_standalone_l10n_files)
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@ $(BUILT)
 	mkdir -p $(BUILT)/$@/content/shared
 	$(RSYNC) shared $(BUILT)/$@/content
-	mkdir -p $(BUILT)/$@/content/l10n/en-US
-	cat locale/en-US/$@.properties locale/en-US/shared.properties > $(BUILT)/$@/content/l10n/en-US/loop.properties
 
 .PHONY: add-on
-add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(BUILT)/$(ADD-ON)/chrome.manifest $(BUILT)/add-on/chrome/content/preferences/prefs.js
+add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(built_add_on_l10n_files) $(BUILT)/$(ADD-ON)/chrome.manifest $(BUILT)/add-on/chrome/content/preferences/prefs.js
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@/chrome/bootstrap.js $(BUILT)/$@
 	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \
@@ -229,8 +245,6 @@ add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(
 	mkdir -p $(BUILT)/$@/chrome/content/shared
 	$(RSYNC) shared $(BUILT)/$@/chrome/content
 	$(RSYNC) $@/chrome/skin $(BUILT)/$@/chrome/
-	mkdir -p $(BUILT)/$@/chrome/locale/en-US
-	cat locale/en-US/$@.properties locale/en-US/shared.properties > $(BUILT)/$@/chrome/locale/en-US/loop.properties
 
 $(BUILT)/$(ADD-ON)/chrome.manifest: $(ADD-ON)/jar.mn
 	mkdir -p $(BUILT)/$(ADD-ON)

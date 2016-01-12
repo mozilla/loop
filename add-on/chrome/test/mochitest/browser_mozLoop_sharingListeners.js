@@ -48,6 +48,18 @@ function* promiseWindowIdReceivedNewTab(handlersParam = []) {
   }
 }
 
+function promiseNewTabLocation() {
+  return new Promise(resolve => {
+    BrowserOpenTab();
+    let tab = gBrowser.selectedTab;
+    createdTabs.push(tab);
+
+    tab.linkedBrowser.addEventListener("DOMContentLoaded", function() {
+      resolve(tab.linkedBrowser.currentURI.spec);
+    });
+  });
+}
+
 function promiseRemoveTab(tab) {
   return new Promise(resolve => {
     gBrowser.tabContainer.addEventListener("TabClose", function onTabClose() {
@@ -185,4 +197,22 @@ add_task(function* test_infoBar() {
   }
   yield removeTabs();
   Services.prefs.clearUserPref(kPrefBrowserSharingInfoBar);
+});
+
+add_task(function* test_newtabLocation() {
+  // Check location before sharing
+  let locationBeforeSharing = yield promiseNewTabLocation();
+  Assert.equal(locationBeforeSharing, "about:newtab");
+
+  // Check location after sharing
+  yield promiseWindowIdReceivedOnAdd(handlers[0]);
+  let locationAfterSharing = yield promiseNewTabLocation();
+  Assert.equal(locationAfterSharing, "about:home");
+
+  // Check location after stopping sharing
+  gHandlers.RemoveBrowserSharingListener({ data: [listenerIds.pop()] }, function() {});
+  let locationAfterStopping = yield promiseNewTabLocation();
+  Assert.equal(locationAfterStopping, "about:newtab");
+
+  yield removeTabs();
 });

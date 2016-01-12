@@ -46,6 +46,7 @@
     "LoopRoomsCache": true,
     "MozLoopPushHandler": true,
     "MozLoopService": true,
+    "NewTabURL": false,
     "onmessage": true,
     "OS": false,
     "PluralForm": false,

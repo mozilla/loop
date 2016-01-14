@@ -950,7 +950,13 @@ var MozLoopServiceInternal = {
         let window = chatbox.contentWindow;
 
         function socialFrameChanged(eventName) {
-          UITour.availableTargetsCache.clear();
+          // `clearAvailableTargetsCache` is new in Firefox 46. The else branch
+          // supports Firefox 45.
+          if ("clearAvailableTargetsCache" in UITour) {
+            UITour.clearAvailableTargetsCache();
+          } else {
+            UITour.availableTargetsCache.clear();
+          }
           UITour.notify(eventName);
 
           if (eventName == "Loop:ChatWindowDetached" || eventName == "Loop:ChatWindowAttached") {

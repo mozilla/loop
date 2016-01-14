@@ -841,7 +841,7 @@ loop.panel = (function(_, mozL10n) {
             <button className="btn btn-info stop-sharing-button"
               disabled={this.props.pendingOperation}
               onClick={this.handleStopSharingButtonClick}>
-              {mozL10n.get("panel_stop_sharing_tabs_button")}
+              {mozL10n.get("panel_disconnect_button")}
             </button> :
             <button className="btn btn-info new-room-button"
               disabled={this.props.pendingOperation}

@@ -9,7 +9,6 @@ const { interfaces: Ci, utils: Cu, classes: Cc } = Components;
 
 const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 const kBrowserSharingNotificationId = "loop-sharing-notification";
-const kPrefBrowserSharingInfoBar = "browserSharing.showInfoBar";
 
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -533,11 +532,6 @@ var WindowListener = {
       _maybeShowBrowserSharingInfoBar: function() {
         this._hideBrowserSharingInfoBar();
 
-        // Don't show the infobar if it's been permanently disabled from the menu.
-        if (!this.MozLoopService.getLoopPref(kPrefBrowserSharingInfoBar)) {
-          return;
-        }
-
         let box = gBrowser.getNotificationBox();
         let pauseButtonLabel = this._getString(this._browserSharePaused ?
                                                "infobar_button_resume_label" :
@@ -596,11 +590,12 @@ var WindowListener = {
       /**
        * Hides the infobar, permanantly if requested.
        *
-       * @param {Boolean} permanently Flag that determines if the infobar will never
-       *                              been shown again. Defaults to `false`.
-       * @return {Boolean} |true| if the infobar was hidden here.
+       * @param   {Object}  browser Optional link to the browser we want to
+       *                    remove the infobar from. If not present, defaults
+       *                    to current browser instance.
+       * @return  {Boolean} |true| if the infobar was hidden here.
        */
-      _hideBrowserSharingInfoBar: function(permanently = false, browser) {
+      _hideBrowserSharingInfoBar: function(browser) {
         browser = browser || gBrowser.selectedBrowser;
         let box = gBrowser.getNotificationBox(browser);
         let notification = box.getNotificationWithValue(kBrowserSharingNotificationId);
@@ -610,17 +605,13 @@ var WindowListener = {
           removed = true;
         }
 
-        if (permanently) {
-          this.MozLoopService.setLoopPref(kPrefBrowserSharingInfoBar, false);
-        }
-
         return removed;
       },
 
       /**
        * Broadcast 'BrowserSwitch' event.
-      */
-      _notifyBrowserSwitch() {
+       */
+      _notifyBrowserSwitch: function() {
          // Get the first window Id for the listener.
         this.LoopAPI.broadcastPushMessage("BrowserSwitch",
           gBrowser.selectedBrowser.outerWindowID);
@@ -639,7 +630,7 @@ var WindowListener = {
             let wasVisible = false;
             // Hide the infobar from the previous tab.
             if (event.detail.previousTab) {
-              wasVisible = this._hideBrowserSharingInfoBar(false, event.detail.previousTab.linkedBrowser);
+              wasVisible = this._hideBrowserSharingInfoBar(event.detail.previousTab.linkedBrowser);
             }
 
             // We've changed the tab, so get the new window id.

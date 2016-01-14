@@ -143,9 +143,6 @@ add_task(function* test_multipleListener() {
 
 add_task(function* test_infoBar() {
   const kBrowserSharingNotificationId = "loop-sharing-notification";
-  const kPrefBrowserSharingInfoBar = "loop.browserSharing.showInfoBar";
-
-  Services.prefs.setBoolPref(kPrefBrowserSharingInfoBar, true);
 
   // First we add two tabs.
   yield promiseWindowIdReceivedNewTab();
@@ -196,7 +193,6 @@ add_task(function* test_infoBar() {
     gHandlers.RemoveBrowserSharingListener({ data: [listenerId] }, function() {});
   }
   yield removeTabs();
-  Services.prefs.clearUserPref(kPrefBrowserSharingInfoBar);
 });
 
 add_task(function* test_newtabLocation() {

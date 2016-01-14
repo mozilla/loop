@@ -56,7 +56,7 @@ if [[ -z "$no_auto" ]] ; then
     -w add-on -w shared -w standalone -w ui \
     -w Makefile \
     -w bin \
-    -e .html,.js,.jsx,.css,.png,.svg,.sh \
+    -e .html,.js,.jsm,.jsx,.css,.png,.svg,.sh \
     --exec bash $0 -- --restart
 else
   run

@@ -235,6 +235,7 @@ loop.roomViews = (function(mozL10n) {
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       error: React.PropTypes.object,
+      facebookEnabled: React.PropTypes.bool.isRequired,
       // This data is supplied by the activeRoomStore.
       roomData: React.PropTypes.object.isRequired,
       show: React.PropTypes.bool.isRequired,
@@ -333,12 +334,16 @@ loop.roomViews = (function(mozL10n) {
               <img src="shared/img/glyph-email-16x16.svg" />
               <p>{mozL10n.get("invite_email_link_button")}</p>
             </div>
-            <div className="btn-facebook invite-button"
-              onClick={this.handleFacebookButtonClick}
-              onMouseOver={this.resetTriggeredButtons}>
-              <img src="shared/img/glyph-facebook-16x16.svg" />
-              <p>{mozL10n.get("invite_facebook_button3")}</p>
-            </div>
+            {(() => {
+              if (this.props.facebookEnabled) {
+                return (<div className="btn-facebook invite-button"
+                            onClick={this.handleFacebookButtonClick}
+                            onMouseOver={this.resetTriggeredButtons}>
+                  <img src="shared/img/glyph-facebook-16x16.svg" />
+                  <p>{mozL10n.get("invite_facebook_button3")}</p>
+                </div>);
+              }
+            })()}
           </div>
           <SocialShareDropdown
             dispatcher={this.props.dispatcher}
@@ -366,6 +371,7 @@ loop.roomViews = (function(mozL10n) {
     propTypes: {
       chatWindowDetached: React.PropTypes.bool.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      facebookEnabled: React.PropTypes.bool.isRequired,
       // The poster URLs are for UI-showcase testing and development.
       localPosterUrl: React.PropTypes.string,
       onCallTerminated: React.PropTypes.func.isRequired,
@@ -574,6 +580,7 @@ loop.roomViews = (function(mozL10n) {
                 <DesktopRoomInvitationView
                   dispatcher={this.props.dispatcher}
                   error={this.state.error}
+                  facebookEnabled={this.props.facebookEnabled}
                   roomData={roomData}
                   show={shouldRenderInvitationOverlay}
                   socialShareProviders={this.state.socialShareProviders} />

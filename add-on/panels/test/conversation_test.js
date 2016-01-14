@@ -6,6 +6,7 @@ describe("loop.conversation", function() {
   "use strict";
 
   var FeedbackView = loop.feedbackViews.FeedbackView;
+  var expect = chai.expect;
   var TestUtils = React.addons.TestUtils;
   var sharedActions = loop.shared.actions;
   var fakeWindow, sandbox, setLoopPrefStub, mozL10nGet;
@@ -165,7 +166,8 @@ describe("loop.conversation", function() {
         activeRoomStore: activeRoomStore,
         dispatcher: dispatcher,
         feedbackPeriod: 42,
-        feedbackTimestamp: 42
+        feedbackTimestamp: 42,
+        facebookEnabled: false
       });
 
       loop.store.StoreMixin.register({
@@ -183,9 +185,27 @@ describe("loop.conversation", function() {
 
       ccView = mountTestComponent();
 
-      TestUtils.findRenderedComponentWithType(ccView,
+      var desktopRoom = TestUtils.findRenderedComponentWithType(ccView,
         loop.roomViews.DesktopRoomConversationView);
+
+      expect(desktopRoom.props.facebookEnabled).to.eql(false);
     });
+
+    it("should pass the correct value of facebookEnabled to DesktopRoomConversationView",
+      function() {
+        conversationAppStore.setStoreState({
+          windowType: "room",
+          facebookEnabled: true
+        });
+        activeRoomStore.setStoreState({ roomState: ROOM_STATES.READY });
+
+        ccView = mountTestComponent();
+
+        var desktopRoom = TestUtils.findRenderedComponentWithType(ccView,
+            loop.roomViews.DesktopRoomConversationView);
+
+        expect(desktopRoom.props.facebookEnabled).to.eql(true);
+      });
 
     it("should display the RoomFailureView for failures", function() {
       conversationAppStore.setStoreState({

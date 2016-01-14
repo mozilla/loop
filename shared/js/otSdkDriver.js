@@ -41,7 +41,8 @@ loop.OTSdkDriver = (function() {
 
     this.dispatcher.register(this, [
       "setupStreamElements",
-      "setMute"
+      "setMute",
+      "toggleBrowserSharing"
     ]);
 
     // Set loop.debug.twoWayMediaTelemetry to true in the browser
@@ -229,6 +230,16 @@ loop.OTSdkDriver = (function() {
       this._noteSharingState(this._windowId ? "browser" : "window", false);
       delete this._windowId;
       return true;
+    },
+
+    /**
+     * Paused or resumes an active screenshare session as appropriate.
+     *
+     * @param {sharedActions.ToggleBrowserSharing} actionData The data associated with the
+     *                                             action. See action.js.
+     */
+    toggleBrowserSharing: function(actionData) {
+      this.screenshare.publishVideo(actionData.enabled);
     },
 
     /**

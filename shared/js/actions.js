@@ -218,6 +218,14 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     * Used to mute or unmute a screen share.
+     */
+    ToggleBrowserSharing: Action.define("toggleBrowserSharing", {
+      // Whether or not to enable the stream.
+      enabled: Boolean
+    }),
+
+    /**
      * Used to notify that screen sharing is active or not.
      */
     ScreenSharingState: Action.define("screenSharingState", {

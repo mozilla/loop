@@ -13,6 +13,8 @@
     "templateStrings": true,
   },
   "globals": {
+    // Bootstrap magic globals.
+    "APP_SHUTDOWN": false,
     // Gecko + Loop Globals.
     "AppConstants": false,
     "appInfo": false,

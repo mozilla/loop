@@ -30,3 +30,8 @@ pref("loop.CSP", "default-src 'self' about: file: chrome:; img-src * data:; font
 pref("loop.fxa_oauth.tokendata", "");
 pref("loop.fxa_oauth.profile", "");
 pref("loop.support_url", "https://support.mozilla.org/1/firefox/%VERSION%/%OS%/%LOCALE%/cobrowsing");
+#ifdef LOOP_BETA
+pref("loop.facebook.enabled", true);
+#else
+pref("loop.facebook.enabled", false);
+#endif

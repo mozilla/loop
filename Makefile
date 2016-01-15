@@ -127,13 +127,13 @@ $(BUILT)/add-on/chrome/content/preferences/prefs.js: $(VENV) add-on/preferences/
 	mkdir -p $(@D)
 	. $(VENV)/bin/activate && \
 	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
-	         -D DEBUG=1 -o $@ add-on/preferences/prefs.js
+	         -D DEBUG=1 -D LOOP_BETA=1 -o $@ add-on/preferences/prefs.js
 
 $(DIST)/add-on/chrome/content/preferences/prefs.js: $(VENV) add-on/preferences/prefs.js
 	mkdir -p $(@D)
 	. $(VENV)/bin/activate && \
 	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
-	         -o $@ add-on/preferences/prefs.js
+	         -D LOOP_BETA=1 -o $@ add-on/preferences/prefs.js
 
 
 # Build our jsx files into appropriately placed js files.  Note that the rules

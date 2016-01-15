@@ -34,6 +34,7 @@ loop.store.ConversationAppStore = (function() {
 
     this._activeRoomStore = options.activeRoomStore;
     this._dispatcher = options.dispatcher;
+    this._facebookEnabled = options.facebookEnabled;
     this._feedbackPeriod = options.feedbackPeriod;
     this._feedbackTimestamp = options.feedbackTimestamp;
     this._rootObj = ("rootObject" in options) ? options.rootObject : window;
@@ -58,6 +59,7 @@ loop.store.ConversationAppStore = (function() {
     getInitialStoreState: function() {
       return {
         chatWindowDetached: false,
+        facebookEnabled: this._facebookEnabled,
         // How often to display the form. Convert seconds to ms.
         feedbackPeriod: this._feedbackPeriod * 1000,
         // Date when the feedback form was last presented. Convert to ms.

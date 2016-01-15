@@ -70,6 +70,7 @@ loop.conversation = (function(mozL10n) {
           return (<DesktopRoomConversationView
             chatWindowDetached={this.state.chatWindowDetached}
             dispatcher={this.props.dispatcher}
+            facebookEnabled={this.state.facebookEnabled}
             onCallTerminated={this.handleCallTerminated}
             roomStore={this.props.roomStore} />);
         }
@@ -107,7 +108,8 @@ loop.conversation = (function(mozL10n) {
       ["GetLoopPref", "ot.guid"],
       ["GetLoopPref", "textChat.enabled"],
       ["GetLoopPref", "feedback.periodSec"],
-      ["GetLoopPref", "feedback.dateLastSeenSec"]
+      ["GetLoopPref", "feedback.dateLastSeenSec"],
+      ["GetLoopPref", "facebook.enabled"]
     ];
     var prefetch = [
       ["GetConversationWindowData", windowId]
@@ -174,7 +176,8 @@ loop.conversation = (function(mozL10n) {
         activeRoomStore: activeRoomStore,
         dispatcher: dispatcher,
         feedbackPeriod: results[++requestIdx],
-        feedbackTimestamp: results[++requestIdx]
+        feedbackTimestamp: results[++requestIdx],
+        facebookEnabled: results[++requestIdx]
       });
 
       prefetch.forEach(function(req) {

@@ -544,10 +544,10 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     render: function() {
-      var hostname;
-
+      // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
+      // Try catch to not produce output if invalid url
       try {
-        hostname = new URL(this.props.url).hostname;
+        var sanitizeURL = loop.shared.utils.formatURL(this.props.url, true).hostname;
       } catch (ex) {
         return null;
       }
@@ -576,7 +576,7 @@ loop.shared.views = (function(_, mozL10n) {
             <span className="context-info">
               {this.props.description}
               <span className="context-url">
-                {hostname}
+                {sanitizeURL}
               </span>
             </span>
           </a>

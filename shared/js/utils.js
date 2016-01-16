@@ -367,20 +367,29 @@ var inChrome = typeof Components != "undefined" && "utils" in Components;
   /**
    * Formats a url for display purposes. This includes converting the
    * domain to punycode, and then decoding the url.
+   * Intended to be used for both display and (uglier in confusing cases) clickthrough,
+   * as described by dveditz in comment 12 of the bug 1196143,
+   * as well as testing the behavior case in the browser.
    *
-   * @param {String} url The url to format.
-   * @return {Object}    An object containing the hostname and full location.
+   * @param {String}  url                   The url to format.
+   * @param {String}  suppressConsoleError  For testing, call with a boolean which is true to squash the default console error.
+   * @return {Object}                       An object containing the hostname and full location.
    */
-  function formatURL(url) {
+  function formatURL(url, suppressConsoleError) {
     // We're using new URL to pass this through the browser's ACE/punycode
     // processing system. If the browser considers a url to need to be
     // punycode encoded for it to be displayed, then new URL will do that for
     // us. This saves us needing our own punycode library.
+    // Note that URL does canonicalize hostname-only URLs,
+    // adding a slash to them, but this is ok for at least HTTP(S)
+    // because GET always has to specify a path, which will (by default) be
     var urlObject;
     try {
       urlObject = new URL(url);
     } catch (ex) {
-      console.error("Error occurred whilst parsing URL:", ex);
+      if (suppressConsoleError ? !suppressConsoleError : true) {
+        console.error("Error occurred whilst parsing URL:", ex);
+      }
       return null;
     }
 

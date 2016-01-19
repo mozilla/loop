@@ -310,6 +310,11 @@ describe("loop.shared.views.LinkifiedTextView", function() {
           rawText: "//C/Programs",
           markup: "<p>//C/Programs</p>"
         },
+        {
+          desc: "should not linkify malformed URI sequences",
+          rawText: "http://www.example.com/DNA/pizza/menu/lots-of-different-kinds-of-pizza/%8D%E0%B8%88%E0%B8%A1%E0%B8%A3%E0%8D%E0%B8%88%E0%B8%A1%E0%B8%A3%E0%",
+          markup: "<p>http://www.example.com/DNA/pizza/menu/lots-of-different-kinds-of-pizza/%8D%E0%B8%88%E0%B8%A1%E0%B8%A3%E0%8D%E0%B8%88%E0%B8%A1%E0%B8%A3%E0%</p>"
+        },
         // do a few tests to convince ourselves that, when our code is handled
         // HTML in the input box, the integration of our code with React should
         // cause that to rendered to appear as HTML source code, rather than

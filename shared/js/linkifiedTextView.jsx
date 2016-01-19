@@ -86,13 +86,17 @@ loop.shared.views.LinkifiedTextView = (function() {
 
         // Push the first link itself, and advance the string pointer again.
         // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
-        sanitizeURL = loop.shared.utils.formatURL(result[0]).location;
-        elements.push(
-          <a { ...this._generateLinkAttributes(sanitizeURL) }
-            key={reactElementsCounter++}>
-            {sanitizeURL}
-          </a>
-        );
+        sanitizeURL = loop.shared.utils.formatURL(result[0]);
+        if (sanitizeURL && sanitizeURL.location) {
+          elements.push(
+            <a { ...this._generateLinkAttributes(sanitizeURL.location) }
+              key={reactElementsCounter++}>
+              {sanitizeURL.location}
+            </a>
+          );
+        } else {
+          elements.push(result[0]);
+        }
         s = s.substr(result[0].length);
 
         // Check for another link, and perhaps continue...

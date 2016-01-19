@@ -386,18 +386,18 @@ var inChrome = typeof Components != "undefined" && "utils" in Components;
     var urlObject;
     try {
       urlObject = new URL(url);
+      // Finally, ensure we look good.
+      return {
+        hostname: urlObject.hostname,
+        location: decodeURI(urlObject.href)
+      };
     } catch (ex) {
       if (suppressConsoleError ? !suppressConsoleError : true) {
-        console.error("Error occurred whilst parsing URL:", ex);
+        console.log("Error occurred whilst parsing URL: ", ex);
+        console.trace();
       }
       return null;
     }
-
-    // Finally, ensure we look good.
-    return {
-      hostname: urlObject.hostname,
-      location: decodeURI(urlObject.href)
-    };
   }
 
   /**

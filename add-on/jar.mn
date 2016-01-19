@@ -1,100 +1,16 @@
+#filter substitution
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+# These are used for the big if statement, as the preprocessor can't handle
+# dashes.
+#define en_US en-US
+
 [features/loop@mozilla.org] chrome.jar:
 % content loop %content/ contentaccessible=yes
-% content loop-locale-fallback %locale/en-US/
-% locale loop af %locale/af/
-% locale loop ar %locale/ar/
-% locale loop as %locale/as/
-% locale loop ast %locale/ast/
-% locale loop az %locale/az/
-% locale loop be %locale/be/
-% locale loop bg %locale/bg/
-% locale loop bn-BD %locale/bn-BD/
-% locale loop bn-IN %locale/bn-IN/
-% locale loop bs %locale/bs/
-% locale loop ca %locale/ca/
-% locale loop cs %locale/cs/
-% locale loop cy %locale/cy/
-% locale loop da %locale/da/
-% locale loop de %locale/de/
-% locale loop dsb %locale/dsb/
-% locale loop el %locale/el/
-% locale loop en-GB %locale/en-GB/
-% locale loop en-US %locale/en-US/
-% locale loop eo %locale/eo/
-% locale loop es-AR %locale/es-AR/
-% locale loop es-CL %locale/es-CL/
-% locale loop es-ES %locale/es-ES/
-% locale loop es-MX %locale/es-MX/
-% locale loop et %locale/et/
-% locale loop eu %locale/eu/
-% locale loop fa %locale/fa/
-% locale loop ff %locale/ff/
-% locale loop fi %locale/fi/
-% locale loop fr %locale/fr/
-% locale loop fy %locale/fy/
-% locale loop fy-NL %locale/fy-NL/
-% locale loop ga %locale/ga/
-% locale loop gd %locale/gd/
-% locale loop gl %locale/gl/
-% locale loop gu-IN %locale/gu-IN/
-% locale loop he %locale/he/
-% locale loop hi-IN %locale/hi-IN/
-% locale loop hr %locale/hr/
-% locale loop hsb %locale/hsb/
-% locale loop ht %locale/ht/
-% locale loop hu %locale/hu/
-% locale loop hy-AM %locale/hy-AM/
-% locale loop id %locale/id/
-% locale loop it %locale/it/
-% locale loop ja %locale/ja/
-% locale loop kk %locale/kk/
-% locale loop km %locale/km/
-% locale loop kn %locale/kn/
-% locale loop ko %locale/ko/
-% locale loop ku %locale/ku/
-% locale loop lij %locale/lij/
-% locale loop lt %locale/lt/
-% locale loop lv %locale/lv/
-% locale loop mk %locale/mk/
-% locale loop ml %locale/ml/
-% locale loop mn %locale/mn/
-% locale loop ms %locale/ms/
-% locale loop my %locale/my/
-% locale loop nb-NO %locale/nb-NO/
-% locale loop ne-NP %locale/ne-NP/
-% locale loop nl %locale/nl/
-% locale loop or %locale/or/
-% locale loop pa %locale/pa/
-% locale loop pa-IN %locale/pa-IN/
-% locale loop pl %locale/pl/
-% locale loop pt %locale/pt/
-% locale loop pt-BR %locale/pt-BR/
-% locale loop pt-PT %locale/pt-PT/
-% locale loop rm %locale/rm/
-% locale loop ro %locale/ro/
-% locale loop ru %locale/ru/
-% locale loop si %locale/si/
-% locale loop sk %locale/sk/
-% locale loop sl %locale/sl/
-% locale loop son %locale/son/
-% locale loop sq %locale/sq/
-% locale loop sr %locale/sr/
-% locale loop sv-SE %locale/sv-SE/
-% locale loop ta %locale/ta/
-% locale loop te %locale/te/
-% locale loop th %locale/th/
-% locale loop tr %locale/tr/
-% locale loop uk %locale/uk/
-% locale loop ur %locale/ur/
-% locale loop vi %locale/vi/
-% locale loop xh %locale/xh/
-% locale loop zh-CN %locale/zh-CN/
-% locale loop zh-TW %locale/zh-TW/
-% locale loop zu %locale/zu/
+% content loop-locale-fallback %content/locale-fallback/en-US/
+% locale loop @AB_CD@ %locale/@AB_CD@/
 % skin loop classic/1.0 %skin/linux/ os=Linux
 % skin loop classic/1.0 %skin/osx/ os=Darwin
 % skin loop classic/1.0 %skin/windows/ os=WINNT
@@ -118,7 +34,16 @@
 % override chrome://loop/skin/toolbar@2x.png      chrome://loop/skin/toolbar-aero@2x.png          os=WINNT osversion=6.1
 % override chrome://loop/skin/toolbar@2x.png      chrome://loop/skin/toolbar-win8@2x.png         os=WINNT osversion=6.2
 % override chrome://loop/skin/toolbar@2x.png      chrome://loop/skin/toolbar-win8@2x.png         os=WINNT osversion=6.3
-  locale/                        (chrome/locale/*)
+  # Due to the way Loop's L10n works, we include a fallback to en-US.
+  content/locale-fallback/en-US/          (chrome/locale/en-US/*)
+  # For locales we support, include the file from the locale's directory in the
+  # source tree.
+  # For other locales (and en-US) fallback to the en-US directory.
+#if AB_CD == af
+  locale/@AB_CD@/                (chrome/locale/@AB_CD@/*)
+#else
+  locale/@AB_CD@/                (chrome/locale/en-US/*)
+#endif
   skin/                          (chrome/skin/*)
   content/modules/               (chrome/content/modules/*)
 # We don't package the test/ directory for panels, so do these separately.

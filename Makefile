@@ -286,9 +286,7 @@ add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(
 
 $(BUILT)/$(ADD-ON)/chrome.manifest: $(ADD-ON)/jar.mn
 	mkdir -p $(BUILT)/$(ADD-ON)
-	sed -n -e '/^%/p' $(ADD-ON)/jar.mn | \
-	sed -e "s/^% //g" | sed -e "s/%/chrome\//g" \
-	> $(BUILT)/$(ADD-ON)/chrome.manifest
+	python bin/generateChromeManifest.py --input-file=$^ --output-file=$@ --src=locale
 
 # In this RSYNC, the order of exclude and includes generally matters.
 # The items below are:
@@ -393,17 +391,6 @@ git-export: build dist_export
 	find -E $(GIT_EXPORT_DIR) -type f ! -regex \
 	  '.*/(moz.build|README.txt|.gitignore|run-all-loop-tests.sh|manifest.ini)' -delete
 	$(RSYNC) $(DIST_EXPORT_DIR)/* $(GIT_EXPORT_DIR)
-	# XXX Bug 1239828 - TEMPORARY ITEMS to get l10n to work the "traditional" way
-	# in m-c whilst we sort out a proper fix.
-	# Drop locales from the jar file.
-	grep -v 'locale' $(ADD-ON)/jar.mn > $(GIT_EXPORT_DIR)/jar.mn
-	# Don't load our copy of loop.properties, load the browser's one instead.
-	sed -e "s|loop/locale/loop\.properties|browser/locale/loop/loop\.properties|g" \
-	  < $(BUILT)/$(ADD-ON)/chrome/content/modules/LoopRooms.jsm \
-	  > $(GIT_EXPORT_DIR)/chrome/content/modules/LoopRooms.jsm
-	sed -e "s|loop/locale/loop.properties|browser/locale/loop/loop.properties|g" \
-	  < $(BUILT)/$(ADD-ON)/chrome/content/modules/MozLoopService.jsm \
-	  > $(GIT_EXPORT_DIR)/chrome/content/modules/MozLoopService.jsm
 
 	@echo "*****"
 	@echo "You will need to manually move/add/remove files to create the commit."

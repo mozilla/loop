@@ -111,7 +111,7 @@ var server = app.listen(port);
 
 var baseUrl = "http://localhost:" + port + "/";
 
-console.log("Static contents are available at " + baseUrl + "content/");
+console.log("Static contents are available at " + baseUrl);
 console.log("Tests are viewable at " + baseUrl + "test/");
 console.log("Use this for development only.");
 

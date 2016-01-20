@@ -15,7 +15,7 @@ LOOP_LEGAL_WEBSITE_URL := $(shell echo $${LOOP_LEGAL_WEBSITE_URL-"https://www.mo
 LOOP_PRODUCT_HOMEPAGE_URL := $(shell echo $${LOOP_PRODUCT_HOMEPAGE_URL-"https://www.firefox.com/hello/"})
 FIREFOX_VERSION=45.0
 
-NODE_LOCAL_BIN := ./node_modules/.bin
+NODE_LOCAL_BIN := $(realpath ./node_modules/.bin)
 REPO_BIN_DIR := ./bin
 RSYNC := rsync --archive --exclude='*.jsx'
 
@@ -31,7 +31,7 @@ node_modules: package.json
 # build the dist dir, which contains a production version of the code and
 # assets
 .PHONY: dist
-dist: build dist_xpi dist_export
+dist: build dist_xpi dist_export dist_standalone
 
 .PHONY: distclean
 distclean: clean
@@ -39,7 +39,7 @@ distclean: clean
 
 .PHONY: distserver
 distserver: remove_old_config dist
-	LOOP_CONTENT_DIR=dist node server.js
+	LOOP_CONTENT_DIR=`pwd`/dist/standalone node bin/server.js
 
 BUILT := ./built
 ADD-ON := add-on
@@ -295,14 +295,18 @@ add-on_dist: $(DIST)/add-on/chrome/content/preferences/prefs.js
 	mv $(DIST)/add-on/chrome/content/shared/vendor/react-prod.js \
 	   $(DIST)/add-on/chrome/content/shared/vendor/react.js
 
-.PHONY: standalone_dist
-standalone_dist:
-	mkdir -p $(DIST)
-	$(RSYNC) content/* $(DIST)
-	NODE_ENV="production" $(NODE_LOCAL_BIN)/webpack \
-	  -p -v --display-errors
+.PHONY: dist_standalone
+dist_standalone: build
+	mkdir -p $(DIST)/standalone
+	# Standalone based on the built output
+	$(RSYNC) $(BUILT)/standalone/content/* $(DIST)/standalone
+	# Removing non-required JS files
+	rm -rf $(DIST)/standalone/js/ $(DIST)/standalone/shared/js \
+		$(DIST)/standalone/shared/vendor
+	( cd built/standalone && NODE_ENV="production" $(NODE_LOCAL_BIN)/webpack \
+		-p -v --display-errors )
 	sed 's#webappEntryPoint.js#js/standalone.js#' \
-	  < content/index.html > $(DIST)/index.html
+		< $(BUILT)/standalone/content/index.html > $(DIST)/standalone/index.html
 
 # so we can type "make xpi" without depend on the file directly
 .PHONY: xpi

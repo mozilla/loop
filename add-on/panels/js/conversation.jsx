@@ -106,7 +106,6 @@ loop.conversation = (function(mozL10n) {
       ["GetAllStrings"],
       ["GetLocale"],
       ["GetLoopPref", "ot.guid"],
-      ["GetLoopPref", "textChat.enabled"],
       ["GetLoopPref", "feedback.periodSec"],
       ["GetLoopPref", "feedback.dateLastSeenSec"],
       ["GetLoopPref", "facebook.enabled"]
@@ -152,14 +151,11 @@ loop.conversation = (function(mozL10n) {
         }
       });
 
-      // We want data channels only if the text chat preference is enabled.
-      var useDataChannels = results[++requestIdx];
-
       var dispatcher = new loop.Dispatcher();
       var sdkDriver = new loop.OTSdkDriver({
         constants: constants,
         isDesktop: true,
-        useDataChannels: useDataChannels,
+        useDataChannels: true,
         dispatcher: dispatcher,
         sdk: OT
       });

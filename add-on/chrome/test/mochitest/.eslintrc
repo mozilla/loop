@@ -6,6 +6,8 @@
     "BrowserTestUtils": true,
     "Cc": true,
     "Ci": true,
+    "content": true,
+    "ContentTask": false,
     "Cr": true,
     "Cu": true,
     "is": false,

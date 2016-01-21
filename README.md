@@ -26,3 +26,8 @@ Contributing
 
 Please see the [Contributing](CONTRIBUTING.md) documentation before
 submitting a pull request.
+
+Other Documentation
+===================
+
+* [Release instructions](docs/Releases.md)

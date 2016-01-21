@@ -54,6 +54,25 @@ BABEL := $(NODE_LOCAL_BIN)/babel
 ESLINT := $(NODE_LOCAL_BIN)/eslint
 FLAKE8 := $(NODE_LOCAL_BIN)/flake8
 
+# In the PACKAGE_VERSION below we:
+# - parse package.json
+# - get the lines with version in
+# - reduce to just the first of those lines
+# - strip out space, " and ,
+# - get the real version number (e.g. version:0.1.0 -> 0.1.0)
+# - change 0.1.0-alpha to 0.1.0alpha for AMO compatiblity
+PACKAGE_VERSION := $(shell grep -m1 version package.json | \
+	cut -d'"' -f4 | \
+	sed 's/-alpha/alpha/')
+
+# Commands need to update the versions correctly in all places. Called from
+# npm's version command as configured in package.json
+.PHONY: update_version
+update_version:
+	@sed -i '' \
+	    -e 's/<em:version>.*<\/em:version>/<em:version>$(PACKAGE_VERSION)<\/em:version>/' \
+	    $(ADD-ON)/install.rdf.in
+
 $(VENV): bin/require.pip
 	virtualenv -p python2.7 $(VENV)
 	. $(VENV)/bin/activate && pip install -r bin/require.pip

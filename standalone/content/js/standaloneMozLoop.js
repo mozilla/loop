@@ -150,6 +150,11 @@ loop.StandaloneMozLoop = (function(mozL10n) {
         }
       }.bind(this, xhrReq);
 
+      xhrReq.onerror = function() {
+        var request = xhrReq;
+        failureHandler(callback, request);
+      }.bind(this, xhrReq);
+
       xhrReq.send(JSON.stringify(roomData));
     },
 

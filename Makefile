@@ -16,7 +16,7 @@ LOOP_PRODUCT_HOMEPAGE_URL := $(shell echo $${LOOP_PRODUCT_HOMEPAGE_URL-"https://
 FIREFOX_VERSION=45.0
 
 # Work around for realpath not working as expected
-NODE_LOCAL_BIN := `(cd ./node_modules/.bin && pwd)`
+NODE_LOCAL_BIN := $(abspath ./node_modules/.bin)
 REPO_BIN_DIR := ./bin
 RSYNC := rsync --archive --exclude='*.jsx'
 

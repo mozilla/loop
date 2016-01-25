@@ -15,7 +15,8 @@ LOOP_LEGAL_WEBSITE_URL := $(shell echo $${LOOP_LEGAL_WEBSITE_URL-"https://www.mo
 LOOP_PRODUCT_HOMEPAGE_URL := $(shell echo $${LOOP_PRODUCT_HOMEPAGE_URL-"https://www.firefox.com/hello/"})
 FIREFOX_VERSION=45.0
 
-NODE_LOCAL_BIN := $(realpath ./node_modules/.bin)
+# Work around for realpath not working as expected
+NODE_LOCAL_BIN := `(cd ./node_modules/.bin && pwd)`
 REPO_BIN_DIR := ./bin
 RSYNC := rsync --archive --exclude='*.jsx'
 

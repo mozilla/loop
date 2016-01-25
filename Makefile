@@ -69,10 +69,16 @@ PACKAGE_VERSION := $(shell grep -m1 version package.json | \
 # Commands need to update the versions correctly in all places. Called from
 # npm's version command as configured in package.json
 .PHONY: update_version
-update_version:
-	@sed -i '' \
-	    -e 's/<em:version>.*<\/em:version>/<em:version>$(PACKAGE_VERSION)<\/em:version>/' \
-	    $(ADD-ON)/install.rdf.in
+update_version: $(VENV)
+	@# Hack around pystache not installing things in the correct places
+	@mkdir -p $(VENV)/lib/python2.7/site-packages/templates/mustache
+	@$(RSYNC) $(VENV)/templates/mustache $(VENV)/lib/python2.7/site-packages/templates
+	@# Ubuntu's version of sed doesn't have -i
+	@sed -e 's/<em:version>.*<\/em:version>/<em:version>$(PACKAGE_VERSION)<\/em:version>/' \
+	    $(ADD-ON)/install.rdf.in > $(ADD-ON)/install.rdf.in.gen
+	@mv $(ADD-ON)/install.rdf.in.gen $(ADD-ON)/install.rdf.in
+	@$(VENV)/bin/gitchangelog | sed -e 's/%%version%% (unreleased)/${PACKAGE_VERSION}/' > CHANGELOG.md
+	@git add CHANGELOG.md $(ADD-ON)/install.rdf.in
 
 $(VENV): bin/require.pip
 	virtualenv -p python2.7 $(VENV)

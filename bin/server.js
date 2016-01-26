@@ -25,9 +25,6 @@ var path = require("path");
 var topDir = path.join(__dirname, "..");
 
 var port = process.env.PORT || 3000;
-var feedbackApiUrl = process.env.LOOP_FEEDBACK_API_URL ||
-                     "https://input.allizom.org/api/v1/feedback";
-var feedbackProductName = process.env.LOOP_FEEDBACK_PRODUCT_NAME || "Loop";
 var loopServerUrl = process.env.LOOP_SERVER_URL || "http://localhost:5000";
 
 // This is typically overridden with "dist" so that it's possible to test the
@@ -47,16 +44,12 @@ function getConfigFile(req, res) {
     "var loop = loop || {};",
     "loop.config = loop.config || {};",
     "loop.config.serverUrl = '" + loopServerUrl + "/v0';",
-    "loop.config.feedbackApiUrl = '" + feedbackApiUrl + "';",
-    "loop.config.feedbackProductName = '" + feedbackProductName + "';",
     "loop.config.downloadFirefoxUrl = 'https://www.mozilla.org/firefox/new/?scene=2&utm_source=hello.firefox.com&utm_medium=referral&utm_campaign=non-webrtc-browser#download-fx';",
     "loop.config.privacyWebsiteUrl = 'https://www.mozilla.org/privacy/firefox-hello/';",
     "loop.config.learnMoreUrl = 'https://www.mozilla.org/hello/';",
     "loop.config.legalWebsiteUrl = 'https://www.mozilla.org/about/legal/terms/firefox-hello/';",
-    "loop.config.roomsSupportUrl = 'https://support.mozilla.org/kb/group-conversations-firefox-hello-webrtc';",
     "loop.config.tilesIframeUrl = 'https://tiles.cdn.mozilla.net/iframe.html';",
     "loop.config.tilesSupportUrl = 'https://support.mozilla.org/tiles-firefox-hello';",
-    "loop.config.guestSupportUrl = 'https://support.mozilla.org/kb/respond-firefox-hello-invitation-guest-mode';",
     "loop.config.generalSupportUrl = 'https://support.mozilla.org/kb/respond-firefox-hello-invitation-guest-mode';",
     "loop.config.unsupportedPlatformUrl = 'https://support.mozilla.org/en-US/kb/which-browsers-will-work-firefox-hello-video-chat'"
   ].join("\n"));

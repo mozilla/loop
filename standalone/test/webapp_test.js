@@ -33,7 +33,6 @@ describe("loop.webapp", function() {
       sandbox.stub(React, "render");
       loopConfigRestore = loop.config;
       loop.config = {
-        feedbackApiUrl: "http://fake.invalid",
         serverUrl: "http://fake.invalid"
       };
       sandbox.stub(loop.Dispatcher.prototype, "dispatch");

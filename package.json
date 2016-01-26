@@ -42,7 +42,7 @@
     "karma-firefox-launcher": "0.1.6",
     "karma-mocha": "0.2.0",
     "mkdirp": "0.5.1",
-    "mocha": "2.2.5",
+    "mocha": "2.4.1",
     "nodemon": "1.8.1",
     "script-loader": "0.6.1",
     "sinon": "1.16.1",

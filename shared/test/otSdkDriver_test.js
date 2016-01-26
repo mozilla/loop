@@ -238,7 +238,6 @@ describe("loop.OTSdkDriver", function() {
 
     beforeEach(function() {
       sandbox.stub(screenshare, "off");
-      sandbox.stub(driver, "_noteSharingState");
       options = {
         videoSource: "browser",
         constraints: {
@@ -254,10 +253,6 @@ describe("loop.OTSdkDriver", function() {
       sinon.assert.calledOnce(sdk.initPublisher);
       sinon.assert.calledWithMatch(sdk.initPublisher,
       sinon.match.instanceOf(HTMLDivElement), options);
-    });
-
-    it("should log a telemetry action", function() {
-      sinon.assert.calledWithExactly(driver._noteSharingState, "browser", true);
     });
 
     it("should not do anything if publisher completed successfully", function() {
@@ -303,7 +298,6 @@ describe("loop.OTSdkDriver", function() {
   describe("Screenshare Access Denied", function() {
     beforeEach(function() {
       sandbox.stub(screenshare, "off");
-      sandbox.stub(driver, "_noteSharingState");
       var options = {
         videoSource: "browser",
         constraints: {
@@ -359,10 +353,6 @@ describe("loop.OTSdkDriver", function() {
   });
 
   describe("#endScreenShare", function() {
-    beforeEach(function() {
-      sandbox.stub(driver, "_noteSharingState");
-    });
-
     it("should unpublish the share", function() {
       driver.startScreenShare({
         videoSource: "window"
@@ -372,17 +362,6 @@ describe("loop.OTSdkDriver", function() {
       driver.endScreenShare(new sharedActions.EndScreenShare());
 
       sinon.assert.calledOnce(session.unpublish);
-    });
-
-    it("should log a telemetry action", function() {
-      driver.startScreenShare({
-        videoSource: "window"
-      });
-      driver.session = session;
-
-      driver.endScreenShare(new sharedActions.EndScreenShare());
-
-      sinon.assert.calledWithExactly(driver._noteSharingState, "window", false);
     });
 
     it("should destroy the share", function() {
@@ -408,20 +387,6 @@ describe("loop.OTSdkDriver", function() {
       driver.endScreenShare(new sharedActions.EndScreenShare());
 
       sinon.assert.calledOnce(session.unpublish);
-    });
-
-    it("should log a telemetry action too when type is 'browser'", function() {
-      driver.startScreenShare({
-        videoSource: "browser",
-        constraints: {
-          browserWindow: 42
-        }
-      });
-      driver.session = session;
-
-      driver.endScreenShare(new sharedActions.EndScreenShare());
-
-      sinon.assert.calledWithExactly(driver._noteSharingState, "browser", false);
     });
 
     it("should dispatch a ConnectionStatus action", function() {
@@ -761,44 +726,6 @@ describe("loop.OTSdkDriver", function() {
 
         sinon.assert.notCalled(requestStubs.TelemetryAddValue);
       });
-  });
-
-  describe("#_noteSharingState", function() {
-    it("should record enabled sharing states for window", function() {
-      driver._noteSharingState("window", true);
-
-      sinon.assert.calledOnce(requestStubs.TelemetryAddValue);
-      sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue,
-        "LOOP_SHARING_STATE_CHANGE_1",
-        constants.SHARING_STATE_CHANGE.WINDOW_ENABLED);
-    });
-
-    it("should record enabled sharing states for browser", function() {
-      driver._noteSharingState("browser", true);
-
-      sinon.assert.calledOnce(requestStubs.TelemetryAddValue);
-      sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue,
-        "LOOP_SHARING_STATE_CHANGE_1",
-        constants.SHARING_STATE_CHANGE.BROWSER_ENABLED);
-    });
-
-    it("should record disabled sharing states for window", function() {
-      driver._noteSharingState("window", false);
-
-      sinon.assert.calledOnce(requestStubs.TelemetryAddValue);
-      sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue,
-        "LOOP_SHARING_STATE_CHANGE_1",
-        constants.SHARING_STATE_CHANGE.WINDOW_DISABLED);
-    });
-
-    it("should record disabled sharing states for browser", function() {
-      driver._noteSharingState("browser", false);
-
-      sinon.assert.calledOnce(requestStubs.TelemetryAddValue);
-      sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue,
-        "LOOP_SHARING_STATE_CHANGE_1",
-        constants.SHARING_STATE_CHANGE.BROWSER_DISABLED);
-    });
   });
 
   describe("#forceDisconnectAll", function() {

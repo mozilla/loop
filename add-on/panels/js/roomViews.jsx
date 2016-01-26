@@ -10,7 +10,7 @@ loop.roomViews = (function(mozL10n) {
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var sharedActions = loop.shared.actions;
   var sharedMixins = loop.shared.mixins;
-  var sharedUtils = loop.shared.utils;
+  var sharedDesktopViews = loop.shared.desktopViews;
   var sharedViews = loop.shared.views;
 
   /**
@@ -148,216 +148,6 @@ loop.roomViews = (function(mozL10n) {
               {btnTitle}
             </button>
           </div>
-        </div>
-      );
-    }
-  });
-
-  var SocialShareDropdown = React.createClass({
-    propTypes: {
-      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      roomUrl: React.PropTypes.string,
-      show: React.PropTypes.bool.isRequired,
-      socialShareProviders: React.PropTypes.array
-    },
-
-    handleAddServiceClick: function(event) {
-      event.preventDefault();
-
-      this.props.dispatcher.dispatch(new sharedActions.AddSocialShareProvider());
-    },
-
-    handleProviderClick: function(event) {
-      event.preventDefault();
-
-      var origin = event.currentTarget.dataset.provider;
-      var provider = this.props.socialShareProviders
-                         .filter(function(socialProvider) {
-                           return socialProvider.origin === origin;
-                         })[0];
-
-      this.props.dispatcher.dispatch(new sharedActions.ShareRoomUrl({
-        provider: provider,
-        roomUrl: this.props.roomUrl,
-        previews: []
-      }));
-    },
-
-    render: function() {
-      // Don't render a thing when no data has been fetched yet.
-      if (!this.props.socialShareProviders) {
-        return null;
-      }
-
-      var cx = classNames;
-      var shareDropdown = cx({
-        "share-service-dropdown": true,
-        "dropdown-menu": true,
-        "visually-hidden": true,
-        "hide": !this.props.show
-      });
-
-      return (
-        <ul className={shareDropdown}>
-          <li className="dropdown-menu-item" onClick={this.handleAddServiceClick}>
-            <i className="icon icon-add-share-service"></i>
-            <span>{mozL10n.get("share_add_service_button")}</span>
-          </li>
-          {this.props.socialShareProviders.length ? <li className="dropdown-menu-separator"/> : null}
-          {
-            this.props.socialShareProviders.map(function(provider, idx) {
-              return (
-                <li className="dropdown-menu-item"
-                    data-provider={provider.origin}
-                    key={"provider-" + idx}
-                    onClick={this.handleProviderClick}>
-                  <img className="icon" src={provider.iconURL}/>
-                  <span>{provider.name}</span>
-                </li>
-              );
-            }.bind(this))
-          }
-        </ul>
-      );
-    }
-  });
-
-  /**
-   * Desktop room invitation view (overlay).
-   */
-  var DesktopRoomInvitationView = React.createClass({
-    statics: {
-      TRIGGERED_RESET_DELAY: 3000
-    },
-
-    mixins: [sharedMixins.DropdownMenuMixin(".room-invitation-overlay")],
-
-    propTypes: {
-      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      error: React.PropTypes.object,
-      facebookEnabled: React.PropTypes.bool.isRequired,
-      // This data is supplied by the activeRoomStore.
-      roomData: React.PropTypes.object.isRequired,
-      show: React.PropTypes.bool.isRequired,
-      socialShareProviders: React.PropTypes.array
-    },
-
-    getInitialState: function() {
-      return {
-        copiedUrl: false,
-        newRoomName: ""
-      };
-    },
-
-    handleEmailButtonClick: function(event) {
-      event.preventDefault();
-
-      var roomData = this.props.roomData;
-      var contextURL = roomData.roomContextUrls && roomData.roomContextUrls[0];
-      if (contextURL) {
-        if (contextURL.location === null) {
-          contextURL = undefined;
-        } else {
-          contextURL = sharedUtils.formatURL(contextURL.location).hostname;
-        }
-      }
-
-      this.props.dispatcher.dispatch(
-        new sharedActions.EmailRoomUrl({
-          roomUrl: roomData.roomUrl,
-          roomDescription: contextURL,
-          from: "conversation"
-        }));
-    },
-
-    handleFacebookButtonClick: function(event) {
-      event.preventDefault();
-
-      this.props.dispatcher.dispatch(new sharedActions.FacebookShareRoomUrl({
-        from: "conversation",
-        roomUrl: this.props.roomData.roomUrl
-      }));
-    },
-
-    handleCopyButtonClick: function(event) {
-      event.preventDefault();
-
-      this.props.dispatcher.dispatch(new sharedActions.CopyRoomUrl({
-        roomUrl: this.props.roomData.roomUrl,
-        from: "conversation"
-      }));
-
-      this.setState({ copiedUrl: true });
-      setTimeout(this.resetTriggeredButtons, this.constructor.TRIGGERED_RESET_DELAY);
-    },
-
-    /**
-     * Reset state of triggered buttons if necessary
-     */
-    resetTriggeredButtons: function() {
-      if (this.state.copiedUrl) {
-        this.setState({ copiedUrl: false });
-      }
-    },
-
-    render: function() {
-      if (!this.props.show || !this.props.roomData.roomUrl) {
-        return null;
-      }
-
-      var cx = classNames;
-
-      return (
-        <div className="room-invitation-overlay">
-          <div className="room-invitation-content">
-            <div className="room-context-header">{mozL10n.get("invite_header_text_bold2")}</div>
-            <div>{mozL10n.get("invite_header_text4")}</div>
-          </div>
-          <div className="input-button-group">
-            <div className="input-button-group-label">{mozL10n.get("invite_your_link")}</div>
-            <div className="input-button-content">
-              <div className="input-group group-item-top">
-                <input readOnly={true} type="text" value={this.props.roomData.roomUrl} />
-              </div>
-              <div className={cx({
-                  "group-item-bottom": true,
-                  "btn": true,
-                  "invite-button": true,
-                  "btn-copy": true,
-                  "triggered": this.state.copiedUrl
-                })}
-                   onClick={this.handleCopyButtonClick}>{mozL10n.get(this.state.copiedUrl ?
-                "invite_copied_link_button" : "invite_copy_link_button")}
-              </div>
-            </div>
-          </div>
-          <div className={cx({
-            "btn-group": true,
-            "share-action-group": true
-          })}>
-            <div className="btn-email invite-button"
-              onClick={this.handleEmailButtonClick}
-              onMouseOver={this.resetTriggeredButtons}>
-              <img src="shared/img/glyph-email-16x16.svg" />
-              <div>{mozL10n.get("invite_email_link_button")}</div>
-            </div>
-            {(() => {
-              if (this.props.facebookEnabled) {
-                return (<div className="btn-facebook invite-button"
-                            onClick={this.handleFacebookButtonClick}
-                            onMouseOver={this.resetTriggeredButtons}>
-                  <img src="shared/img/glyph-facebook-16x16.svg" />
-                  <div>{mozL10n.get("invite_facebook_button3")}</div>
-                </div>);
-              }
-            })()}
-          </div>
-          <SocialShareDropdown
-            dispatcher={this.props.dispatcher}
-            ref="menu"
-            roomUrl={this.props.roomData.roomUrl}
-            show={this.state.showMenu}
-            socialShareProviders={this.props.socialShareProviders} />
         </div>
       );
     }
@@ -575,10 +365,11 @@ loop.roomViews = (function(mozL10n) {
                   hangup={this.leaveRoom}
                   showHangup={this.props.chatWindowDetached}
                   video={{ enabled: !this.state.videoMuted, visible: true }} />
-                <DesktopRoomInvitationView
+                <sharedDesktopViews.SharePanelView
                   dispatcher={this.props.dispatcher}
                   error={this.state.error}
                   facebookEnabled={this.props.facebookEnabled}
+                  locationForMetrics="conversation"
                   roomData={roomData}
                   show={shouldRenderInvitationOverlay}
                   socialShareProviders={this.state.socialShareProviders} />
@@ -594,9 +385,7 @@ loop.roomViews = (function(mozL10n) {
     ActiveRoomStoreMixin: ActiveRoomStoreMixin,
     FailureInfoView: FailureInfoView,
     RoomFailureView: RoomFailureView,
-    SocialShareDropdown: SocialShareDropdown,
-    DesktopRoomConversationView: DesktopRoomConversationView,
-    DesktopRoomInvitationView: DesktopRoomInvitationView
+    DesktopRoomConversationView: DesktopRoomConversationView
   };
 
 })(document.mozL10n || navigator.mozL10n);

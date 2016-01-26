@@ -193,153 +193,6 @@ describe("loop.roomViews", function() {
     });
   });
 
-  describe("DesktopRoomInvitationView", function() {
-    function mountTestComponent(props) {
-      props = _.extend({
-        dispatcher: dispatcher,
-        facebookEnabled: false,
-        roomData: { roomUrl: "http://invalid" },
-        savingContext: false,
-        show: true,
-        showEditContext: false
-      }, props);
-      return TestUtils.renderIntoDocument(
-        React.createElement(loop.roomViews.DesktopRoomInvitationView, props));
-    }
-
-    it("should dispatch an EmailRoomUrl with no description" +
-       " for rooms without context when the email button is pressed",
-      function() {
-        view = mountTestComponent();
-
-        var emailBtn = view.getDOMNode().querySelector(".btn-email");
-
-        React.addons.TestUtils.Simulate.click(emailBtn);
-
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWith(dispatcher.dispatch,
-          new sharedActions.EmailRoomUrl({
-            roomUrl: "http://invalid",
-            roomDescription: undefined,
-            from: "conversation"
-          }));
-      });
-
-    it("should dispatch an EmailRoomUrl with a domain name description for rooms with context",
-      function() {
-        var url = "http://invalid";
-        view = mountTestComponent({
-          roomData: {
-            roomUrl: url,
-            roomContextUrls: [{ location: "http://www.mozilla.com/" }]
-          }
-        });
-
-        var emailBtn = view.getDOMNode().querySelector(".btn-email");
-
-        React.addons.TestUtils.Simulate.click(emailBtn);
-
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWith(dispatcher.dispatch,
-          new sharedActions.EmailRoomUrl({
-            roomUrl: url,
-            roomDescription: "www.mozilla.com",
-            from: "conversation"
-          }));
-      });
-
-    it("should not display the Facebook Share button when it is disabled in prefs",
-      function() {
-        view = mountTestComponent({
-          facebookEnabled: false
-        });
-
-        expect(view.getDOMNode().querySelectorAll(".btn-facebook"))
-          .to.have.length.of(0);
-      });
-
-    it("should display the Facebook Share button only when it is enabled in prefs",
-      function() {
-        view = mountTestComponent({
-          facebookEnabled: true
-        });
-
-        expect(view.getDOMNode().querySelectorAll(".btn-facebook"))
-          .to.have.length.of(1);
-      });
-
-    it("should dispatch a FacebookShareRoomUrl action when the facebook button is clicked",
-      function() {
-        var url = "http://invalid";
-        view = mountTestComponent({
-          facebookEnabled: true,
-          roomData: {
-            roomUrl: url
-          }
-        });
-
-        var facebookBtn = view.getDOMNode().querySelector(".btn-facebook");
-
-        React.addons.TestUtils.Simulate.click(facebookBtn);
-
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWith(dispatcher.dispatch,
-          new sharedActions.FacebookShareRoomUrl({
-            from: "conversation",
-            roomUrl: url
-          }));
-    });
-
-    describe("Copy Button", function() {
-      beforeEach(function() {
-        view = mountTestComponent();
-      });
-
-      it("should dispatch a CopyRoomUrl action when the copy button is pressed", function() {
-        var copyBtn = view.getDOMNode().querySelector(".btn-copy");
-        React.addons.TestUtils.Simulate.click(copyBtn);
-
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWith(dispatcher.dispatch, new sharedActions.CopyRoomUrl({
-          roomUrl: "http://invalid",
-          from: "conversation"
-        }));
-      });
-
-      it("should change the text when the url has been copied", function() {
-        var copyBtn = view.getDOMNode().querySelector(".btn-copy");
-        React.addons.TestUtils.Simulate.click(copyBtn);
-
-        expect(copyBtn.textContent).eql("invite_copied_link_button");
-      });
-
-      it("should keep the text for a while after the url has been copied", function() {
-        var copyBtn = view.getDOMNode().querySelector(".btn-copy");
-        React.addons.TestUtils.Simulate.click(copyBtn);
-        clock.tick(loop.roomViews.DesktopRoomInvitationView.TRIGGERED_RESET_DELAY / 2);
-
-        expect(copyBtn.textContent).eql("invite_copied_link_button");
-      });
-
-      it("should reset the text a bit after the url has been copied", function() {
-        var copyBtn = view.getDOMNode().querySelector(".btn-copy");
-        React.addons.TestUtils.Simulate.click(copyBtn);
-        clock.tick(loop.roomViews.DesktopRoomInvitationView.TRIGGERED_RESET_DELAY);
-
-        expect(copyBtn.textContent).eql("invite_copy_link_button");
-      });
-
-      it("should reset the text after the url has been copied then mouse over another button", function() {
-        var copyBtn = view.getDOMNode().querySelector(".btn-copy");
-        React.addons.TestUtils.Simulate.click(copyBtn);
-        var emailBtn = view.getDOMNode().querySelector(".btn-email");
-        React.addons.TestUtils.Simulate.mouseOver(emailBtn);
-
-        expect(copyBtn.textContent).eql("invite_copy_link_button");
-      });
-    });
-  });
-
   describe("DesktopRoomConversationView", function() {
     var onCallTerminatedStub;
 
@@ -598,7 +451,7 @@ describe("loop.roomViews", function() {
           view = mountTestComponent();
 
           expect(TestUtils.findRenderedComponentWithType(view,
-            loop.roomViews.DesktopRoomInvitationView).getDOMNode()).to.not.eql(null);
+            loop.shared.desktopViews.SharePanelView).getDOMNode()).to.not.eql(null);
         });
 
       it("should render the DesktopRoomInvitationView if roomState is `JOINED` with just owner",
@@ -611,7 +464,7 @@ describe("loop.roomViews", function() {
           view = mountTestComponent();
 
           expect(TestUtils.findRenderedComponentWithType(view,
-            loop.roomViews.DesktopRoomInvitationView).getDOMNode()).to.not.eql(null);
+            loop.shared.desktopViews.SharePanelView).getDOMNode()).to.not.eql(null);
         });
 
       it("should render the DesktopRoomConversationView if roomState is `JOINED` with remote participant",
@@ -626,7 +479,7 @@ describe("loop.roomViews", function() {
           TestUtils.findRenderedComponentWithType(view,
             loop.roomViews.DesktopRoomConversationView);
           expect(TestUtils.findRenderedComponentWithType(view,
-            loop.roomViews.DesktopRoomInvitationView).getDOMNode()).to.eql(null);
+            loop.shared.desktopViews.SharePanelView).getDOMNode()).to.eql(null);
         });
 
       it("should render the DesktopRoomConversationView if roomState is `JOINED` with participants",
@@ -641,7 +494,7 @@ describe("loop.roomViews", function() {
           TestUtils.findRenderedComponentWithType(view,
             loop.roomViews.DesktopRoomConversationView);
           expect(TestUtils.findRenderedComponentWithType(view,
-            loop.roomViews.DesktopRoomInvitationView).getDOMNode()).to.eql(null);
+            loop.shared.desktopViews.SharePanelView).getDOMNode()).to.eql(null);
         });
 
       it("should render the DesktopRoomConversationView if roomState is `HAS_PARTICIPANTS`",
@@ -653,7 +506,7 @@ describe("loop.roomViews", function() {
           TestUtils.findRenderedComponentWithType(view,
             loop.roomViews.DesktopRoomConversationView);
           expect(TestUtils.findRenderedComponentWithType(view,
-            loop.roomViews.DesktopRoomInvitationView).getDOMNode()).to.eql(null);
+            loop.shared.desktopViews.SharePanelView).getDOMNode()).to.eql(null);
         });
 
       it("should display loading spinner when localSrcMediaElement is null",
@@ -794,100 +647,6 @@ describe("loop.roomViews", function() {
           view = mountTestComponent();
           expect(fakeWindow.document.title).to.equal("https://fakeurl.com");
         });
-      });
-    });
-  });
-
-  describe("SocialShareDropdown", function() {
-    var fakeProvider;
-
-    beforeEach(function() {
-      fakeProvider = {
-        name: "foo",
-        origin: "https://foo",
-        iconURL: "http://example.com/foo.png"
-      };
-    });
-
-    afterEach(function() {
-      fakeProvider = null;
-    });
-
-    function mountTestComponent(props) {
-      props = _.extend({
-        dispatcher: dispatcher,
-        show: true
-      }, props);
-      return TestUtils.renderIntoDocument(
-        React.createElement(loop.roomViews.SocialShareDropdown, props));
-    }
-
-    describe("#render", function() {
-      it("should show no contents when the Social Providers have not been fetched yet", function() {
-        view = mountTestComponent();
-
-        expect(view.getDOMNode()).to.eql(null);
-      });
-
-      it("should show an empty list when no Social Providers are available", function() {
-        view = mountTestComponent({
-          socialShareProviders: []
-        });
-
-        var node = view.getDOMNode();
-        expect(node.querySelector(".icon-add-share-service")).to.not.eql(null);
-        expect(node.querySelectorAll(".dropdown-menu-item").length).to.eql(1);
-      });
-
-      it("should show a list of available Social Providers", function() {
-        view = mountTestComponent({
-          socialShareProviders: [fakeProvider]
-        });
-
-        var node = view.getDOMNode();
-        expect(node.querySelector(".icon-add-share-service")).to.not.eql(null);
-        expect(node.querySelector(".dropdown-menu-separator")).to.not.eql(null);
-
-        var dropdownNodes = node.querySelectorAll(".dropdown-menu-item");
-        expect(dropdownNodes.length).to.eql(2);
-        expect(dropdownNodes[1].querySelector("img").src).to.eql(fakeProvider.iconURL);
-        expect(dropdownNodes[1].querySelector("span").textContent)
-          .to.eql(fakeProvider.name);
-      });
-    });
-
-    describe("#handleAddServiceClick", function() {
-      it("should dispatch an action when the 'add provider' item is clicked", function() {
-        view = mountTestComponent({
-          socialShareProviders: []
-        });
-
-        var addItem = view.getDOMNode().querySelector(".dropdown-menu-item:first-child");
-        React.addons.TestUtils.Simulate.click(addItem);
-
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.AddSocialShareProvider());
-      });
-    });
-
-    describe("#handleProviderClick", function() {
-      it("should dispatch an action when a provider item is clicked", function() {
-        view = mountTestComponent({
-          roomUrl: "http://example.com",
-          socialShareProviders: [fakeProvider]
-        });
-
-        var providerItem = view.getDOMNode().querySelector(".dropdown-menu-item:last-child");
-        React.addons.TestUtils.Simulate.click(providerItem);
-
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.ShareRoomUrl({
-            provider: fakeProvider,
-            roomUrl: "http://example.com",
-            previews: []
-          }));
       });
     });
   });

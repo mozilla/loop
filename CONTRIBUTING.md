@@ -39,15 +39,17 @@ create this easily).
 should only take a few minutes.
   * It is useful to make sure the tests pass (are green) before requesting review,
 otherwise your patch will be rejected.
-* The pull request should be attached to the bug, and reviewer(s) requested (there
-is a suggested list of reviewers to pick from if you don't know who to ask).
-  * Use [github tweaks for bugzilla](https://addons.mozilla.org/en-US/firefox/addon/github-tweaks-for-bugzilla/) firefox add-on to make this easier.
+* [Autolander](#autolander-bot) will automatically attach the pull request to the bug assuming the
+pull request title is formatted correctly.
+* Reviewers should be suggested, there is a suggested list of reviewers to pick from
+if you don't know who to ask.
 * If a pull request changes the UI then you should also attach screenshots or short
 videos to the bug and request ui-review on those from :sevaan and :pau
 
 Review
 ------
 
+* Reviewers should take the Definition of Done (below) into account when reviewing bugs
 * If you didn't get review granted, or have comments to address, then edit the
 files. If there's significant changes, it helps to address the comments in a
 separate commit, to make the follow-up review easier.
@@ -56,6 +58,34 @@ commit message and rebase it against latest `master` so that it is ready to land
 * If there's no comments that need addressing, once you've added the annotation
 then you can add checkin-needed onto the bug and someone will land it for you if
 it hasn't been already.
+
+Definition of Done
+------------------
+
+"The Definition of Done (DoD) is a tool for bringing transparency to the work a
+team is performing.  It is related more to the quality of a product, rather than
+its functionality.  Before a piece of functionality is in a potentially releasable
+state, it must adhere to a common understanding of completion by those working on
+the increment.”
+
+New contributors: don't worry if you don't understand all these pieces.  Reviewers
+will let you know when your code has issues.
+
+Current checklist:
+- The code is reviewed
+- The code passes linter checks
+- The code is unit tested with good coverage
+-- All new code should have 100% coverage, or some reason why it can't be tested.
+- It should be localized/internationalized appropriate
+- The code respects the local prevailing style (js, jsm, html, css…)
+- The code is properly documented
+- It should work correctly in languages that render Right-To-Left (RTL)
+
+When practical:
+- The code is functionally tested
+- The code has metric (telemetry/FHR) points
+- The images are optimized
+- It should be (keyboard- and/or ARIA-) accessible
 
 Landing
 -------
@@ -76,3 +106,15 @@ it doesn't need to. r=Standard8`
   * master should then be merged with the branch via fast-forward only:
     * `git merge --ff master`
   * If it was successful, push the result
+
+Autolander (bot)
+----------------
+
+Autolander is a bot which integrates github and bugzilla workflows.
+
+Features available:
+  - Automatic pull request to bugzilla attachment linking.
+  - Automatic landing with a R+ from a suggested reviewer and the autoland keyword.
+  - Comments in the bug with the landed commit, and marks the bug as fixed.
+  - Validates pull request title and commit message formats.
+  - [Autolander on Github](https://github.com/mozilla/autolander)

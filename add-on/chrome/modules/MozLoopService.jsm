@@ -770,14 +770,20 @@ var MozLoopServiceInternal = {
       return gLocalizedStrings;
     }
 
-    let stringBundle =
-      Services.strings.createBundle("chrome://loop/locale/loop.properties");
-
-    let enumerator = stringBundle.getSimpleEnumeration();
-    while (enumerator.hasMoreElements()) {
-      let string = enumerator.getNext().QueryInterface(Ci.nsIPropertyElement);
-      gLocalizedStrings.set(string.key, string.value);
+    // Load all strings from a bundle location preferring strings loaded later.
+    function loadAllStrings(location) {
+      let bundle = Services.strings.createBundle(location);
+      let enumerator = bundle.getSimpleEnumeration();
+      while (enumerator.hasMoreElements()) {
+        let string = enumerator.getNext().QueryInterface(Ci.nsIPropertyElement);
+        gLocalizedStrings.set(string.key, string.value);
+      }
     }
+
+    // Load fallback/en-US strings then prefer the localized ones if available.
+    loadAllStrings("chrome://loop-locale-fallback/content/loop.properties");
+    loadAllStrings("chrome://loop/locale/loop.properties");
+
     // Supply the strings from the branding bundle on a per-need basis.
     let brandBundle =
       Services.strings.createBundle("chrome://branding/locale/brand.properties");
@@ -866,15 +872,30 @@ var MozLoopServiceInternal = {
     return "about:loopconversation#" + chatWindowId;
   },
 
+  getChatWindows() {
+    let isLoopURL = ({ src }) => /^about:loopconversation#/.test(src);
+    return [...Chat.chatboxes].filter(isLoopURL);
+  },
+
   /**
    * Hangup and close all chat windows that are open.
    */
   hangupAllChatWindows() {
-    let isLoopURL = ({ src }) => /^about:loopconversation#/.test(src);
-    let loopChatWindows = [...Chat.chatboxes].filter(isLoopURL);
-    for (let chatbox of loopChatWindows) {
+    for (let chatbox of this.getChatWindows()) {
       let window = chatbox.content.contentWindow;
       window.dispatchEvent(new window.CustomEvent("LoopHangupNow"));
+    }
+  },
+
+  /**
+   * Pause or resume all chat windows that are open.
+   */
+  toggleBrowserSharing(on = true) {
+    for (let chatbox of this.getChatWindows()) {
+      let window = chatbox.content.contentWindow;
+      window.dispatchEvent(new window.CustomEvent("ToggleBrowserSharing", {
+        detail: on
+      }));
     }
   },
 
@@ -935,7 +956,13 @@ var MozLoopServiceInternal = {
         let window = chatbox.contentWindow;
 
         function socialFrameChanged(eventName) {
-          UITour.availableTargetsCache.clear();
+          // `clearAvailableTargetsCache` is new in Firefox 46. The else branch
+          // supports Firefox 45.
+          if ("clearAvailableTargetsCache" in UITour) {
+            UITour.clearAvailableTargetsCache();
+          } else {
+            UITour.availableTargetsCache.clear();
+          }
           UITour.notify(eventName);
 
           if (eventName == "Loop:ChatWindowDetached" || eventName == "Loop:ChatWindowAttached") {
@@ -1412,6 +1439,10 @@ this.MozLoopService = {
    */
   hangupAllChatWindows() {
     return MozLoopServiceInternal.hangupAllChatWindows();
+  },
+
+  toggleBrowserSharing(on) {
+    return MozLoopServiceInternal.toggleBrowserSharing(on);
   },
 
   /**

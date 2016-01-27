@@ -133,7 +133,6 @@ describe("loop.StandaloneMozLoop", function() {
       });
 
       // Method to mock network failure
-      // https://github.com/sinonjs/sinon/issues/361
       requests[0].respond(0, {}, "");
 
       return promise;
@@ -178,6 +177,18 @@ describe("loop.StandaloneMozLoop", function() {
 
       requests[0].respond(401, { "Content-Type": "application/json" },
                           JSON.stringify(fakeServerErrorDescription));
+
+      return promise;
+    });
+
+    it("should call the callback on xhr error", function() {
+      var promise = loop.request("Rooms:Join", "fakeToken").then(function(result) {
+        expect(result.isError).eql(true);
+        expect(/HTTP 0/.test(result.message)).eql(true);
+      });
+
+      // Method to mock network failure
+      requests[0].respond(0, {}, "");
 
       return promise;
     });
@@ -235,6 +246,19 @@ describe("loop.StandaloneMozLoop", function() {
 
       requests[0].respond(401, { "Content-Type": "application/json" },
                           JSON.stringify(fakeServerErrDescription));
+
+      return promise;
+    });
+
+    it("should call the callback on xhr error", function() {
+      var promise = loop.request("Rooms:RefreshMembership", "fakeToken",
+        "fakeSessionToken").then(function(result) {
+        expect(result.isError).eql(true);
+        expect(/HTTP 0/.test(result.message)).eql(true);
+      });
+
+      // Method to mock network failure
+      requests[0].respond(0, {}, "");
 
       return promise;
     });

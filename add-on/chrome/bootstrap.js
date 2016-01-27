@@ -9,7 +9,6 @@ const { interfaces: Ci, utils: Cu, classes: Cc } = Components;
 
 const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 const kBrowserSharingNotificationId = "loop-sharing-notification";
-const kPrefBrowserSharingInfoBar = "browserSharing.showInfoBar";
 
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -533,50 +532,44 @@ var WindowListener = {
       _maybeShowBrowserSharingInfoBar: function() {
         this._hideBrowserSharingInfoBar();
 
-        // Don't show the infobar if it's been permanently disabled from the menu.
-        if (!this.MozLoopService.getLoopPref(kPrefBrowserSharingInfoBar)) {
-          return;
-        }
-
         let box = gBrowser.getNotificationBox();
-        let pauseButtonLabel = this._getString(this._browserSharePaused ?
-                                               "infobar_button_resume_label" :
-                                               "infobar_button_pause_label");
-        let pauseButtonAccessKey = this._getString(this._browserSharePaused ?
-                                                   "infobar_button_resume_accesskey" :
-                                                   "infobar_button_pause_accesskey");
-        let barLabel = this._getString(this._browserSharePaused ?
-                                       "infobar_screenshare_paused_browser_message" :
-                                       "infobar_screenshare_browser_message2");
+        // Pre-load strings
+        let pausedStrings = {
+          label: this._getString("infobar_button_restart_label2"),
+          accesskey: this._getString("infobar_button_restart_accesskey"),
+          message: this._getString("infobar_screenshare_stop_sharing_message")
+        };
+        let unpausedStrings = {
+          label: this._getString("infobar_button_stop_label2"),
+          accesskey: this._getString("infobar_button_stop_accesskey"),
+          message: this._getString("infobar_screenshare_browser_message2")
+        };
+        let initStrings = this._browserSharePaused ? pausedStrings : unpausedStrings;
         let bar = box.appendNotification(
-          barLabel,
+          initStrings.message,
           kBrowserSharingNotificationId,
           // Icon is defined in browser theme CSS.
           null,
           box.PRIORITY_WARNING_LOW,
           [{
-            label: pauseButtonLabel,
-            accessKey: pauseButtonAccessKey,
+            label: initStrings.label,
+            accessKey: initStrings.accessKey,
             isDefault: false,
             callback: (event, buttonInfo, buttonNode) => {
               this._browserSharePaused = !this._browserSharePaused;
-              bar.label = this._getString(this._browserSharePaused ?
-                                          "infobar_screenshare_paused_browser_message" :
-                                          "infobar_screenshare_browser_message2");
+              let stringObj = this._browserSharePaused ? pausedStrings : unpausedStrings;
+              bar.label = stringObj.message;
               bar.classList.toggle("paused", this._browserSharePaused);
-              buttonNode.label = this._getString(this._browserSharePaused ?
-                                                 "infobar_button_resume_label" :
-                                                 "infobar_button_pause_label");
-              buttonNode.accessKey = this._getString(this._browserSharePaused ?
-                                                     "infobar_button_resume_accesskey" :
-                                                     "infobar_button_pause_accesskey");
+              buttonNode.label = stringObj.label;
+              buttonNode.accessKey = stringObj.accesskey;
+              LoopUI.MozLoopService.toggleBrowserSharing(this._browserSharePaused);
               return true;
             },
             type: "pause"
           },
           {
-            label: this._getString("infobar_button_stop_label"),
-            accessKey: this._getString("infobar_button_stop_accesskey"),
+            label: this._getString("infobar_button_disconnect_label"),
+            accessKey: this._getString("infobar_button_disconnect_accesskey"),
             isDefault: true,
             callback: () => {
               this._hideBrowserSharingInfoBar();
@@ -596,11 +589,12 @@ var WindowListener = {
       /**
        * Hides the infobar, permanantly if requested.
        *
-       * @param {Boolean} permanently Flag that determines if the infobar will never
-       *                              been shown again. Defaults to `false`.
-       * @return {Boolean} |true| if the infobar was hidden here.
+       * @param   {Object}  browser Optional link to the browser we want to
+       *                    remove the infobar from. If not present, defaults
+       *                    to current browser instance.
+       * @return  {Boolean} |true| if the infobar was hidden here.
        */
-      _hideBrowserSharingInfoBar: function(permanently = false, browser) {
+      _hideBrowserSharingInfoBar: function(browser) {
         browser = browser || gBrowser.selectedBrowser;
         let box = gBrowser.getNotificationBox(browser);
         let notification = box.getNotificationWithValue(kBrowserSharingNotificationId);
@@ -610,17 +604,13 @@ var WindowListener = {
           removed = true;
         }
 
-        if (permanently) {
-          this.MozLoopService.setLoopPref(kPrefBrowserSharingInfoBar, false);
-        }
-
         return removed;
       },
 
       /**
        * Broadcast 'BrowserSwitch' event.
-      */
-      _notifyBrowserSwitch() {
+       */
+      _notifyBrowserSwitch: function() {
          // Get the first window Id for the listener.
         this.LoopAPI.broadcastPushMessage("BrowserSwitch",
           gBrowser.selectedBrowser.outerWindowID);
@@ -639,7 +629,7 @@ var WindowListener = {
             let wasVisible = false;
             // Hide the infobar from the previous tab.
             if (event.detail.previousTab) {
-              wasVisible = this._hideBrowserSharingInfoBar(false, event.detail.previousTab.linkedBrowser);
+              wasVisible = this._hideBrowserSharingInfoBar(event.detail.previousTab.linkedBrowser);
             }
 
             // We've changed the tab, so get the new window id.
@@ -859,7 +849,7 @@ function startup() {
  * Called when the add-on is shutting down, could be for re-installation
  * or just uninstall.
  */
-function shutdown() {
+function shutdown(data, reason) {
   // Close any open chat windows
   Cu.import("resource:///modules/Chat.jsm");
   let isLoopURL = ({ src }) => /^about:loopconversation#/.test(src);
@@ -882,6 +872,12 @@ function shutdown() {
 
   // Stop waiting for browser windows to open.
   wm.removeListener(WindowListener);
+
+  // If the app is shutting down, don't worry about cleaning up, just let
+  // it fade away...
+  if (reason == APP_SHUTDOWN) {
+    return;
+  }
 
   CustomizableUI.destroyWidget("loop-button");
 

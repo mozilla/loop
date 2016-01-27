@@ -855,6 +855,7 @@
                 <DesktopRoomConversationView
                   chatWindowDetached={false}
                   dispatcher={dispatcher}
+                  facebookEnabled={true}
                   localPosterUrl="sample-img/video-screen-local.png"
                   onCallTerminated={function() {}}
                   roomState={ROOM_STATES.INIT}
@@ -873,6 +874,7 @@
                 <DesktopRoomConversationView
                   chatWindowDetached={false}
                   dispatcher={dispatcher}
+                  facebookEnabled={true}
                   localPosterUrl="sample-img/video-screen-local.png"
                   onCallTerminated={function() {}}
                   remotePosterUrl="sample-img/video-screen-remote.png"
@@ -890,6 +892,7 @@
                 <DesktopRoomConversationView
                   chatWindowDetached={false}
                   dispatcher={dispatcher}
+                  facebookEnabled={true}
                   localPosterUrl="sample-img/video-screen-local.png"
                   onCallTerminated={function() {}}
                   remotePosterUrl="sample-img/video-screen-remote.png"
@@ -907,6 +910,7 @@
                 <DesktopRoomConversationView
                   chatWindowDetached={false}
                   dispatcher={dispatcher}
+                  facebookEnabled={true}
                   localPosterUrl="sample-img/video-screen-local.png"
                   onCallTerminated={function() {}}
                   remotePosterUrl="sample-img/video-screen-remote.png"
@@ -924,6 +928,7 @@
                 <DesktopRoomConversationView
                   chatWindowDetached={false}
                   dispatcher={dispatcher}
+                  facebookEnabled={true}
                   localPosterUrl="sample-img/video-screen-local.png"
                   onCallTerminated={function() {}}
                   remotePosterUrl="sample-img/video-screen-remote.png"
@@ -941,6 +946,7 @@
                 <DesktopRoomConversationView
                   chatWindowDetached={false}
                   dispatcher={dispatcher}
+                  facebookEnabled={true}
                   onCallTerminated={function() {}}
                   remotePosterUrl="sample-img/video-screen-remote.png"
                   roomStore={desktopLocalFaceMuteRoomStore} />
@@ -956,6 +962,7 @@
                 <DesktopRoomConversationView
                   chatWindowDetached={false}
                   dispatcher={dispatcher}
+                  facebookEnabled={true}
                   localPosterUrl="sample-img/video-screen-local.png"
                   onCallTerminated={function() {}}
                   remotePosterUrl="sample-img/video-screen-remote.png"

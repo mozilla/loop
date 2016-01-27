@@ -13,6 +13,8 @@
     "templateStrings": true,
   },
   "globals": {
+    // Bootstrap magic globals.
+    "APP_SHUTDOWN": false,
     // Gecko + Loop Globals.
     "AppConstants": false,
     "appInfo": false,
@@ -46,6 +48,7 @@
     "LoopRoomsCache": true,
     "MozLoopPushHandler": true,
     "MozLoopService": true,
+    "NewTabURL": false,
     "onmessage": true,
     "OS": false,
     "PluralForm": false,

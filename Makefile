@@ -7,15 +7,14 @@
 # build system at-large doesn't yet support.
 
 LOOP_SERVER_URL := $(shell echo $${LOOP_SERVER_URL-http://localhost:5000/v0})
-LOOP_FEEDBACK_API_URL := $(shell echo $${LOOP_FEEDBACK_API_URL-"https://input.allizom.org/api/v1/feedback"})
-LOOP_FEEDBACK_PRODUCT_NAME := $(shell echo $${LOOP_FEEDBACK_PRODUCT_NAME-Loop})
 LOOP_DOWNLOAD_FIREFOX_URL := $(shell echo $${LOOP_DOWNLOAD_FIREFOX_URL-"https://www.mozilla.org/firefox/new/?scene=2&utm_source=hello.firefox.com&utm_medium=referral&utm_campaign=non-webrtc-browser\#download-fx"})
 LOOP_PRIVACY_WEBSITE_URL := $(shell echo $${LOOP_PRIVACY_WEBSITE_URL-"https://www.mozilla.org/privacy/firefox-hello/"})
 LOOP_LEGAL_WEBSITE_URL := $(shell echo $${LOOP_LEGAL_WEBSITE_URL-"https://www.mozilla.org/about/legal/terms/firefox-hello/"})
 LOOP_PRODUCT_HOMEPAGE_URL := $(shell echo $${LOOP_PRODUCT_HOMEPAGE_URL-"https://www.firefox.com/hello/"})
 FIREFOX_VERSION=45.0
 
-NODE_LOCAL_BIN := ./node_modules/.bin
+# Work around for realpath not working as expected
+NODE_LOCAL_BIN := $(abspath ./node_modules/.bin)
 REPO_BIN_DIR := ./bin
 RSYNC := rsync --archive --exclude='*.jsx'
 
@@ -31,7 +30,7 @@ node_modules: package.json
 # build the dist dir, which contains a production version of the code and
 # assets
 .PHONY: dist
-dist: build dist_xpi dist_export
+dist: build dist_xpi dist_export dist_standalone
 
 .PHONY: distclean
 distclean: clean
@@ -39,7 +38,7 @@ distclean: clean
 
 .PHONY: distserver
 distserver: remove_old_config dist
-	LOOP_CONTENT_DIR=dist node server.js
+	LOOP_CONTENT_DIR=`pwd`/dist/standalone node bin/server.js
 
 BUILT := ./built
 ADD-ON := add-on
@@ -68,10 +67,16 @@ PACKAGE_VERSION := $(shell grep -m1 version package.json | \
 # Commands need to update the versions correctly in all places. Called from
 # npm's version command as configured in package.json
 .PHONY: update_version
-update_version:
-	@sed -i '' \
-	    -e 's/<em:version>.*<\/em:version>/<em:version>$(PACKAGE_VERSION)<\/em:version>/' \
-	    $(ADD-ON)/install.rdf.in
+update_version: $(VENV)
+	@# Hack around pystache not installing things in the correct places
+	@mkdir -p $(VENV)/lib/python2.7/site-packages/templates/mustache
+	@$(RSYNC) $(VENV)/templates/mustache $(VENV)/lib/python2.7/site-packages/templates
+	@# Ubuntu's version of sed doesn't have -i
+	@sed -e 's/<em:version>.*<\/em:version>/<em:version>$(PACKAGE_VERSION)<\/em:version>/' \
+	    $(ADD-ON)/install.rdf.in > $(ADD-ON)/install.rdf.in.gen
+	@mv $(ADD-ON)/install.rdf.in.gen $(ADD-ON)/install.rdf.in
+	@$(VENV)/bin/gitchangelog | sed -e 's/%%version%% (unreleased)/${PACKAGE_VERSION}/' > CHANGELOG.md
+	@git add CHANGELOG.md $(ADD-ON)/install.rdf.in
 
 $(VENV): bin/require.pip
 	virtualenv -p python2.7 $(VENV)
@@ -146,13 +151,13 @@ $(BUILT)/add-on/chrome/content/preferences/prefs.js: $(VENV) add-on/preferences/
 	mkdir -p $(@D)
 	. $(VENV)/bin/activate && \
 	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
-	         -D DEBUG=1 -o $@ add-on/preferences/prefs.js
+	         -D DEBUG=1 -D LOOP_BETA=1 -o $@ add-on/preferences/prefs.js
 
 $(DIST)/add-on/chrome/content/preferences/prefs.js: $(VENV) add-on/preferences/prefs.js
 	mkdir -p $(@D)
 	. $(VENV)/bin/activate && \
 	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
-	         -o $@ add-on/preferences/prefs.js
+	         -D LOOP_BETA=1 -o $@ add-on/preferences/prefs.js
 
 
 # Build our jsx files into appropriately placed js files.  Note that the rules
@@ -204,6 +209,15 @@ $(BUILT)/standalone/content/js/%.js: standalone/content/js/%.jsx
 	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
+standalone_l10n_files=$(wildcard locale/*/standalone.properties)
+built_standalone_l10n_files=$(patsubst locale/%/standalone.properties, \
+	$(BUILT)/standalone/content/l10n/%/loop.properties, \
+	$(standalone_l10n_files))
+
+$(BUILT)/standalone/content/l10n/%/loop.properties: locale/%/standalone.properties locale/%/shared.properties
+	@mkdir -p $(@D)
+	cat $^ > $@
+
 # add-on
 add_on_jsx_files=$(wildcard add-on/panels/js/*.jsx)
 built_add_on_js_files=$(patsubst add-on/panels/js/%.jsx, \
@@ -213,6 +227,15 @@ built_add_on_js_files=$(patsubst add-on/panels/js/%.jsx, \
 $(BUILT)/add-on/chrome/content/panels/js/%.js: add-on/panels/js/%.jsx
 	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
+
+add_on_l10n_files=$(wildcard locale/*/add-on.properties)
+built_add_on_l10n_files=$(patsubst locale/%/add-on.properties, \
+	$(BUILT)/add-on/chrome/locale/%/loop.properties, \
+	$(add_on_l10n_files))
+
+$(BUILT)/add-on/chrome/locale/%/loop.properties: locale/%/add-on.properties locale/%/shared.properties
+	@mkdir -p $(@D)
+	cat $^ > $@
 
 # XXX maybe just build one copy of shared in standalone, and then use
 # server.js magic to redirect?
@@ -225,16 +248,14 @@ ui: node_modules $(built_ui_js_files) $(built_ui_shared_js_files)
 	$(RSYNC) shared $(BUILT)/$@
 
 .PHONY: standalone
-standalone: node_modules $(built_standalone_js_files) $(built_standalone_shared_js_files)
+standalone: node_modules $(built_standalone_js_files) $(built_standalone_shared_js_files) $(built_standalone_l10n_files)
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@ $(BUILT)
 	mkdir -p $(BUILT)/$@/content/shared
 	$(RSYNC) shared $(BUILT)/$@/content
-	mkdir -p $(BUILT)/$@/content/l10n/en-US
-	cat locale/en-US/$@.properties locale/en-US/shared.properties > $(BUILT)/$@/content/l10n/en-US/loop.properties
 
 .PHONY: add-on
-add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(BUILT)/$(ADD-ON)/chrome.manifest $(BUILT)/add-on/chrome/content/preferences/prefs.js
+add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(built_add_on_l10n_files) $(BUILT)/$(ADD-ON)/chrome.manifest $(BUILT)/add-on/chrome/content/preferences/prefs.js
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@/chrome/bootstrap.js $(BUILT)/$@
 	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \
@@ -248,8 +269,6 @@ add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(
 	mkdir -p $(BUILT)/$@/chrome/content/shared
 	$(RSYNC) shared $(BUILT)/$@/chrome/content
 	$(RSYNC) $@/chrome/skin $(BUILT)/$@/chrome/
-	mkdir -p $(BUILT)/$@/chrome/locale/en-US
-	cat locale/en-US/$@.properties locale/en-US/shared.properties > $(BUILT)/$@/chrome/locale/en-US/loop.properties
 
 $(BUILT)/$(ADD-ON)/chrome.manifest: $(ADD-ON)/jar.mn
 	mkdir -p $(BUILT)/$(ADD-ON)
@@ -281,14 +300,18 @@ add-on_dist: $(DIST)/add-on/chrome/content/preferences/prefs.js
 	mv $(DIST)/add-on/chrome/content/shared/vendor/react-prod.js \
 	   $(DIST)/add-on/chrome/content/shared/vendor/react.js
 
-.PHONY: standalone_dist
-standalone_dist:
-	mkdir -p $(DIST)
-	$(RSYNC) content/* $(DIST)
-	NODE_ENV="production" $(NODE_LOCAL_BIN)/webpack \
-	  -p -v --display-errors
+.PHONY: dist_standalone
+dist_standalone: build
+	mkdir -p $(DIST)/standalone
+	# Standalone based on the built output
+	$(RSYNC) $(BUILT)/standalone/content/* $(DIST)/standalone
+	# Removing non-required JS files
+	rm -rf $(DIST)/standalone/js/ $(DIST)/standalone/shared/js \
+		$(DIST)/standalone/shared/vendor
+	( cd built/standalone && NODE_ENV="production" $(NODE_LOCAL_BIN)/webpack \
+		-p -v --display-errors )
 	sed 's#webappEntryPoint.js#js/standalone.js#' \
-	  < content/index.html > $(DIST)/index.html
+		< $(BUILT)/standalone/content/index.html > $(DIST)/standalone/index.html
 
 # so we can type "make xpi" without depend on the file directly
 .PHONY: xpi
@@ -424,14 +447,10 @@ config:
 	@echo "var loop = loop || {};" > content/config.js
 	@echo "loop.config = loop.config || {};" >> content/config.js
 	@echo "loop.config.serverUrl = '`echo $(LOOP_SERVER_URL)`';" >> content/config.js
-	@echo "loop.config.feedbackApiUrl = '`echo $(LOOP_FEEDBACK_API_URL)`';" >> content/config.js
-	@echo "loop.config.feedbackProductName = '`echo $(LOOP_FEEDBACK_PRODUCT_NAME)`';" >> content/config.js
 	@echo "loop.config.downloadFirefoxUrl = '`echo $(LOOP_DOWNLOAD_FIREFOX_URL)`';" >> content/config.js
 	@echo "loop.config.privacyWebsiteUrl = '`echo $(LOOP_PRIVACY_WEBSITE_URL)`';" >> content/config.js
 	@echo "loop.config.legalWebsiteUrl = '`echo $(LOOP_LEGAL_WEBSITE_URL)`';" >> content/config.js
 	@echo "loop.config.learnMoreUrl = '`echo $(LOOP_PRODUCT_HOMEPAGE_URL)`';" >> content/config.js
-	@echo "loop.config.roomsSupportUrl = 'https://support.mozilla.org/kb/group-conversations-firefox-hello-webrtc';" >> content/config.js
-	@echo "loop.config.guestSupportUrl = 'https://support.mozilla.org/kb/respond-firefox-hello-invitation-guest-mode';" >> content/config.js
 	@echo "loop.config.generalSupportUrl = 'https://support.mozilla.org/kb/respond-firefox-hello-invitation-guest-mode';" >> content/config.js
 	@echo "loop.config.tilesIframeUrl = 'https://tiles.cdn.mozilla.net/iframe.html';" >> content/config.js
 	@echo "loop.config.tilesSupportUrl = 'https://support.mozilla.org/tiles-firefox-hello';" >> content/config.js

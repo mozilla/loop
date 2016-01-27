@@ -45,7 +45,7 @@
     "mocha": "2.4.1",
     "nodemon": "1.8.1",
     "script-loader": "0.6.1",
-    "sinon": "1.16.1",
+    "sinon": "1.17.3",
     "rimraf": "2.5.1",
     "webpack": "1.12.12",
     "when": "3.7.5"

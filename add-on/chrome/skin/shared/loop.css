@@ -180,16 +180,11 @@
     color: #00a9dc;
   }
 
-  notification[value="loop-sharing-notification"] .notification-inner description {
-    padding-top: .2rem;
-    padding-bottom: .4rem;
-  }
-
   notification[value="loop-sharing-notification"] .notification-button {
     -moz-appearance: none;
     background-color: #fff;
     border: 0;
-    padding: .2rem 1rem .4rem;
+    width: 100px;
     height: 40px;
     margin: 0;
     list-style-image: url(chrome://loop/content/shared/img/pause-12x12.svg);
@@ -231,7 +226,6 @@
   notification[value="loop-sharing-notification"] .messageImage {
     list-style-image: url(chrome://loop/content/shared/img/icons-16x16.svg#loop-icon-white);
     margin-inline-start: 14px;
-    margin-bottom: .2rem;
   }
 
   notification[value="loop-sharing-notification"].paused .messageImage {

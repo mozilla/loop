@@ -533,43 +533,45 @@ var WindowListener = {
         this._hideBrowserSharingInfoBar();
 
         let box = gBrowser.getNotificationBox();
-        // Pre-load strings
-        let pausedStrings = {
-          label: this._getString("infobar_button_restart_label2"),
-          accesskey: this._getString("infobar_button_restart_accesskey"),
-          message: this._getString("infobar_screenshare_stop_sharing_message")
-        };
-        let unpausedStrings = {
-          label: this._getString("infobar_button_stop_label2"),
-          accesskey: this._getString("infobar_button_stop_accesskey"),
-          message: this._getString("infobar_screenshare_browser_message2")
-        };
-        let initStrings = this._browserSharePaused ? pausedStrings : unpausedStrings;
+        let pauseButtonLabel = this._getString(this._browserSharePaused ?
+                                               "infobar_button_resume_label" :
+                                               "infobar_button_pause_label");
+        let pauseButtonAccessKey = this._getString(this._browserSharePaused ?
+                                                   "infobar_button_resume_accesskey" :
+                                                   "infobar_button_pause_accesskey");
+        let barLabel = this._getString(this._browserSharePaused ?
+                                       "infobar_screenshare_paused_browser_message" :
+                                       "infobar_screenshare_browser_message2");
         let bar = box.appendNotification(
-          initStrings.message,
+          barLabel,
           kBrowserSharingNotificationId,
           // Icon is defined in browser theme CSS.
           null,
           box.PRIORITY_WARNING_LOW,
           [{
-            label: initStrings.label,
-            accessKey: initStrings.accessKey,
+            label: pauseButtonLabel,
+            accessKey: pauseButtonAccessKey,
             isDefault: false,
             callback: (event, buttonInfo, buttonNode) => {
               this._browserSharePaused = !this._browserSharePaused;
-              let stringObj = this._browserSharePaused ? pausedStrings : unpausedStrings;
-              bar.label = stringObj.message;
+              bar.label = this._getString(this._browserSharePaused ?
+                                          "infobar_screenshare_paused_browser_message" :
+                                          "infobar_screenshare_browser_message2");
               bar.classList.toggle("paused", this._browserSharePaused);
-              buttonNode.label = stringObj.label;
-              buttonNode.accessKey = stringObj.accesskey;
+              buttonNode.label = this._getString(this._browserSharePaused ?
+                                                 "infobar_button_resume_label" :
+                                                 "infobar_button_pause_label");
+              buttonNode.accessKey = this._getString(this._browserSharePaused ?
+                                                     "infobar_button_resume_accesskey" :
+                                                     "infobar_button_pause_accesskey");
               LoopUI.MozLoopService.toggleBrowserSharing(this._browserSharePaused);
               return true;
             },
             type: "pause"
           },
           {
-            label: this._getString("infobar_button_disconnect_label"),
-            accessKey: this._getString("infobar_button_disconnect_accesskey"),
+            label: this._getString("infobar_button_stop_label"),
+            accessKey: this._getString("infobar_button_stop_accesskey"),
             isDefault: true,
             callback: () => {
               this._hideBrowserSharingInfoBar();

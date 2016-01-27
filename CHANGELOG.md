@@ -1,10 +1,111 @@
 # Changelog
 
-## 0.1.0
+## 0.2.0
 
 ### New
 
-* Bug 1242425 - Add ChangeLog generation for releases. [Mark Banner]
+* Bug 1242908 - Remove some obsolete configuration settings in the standalone server. r=fcampo. [Mark Banner]
+
+* Bug 1240512 - added onerror handler for POST requsts in standaloneMozLoop. r=Standard8. [Vidhuran Harichandra Babu]
+
+* Bug 1242425 - Add ChangeLog generation for releases. r=crafuse. [Mark Banner]
+
+* Bug 1241063 - browser_mozLoop_sharingListeners.js is timing out. r=mikedeboer. [Ed Lee]
+
+* Bug 1196143 - IDN homograph attack in firefox hello chat. [Chris Rafuse]
+
+* Bug 1239634 - Change some new user journey strings, r=Mardak. [Chris Rafuse]
+
+* Bug 1233701 - Hello button has increased hight of Navigation bar r=Standard8. [David Critchley]
+
+* Bug 1233045 - Update MakeFile dist for standalone r=standard8. [David Critchley]
+
+* Bug 1241649 - Change the version on master to 0.2.0alpha for development channel on AMO. r=Mardak. [Mark Banner]
+
+* Bug 1241649 - Hook up `npm version` to be able to bump the install.rdf.in and prepare for releases. r=Mardak. [Mark Banner]
+
+* Bug 1238509 - Drop some obsolete preferences. r=Standard8. [Martin Pinto-Bazurco]
+
+* Bug 1237662 - Set up a script to automatically import from the loop-client-l10n directory. r=Standard8. [Ed Lee]
+
+* Bug 1236336 - If there is no page details, fallback to displaying untitled page rather than null. r=Standard8. [Sarthak Munshi]
+
+* Bug 1237677 - Update OpenTok library to 2.7.2. r=mikedeboer. [Mark Banner]
+
+* Bug 1239246 - added prefs to enable/disable facebook share button in conversations waiting room. r=Standard8. [Vidhuran Harichandra Babu]
+
+* Bug 1239963 - Stop unloading style sheets and destorying the loop-button on shutdown to help performance and Talos test failures. r=mikedeboer. [Mark Banner]
+
+* Bug 1232707 - Part 2. Add an export option for exporting to mozilla-central. r=dmose,r=mikedeboer. [Mark Banner]
+
+* Bug 1232707 - Part 1. Make the shared tests use the L10n file from desktop as that will be the only one available in m-c. Also make the desktop mozL10n api closer to the standalone version. r=dmose,r=mikedeboer. [Mark Banner]
+
+* Bug 1239780 - Port Bug 1101817 - Part 5: Remove WeakMap.prototype.clear from Loop addon. Also account for different Firefox versions. r=Mardak. [Mark Banner]
+
+* Bug 1238170 - Make dev server room routing code more readable, r=Standard8. [Dan Mosedale]
+
+* Bug 1220608 - As a desktop client user in a sharing session, I can pause/restart sharing my tabs. r=mikedeboer. [Manuel Casas Barrado]
+
+* Bug 1238510 - The loop.browserSharing.showInfoBar should be dropped (r=Mardak) [Fernando Campo]
+
+* Bug 1233748 - Update contributing docs with autolander information. r=standard8. [Kevin Grandon]
+
+* Bug 1238682 - As a desktop client user, when in a Hello session opening a new tab should open about:home r=mikedeboer. [Ed Lee]
+
+* Bug 1232111 - Add initial developing document. r=dcritch. [Mark Banner]
+
+### Chores
+
+* Update L10n from changeset 1567b00c143481bac6b841b172d3321e05668837. [Mark Banner]
+
+* Update mocha to version 2.4.2. r=Standard8. [greenkeeperio-bot]
+
+* Update sinon to version 1.17.3. r=Standard8. r=Standard8. [greenkeeperio-bot]
+
+* Update mocha to version 2.4.1. r=Standard8. [greenkeeperio-bot]
+
+* Update webpack to version 1.12.12. r=Standard8. [greenkeeperio-bot]
+
+* Update eslint-plugin-react to version 3.16.1. r=Standard8. [greenkeeperio-bot]
+
+* Update rimraf to version 2.5.1. r=Standard8. [greenkeeperio-bot]
+
+* Update babel-cli to version 6.4.5. r=Standard8. [greenkeeperio-bot]
+
+* Update compression to version 1.6.1. r=Standard8. r=Standard8. [greenkeeperio-bot]
+
+* Update webpack to version 1.12.11. r=Standard8. [greenkeeperio-bot]
+
+* Update fx-runner to version 1.0.0. r=Standard8. [greenkeeperio-bot]
+
+* Update eslint-plugin-react to version 3.15.0. r=Standard8. [greenkeeperio-bot]
+
+### Other
+
+* Backout bug 1239634 / changeset ece8093 - Change some new user journey strings - due to not wanting to release string changes yet. rs=Standard8. [Mark Banner]
+
+* Remove obsolete README files. rs=dmose. [Mark Banner]
+
+* UI Showcase facebookEnabled required property. r=Standard8. [Chris Rafuse]
+
+* Update CONTRIBUTING.md with the Definition of Done. r=Standard8. [Dan Mosedale]
+
+* Makefile fix using abspath, r=dmose. [Chris Rafuse]
+
+* Makefile node modules directory regression fix, r=dmose. [Chris Rafuse]
+
+* Update L10n from changeset 75e0724259d6a4645ee6c4b96a47d76332de6820. [Ed Lee]
+
+* Follow to bug 1232707 - Adjust how react is included into Loop in release and debug configurations. r=glandium. [Mark Banner]
+
+* Make nodemon watch jsm files and rebuild on change, r=Standard8. [Dan Mosedale]
+
+* Ignore the pep8 error for module imports not being at the top of the file and fix versions of flake8 dependencies to stop them being updated underneath us. r=crafuse. [Mark Banner]
+
+
+## v0.1.0 (2016-01-25)
+
+### New
 
 * Bug 1241649 - Hook up `npm version` to be able to bump the install.rdf.in and prepare for releases. r=Mardak. [Mark Banner]
 
@@ -2355,6 +2456,8 @@
 * Update webpack to version 1.12.10. r=Standard8. [greenkeeperio-bot]
 
 ### Other
+
+* 0.1.0. [Mark Banner]
 
 * Ignore the pep8 error for module imports not being at the top of the file and fix versions of flake8 dependencies to stop them being updated underneath us. r=crafuse. [Mark Banner]
 

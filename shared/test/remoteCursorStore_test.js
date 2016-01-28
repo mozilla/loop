@@ -65,4 +65,56 @@ describe("loop.store.RemoteCursorStore", function() {
       });
     });
   });
+
+  describe("#receivedCursorData", function() {
+    it("should save the state", function() {
+      store.receivedCursorData(new sharedActions.ReceivedCursorData({
+        type: CURSOR_MESSAGE_TYPES.POSITION,
+        ratioX: 10,
+        ratioY: 10
+      }));
+
+      expect(store.getStoreState().remoteCursorPosition).eql({
+        ratioX: 10,
+        ratioY: 10
+      });
+    });
+  });
+
+  describe("#videoDimensionsChanged", function() {
+    beforeEach(function() {
+      store.setStoreState({
+        realVideoSize: null
+      });
+    });
+
+    it("should save the state", function() {
+      store.videoDimensionsChanged(new sharedActions.VideoDimensionsChanged({
+        isLocal: false,
+        videoType: "screen",
+        dimensions: {
+          height: 10,
+          width: 10
+        }
+      }));
+
+      expect(store.getStoreState().realVideoSize).eql({
+        height: 10,
+        width: 10
+      });
+    });
+
+    it("should not save the state if video type is not screen", function() {
+      store.videoDimensionsChanged(new sharedActions.VideoDimensionsChanged({
+        isLocal: false,
+        videoType: "camera",
+        dimensions: {
+          height: 10,
+          width: 10
+        }
+      }));
+
+      expect(store.getStoreState().realVideoSize).eql(null);
+    });
+  });
 });

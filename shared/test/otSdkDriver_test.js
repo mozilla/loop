@@ -10,6 +10,7 @@ describe("loop.OTSdkDriver", function() {
   var STREAM_PROPERTIES = loop.shared.utils.STREAM_PROPERTIES;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
   var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
+  var CURSOR_MESSAGE_TYPES = loop.shared.utils.CURSOR_MESSAGE_TYPES;
 
   var sandbox, constants;
   var dispatcher, driver, requestStubs, publisher, screenshare, sdk, session;
@@ -153,7 +154,10 @@ describe("loop.OTSdkDriver", function() {
     it("should call initPublisher", function() {
       var expectedConfig = _.extend({
         channels: {
-          text: {}
+          text: {},
+          cursor: {
+            reliable: true
+          }
         }
       }, publisherConfig);
 
@@ -784,6 +788,54 @@ describe("loop.OTSdkDriver", function() {
     });
   });
 
+  describe("#sendCursorMessage", function() {
+    beforeEach(function() {
+      driver.session = session;
+    });
+
+    it("should send a message on the publisher cursor data channel", function() {
+      driver._publisherCursorChannel = {
+        send: sinon.stub()
+      };
+
+      driver._subscriberCursorChannel = {};
+
+      var message = {
+        contentType: CURSOR_MESSAGE_TYPES.POSITION,
+        top: 10,
+        left: 10,
+        width: 100,
+        height: 100
+      };
+
+      driver.sendCursorMessage(message);
+
+      sinon.assert.calledOnce(driver._publisherCursorChannel.send);
+      sinon.assert.calledWithExactly(driver._publisherCursorChannel.send,
+        JSON.stringify(message));
+    });
+
+    it("should not send a message if no cursor data channel has been set", function() {
+      driver._publisherCursorChannel = {
+        send: sinon.stub()
+      };
+
+      driver._subscriberCursorChannel = null;
+
+      var message = {
+        contentType: CURSOR_MESSAGE_TYPES.POSITION,
+        top: 10,
+        left: 10,
+        width: 100,
+        height: 100
+      };
+
+      driver.sendCursorMessage(message);
+
+      sinon.assert.notCalled(driver._publisherCursorChannel.send);
+    });
+  });
+
   describe("Events: general media", function() {
     var fakeConnection, fakeStream, fakeSubscriberObject, videoElement;
 
@@ -1152,8 +1204,9 @@ describe("loop.OTSdkDriver", function() {
           it("should get the data channel after subscribe is complete", function() {
             session.trigger("streamCreated", { stream: fakeStream });
 
-            sinon.assert.calledOnce(fakeSubscriberObject._.getDataChannel);
-            sinon.assert.calledWith(fakeSubscriberObject._.getDataChannel, "text", {});
+            sinon.assert.calledTwice(fakeSubscriberObject._.getDataChannel);
+            sinon.assert.calledWith(fakeSubscriberObject._.getDataChannel.getCall(0), "text", {});
+            sinon.assert.calledWith(fakeSubscriberObject._.getDataChannel.getCall(1), "cursor", {});
           });
 
           it("should not get the data channel if data channels are not wanted", function() {
@@ -1171,7 +1224,7 @@ describe("loop.OTSdkDriver", function() {
 
             session.trigger("streamCreated", { stream: fakeStream });
 
-            sinon.assert.calledOnce(console.error);
+            sinon.assert.calledTwice(console.error);
             sinon.assert.calledWithMatch(console.error, err);
           });
 
@@ -1184,7 +1237,7 @@ describe("loop.OTSdkDriver", function() {
             sinon.assert.calledWithExactly(dispatcher.dispatch,
               new sharedActions.ConnectionStatus({
                 connections: 0,
-                event: "sdk.datachannel.sub.fakeError",
+                event: "sdk.datachannel.sub.text.fakeError",
                 sendStreams: 0,
                 state: "receiving",
                 recvStreams: 1
@@ -1630,20 +1683,20 @@ describe("loop.OTSdkDriver", function() {
         sinon.assert.notCalled(subscriber._.getDataChannel);
       });
 
-      it("should get the data channel for the publisher", function() {
+      it("should get the data channels for the publisher", function() {
         session.trigger("signal:readyForDataChannel");
 
-        sinon.assert.calledOnce(publisher._.getDataChannel);
+        sinon.assert.calledTwice(publisher._.getDataChannel);
       });
 
-      it("should log an error if the data channel couldn't be obtained", function() {
+      it("should log an error if the data channels couldn't be obtained", function() {
         var err = new Error("fakeError");
 
         publisher._.getDataChannel.callsArgWith(2, err);
 
         session.trigger("signal:readyForDataChannel");
 
-        sinon.assert.calledOnce(console.error);
+        sinon.assert.calledTwice(console.error);
         sinon.assert.calledWithMatch(console.error, err);
       });
 
@@ -1652,11 +1705,11 @@ describe("loop.OTSdkDriver", function() {
 
         session.trigger("signal:readyForDataChannel");
 
-        sinon.assert.calledOnce(dispatcher.dispatch);
+        sinon.assert.calledTwice(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
           new sharedActions.ConnectionStatus({
             connections: 0,
-            event: "sdk.datachannel.pub.fakeError",
+            event: "sdk.datachannel.pub.text.fakeError",
             sendStreams: 0,
             state: "starting",
             recvStreams: 0

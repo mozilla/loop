@@ -23,7 +23,7 @@
     "babel-cli": "6.4.5",
     "babel-plugin-transform-react-display-name": "6.4.0",
     "babel-plugin-transform-react-jsx": "6.4.0",
-    "chai": "3.0.0",
+    "chai": "3.5.0",
     "chai-as-promised": "5.1.0",
     "commander": "2.9.0",
     "compression": "1.6.1",

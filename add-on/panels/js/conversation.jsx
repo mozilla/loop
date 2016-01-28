@@ -188,9 +188,13 @@ loop.conversation = (function(mozL10n) {
       var textChatStore = new loop.store.TextChatStore(dispatcher, {
         sdkDriver: sdkDriver
       });
+      var remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+        sdkDriver: sdkDriver
+      });
 
       loop.store.StoreMixin.register({
         conversationAppStore: conversationAppStore,
+        remoteCursorStore: remoteCursorStore,
         textChatStore: textChatStore
       });
 

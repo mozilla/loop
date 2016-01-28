@@ -11,7 +11,8 @@ describe("loop.webapp", function() {
   var sharedUtils = loop.shared.utils,
       sandbox,
       dispatcher,
-      mozL10nGet;
+      mozL10nGet,
+      remoteCursorStore;
 
   beforeEach(function() {
     sandbox = sinon.sandbox.create();
@@ -20,6 +21,12 @@ describe("loop.webapp", function() {
     mozL10nGet = sandbox.stub(navigator.mozL10n, "get", function(x) {
       return "translated:" + x;
     });
+
+    remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+      sdkDriver: {}
+    });
+
+    loop.store.StoreMixin.register({ remoteCursorStore: remoteCursorStore });
   });
 
   afterEach(function() {

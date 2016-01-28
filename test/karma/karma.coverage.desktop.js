@@ -32,6 +32,7 @@ module.exports = function(config) {
     "built/add-on/chrome/content/shared/js/dispatcher.js",
     "built/add-on/chrome/content/shared/js/store.js",
     "built/add-on/chrome/content/shared/js/activeRoomStore.js",
+    "built/add-on/chrome/content/shared/js/remoteCursorStore.js",
     "built/add-on/chrome/content/shared/js/views.js",
     "built/add-on/chrome/content/shared/js/textChatStore.js",
     "built/add-on/chrome/content/shared/js/textChatView.js",

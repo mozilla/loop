@@ -33,6 +33,7 @@ module.exports = function(config) {
     "built/standalone/content/shared/js/dispatcher.js",
     "built/standalone/content/shared/js/otSdkDriver.js",
     "built/standalone/content/shared/js/activeRoomStore.js",
+    "built/standalone/content/shared/js/remoteCursorStore.js",
     "built/standalone/content/shared/js/views.js",
     "built/standalone/content/shared/js/textChatStore.js",
     "built/standalone/content/shared/js/textChatView.js",

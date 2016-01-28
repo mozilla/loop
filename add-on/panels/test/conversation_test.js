@@ -9,7 +9,7 @@ describe("loop.conversation", function() {
   var expect = chai.expect;
   var TestUtils = React.addons.TestUtils;
   var sharedActions = loop.shared.actions;
-  var fakeWindow, sandbox, setLoopPrefStub, mozL10nGet;
+  var fakeWindow, sandbox, setLoopPrefStub, mozL10nGet, remoteCursorStore, dispatcher;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
@@ -77,6 +77,14 @@ describe("loop.conversation", function() {
       getStrings: function() { return JSON.stringify({ textContent: "fakeText" }); },
       locale: "en_US"
     });
+
+    dispatcher = new loop.Dispatcher();
+
+    remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+      sdkDriver: {}
+    });
+
+    loop.store.StoreMixin.register({ remoteCursorStore: remoteCursorStore });
   });
 
   afterEach(function() {
@@ -139,7 +147,7 @@ describe("loop.conversation", function() {
   });
 
   describe("AppControllerView", function() {
-    var activeRoomStore, ccView, dispatcher;
+    var activeRoomStore, ccView;
     var conversationAppStore, roomStore, feedbackPeriodMs = 15770000000;
     var ROOM_STATES = loop.store.ROOM_STATES;
 
@@ -152,8 +160,6 @@ describe("loop.conversation", function() {
     }
 
     beforeEach(function() {
-      dispatcher = new loop.Dispatcher();
-
       activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, {
         mozLoop: {},
         sdkDriver: {}

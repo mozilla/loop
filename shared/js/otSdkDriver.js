@@ -191,8 +191,6 @@ loop.OTSdkDriver = (function() {
       this.screenshare.on("accessAllowed", this._onScreenShareGranted.bind(this));
       this.screenshare.on("accessDenied", this._onScreenSharePublishError.bind(this));
       this.screenshare.on("streamCreated", this._onScreenShareStreamCreated.bind(this));
-
-      this._noteSharingState(options.videoSource, true);
     },
 
     /**
@@ -227,7 +225,6 @@ loop.OTSdkDriver = (function() {
       this.screenshare.destroy();
       delete this.screenshare;
       delete this._mockScreenSharePreviewEl;
-      this._noteSharingState(this._windowId ? "browser" : "window", false);
       delete this._windowId;
       return true;
     },
@@ -1196,27 +1193,7 @@ loop.OTSdkDriver = (function() {
      * If set to true, make it easy to test/verify 2-way media connection
      * telemetry code operation by viewing the logs.
      */
-    _debugTwoWayMediaTelemetry: false,
-
-    /**
-     * Note the sharing state.
-     *
-     * @param  {String}  type    Type of sharing that was flipped. May be 'window'
-     *                           or 'browser'.
-     * @param  {Boolean} enabled Flag that tells us if the feature was flipped on
-     *                           or off.
-     * @private
-     */
-    _noteSharingState: function(type, enabled) {
-      var bucket = this._constants.SHARING_STATE_CHANGE[type.toUpperCase() + "_" +
-        (enabled ? "ENABLED" : "DISABLED")];
-      if (typeof bucket === "undefined") {
-        console.error("No sharing state bucket found for '" + type + "'");
-        return;
-      }
-
-      loop.request("TelemetryAddValue", "LOOP_SHARING_STATE_CHANGE_1", bucket);
-    }
+    _debugTwoWayMediaTelemetry: false
   };
 
   return OTSdkDriver;

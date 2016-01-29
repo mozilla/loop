@@ -1286,11 +1286,24 @@ this.MozLoopService = {
 
       let window = gWM.getMostRecentWindow("navigator:browser");
       if (window) {
+        // The participant that joined isn't necessarily included in room.participants (depending on
+        // when the broadcast happens) so concatenate.
+        let isOwnerInRoom = room.participants.concat(participant).some(p => p.owner);
+        let bundle = MozLoopServiceInternal.localizedStrings;
+
+        let localizedString;
+        if (isOwnerInRoom) {
+          localizedString = bundle.get("rooms_room_joined_owner_connected_label2");
+        } else {
+          let l10nString = bundle.get("rooms_room_joined_owner_not_connected_label");
+          let roomUrlHostname = new URL(room.decryptedContext.urls[0].location).hostname.replace(/^www\./, "");
+          localizedString = l10nString.replace("{{roomURLHostname}}", roomUrlHostname);
+        }
         window.LoopUI.showNotification({
           sound: "room-joined",
           // Fallback to the brand short name if the roomName isn't available.
           title: room.roomName || MozLoopServiceInternal.localizedStrings.get("clientShortname2"),
-          message: MozLoopServiceInternal.localizedStrings.get("rooms_room_joined_label"),
+          message: localizedString,
           selectTab: "rooms"
         });
       }

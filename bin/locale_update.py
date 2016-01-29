@@ -27,7 +27,13 @@ DEF_JAR_FILE_NAME = os.path.join("add-on", os.extsep.join(["jar", "mn"]))
 
 def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
     print("deleting existing l10n content tree:", l10n_dst)
-    shutil.rmtree(l10n_dst, ignore_errors=True)
+
+    old_locale_dirs = os.listdir(l10n_dst)
+
+    for dir in old_locale_dirs:
+        # Ensure we leave en-US alone.
+        if dir != "en-US":
+            shutil.rmtree(os.path.join(l10n_dst, dir), ignore_errors=True)
 
     print("updating l10n tree from", l10n_src)
 
@@ -35,7 +41,13 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
         # Convert loop-client-l10n repo names to loop repo names.
         dst_dir = src_dir.replace('_', '-').replace('templates', 'en-US')
 
-        shutil.copytree(os.path.join(l10n_src, src_dir), os.path.join(l10n_dst, dst_dir))
+        # Don't copy the en-US files. Stick with what's in our tree as that might
+        # be a later version.
+        if dst_dir != "en-US":
+            # Copy the l10n files, but ignore any `.keep`
+            shutil.copytree(os.path.join(l10n_src, src_dir),
+                            os.path.join(l10n_dst, dst_dir),
+                            ignore=shutil.ignore_patterns(".keep"))
         return dst_dir
 
     locale_dirs = os.listdir(l10n_src)

@@ -11,7 +11,7 @@ LOOP_DOWNLOAD_FIREFOX_URL := $(shell echo $${LOOP_DOWNLOAD_FIREFOX_URL-"https://
 LOOP_PRIVACY_WEBSITE_URL := $(shell echo $${LOOP_PRIVACY_WEBSITE_URL-"https://www.mozilla.org/privacy/firefox-hello/"})
 LOOP_LEGAL_WEBSITE_URL := $(shell echo $${LOOP_LEGAL_WEBSITE_URL-"https://www.mozilla.org/about/legal/terms/firefox-hello/"})
 LOOP_PRODUCT_HOMEPAGE_URL := $(shell echo $${LOOP_PRODUCT_HOMEPAGE_URL-"https://www.firefox.com/hello/"})
-FIREFOX_VERSION=45.0
+FIREFOX_VERSION=47.0
 
 # Work around for realpath not working as expected
 NODE_LOCAL_BIN := $(abspath ./node_modules/.bin)
@@ -64,19 +64,33 @@ PACKAGE_VERSION := $(shell grep -m1 version package.json | \
 	cut -d'"' -f4 | \
 	sed 's/-alpha/alpha/')
 
-# Commands need to update the versions correctly in all places. Called from
-# npm's version command as configured in package.json
-.PHONY: update_version
-update_version: $(VENV)
+.PHONY: generate_changelog
+generate_changelog: $(VENV)
 	@# Hack around pystache not installing things in the correct places
 	@mkdir -p $(VENV)/lib/python2.7/site-packages/templates/mustache
 	@$(RSYNC) $(VENV)/templates/mustache $(VENV)/lib/python2.7/site-packages/templates
+	@$(VENV)/bin/gitchangelog | sed -e 's/%%version%% (unreleased)/${PACKAGE_VERSION}/' > CHANGELOG.md
+	@git add CHANGELOG.md
+
+.PHONY: change_versions
+change_versions:
 	@# Ubuntu's version of sed doesn't have -i
 	@sed -e 's/<em:version>.*<\/em:version>/<em:version>$(PACKAGE_VERSION)<\/em:version>/' \
 	    $(ADD-ON)/install.rdf.in > $(ADD-ON)/install.rdf.in.gen
 	@mv $(ADD-ON)/install.rdf.in.gen $(ADD-ON)/install.rdf.in
-	@$(VENV)/bin/gitchangelog | sed -e 's/%%version%% (unreleased)/${PACKAGE_VERSION}/' > CHANGELOG.md
-	@git add CHANGELOG.md $(ADD-ON)/install.rdf.in
+	@# Add package.json for the case where `npm version` is used with
+	@# `--no-git-tag-version` - to make it easier to commit.
+	@git add $(ADD-ON)/install.rdf.in package.json
+
+# Commands need to update the versions correctly in all places. Called from
+# npm's version command as configured in package.json
+.PHONY: update_version
+update_version: change_versions
+
+# Don't generate the changelog for alpha versions, which is more like a rolling tag.
+ifneq ($(findstring alpha,$(PACKAGE_VERSION)),alpha)
+update_version: generate_changelog
+endif
 
 $(VENV): bin/require.pip
 	virtualenv -p python2.7 $(VENV)
@@ -414,22 +428,6 @@ runfx:
 
 frontend:
 	@echo "Not implemented yet."
-
-# Try hg first, if not fall back to git.
-SOURCE_STAMP := $(shell hg parent --template '{node|short}\n' 2> /dev/null)
-ifndef SOURCE_STAMP
-SOURCE_STAMP := $(shell git describe --always --tag)
-endif
-
-SOURCE_DATE := $(shell hg parent --template '{date|date}\n' 2> /dev/null)
-ifndef SOURCE_DATE
-SOURCE_DATE := $(shell git log -1 --format="%H%n%aD")
-endif
-
-version:
-	@echo $(SOURCE_STAMP) > content/VERSION.txt
-	@echo $(SOURCE_DATE) >> content/VERSION.txt
-
 
 # The local node server used for client dev (server.js) used to use a static
 # content/config.js.  Now that information is server up dynamically.  This

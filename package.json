@@ -33,7 +33,7 @@
     "expose-loader": "0.7.x",
     "express": "4.13.4",
     "firefox-profile": "0.3.11",
-    "fs-promise": "0.3.1",
+    "fs-promise": "0.4.1",
     "fx-runner": "1.0.0",
     "imports-loader": "0.6.5",
     "karma": "0.12.37",

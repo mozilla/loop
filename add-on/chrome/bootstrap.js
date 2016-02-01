@@ -660,6 +660,11 @@ var WindowListener = {
        * through the sdk.
        */
       handleMousemove: function(event) {
+        // We want to stop sending events if sharing is paused.
+        if (this._browserSharePaused) {
+          return;
+        }
+
         // Only update every so often.
         let now = Date.now();
         if (now - this.lastCursorTime < MIN_CURSOR_INTERVAL) {

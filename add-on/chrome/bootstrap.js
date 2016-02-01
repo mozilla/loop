@@ -523,6 +523,7 @@ var WindowListener = {
           // Add this event to the parent gBrowser to avoid adding and removing
           // it for each individual tab's browsers.
           gBrowser.addEventListener("mousemove", this);
+          gBrowser.addEventListener("click", this);
         }
 
         this._maybeShowBrowserSharingInfoBar();
@@ -543,8 +544,11 @@ var WindowListener = {
         this._hideBrowserSharingInfoBar();
         gBrowser.tabContainer.removeEventListener("TabSelect", this);
         gBrowser.removeEventListener("DOMTitleChanged", this);
+
+        // Remove shared pointers related events
         gBrowser.removeEventListener("mousemove", this);
         this.removeRemoteCursor();
+
         this._listeningToTabSelect = false;
         this._browserSharePaused = false;
         this._sendTelemetryEventsIfNeeded();
@@ -771,6 +775,9 @@ var WindowListener = {
           case "mousemove":
             this.handleMousemove(event);
             break;
+          case "click":
+            this.handleMouseClick(event);
+            break;
           }
       },
 
@@ -809,6 +816,15 @@ var WindowListener = {
           ratioX: deltaX / browserBox.width,
           ratioY: deltaY / browserBox.height
         });
+      },
+
+      /**
+       * Handles mouse click events from gBrowser and send a broadcast message
+       * with all the data needed for sending link generator cursor click position
+       * through the sdk.
+       */
+      handleMouseClick: function(event) {
+        this.LoopAPI.broadcastPushMessage("CursorClick");
       },
 
       /**

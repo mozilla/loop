@@ -966,6 +966,10 @@ loop.shared.views = (function(_, mozL10n) {
   });
 
   var RemoteCursorView = React.createClass({
+    statics: {
+      TRIGGERED_RESET_DELAY: 1000
+    },
+
     mixins: [
       React.addons.PureRenderMixin,
       loop.store.StoreMixin("remoteCursorStore")
@@ -1062,13 +1066,31 @@ loop.shared.views = (function(_, mozL10n) {
       };
     },
 
+    resetClickState: function() {
+      this.getStore().setStoreState({
+        remoteCursorClick: false
+      });
+    },
+
     render: function() {
       if (!this.state.remoteCursorPosition || !this.state.videoLetterboxing) {
         return null;
       }
 
+      var cx = classNames;
+      var cursorClasses = cx({
+        "remote-cursor-container": true,
+        "remote-cursor-clicked": !!this.state.remoteCursorClick ? true : false
+      });
+
+      if (this.state.remoteCursorClick) {
+        setTimeout(this.resetClickState, this.constructor.TRIGGERED_RESET_DELAY);
+      }
+
       return (
-        <div className="remote-cursor" style={this.calculateCursorPosition()} />
+        <div className={cursorClasses} style={this.calculateCursorPosition()}>
+          <div className="remote-cursor" />
+        </div>
       );
     }
   });

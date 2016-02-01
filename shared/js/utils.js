@@ -123,7 +123,8 @@ if (inChrome) {
   };
 
   var CURSOR_MESSAGE_TYPES = {
-    POSITION: "cursor-position"
+    POSITION: "cursor-position",
+    CLICK: "cursor-click"
   };
 
   /**

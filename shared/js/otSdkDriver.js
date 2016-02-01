@@ -699,11 +699,7 @@ loop.OTSdkDriver = (function() {
          }.bind(this)],
         ["cursor",
          function(message) {
-           switch (message.type) {
-             case CURSOR_MESSAGE_TYPES.POSITION:
-               this.dispatcher.dispatch(new sharedActions.ReceivedCursorData(message));
-               break;
-           }
+            this.dispatcher.dispatch(new sharedActions.ReceivedCursorData(message));
          }.bind(this),
          function(channel) {
            this._subscriberCursorChannel = channel;

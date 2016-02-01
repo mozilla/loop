@@ -49,7 +49,7 @@ function getConfigFile(req, res) {
     "loop.config.learnMoreUrl = 'https://www.mozilla.org/hello/';",
     "loop.config.legalWebsiteUrl = 'https://www.mozilla.org/about/legal/terms/firefox-hello/';",
     "loop.config.tilesIframeUrl = 'https://tiles.cdn.mozilla.net/iframe.html';",
-    "loop.config.tilesSupportUrl = 'https://support.mozilla.org/tiles-firefox-hello';",
+    "loop.config.tilesSupportUrl = 'https://support.mozilla.org/kb/tiles-firefox-hello';",
     "loop.config.generalSupportUrl = 'https://support.mozilla.org/kb/respond-firefox-hello-invitation-guest-mode';",
     "loop.config.unsupportedPlatformUrl = 'https://support.mozilla.org/en-US/kb/which-browsers-will-work-firefox-hello-video-chat'"
   ].join("\n"));

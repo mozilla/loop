@@ -7,7 +7,7 @@
  * in the desktop code. Not all functions are implemented.
  */
 var loop = loop || {};
-loop.StandaloneMozLoop = (function(mozL10n) {
+loop.StandaloneMozLoop = (function() {
   "use strict";
 
   /**
@@ -166,7 +166,7 @@ loop.StandaloneMozLoop = (function(mozL10n) {
      *                            finished. The first argument passed will be an
      *                            `Error` object or `null`.
      */
-    join: function(roomToken, callback) {
+    join: function(roomToken, displayName, callback) {
       function callbackWrapper(err, result) {
         // XXX Save the sessionToken for purposes of get.
         // When bug 1103331 this can probably be removed.
@@ -179,7 +179,7 @@ loop.StandaloneMozLoop = (function(mozL10n) {
 
       this._postToRoom(roomToken, null, {
         action: "join",
-        displayName: mozL10n.get("rooms_display_name_guest"),
+        displayName: displayName,
         clientMaxSize: ROOM_MAX_CLIENTS
       }, {
         apiKey: String,
@@ -432,4 +432,4 @@ loop.StandaloneMozLoop = (function(mozL10n) {
       }
     };
   };
-})(navigator.mozL10n);
+})();

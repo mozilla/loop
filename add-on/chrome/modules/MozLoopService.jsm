@@ -1655,6 +1655,19 @@ this.MozLoopService = {
     }
   },
 
+  /*
+   * Returns current FTU version
+   *
+   * @return {Number}
+   *
+   * XXX must match number in panel.jsx; expose this via MozLoopAPI
+   * and kill that constant.
+   */
+   get FTU_VERSION()
+   {
+     return 2;
+   },
+
   /**
    * Set any preference under "loop.".
    *
@@ -1918,20 +1931,65 @@ this.MozLoopService = {
 
   /**
    * Opens the Getting Started tour in the browser.
-   *
-   * @param {String} [aSrc] A string representing the entry point to begin the tour, optional.
    */
-  openGettingStartedTour: Task.async(function(aSrc = null) {
-    try {
-      let url = this.getTourURL(aSrc);
-      let win = Services.wm.getMostRecentWindow("navigator:browser");
-      win.switchToTabHavingURI(url, true, {
-        ignoreFragment: true,
-        replaceQueryString: true
-      });
-    } catch (ex) {
-      log.error("Error opening Getting Started tour", ex);
+  openGettingStartedTour: Task.async(function() {
+    const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+    // User will have _just_ clicked the tour menu item or the FTU
+    // button in the panel, (or else it wouldn't be visible), so...
+    let xulWin = Services.wm.getMostRecentWindow("navigator:browser");
+    let xulDoc = xulWin.document;
+
+    let box = xulDoc.createElementNS(kNSXUL, "box");
+    box.setAttribute("id", "loop-slideshow-container");
+
+    let appContent = xulDoc.getElementById("appcontent");
+    let tabBrowser = xulDoc.getElementById("content");
+    appContent.insertBefore(box, tabBrowser);
+
+    var xulBrowser = xulDoc.createElementNS(kNSXUL, "browser");
+    xulBrowser.setAttribute("id", "loop-slideshow-browser");
+    xulBrowser.setAttribute("flex", "1");
+    xulBrowser.setAttribute("type", "content");
+    box.appendChild(xulBrowser);
+
+    // Notify the UI, which has the side effect of disabling panel opening
+    // and updating the toolbar icon to visually indicate difference.
+    xulWin.LoopUI.isSlideshowOpen = true;
+
+    var removeSlideshow = function() {
+      try {
+        appContent.removeChild(box);
+      } catch (ex) {
+        log.error(ex);
+      }
+
+      this.setLoopPref("gettingStarted.latestFTUVersion", this.FTU_VERSION);
+
+      // Notify the UI, which has the side effect of re-enabling panel opening
+      // and updating the toolbar.
+      xulWin.LoopUI.isSlideshowOpen = false;
+
+      xulWin.removeEventListener("CloseSlideshow", removeSlideshow);
+
+      log.info("slideshow removed");
+    }.bind(this);
+
+    function xulLoadListener() {
+      xulBrowser.contentWindow.addEventListener("CloseSlideshow",
+        removeSlideshow);
+      log.info("CloseSlideshow handler added");
+
+      xulBrowser.removeEventListener("load", xulLoadListener, true);
     }
+
+    xulBrowser.addEventListener("load", xulLoadListener, true);
+
+    // XXX we are loading the slideshow page with chrome privs.
+    // To make this remote, we'll need to think through a better
+    // security model.
+    xulBrowser.setAttribute("src",
+      "chrome://loop/content/panels/slideshow.html");
   }),
 
   /**

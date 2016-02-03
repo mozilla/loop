@@ -811,16 +811,13 @@ const kMessageHandlers = {
    *
    * @param {Object}   message Message meant for the handler function, containing
    *                           the following parameters in its `data` property:
-   *                           [
-   *                             {String} src Origin that starts or resumes the tour
-   *                           ]
+   *                           []
    * @param {Function} reply   Callback function, invoked with the result of this
    *                           message handler. The result will be sent back to
    *                           the senders' channel.
    */
   OpenGettingStartedTour: function(message, reply) {
-    var src = message.data[0];
-    MozLoopService.openGettingStartedTour(src);
+    MozLoopService.openGettingStartedTour();
     reply();
   },
 
@@ -1075,7 +1072,11 @@ const LoopAPIInternal = {
 
     Cu.import("resource://gre/modules/RemotePageManager.jsm");
 
-    gPageListeners = [new RemotePages("about:looppanel"), new RemotePages("about:loopconversation")];
+    gPageListeners = [new RemotePages("about:looppanel"),
+      new RemotePages("about:loopconversation"),
+      // Slideshow added here to expose the loop api to make L10n work.
+      // XXX Can remove once slideshow is made remote.
+      new RemotePages("chrome://loop/content/panels/slideshow.html")];
     for (let page of gPageListeners) {
       page.addMessageListener(kMessageName, this.handleMessage.bind(this));
     }

@@ -24,6 +24,18 @@ XPCOMUtils.defineLazyModuleGetter(this, "CustomizableUI",
 XPCOMUtils.defineLazyModuleGetter(this, "Task",
   "resource://gre/modules/Task.jsm");
 
+// See LOG_LEVELS in Console.jsm. Common examples: "All", "Info", "Warn", & "Error".
+const PREF_LOG_LEVEL = "loop.debug.loglevel";
+
+XPCOMUtils.defineLazyGetter(this, "log", () => {
+  let ConsoleAPI = Cu.import("resource://gre/modules/Console.jsm", {}).ConsoleAPI;
+  let consoleOptions = {
+    maxLogLevelPref: PREF_LOG_LEVEL,
+    prefix: "Loop"
+  };
+  return new ConsoleAPI(consoleOptions);
+});
+
 /**
  * This window listener gets loaded into each browser.xul window and is used
  * to provide the required loop functions for the window.
@@ -43,6 +55,7 @@ var WindowListener = {
     let xhrClass = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"];
     let FileReader = window.FileReader;
     let menuItem = null;
+    let isSlideshowOpen = false;
 
     // the "exported" symbols
     var LoopUI = {
@@ -77,6 +90,15 @@ var WindowListener = {
         return browser;
       },
 
+      get isSlideshowOpen() {
+        return isSlideshowOpen;
+      },
+
+      set isSlideshowOpen(aOpen) {
+        log.info("in isSlideshowOpen setter, aOpen = ", aOpen);
+        isSlideshowOpen = aOpen;
+        this.updateToolbarState();
+      },
       /**
        * @return {Object} Getter for the Loop constants
        */
@@ -131,6 +153,10 @@ var WindowListener = {
             this.panel.hidePopup();
             resolve();
           });
+        }
+
+        if (this.isSlideshowOpen) {
+          return Promise.resolve();
         }
 
         return this.openPanel(event).then(mm => {
@@ -349,6 +375,8 @@ var WindowListener = {
         if (this.MozLoopService.errors.size) {
           state = "error";
           mozL10nId += "-error";
+        } else if (this.isSlideshowOpen) {
+          state = "slideshow";
         } else if (this.MozLoopService.screenShareActive) {
           state = "action";
           mozL10nId += "-screensharing";

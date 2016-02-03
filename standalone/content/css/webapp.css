@@ -119,9 +119,84 @@ html[dir="rtl"] .standalone-overlay-wrapper > .standalone-moz-logo {
 }
 
 /**
- * Unsupported/expired views
+ * Warning views
  */
 
+.issue-box {
+  display: block;
+  height: 100%;
+}
+
+.issue-box-content {
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.issue-box-content .info-panel {
+  background: none;
+  border: none;
+  box-shadow: none;
+  margin: 0;
+  max-width: 430px;
+  padding: 0;
+  text-align: start;
+}
+
+.info-panel h1 {
+  color: #666;
+  font-size: 28px;
+  font-weight: normal;
+  line-height: 40px;
+  margin-bottom: 30px;
+  padding: 130px 0 0;
+  position: relative;
+  text-align: center;
+}
+
+.info-panel h1:before {
+  background: url(../img/sad-face.svg) center center;
+  background-size: 93px 90px;
+  content: "";
+  display: block;
+  height: 90px;
+  left: 50%;
+  position: absolute;
+  top: 0;
+  transform: translate(-50%, 0);
+  width: 93px;
+}
+
+/**
+ * Unsupported views
+ */
+
+.issue-unsupported-platform .issue-box-content {
+  width: 550px;
+}
+
+.issue-unsupported-platform .issue-box-content .info-panel {
+  max-width: 550px;
+  text-align: center;
+}
+
+.issue-unsupported-platform.issue-box:after {
+  background: transparent url(../img/Hello_Logo.svg) no-repeat center center;
+  background-size: contain;
+  bottom: 40px;
+  content: '';
+  display: block;
+  height: 31px;
+  left: 50%;
+  position: absolute;
+  transform: translate(-50%, 0);
+  width: 138px;
+}
+
+/**
+* Expired views
+*/
 .highlight-issue-box {
   width: 400px;
   margin: 0 auto;
@@ -298,4 +373,42 @@ html[dir="rtl"] .standalone-overlay-wrapper > .standalone-moz-logo {
 .room-inner-info-area > .terms-service,
 .room-inner-info-area > .terms-service > a {
   color: #999;
+}
+
+@media screen and (max-width:620px) {
+  .issue-unsupported-platform .issue-box-content {
+    width: 100%;
+  }
+
+  .issue-unsupported-platform .issue-box-content .info-panel {
+    margin: auto;
+    max-width: 500px;
+  }
+
+  .issue-unsupported-platform .info-panel h1 {
+    font-size: 20px;
+    line-height: 24px;
+    margin-bottom: 25px;
+    padding: 95px 0 0;
+    text-align: center;
+  }
+
+  .issue-unsupported-platform .info-panel h1:before {
+    background-size: 72px 70px;
+    height: 70px;
+    top: 0;
+    width: 72px;
+  }
+
+  .issue-unsupported-platform.issue-box::after {
+    bottom: 30px;
+    height: 18px;
+    width: 109px;
+  }
+}
+
+@media screen and (max-width:360px) {
+  .issue-unsupported-platform .issue-box-content .info-panel {
+    max-width: 300px;
+  }
 }

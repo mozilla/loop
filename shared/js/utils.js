@@ -191,6 +191,13 @@ var inChrome = typeof Components != "undefined" && "utils" in Components;
       return "blackberry";
     }
 
+    // Checks if the platform is Android. Due to the difficulties of detecting an
+    // android device, we need to rely on window.navigator.userAgent instead of
+    // using window.navigator.platform.
+    if (rootNavigator.userAgent.toLowerCase().indexOf("android") > -1) {
+      return "android";
+    }
+
     return null;
   }
 

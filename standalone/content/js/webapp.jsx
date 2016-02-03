@@ -55,23 +55,13 @@ loop.webapp = (function(_, OT, mozL10n) {
     },
 
     render: function() {
-      var unsupportedDeviceParams = {
-        clientShortname: mozL10n.get("clientShortname2"),
-        platform: mozL10n.get("unsupported_platform_" + this.props.platform)
-      };
-      var unsupportedLearnMoreText = mozL10n.get("unsupported_platform_learn_more_link",
-        { clientShortname: mozL10n.get("clientShortname2") });
-
       return (
-        <div className="highlight-issue-box">
-          <div className="info-panel">
-            <div className="firefox-logo" />
-            <h1>{mozL10n.get("unsupported_platform_heading")}</h1>
-            <h4>{mozL10n.get("unsupported_platform_message", unsupportedDeviceParams)}</h4>
+        <div className="issue-box issue-unsupported-platform">
+          <div className="issue-box-content">
+            <div className="info-panel">
+              <h1>{mozL10n.get("unsupported_platform_message2")}</h1>
+            </div>
           </div>
-          <p>
-            <a className="btn btn-large btn-accept btn-unsupported-device"
-               href={loop.config.unsupportedPlatformUrl}>{unsupportedLearnMoreText}</a></p>
         </div>
       );
     }

@@ -59,6 +59,16 @@ const ROOM_DELETE = {
   DELETE_FAIL: 1
 };
 
+/**
+ * Values that we segment sharing screen pause/ resume action telemetry probes into.
+ *
+ * @type {{PAUSED: Number, RESUMED: Number}}
+ */
+const SHARING_SCREEN = {
+  PAUSED: 0,
+  RESUMED: 1
+};
+
 // See LOG_LEVELS in Console.jsm. Common examples: "All", "Info", "Warn", & "Error".
 const PREF_LOG_LEVEL = "loop.debug.loglevel";
 
@@ -82,11 +92,13 @@ Cu.import("resource://gre/modules/FxAccountsOAuthClient.jsm");
 Cu.importGlobalProperties(["URL"]);
 
 this.EXPORTED_SYMBOLS = ["MozLoopService", "LOOP_SESSION_TYPE",
-  "TWO_WAY_MEDIA_CONN_LENGTH", "SHARING_ROOM_URL", "ROOM_CREATE", "ROOM_DELETE"];
+  "TWO_WAY_MEDIA_CONN_LENGTH", "SHARING_ROOM_URL", "SHARING_SCREEN",
+  "ROOM_CREATE", "ROOM_DELETE"];
 
 XPCOMUtils.defineConstant(this, "LOOP_SESSION_TYPE", LOOP_SESSION_TYPE);
 XPCOMUtils.defineConstant(this, "TWO_WAY_MEDIA_CONN_LENGTH", TWO_WAY_MEDIA_CONN_LENGTH);
 XPCOMUtils.defineConstant(this, "SHARING_ROOM_URL", SHARING_ROOM_URL);
+XPCOMUtils.defineConstant(this, "SHARING_SCREEN", SHARING_SCREEN);
 XPCOMUtils.defineConstant(this, "ROOM_CREATE", ROOM_CREATE);
 XPCOMUtils.defineConstant(this, "ROOM_DELETE", ROOM_DELETE);
 

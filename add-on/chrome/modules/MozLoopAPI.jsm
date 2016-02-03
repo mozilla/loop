@@ -369,6 +369,7 @@ const kMessageHandlers = {
       ROOM_CREATE: ROOM_CREATE,
       ROOM_DELETE: ROOM_DELETE,
       SHARING_ROOM_URL: SHARING_ROOM_URL,
+      SHARING_SCREEN: SHARING_SCREEN,
       TWO_WAY_MEDIA_CONN_LENGTH: TWO_WAY_MEDIA_CONN_LENGTH
     });
   },
@@ -1001,7 +1002,11 @@ const kMessageHandlers = {
    */
   TelemetryAddValue: function(message, reply) {
     let [histogramId, value] = message.data;
-    Services.telemetry.getHistogramById(histogramId).add(value);
+    try {
+      Services.telemetry.getHistogramById(histogramId).add(value);
+    } catch (ex) {
+      MozLoopService.log.error("TelemetryAddValue failed for histogram '" + histogramId + "'", ex);
+    }
     reply();
   }
 };

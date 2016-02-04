@@ -34,7 +34,8 @@ dist: build dist_xpi dist_export dist_standalone
 
 .PHONY: distclean
 distclean: clean
-	rm -fr dist
+	rm -rf dist
+	rm -rf node_modules
 
 .PHONY: distserver
 distserver: remove_old_config dist
@@ -340,6 +341,7 @@ dist_xpi: add-on_dist
 .PHONY: dist_export
 dist_export:
 	rm -rf $(DIST_EXPORT_DIR)
+	@mkdir -p $(DIST_EXPORT_DIR)
 	# Do a basic copy of the add-on.
 	$(RSYNC) $(BUILT)/$(ADD-ON)/* $(DIST_EXPORT_DIR)
 	# Use the install.rdf.in rather than install.rdf.
@@ -418,6 +420,15 @@ runfx:
 
 frontend:
 	@echo "Not implemented yet."
+
+.PHONY: upload_xpi
+upload_xpi:
+	@if [[ -z "${JPM_API_KEY}" || -z "${JPM_API_SECRET}" ]]; then \
+	  echo "JPM_API_KEY and JPM_API_SECRET should be defined"; \
+	  exit 1; \
+	  fi
+	$(NODE_LOCAL_BIN)/jpm sign --api-key=${JPM_API_KEY} --api-secret=${JPM_API_SECRET} \
+	  --xpi $(DIST)/$(XPI_NAME)
 
 # The local node server used for client dev (server.js) used to use a static
 # content/config.js.  Now that information is server up dynamically.  This

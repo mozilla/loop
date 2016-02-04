@@ -36,6 +36,7 @@
     "fs-promise": "0.4.1",
     "fx-runner": "1.0.1",
     "imports-loader": "0.6.5",
+    "jpm": "1.0.5",
     "karma": "0.12.37",
     "karma-chrome-launcher": "0.2.2",
     "karma-coverage": "0.5.3",

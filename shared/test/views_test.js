@@ -50,7 +50,7 @@ describe("loop.shared.views", function() {
           scope: "local",
           type: "audio",
           action: function() {},
-          enabled: true
+          muted: false
         }));
 
       expect(comp.getDOMNode().classList.contains("muted")).eql(false);
@@ -62,7 +62,7 @@ describe("loop.shared.views", function() {
           scope: "local",
           type: "audio",
           action: function() {},
-          enabled: false
+          muted: true
         }));
 
       expect(comp.getDOMNode().classList.contains("muted")).eql(true);
@@ -74,7 +74,7 @@ describe("loop.shared.views", function() {
           scope: "local",
           type: "video",
           action: function() {},
-          enabled: true
+          muted: false
         }));
 
       expect(comp.getDOMNode().classList.contains("muted")).eql(false);
@@ -86,15 +86,123 @@ describe("loop.shared.views", function() {
           scope: "local",
           type: "video",
           action: function() {},
-          enabled: false
+          muted: true
         }));
 
       expect(comp.getDOMNode().classList.contains("muted")).eql(true);
     });
   });
 
+  describe("AudioMuteButton", function() {
+    it("should set the muted class when not enabled", function() {
+      var comp = TestUtils.renderIntoDocument(
+        React.createElement(sharedViews.AudioMuteButton, {
+          muted: true
+        }));
+
+      var node = comp.getDOMNode();
+      expect(node.classList.contains("muted")).eql(true);
+    });
+
+    it("should not set the muted class when enabled", function() {
+      var comp = TestUtils.renderIntoDocument(
+        React.createElement(sharedViews.AudioMuteButton, {
+          muted: false
+        }));
+
+      var node = comp.getDOMNode();
+      expect(node.classList.contains("muted")).eql(false);
+    });
+
+    it("should dispatch SetMute('audio', false) if clicked when audio is disabled",
+      function() {
+        var comp = TestUtils.renderIntoDocument(
+          React.createElement(sharedViews.AudioMuteButton, {
+            dispatcher: dispatcher,
+            muted: false
+          }));
+
+        TestUtils.Simulate.click(comp.getDOMNode());
+
+        sinon.assert.calledOnce(dispatcher.dispatch);
+        sinon.assert.calledWithExactly(dispatcher.dispatch,
+          new sharedActions.SetMute({ type: "audio", enabled: false })
+        );
+      });
+
+    it("should dispatch SetMute('audio', true) if clicked when audio is enabled",
+      function() {
+        var comp = TestUtils.renderIntoDocument(
+          React.createElement(sharedViews.AudioMuteButton, {
+            dispatcher: dispatcher,
+            muted: true
+          }));
+
+        TestUtils.Simulate.click(comp.getDOMNode());
+
+        sinon.assert.calledOnce(dispatcher.dispatch);
+        sinon.assert.calledWithExactly(dispatcher.dispatch,
+          new sharedActions.SetMute({ type: "audio", enabled: true })
+        );
+      });
+  });
+
+describe("VideoMuteButton", function() {
+    it("should set the muted class when not enabled", function() {
+      var comp = TestUtils.renderIntoDocument(
+        React.createElement(sharedViews.VideoMuteButton, {
+          muted: true
+        }));
+
+      var node = comp.getDOMNode();
+      expect(node.classList.contains("muted")).eql(true);
+    });
+
+    it("should not set the muted class when enabled", function() {
+      var comp = TestUtils.renderIntoDocument(
+        React.createElement(sharedViews.VideoMuteButton, {
+          muted: false
+        }));
+
+      var node = comp.getDOMNode();
+      expect(node.classList.contains("muted")).eql(false);
+    });
+
+    it("should dispatch SetMute('audio', false) if clicked when audio is disabled",
+      function() {
+        var comp = TestUtils.renderIntoDocument(
+          React.createElement(sharedViews.VideoMuteButton, {
+            dispatcher: dispatcher,
+            muted: false
+          }));
+
+        TestUtils.Simulate.click(comp.getDOMNode());
+
+        sinon.assert.calledOnce(dispatcher.dispatch);
+        sinon.assert.calledWithExactly(dispatcher.dispatch,
+          new sharedActions.SetMute({ type: "video", enabled: false })
+        );
+      });
+
+    it("should dispatch SetMute('audio', true) if clicked when audio is enabled",
+      function() {
+        var comp = TestUtils.renderIntoDocument(
+          React.createElement(sharedViews.VideoMuteButton, {
+            dispatcher: dispatcher,
+            muted: true
+          }));
+
+        TestUtils.Simulate.click(comp.getDOMNode());
+
+        sinon.assert.calledOnce(dispatcher.dispatch);
+        sinon.assert.calledWithExactly(dispatcher.dispatch,
+          new sharedActions.SetMute({ type: "video", enabled: true })
+        );
+      });
+  });
+
   describe("ConversationToolbar", function() {
-    var hangup, publishStream;
+    var hangup;
 
     function mountTestComponent(props) {
       props = _.extend({
@@ -106,14 +214,12 @@ describe("loop.shared.views", function() {
 
     beforeEach(function() {
       hangup = sandbox.stub();
-      publishStream = sandbox.stub();
     });
 
     it("should start no idle", function() {
       var comp = mountTestComponent({
         hangupButtonLabel: "foo",
-        hangup: hangup,
-        publishStream: publishStream
+        hangup: hangup
       });
       expect(comp.getDOMNode().classList.contains("idle")).eql(false);
     });
@@ -121,8 +227,7 @@ describe("loop.shared.views", function() {
     it("should be on idle state after 6 seconds", function() {
       var comp = mountTestComponent({
         hangupButtonLabel: "foo",
-        hangup: hangup,
-        publishStream: publishStream
+        hangup: hangup
       });
       expect(comp.getDOMNode().classList.contains("idle")).eql(false);
 
@@ -133,8 +238,7 @@ describe("loop.shared.views", function() {
     it("should remove idle state when the user moves the mouse", function() {
       var comp = mountTestComponent({
         hangupButtonLabel: "foo",
-        hangup: hangup,
-        publishStream: publishStream
+        hangup: hangup
       });
 
       clock.tick(6001);
@@ -148,8 +252,7 @@ describe("loop.shared.views", function() {
     it("should accept a showHangup optional prop", function() {
       var comp = mountTestComponent({
         showHangup: false,
-        hangup: hangup,
-        publishStream: publishStream
+        hangup: hangup
       });
 
       expect(comp.getDOMNode().querySelector(".btn-hangup-entry")).to.eql(null);
@@ -158,7 +261,6 @@ describe("loop.shared.views", function() {
     it("should hangup when hangup button is clicked", function() {
       var comp = mountTestComponent({
         hangup: hangup,
-        publishStream: publishStream,
         audio: { enabled: true }
       });
 
@@ -167,62 +269,6 @@ describe("loop.shared.views", function() {
 
       sinon.assert.calledOnce(hangup);
       sinon.assert.calledWithExactly(hangup);
-    });
-
-    it("should unpublish audio when audio mute btn is clicked", function() {
-      var comp = mountTestComponent({
-        hangup: hangup,
-        publishStream: publishStream,
-        audio: { enabled: true }
-      });
-
-      TestUtils.Simulate.click(
-        comp.getDOMNode().querySelector(".btn-mute-audio"));
-
-      sinon.assert.calledOnce(publishStream);
-      sinon.assert.calledWithExactly(publishStream, "audio", false);
-    });
-
-    it("should publish audio when audio mute btn is clicked", function() {
-      var comp = mountTestComponent({
-        hangup: hangup,
-        publishStream: publishStream,
-        audio: { enabled: false }
-      });
-
-      TestUtils.Simulate.click(
-        comp.getDOMNode().querySelector(".btn-mute-audio"));
-
-      sinon.assert.calledOnce(publishStream);
-      sinon.assert.calledWithExactly(publishStream, "audio", true);
-    });
-
-    it("should unpublish video when video mute btn is clicked", function() {
-      var comp = mountTestComponent({
-        hangup: hangup,
-        publishStream: publishStream,
-        video: { enabled: true }
-      });
-
-      TestUtils.Simulate.click(
-        comp.getDOMNode().querySelector(".btn-mute-video"));
-
-      sinon.assert.calledOnce(publishStream);
-      sinon.assert.calledWithExactly(publishStream, "video", false);
-    });
-
-    it("should publish video when video mute btn is clicked", function() {
-      var comp = mountTestComponent({
-        hangup: hangup,
-        publishStream: publishStream,
-        video: { enabled: false }
-      });
-
-      TestUtils.Simulate.click(
-        comp.getDOMNode().querySelector(".btn-mute-video"));
-
-      sinon.assert.calledOnce(publishStream);
-      sinon.assert.calledWithExactly(publishStream, "video", true);
     });
   });
 

@@ -419,20 +419,6 @@ loop.roomViews = (function(mozL10n) {
     },
 
     /**
-     * Used to control publishing a stream - i.e. to mute a stream
-     *
-     * @param {String} type The type of stream, e.g. "audio" or "video".
-     * @param {Boolean} enabled True to enable the stream, false otherwise.
-     */
-    publishStream: function(type, enabled) {
-      this.props.dispatcher.dispatch(
-        new sharedActions.SetMute({
-          type: type,
-          enabled: enabled
-        }));
-    },
-
-    /**
      * Determine if the invitation controls should be shown.
      *
      * @return {Boolean} True if there's no guests.
@@ -586,7 +572,6 @@ loop.roomViews = (function(mozL10n) {
                   audio={{ enabled: !this.state.audioMuted, visible: true }}
                   dispatcher={this.props.dispatcher}
                   hangup={this.leaveRoom}
-                  publishStream={this.publishStream}
                   showHangup={this.props.chatWindowDetached}
                   video={{ enabled: !this.state.videoMuted, visible: true }} />
                 <DesktopRoomInvitationView

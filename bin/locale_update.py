@@ -17,16 +17,25 @@ import io
 import os
 import re
 import shutil
+from git import Repo
 
 # defaults
-DEF_L10N_SRC = os.path.join(os.pardir, "loop-client-l10n", "l10n")
+DEF_L10N_SRC = os.path.join(os.pardir, "loop-client-l10n")
 DEF_L10N_DST = os.path.join("locale")
 DEF_INDEX_FILE_NAME = os.path.join("standalone", "content", os.extsep.join(["index", "html"]))
 DEF_JAR_FILE_NAME = os.path.join("add-on", os.extsep.join(["jar", "mn"]))
 
 
 def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
+    repo = Repo(os.path.abspath(l10n_src))
+
+    print("Updating L10n repo:", l10n_src)
+
+    repo.remotes.origin.pull()
+
     print("deleting existing l10n content tree:", l10n_dst)
+
+    l10n_src_files_dir = os.path.join(l10n_src, "l10n")
 
     old_locale_dirs = os.listdir(l10n_dst)
 
@@ -35,7 +44,7 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
         if dir != "en-US":
             shutil.rmtree(os.path.join(l10n_dst, dir), ignore_errors=True)
 
-    print("updating l10n tree from", l10n_src)
+    print("updating l10n tree from", l10n_src_files_dir)
 
     def create_locale(src_dir):
         # Convert loop-client-l10n repo names to loop repo names.
@@ -45,12 +54,12 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
         # be a later version.
         if dst_dir != "en-US":
             # Copy the l10n files, but ignore any `.keep`
-            shutil.copytree(os.path.join(l10n_src, src_dir),
+            shutil.copytree(os.path.join(l10n_src_files_dir, src_dir),
                             os.path.join(l10n_dst, dst_dir),
                             ignore=shutil.ignore_patterns(".keep"))
         return dst_dir
 
-    locale_dirs = os.listdir(l10n_src)
+    locale_dirs = os.listdir(l10n_src_files_dir)
     locale_list = sorted([create_locale(x) for x in locale_dirs if x[0] != "."])
 
     def filter_locales_with_no_files(locale):
@@ -106,6 +115,10 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
         jar_file.seek(0)
         jar_file.truncate(0)
         jar_file.write(new_content)
+
+    print("Please check the diffs, and then commit the result. Suggested commit message:")
+    print("chore(package): Update L10n from changeset", repo.heads.master.commit.hexsha)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

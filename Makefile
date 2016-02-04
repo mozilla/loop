@@ -357,6 +357,9 @@ dist_export:
 	@mkdir -p $(DIST_EXPORT_DIR)/test/functional
 	$(RSYNC) test/functional/* $(DIST_EXPORT_DIR)/test/functional
 
+.PHONY: update_locale
+update_locale: $(VENV)
+	$(VENV)/bin/python bin/locale_update.py
 
 #
 # Tests

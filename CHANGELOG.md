@@ -1,6 +1,75 @@
 # Changelog
 
-## 0.2.0
+## 0.3.0
+
+### New
+
+* Bug 1154277 - follow-up: hook panel close to content window.close again. r=Standard8. [mikedeboer]
+
+* Bug 1154277: Part 3 - make chat windows run in the content process and re-enable browser sharing. r=Standard8. [mikedeboer]
+
+* Bug 1154277: Part 2 - adjust unit tests to Social API code changes. r=Standard8. [mikedeboer]
+
+* Bug 1154277: Part 1 - introduce a pref to switch e10s support for Loop/ Hello on or off. The default for now is off. r=Standard8. [mikedeboer]
+
+* Bug 1239828 - Update the locale list via the automatic generation. r=Mardak. [Mark Banner]
+
+* Bug 1239828 - Make export work for L10n. Re-arrange L10n to work well with mozilla-central rules. r=Mardak. [Mark Banner]
+
+* Bug 1244539 - Pointer still gets shared when tab sharing is stopped/paused. r=Mardak. [Manuel Casas Barrado]
+
+* Bug 1244744 - Pointer is not visible in standalone on Chrome. r=mancas. [Ed Lee]
+
+* Bug 1240761 - Disabled/grey toolbar icon shown on Windows 10 fix r=standard8. [David Critchley]
+
+* Bug 1210588 - Add a remote cursor view that calculates the cursor position based on video and stream size. r=Mardak. [Manuel Casas Barrado]
+
+* Bug 1210588 - Handle receiving cursor events and video dimension changes in the remote cursor store. r=Mardak. [Manuel Casas Barrado]
+
+* Bug 1210588 - Setup cursor data channels like the text channels and send cursor position. r=Mardak. [Manuel Casas Barrado]
+
+* Bug 1210588 - Listen to mousemove events on desktop to pass to a remote cursor store. r=Mardak. [Manuel Casas Barrado]
+
+* Bug 1234183 - Auto Resize panel height for number of items in Room list. [David Critchley]
+
+* Bug 1244119 - Improve the release process; handle alpha version better and improve locale imports. r=mardak. [Mark Banner]
+
+* Bug 1244055 - Enable browser_mozLoop_telemetry.js in e10s mode. r=mikedeboer. [Mark Banner]
+
+* Bug 1239978 - Change notification copy when someone joins a room. r=mikedeboer. [Manuel Casas Barrado]
+
+* Bug 1242524 - Remove old telemetry hooks from Loop (context add/click and sharing state change) [Manuel Casas Barrado]
+
+* Bug 1239634 - Change some new user journey strings, r=Mardak. [Chris Rafuse]
+
+### Chores
+
+* Update L10n from changeset 46a995eebbc7fd8d2f66eeb83aafaf2aa4f460ee. [Mark Banner]
+
+* Update L10n from changeset ac451eaaae603b8752fbf9e9c77dfa068a147510. [Mark Banner]
+
+* Update fx-runner to version 1.0.1. r=standard8. [greenkeeperio-bot]
+
+* Update fs-promise to version 0.4.1. r=standard8. [greenkeeperio-bot]
+
+* Update mocha to version 2.4.5. r=Standard8. [greenkeeperio-bot]
+
+* Update chai to version 3.5.0. r=Standard8. [greenkeeperio-bot]
+
+* Update express to version 4.13.4. r=Standard8. [greenkeeperio-bot]
+
+* Update mocha to version 2.4.4. r=Standard8. [greenkeeperio-bot]
+
+* Update master's version post 0.2.0 release. [Mark Banner]
+
+### Other
+
+* Fix the tiles support url used for local standalone server instances. rs=dmose. [Mark Banner]
+
+* Fix functional test breakage w/Ubuntu auto-installing add-ons, r=Standard8. [Nils Ohlmeier]
+
+
+## v0.2.0 (2016-01-27)
 
 ### New
 
@@ -81,6 +150,8 @@
 * Update eslint-plugin-react to version 3.15.0. r=Standard8. [greenkeeperio-bot]
 
 ### Other
+
+* 0.2.0. [Mark Banner]
 
 * Backout bug 1239634 / changeset ece8093 - Change some new user journey strings - due to not wanting to release string changes yet. rs=Standard8. [Mark Banner]
 

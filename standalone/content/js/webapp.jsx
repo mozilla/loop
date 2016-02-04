@@ -202,9 +202,13 @@ loop.webapp = (function(_, OT, mozL10n) {
     var textChatStore = new loop.store.TextChatStore(dispatcher, {
       sdkDriver: sdkDriver
     });
+    var remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+      sdkDriver: sdkDriver
+    });
 
     loop.store.StoreMixin.register({
       activeRoomStore: activeRoomStore,
+      remoteCursorStore: remoteCursorStore,
       // This isn't used in any views, but is saved here to ensure it
       // is kept alive.
       standaloneMetricsStore: standaloneMetricsStore,

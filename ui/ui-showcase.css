@@ -131,32 +131,35 @@ body {
   background-color: grey;
 }
 /* SVG icons showcase */
-
-.svg-icons h3 {
-  clear: left;
-}
-
 .svg-icon-list {
-  display: block;
-  margin: .5rem 0;
-  clear: left;
+  display: flex;
+  flex-wrap: wrap;
 }
 
-.svg-icon-entry {
-  width: 180px;
-  float: left;
-  background-color: rgba(255,0,255,.1)
+.svg-icon-list-item {
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: 25%;
+  color: #FFF;
+  margin: 0.1rem;
+  background-color: #000;
 }
 
-.svg-icon-entry > p {
+.svg-icon-list-item > p {
   float: left;
   margin-right: .5rem;
 }
 
-.svg-icon {
-  display: inline-block;
-  margin-left: .5rem;
-  border: 0;
+.svg-icon-list-item > p:first-child {
+  clear: both;
+  margin-left: 5px;
+}
+.svg-icon-list-item > p.svg-icon {
+  padding: 4px;
+}
+
+.svg-icon-list-item > p.svg-icon-white-background {
+  background-color: #FFF;
 }
 
 /* Temporary until bug 1168829 is completed */

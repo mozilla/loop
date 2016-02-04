@@ -131,6 +131,15 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     * Notifies that cursor data has been received from the other peer.
+     */
+    ReceivedCursorData: Action.define("receivedCursorData", {
+      ratioX: Number,
+      ratioY: Number,
+      type: String
+    }),
+
+    /**
      * Used by the ongoing views to notify stores about the elements
      * required for the sdk.
      */
@@ -165,6 +174,13 @@ loop.shared.actions = (function() {
       isLocal: Boolean,
       videoType: String,
       dimensions: Object
+    }),
+
+    /**
+     * Used for notifying that the hasVideo property of the screen stream, has changed.
+     */
+    VideoScreenStreamChanged: Action.define("videoScreenStreamChanged", {
+      hasVideo: Boolean
     }),
 
     /**

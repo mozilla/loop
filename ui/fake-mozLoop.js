@@ -187,6 +187,6 @@ var fakeRooms = [
     "GetLoopPref|gettingStarted.latestFTUVersion": 1,
     "GetLoopPref|legal.ToS_url": null,
     "GetLoopPref|legal.privacy_url": null,
-    IsMultiProcessEnabled: false
+    IsMultiProcessActive: false
   };
 })();

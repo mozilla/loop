@@ -27,7 +27,13 @@ DEF_JAR_FILE_NAME = os.path.join("add-on", os.extsep.join(["jar", "mn"]))
 
 def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
     print("deleting existing l10n content tree:", l10n_dst)
-    shutil.rmtree(l10n_dst, ignore_errors=True)
+
+    old_locale_dirs = os.listdir(l10n_dst)
+
+    for dir in old_locale_dirs:
+        # Ensure we leave en-US alone.
+        if dir != "en-US":
+            shutil.rmtree(os.path.join(l10n_dst, dir), ignore_errors=True)
 
     print("updating l10n tree from", l10n_src)
 
@@ -35,7 +41,13 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
         # Convert loop-client-l10n repo names to loop repo names.
         dst_dir = src_dir.replace('_', '-').replace('templates', 'en-US')
 
-        shutil.copytree(os.path.join(l10n_src, src_dir), os.path.join(l10n_dst, dst_dir))
+        # Don't copy the en-US files. Stick with what's in our tree as that might
+        # be a later version.
+        if dst_dir != "en-US":
+            # Copy the l10n files, but ignore any `.keep`
+            shutil.copytree(os.path.join(l10n_src, src_dir),
+                            os.path.join(l10n_dst, dst_dir),
+                            ignore=shutil.ignore_patterns(".keep"))
         return dst_dir
 
     locale_dirs = os.listdir(l10n_src)
@@ -60,11 +72,26 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
         jar_mn = jar_file.read()
 
         # Replace multiple locale registrations with new locales.
-        jar_locales = ['% locale loop {0} %locale/{0}/'.format(x) for x in locale_list]
+        # The jar.mn preprocessor can't cope with '-' so we add some defines
+        # in so it can handle '_' instead.
+        dashLocales = []
+        for locale in locale_list:
+            if "-" in locale:
+                dashLocales.append('#define {0} {1}'.format(locale.replace("-", "_"), locale))
+
         new_content = re.sub(
-            '(% locale loop .+\n)+',
-            '\n'.join(jar_locales) + '\n',
+            '(#define .+\n)+',
+            '\n'.join(dashLocales) + '\n',
             jar_mn)
+
+        # One big if statement to avoid lots of if/endif lines, and the preprocessor
+        # can't cope with '\' on the end of the line.
+        jar_locales = ['AB_CD == {0}'.format(x.replace("-", "_")) for x in locale_list]
+
+        new_content = re.sub(
+            '(#if AB_CD.+\n)',
+            '#if ' + ' || '.join(jar_locales) + '\n',
+            new_content)
 
         jar_file.seek(0)
         jar_file.truncate(0)

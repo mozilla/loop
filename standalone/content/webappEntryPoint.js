@@ -84,6 +84,7 @@ require("imports?loop=>window.loop!exports?loop!shared/js/urlRegExps.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/textChatStore.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/textChatView.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/linkifiedTextView.js");
+require("imports?loop=>window.loop!exports?loop!shared/js/remoteCursorStore.js");
 
 require("imports?loop=>window.loop!exports?loop!./js/standaloneAppStore.js");
 require("imports?loop=>window.loop!exports?loop!./js/standaloneMozLoop.js");

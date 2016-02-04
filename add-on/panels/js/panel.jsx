@@ -20,17 +20,12 @@ loop.panel = (function(_, mozL10n) {
     handleButtonClick: function() {
       loop.requestMulti(
         ["OpenGettingStartedTour", "getting-started"],
-        ["SetLoopPref", "gettingStarted.latestFTUVersion", FTU_VERSION],
-        ["SetPanelHeight"]).then(function() {
+        ["SetLoopPref", "gettingStarted.latestFTUVersion", FTU_VERSION]
+      ).then(function() {
           var event = new CustomEvent("GettingStartedSeen");
           window.dispatchEvent(event);
         }.bind(this));
       this.closeWindow();
-    },
-
-    componentWillMount: function() {
-      // Set 553 pixel height to show the full FTU panel content.
-      loop.request("SetPanelHeight", 553);
     },
 
     render: function() {
@@ -712,11 +707,15 @@ loop.panel = (function(_, mozL10n) {
      * @returns {Object} React render
      */
     _renderLoadingRoomsView: function() {
+      /* XXX should refactor and separate "rooms" amd perhaps room-list so that
+      we arent duplicating those elements all over */
       return (
-        <div className="room-list">
+        <div className="rooms">
           {this._renderNewRoomButton()}
-          <div className="room-list-loading">
-            <img src="shared/img/animated-spinner.svg" />
+          <div className="room-list">
+            <div className="room-list-loading">
+              <img src="shared/img/animated-spinner.svg" />
+            </div>
           </div>
         </div>
       );
@@ -731,7 +730,20 @@ loop.panel = (function(_, mozL10n) {
       );
     },
 
+    _addListGradientIfNeeded: function() {
+      if (this.state.rooms.length > 5) {
+        return (<div className="room-list-blur" />);
+      }
+    },
+
     render: function() {
+      var roomListClasses = classNames({
+        "room-list": true,
+        // add extra space to last item so when scrolling to bottom,
+        // last item is not covered by the gradient
+        "room-list-add-space": (this.state.rooms.length && this.state.rooms.length > 5)
+      });
+
       if (this.state.error) {
         // XXX Better end user reporting of errors.
         console.error("RoomList error", this.state.error);
@@ -749,8 +761,9 @@ loop.panel = (function(_, mozL10n) {
               "rooms_list_recently_browsed2" :
               "rooms_list_currently_browsing2")}</h1>
           }
-          {!this.state.rooms.length ? null :
-            <div className="room-list">{
+          {!this.state.rooms.length ?
+            <div className="room-list-empty" /> :
+            <div className={roomListClasses}>{
               this.state.rooms.map(function(room) {
                 if (this.state.openedRoom !== null &&
                     room.roomToken !== this.state.openedRoom) {
@@ -765,8 +778,10 @@ loop.panel = (function(_, mozL10n) {
                     room={room} />
                 );
               }, this)
-            }</div>
+            }
+            </div>
           }
+          {this._addListGradientIfNeeded()}
         </div>
       );
     }
@@ -861,6 +876,10 @@ loop.panel = (function(_, mozL10n) {
       onClick: React.PropTypes.func.isRequired
     },
 
+    componentWillMount: function() {
+      loop.request("SetPanelHeight", 262);
+    },
+
     render: function() {
       return (
         <div className="error-content">
@@ -907,7 +926,8 @@ loop.panel = (function(_, mozL10n) {
         hasEncryptionKey: loop.getStoredRequest(["GetHasEncryptionKey"]),
         userProfile: loop.getStoredRequest(["GetUserProfile"]),
         gettingStartedSeen: loop.getStoredRequest(["GetLoopPref", "gettingStarted.latestFTUVersion"]) >= FTU_VERSION,
-        multiProcessEnabled: loop.getStoredRequest(["IsMultiProcessEnabled"])
+        multiProcessActive: loop.getStoredRequest(["IsMultiProcessActive"]),
+        remoteAutoStart: loop.getStoredRequest(["GetLoopPref", "remote.autostart"])
       };
     },
 
@@ -999,7 +1019,7 @@ loop.panel = (function(_, mozL10n) {
     render: function() {
       var NotificationListView = sharedViews.NotificationListView;
 
-      if (this.state.multiProcessEnabled) {
+      if (this.state.multiProcessActive && !this.state.remoteAutoStart) {
         return (
           <E10sNotSupported onClick={this.launchNonE10sWindow} />
         );
@@ -1056,11 +1076,12 @@ loop.panel = (function(_, mozL10n) {
       ["GetLoopPref", "gettingStarted.latestFTUVersion"],
       ["GetLoopPref", "legal.ToS_url"],
       ["GetLoopPref", "legal.privacy_url"],
+      ["GetLoopPref", "remote.autostart"],
       ["GetUserProfile"],
       ["GetFxAEnabled"],
       ["GetDoNotDisturb"],
       ["GetHasEncryptionKey"],
-      ["IsMultiProcessEnabled"]
+      ["IsMultiProcessActive"]
     ];
 
     return loop.requestMulti.apply(null, requests.concat(prefetch)).then(function(results) {

@@ -1,100 +1,35 @@
+#filter substitution
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+# These are used for the big if statement, as the preprocessor can't handle
+# dashes.
+#define bn_BD bn-BD
+#define bn_IN bn-IN
+#define en_GB en-GB
+#define en_US en-US
+#define es_AR es-AR
+#define es_CL es-CL
+#define es_ES es-ES
+#define es_MX es-MX
+#define fy_NL fy-NL
+#define gu_IN gu-IN
+#define hi_IN hi-IN
+#define hy_AM hy-AM
+#define nb_NO nb-NO
+#define ne_NP ne-NP
+#define pa_IN pa-IN
+#define pt_BR pt-BR
+#define pt_PT pt-PT
+#define sv_SE sv-SE
+#define zh_CN zh-CN
+#define zh_TW zh-TW
+
 [features/loop@mozilla.org] chrome.jar:
 % content loop %content/ contentaccessible=yes
-% content loop-locale-fallback %locale/en-US/
-% locale loop af %locale/af/
-% locale loop ar %locale/ar/
-% locale loop as %locale/as/
-% locale loop ast %locale/ast/
-% locale loop az %locale/az/
-% locale loop be %locale/be/
-% locale loop bg %locale/bg/
-% locale loop bn-BD %locale/bn-BD/
-% locale loop bn-IN %locale/bn-IN/
-% locale loop bs %locale/bs/
-% locale loop ca %locale/ca/
-% locale loop cs %locale/cs/
-% locale loop cy %locale/cy/
-% locale loop da %locale/da/
-% locale loop de %locale/de/
-% locale loop dsb %locale/dsb/
-% locale loop el %locale/el/
-% locale loop en-GB %locale/en-GB/
-% locale loop en-US %locale/en-US/
-% locale loop eo %locale/eo/
-% locale loop es-AR %locale/es-AR/
-% locale loop es-CL %locale/es-CL/
-% locale loop es-ES %locale/es-ES/
-% locale loop es-MX %locale/es-MX/
-% locale loop et %locale/et/
-% locale loop eu %locale/eu/
-% locale loop fa %locale/fa/
-% locale loop ff %locale/ff/
-% locale loop fi %locale/fi/
-% locale loop fr %locale/fr/
-% locale loop fy %locale/fy/
-% locale loop fy-NL %locale/fy-NL/
-% locale loop ga %locale/ga/
-% locale loop gd %locale/gd/
-% locale loop gl %locale/gl/
-% locale loop gu-IN %locale/gu-IN/
-% locale loop he %locale/he/
-% locale loop hi-IN %locale/hi-IN/
-% locale loop hr %locale/hr/
-% locale loop hsb %locale/hsb/
-% locale loop ht %locale/ht/
-% locale loop hu %locale/hu/
-% locale loop hy-AM %locale/hy-AM/
-% locale loop id %locale/id/
-% locale loop it %locale/it/
-% locale loop ja %locale/ja/
-% locale loop kk %locale/kk/
-% locale loop km %locale/km/
-% locale loop kn %locale/kn/
-% locale loop ko %locale/ko/
-% locale loop ku %locale/ku/
-% locale loop lij %locale/lij/
-% locale loop lt %locale/lt/
-% locale loop lv %locale/lv/
-% locale loop mk %locale/mk/
-% locale loop ml %locale/ml/
-% locale loop mn %locale/mn/
-% locale loop ms %locale/ms/
-% locale loop my %locale/my/
-% locale loop nb-NO %locale/nb-NO/
-% locale loop ne-NP %locale/ne-NP/
-% locale loop nl %locale/nl/
-% locale loop or %locale/or/
-% locale loop pa %locale/pa/
-% locale loop pa-IN %locale/pa-IN/
-% locale loop pl %locale/pl/
-% locale loop pt %locale/pt/
-% locale loop pt-BR %locale/pt-BR/
-% locale loop pt-PT %locale/pt-PT/
-% locale loop rm %locale/rm/
-% locale loop ro %locale/ro/
-% locale loop ru %locale/ru/
-% locale loop si %locale/si/
-% locale loop sk %locale/sk/
-% locale loop sl %locale/sl/
-% locale loop son %locale/son/
-% locale loop sq %locale/sq/
-% locale loop sr %locale/sr/
-% locale loop sv-SE %locale/sv-SE/
-% locale loop ta %locale/ta/
-% locale loop te %locale/te/
-% locale loop th %locale/th/
-% locale loop tr %locale/tr/
-% locale loop uk %locale/uk/
-% locale loop ur %locale/ur/
-% locale loop vi %locale/vi/
-% locale loop xh %locale/xh/
-% locale loop zh-CN %locale/zh-CN/
-% locale loop zh-TW %locale/zh-TW/
-% locale loop zu %locale/zu/
+% content loop-locale-fallback %content/locale-fallback/en-US/
+% locale loop @AB_CD@ %locale/@AB_CD@/
 % skin loop classic/1.0 %skin/linux/ os=Linux
 % skin loop classic/1.0 %skin/osx/ os=Darwin
 % skin loop classic/1.0 %skin/windows/ os=WINNT
@@ -103,6 +38,7 @@
 % override chrome://loop/skin/menuPanel@2x.png    chrome://loop/skin/menuPanel-yosemite@2x.png    os=Darwin osversion>=10.10
 % override chrome://loop/skin/toolbar.png         chrome://loop/skin/toolbar-yosemite.png         os=Darwin osversion>=10.10
 % override chrome://loop/skin/toolbar@2x.png      chrome://loop/skin/toolbar-yosemite@2x.png      os=Darwin osversion>=10.10
+# Windows 10+ uses the default toolbar.png
 % override chrome://loop/skin/menuPanel.png       chrome://loop/skin/menuPanel-aero.png           os=WINNT osversion=6
 % override chrome://loop/skin/menuPanel.png       chrome://loop/skin/menuPanel-aero.png           os=WINNT osversion=6.1
 % override chrome://loop/skin/menuPanel@2x.png    chrome://loop/skin/menuPanel-aero@2x.png        os=WINNT osversion=6
@@ -110,14 +46,23 @@
 % override chrome://loop/skin/toolbar.png         chrome://loop/skin/toolbar-XP.png               os=WINNT osversion<6
 % override chrome://loop/skin/toolbar.png         chrome://loop/skin/toolbar-aero.png             os=WINNT osversion=6
 % override chrome://loop/skin/toolbar.png         chrome://loop/skin/toolbar-aero.png             os=WINNT osversion=6.1
-% override chrome://loop/skin/toolbar.png         chrome://loop/skin/toolbar-win10.png            os=WINNT osversion=6.2
-% override chrome://loop/skin/toolbar.png         chrome://loop/skin/toolbar-win10.png            os=WINNT osversion=6.3
+% override chrome://loop/skin/toolbar.png         chrome://loop/skin/toolbar-win8.png            os=WINNT osversion=6.2
+% override chrome://loop/skin/toolbar.png         chrome://loop/skin/toolbar-win8.png            os=WINNT osversion=6.3
 % override chrome://loop/skin/toolbar@2x.png      chrome://loop/skin/toolbar-XP@2x.png            os=WINNT osversion<6
 % override chrome://loop/skin/toolbar@2x.png      chrome://loop/skin/toolbar-aero@2x.png          os=WINNT osversion=6
 % override chrome://loop/skin/toolbar@2x.png      chrome://loop/skin/toolbar-aero@2x.png          os=WINNT osversion=6.1
-% override chrome://loop/skin/toolbar@2x.png      chrome://loop/skin/toolbar-win10@2x.png         os=WINNT osversion=6.2
-% override chrome://loop/skin/toolbar@2x.png      chrome://loop/skin/toolbar-win10@2x.png         os=WINNT osversion=6.3
-  locale/                        (chrome/locale/*)
+% override chrome://loop/skin/toolbar@2x.png      chrome://loop/skin/toolbar-win8@2x.png         os=WINNT osversion=6.2
+% override chrome://loop/skin/toolbar@2x.png      chrome://loop/skin/toolbar-win8@2x.png         os=WINNT osversion=6.3
+  # Due to the way Loop's L10n works, we include a fallback to en-US.
+  content/locale-fallback/en-US/          (chrome/locale/en-US/*)
+  # For locales we support, include the file from the locale's directory in the
+  # source tree.
+  # For other locales (and en-US) fallback to the en-US directory.
+#if AB_CD == af || AB_CD == ar || AB_CD == as || AB_CD == ast || AB_CD == az || AB_CD == be || AB_CD == bg || AB_CD == bn_BD || AB_CD == bn_IN || AB_CD == bs || AB_CD == ca || AB_CD == cs || AB_CD == cy || AB_CD == da || AB_CD == de || AB_CD == dsb || AB_CD == el || AB_CD == en_GB || AB_CD == en_US || AB_CD == eo || AB_CD == es_AR || AB_CD == es_CL || AB_CD == es_ES || AB_CD == es_MX || AB_CD == et || AB_CD == eu || AB_CD == fa || AB_CD == ff || AB_CD == fi || AB_CD == fr || AB_CD == fy || AB_CD == fy_NL || AB_CD == ga || AB_CD == gd || AB_CD == gl || AB_CD == gu_IN || AB_CD == he || AB_CD == hi_IN || AB_CD == hr || AB_CD == hsb || AB_CD == ht || AB_CD == hu || AB_CD == hy_AM || AB_CD == id || AB_CD == it || AB_CD == ja || AB_CD == kk || AB_CD == km || AB_CD == kn || AB_CD == ko || AB_CD == ku || AB_CD == lij || AB_CD == lt || AB_CD == lv || AB_CD == mk || AB_CD == ml || AB_CD == mn || AB_CD == ms || AB_CD == my || AB_CD == nb_NO || AB_CD == ne_NP || AB_CD == nl || AB_CD == or || AB_CD == pa || AB_CD == pa_IN || AB_CD == pl || AB_CD == pt || AB_CD == pt_BR || AB_CD == pt_PT || AB_CD == rm || AB_CD == ro || AB_CD == ru || AB_CD == si || AB_CD == sk || AB_CD == sl || AB_CD == son || AB_CD == sq || AB_CD == sr || AB_CD == sv_SE || AB_CD == ta || AB_CD == te || AB_CD == th || AB_CD == tr || AB_CD == uk || AB_CD == ur || AB_CD == vi || AB_CD == xh || AB_CD == zh_CN || AB_CD == zh_TW || AB_CD == zu
+  locale/@AB_CD@/                (chrome/locale/@AB_CD@/*)
+#else
+  locale/@AB_CD@/                (chrome/locale/en-US/*)
+#endif
   skin/                          (chrome/skin/*)
   content/modules/               (chrome/content/modules/*)
 # We don't package the test/ directory for panels, so do these separately.

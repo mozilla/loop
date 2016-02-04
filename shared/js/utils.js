@@ -109,6 +109,10 @@ var inChrome = typeof Components != "undefined" && "utils" in Components;
     CONTEXT_TILE: "context-tile"
   };
 
+  var CURSOR_MESSAGE_TYPES = {
+    POSITION: "cursor-position"
+  };
+
   /**
    * Format a given date into an l10n-friendly string.
    *
@@ -758,6 +762,7 @@ var inChrome = typeof Components != "undefined" && "utils" in Components;
   this.utils = {
     CALL_TYPES: CALL_TYPES,
     CHAT_CONTENT_TYPES: CHAT_CONTENT_TYPES,
+    CURSOR_MESSAGE_TYPES: CURSOR_MESSAGE_TYPES,
     FAILURE_DETAILS: FAILURE_DETAILS,
     REST_ERRNOS: REST_ERRNOS,
     STREAM_PROPERTIES: STREAM_PROPERTIES,

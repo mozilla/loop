@@ -53,6 +53,16 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
     locale_dirs = os.listdir(l10n_src)
     locale_list = sorted([create_locale(x) for x in locale_dirs if x[0] != "."])
 
+    def filter_locales_with_no_files(locale):
+        files = os.listdir(os.path.join(l10n_dst, locale))
+
+        # Find just the .properties files.
+        files = [file for file in files if ".properties" in file]
+
+        return len(files) != 0
+
+    locale_list = [x for x in locale_list if filter_locales_with_no_files(x)]
+
     print("updating locales list in", index_file_name)
     with io.open(index_file_name, "r+") as index_file:
         index_html = index_file.read()

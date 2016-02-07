@@ -27,9 +27,19 @@ loop.conversation = (function(mozL10n) {
     ],
 
     propTypes: {
-      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore),
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       roomStore: React.PropTypes.instanceOf(loop.store.RoomStore)
+    },
+
+    componentWillMount: function() {
+      this.listenTo(this.props.cursorStore, "change:remoteCursorPosition",
+                    this._onRemoteCursorChange);
+    },
+
+    _onRemoteCursorChange: function() {
+      return loop.request("AddRemoteCursorOverlay",
+                          this.props.cursorStore.getStoreState("remoteCursorPosition"));
     },
 
     getInitialState: function() {

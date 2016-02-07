@@ -186,6 +186,30 @@ const kMessageHandlers = {
   },
 
   /**
+   * Creates a layout for the remote cursor on the browser chrome,
+   * and positions it on the received coordinates.
+   *
+   * @param {Object}  message Message meant for the handler function, containing
+   *                          the following parameters in its 'data' property:
+   *                          {
+   *                            ratioX: cursor's X position (between 0-1)
+   *                            ratioY: cursor's Y position (between 0-1)
+   *                          }
+   *
+   * @param {Function} reply  Callback function, invoked with the result of the
+   *                          message handler. The result will be sent back to
+   *                          the senders' channel.
+   */
+  AddRemoteCursorOverlay: function(message, reply) {
+    let win = Services.wm.getMostRecentWindow("navigator:browser");
+    if (win) {
+      win.LoopUI.addRemoteCursor(message.data[0]);
+    }
+
+    reply();
+  },
+
+  /**
    * Associates a session-id and a call-id with a window for debugging.
    *
    * @param {Object}   message Message meant for the handler function, containing

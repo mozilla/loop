@@ -40,6 +40,7 @@ loop.store.RemoteCursorStore = (function() {
       }
 
       this._sdkDriver = options.sdkDriver;
+
       loop.subscribe("CursorPositionChange",
                      this._cursorPositionChangeListener.bind(this));
     },
@@ -63,7 +64,7 @@ loop.store.RemoteCursorStore = (function() {
      *                       - ratioY: Top position. Number between 0 and 1.
      */
     _cursorPositionChangeListener: function(event) {
-      this._sdkDriver.sendCursorMessage({
+      this.sendCursorData({
         ratioX: event.ratioX,
         ratioY: event.ratioY,
         type: CURSOR_MESSAGE_TYPES.POSITION
@@ -97,7 +98,6 @@ loop.store.RemoteCursorStore = (function() {
     receivedCursorData: function(actionData) {
       switch (actionData.type) {
         case CURSOR_MESSAGE_TYPES.POSITION:
-          // TODO: handle cursor position if it's desktop instead of standalone
           this.setStoreState({
             remoteCursorPosition: {
               ratioX: actionData.ratioX,

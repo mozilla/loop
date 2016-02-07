@@ -147,7 +147,7 @@ describe("loop.conversation", function() {
   });
 
   describe("AppControllerView", function() {
-    var activeRoomStore, ccView;
+    var activeRoomStore, ccView, addRemoteCursorStub;
     var conversationAppStore,
         roomStore,
         feedbackPeriodMs = 15770000000;
@@ -157,8 +157,8 @@ describe("loop.conversation", function() {
       return TestUtils.renderIntoDocument(
         React.createElement(loop.conversation.AppControllerView, {
           cursorStore: remoteCursorStore,
-          roomStore: roomStore,
-          dispatcher: dispatcher
+          dispatcher: dispatcher,
+          roomStore: roomStore
         }));
     }
 
@@ -185,10 +185,41 @@ describe("loop.conversation", function() {
       loop.store.StoreMixin.register({
         conversationAppStore: conversationAppStore
       });
+
+      addRemoteCursorStub = sandbox.stub();
+      LoopMochaUtils.stubLoopRequest({
+        AddRemoteCursorOverlay: addRemoteCursorStub
+      });
     });
 
     afterEach(function() {
       ccView = undefined;
+    });
+
+    it("should request AddRemoteCursorOverlay when cursor position changes", function() {
+
+      mountTestComponent();
+      remoteCursorStore.setStoreState({
+        "remoteCursorPosition": {
+          "ratioX": 10,
+          "ratioY": 10
+        }
+      });
+
+      sinon.assert.calledOnce(addRemoteCursorStub);
+    });
+
+    it("should NOT request AddRemoteCursorOverlay when cursor position DOES NOT changes", function() {
+
+      mountTestComponent();
+      remoteCursorStore.setStoreState({
+        "realVideoSize": {
+          "height": 400,
+          "width": 600
+        }
+      });
+
+      sinon.assert.notCalled(addRemoteCursorStub);
     });
 
     it("should display the RoomView for rooms", function() {

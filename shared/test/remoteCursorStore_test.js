@@ -67,11 +67,14 @@ describe("loop.store.RemoteCursorStore", function() {
   });
 
   describe("#sendCursorData", function() {
-    it("should do nothing if not a mouse position event", function() {
+    it("should do nothing if not a proper event", function() {
       var fakeData = {
-        type: "not-a-position=event"
+        ratioX: 10,
+        ratioY: 10,
+        type: "not-a-position-event"
       };
-      store.sendCursorData(fakeData);
+
+      store.sendCursorData(new sharedActions.SendCursorData(fakeData));
 
       sinon.assert.notCalled(fakeSdkDriver.sendCursorMessage);
     });
@@ -83,11 +86,12 @@ describe("loop.store.RemoteCursorStore", function() {
         type: CURSOR_MESSAGE_TYPES.POSITION
       };
 
-      store.sendCursorData(fakeData);
+      store.sendCursorData(new sharedActions.SendCursorData(fakeData));
 
       sinon.assert.calledOnce(fakeSdkDriver.sendCursorMessage);
       sinon.assert.calledWith(fakeSdkDriver.sendCursorMessage, {
-        type: CURSOR_MESSAGE_TYPES.POSITION,
+        name: "sendCursorData",
+        type: fakeData.type,
         ratioX: fakeData.ratioX,
         ratioY: fakeData.ratioY
       });
@@ -95,6 +99,19 @@ describe("loop.store.RemoteCursorStore", function() {
   });
 
   describe("#receivedCursorData", function() {
+
+    it("should do nothing if not a proper event", function() {
+      sandbox.stub(store, "setStoreState");
+
+      store.receivedCursorData(new sharedActions.ReceivedCursorData({
+        ratioX: 10,
+        ratioY: 10,
+        type: "not-a-position-event"
+      }));
+
+      sinon.assert.notCalled(store.setStoreState);
+    });
+
     it("should save the state", function() {
       store.receivedCursorData(new sharedActions.ReceivedCursorData({
         type: CURSOR_MESSAGE_TYPES.POSITION,

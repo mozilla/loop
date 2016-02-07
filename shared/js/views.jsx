@@ -684,6 +684,12 @@ loop.shared.views = (function(_, mozL10n) {
 
       this.lastCursorX = deltaX;
       this.lastCursorY = deltaY;
+
+      this.props.dispatcher.dispatch(new sharedActions.SendCursorData({
+        ratioX: deltaX / storeState.streamVideoWidth,
+        ratioY: deltaY / storeState.streamVideoHeight,
+        type: loop.shared.utils.CURSOR_MESSAGE_TYPES.POSITION
+      }));
     },
 
     /**

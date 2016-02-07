@@ -131,6 +131,15 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     *  Used to send cursor data to the other peer
+     */
+    SendCursorData: Action.define("sendCursorData", {
+      ratioX: Number,
+      ratioY: Number,
+      type: String
+    }),
+
+    /**
      * Notifies that cursor data has been received from the other peer.
      */
     ReceivedCursorData: Action.define("receivedCursorData", {

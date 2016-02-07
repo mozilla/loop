@@ -66,6 +66,34 @@ describe("loop.store.RemoteCursorStore", function() {
     });
   });
 
+  describe("#sendCursorData", function() {
+    it("should do nothing if not a mouse position event", function() {
+      var fakeData = {
+        type: "not-a-position=event"
+      };
+      store.sendCursorData(fakeData);
+
+      sinon.assert.notCalled(fakeSdkDriver.sendCursorMessage);
+    });
+
+    it("should send cursor data through the sdk", function() {
+      var fakeData = {
+        ratioX: 10,
+        ratioY: 10,
+        type: CURSOR_MESSAGE_TYPES.POSITION
+      };
+
+      store.sendCursorData(fakeData);
+
+      sinon.assert.calledOnce(fakeSdkDriver.sendCursorMessage);
+      sinon.assert.calledWith(fakeSdkDriver.sendCursorMessage, {
+        type: CURSOR_MESSAGE_TYPES.POSITION,
+        ratioX: fakeData.ratioX,
+        ratioY: fakeData.ratioY
+      });
+    });
+  });
+
   describe("#receivedCursorData", function() {
     it("should save the state", function() {
       store.receivedCursorData(new sharedActions.ReceivedCursorData({

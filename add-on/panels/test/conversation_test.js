@@ -148,12 +148,15 @@ describe("loop.conversation", function() {
 
   describe("AppControllerView", function() {
     var activeRoomStore, ccView;
-    var conversationAppStore, roomStore, feedbackPeriodMs = 15770000000;
+    var conversationAppStore,
+        roomStore,
+        feedbackPeriodMs = 15770000000;
     var ROOM_STATES = loop.store.ROOM_STATES;
 
     function mountTestComponent() {
       return TestUtils.renderIntoDocument(
         React.createElement(loop.conversation.AppControllerView, {
+          cursorStore: remoteCursorStore,
           roomStore: roomStore,
           dispatcher: dispatcher
         }));
@@ -167,6 +170,9 @@ describe("loop.conversation", function() {
       roomStore = new loop.store.RoomStore(dispatcher, {
         activeRoomStore: activeRoomStore,
         constants: {}
+      });
+      remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+        sdkDriver: {}
       });
       conversationAppStore = new loop.store.ConversationAppStore({
         activeRoomStore: activeRoomStore,

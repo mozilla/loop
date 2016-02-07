@@ -406,6 +406,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
       // We pass conversationStore here rather than use the mixin, to allow
       // easy configurability for the ui-showcase.
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isFirefox: React.PropTypes.bool.isRequired,
       // The poster URLs are for UI-showcase testing and development
@@ -610,6 +611,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
       return (
         <div className="room-conversation-wrapper standalone-room-wrapper">
           <sharedViews.MediaLayoutView
+            cursorStore={this.props.cursorStore}
             dispatcher={this.props.dispatcher}
             displayScreenShare={displayScreenShare}
             isLocalLoading={this._isLocalLoading()}
@@ -695,6 +697,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
     ],
 
     propTypes: {
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isFirefox: React.PropTypes.bool.isRequired
     },
@@ -719,6 +722,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
       return (
         <StandaloneRoomView
           activeRoomStore={this.getStore()}
+          cursorStore={this.props.cursorStore}
           dispatcher={this.props.dispatcher}
           isFirefox={this.props.isFirefox} />
       );

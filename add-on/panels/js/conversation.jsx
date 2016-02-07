@@ -27,6 +27,7 @@ loop.conversation = (function(mozL10n) {
     ],
 
     propTypes: {
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore),
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       roomStore: React.PropTypes.instanceOf(loop.store.RoomStore)
     },
@@ -69,6 +70,7 @@ loop.conversation = (function(mozL10n) {
         case "room": {
           return (<DesktopRoomConversationView
             chatWindowDetached={this.state.chatWindowDetached}
+            cursorStore={this.props.cursorStore}
             dispatcher={this.props.dispatcher}
             facebookEnabled={this.state.facebookEnabled}
             onCallTerminated={this.handleCallTerminated}
@@ -200,6 +202,7 @@ loop.conversation = (function(mozL10n) {
 
       React.render(
         <AppControllerView
+          cursorStore={remoteCursorStore}
           dispatcher={dispatcher}
           roomStore={roomStore} />, document.querySelector("#main"));
 

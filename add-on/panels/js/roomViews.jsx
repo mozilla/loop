@@ -370,6 +370,7 @@ loop.roomViews = (function(mozL10n) {
 
     propTypes: {
       chatWindowDetached: React.PropTypes.bool.isRequired,
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       facebookEnabled: React.PropTypes.bool.isRequired,
       // The poster URLs are for UI-showcase testing and development.
@@ -557,6 +558,7 @@ loop.roomViews = (function(mozL10n) {
             <div className="room-conversation-wrapper desktop-room-wrapper"
               onContextMenu={this.handleContextMenu}>
               <sharedViews.MediaLayoutView
+                cursorStore={this.props.cursorStore}
                 dispatcher={this.props.dispatcher}
                 displayScreenShare={false}
                 isLocalLoading={this._isLocalLoading()}

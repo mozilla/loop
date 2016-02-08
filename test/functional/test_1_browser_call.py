@@ -81,7 +81,7 @@ class Test1BrowserCall(MarionetteTestCase):
         # for Marionette bug 1094246 to be fixed.
         chatbox = self.wait_for_element_exists(By.TAG_NAME, 'chatbox')
         script = ("return document.getAnonymousElementByAttribute("
-                  "arguments[0], 'class', 'chat-frame');")
+                  "arguments[0], 'anonid', 'content');")
         frame = self.marionette.execute_script(script, [chatbox])
         self.marionette.switch_to_frame(frame)
 
@@ -216,8 +216,8 @@ class Test1BrowserCall(MarionetteTestCase):
         chatbox = self.wait_for_element_exists(By.TAG_NAME, 'chatbox')
         script = '''
             let chatBrowser = document.getAnonymousElementByAttribute(
-              arguments[0], 'class',
-              'chat-frame')
+              arguments[0], 'anonid',
+              'content')
 
             // note that using wrappedJSObject waives X-ray vision, which
             // has security implications, but because we trust the code

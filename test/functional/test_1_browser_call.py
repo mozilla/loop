@@ -12,7 +12,7 @@ sys.path.insert(1, os.path.dirname(os.path.abspath(__file__)))
 import pyperclip
 
 from serversetup import LoopTestServers
-from config import *
+from config import FIREFOX_PREFERENCES
 
 
 class Test1BrowserCall(MarionetteTestCase):
@@ -130,7 +130,7 @@ class Test1BrowserCall(MarionetteTestCase):
     # Assumes the standalone or the conversation window is selected first.
     def check_video(self, selector):
         video = self.wait_for_element_displayed(By.CSS_SELECTOR,
-                                                        selector, 20)
+                                                selector, 20)
         self.wait_for_element_attribute_to_be_false(video, "paused")
         self.assertEqual(video.get_attribute("ended"), "false")
 

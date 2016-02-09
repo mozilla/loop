@@ -322,7 +322,10 @@ loop.store = loop.store || {};
         console.error("No URL sharing type bucket found for '" + from + "'");
         return;
       }
-      loop.request("TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket);
+      loop.requestMulti(
+        ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
+        ["TelemetryAddValue", "LOOP_MAU", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
+      );
     },
 
     /**
@@ -344,7 +347,8 @@ loop.store = loop.store || {};
       }
       loop.requestMulti(
         ["NotifyUITour", "Loop:RoomURLEmailed"],
-        ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket]
+        ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
+        ["TelemetryAddValue", "LOOP_MAU", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
       );
     },
 
@@ -381,7 +385,10 @@ loop.store = loop.store || {};
         console.error("No URL sharing type bucket found for '" + from + "'");
         return;
       }
-      loop.request("TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket);
+      loop.requestMulti(
+        ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
+        ["TelemetryAddValue", "LOOP_MAU", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
+      );
     },
 
     /**
@@ -435,8 +442,11 @@ loop.store = loop.store || {};
           this.dispatchAction(new sharedActions.DeleteRoomError({ error: result }));
         }
         var buckets = this._constants.ROOM_DELETE;
-        loop.request("TelemetryAddValue", "LOOP_ROOM_DELETE", buckets[isError ?
-          "DELETE_FAIL" : "DELETE_SUCCESS"]);
+        loop.requestMulti(
+          ["TelemetryAddValue", "LOOP_ROOM_DELETE", buckets[isError ?
+            "DELETE_FAIL" : "DELETE_SUCCESS"]],
+          ["TelemetryAddValue", "LOOP_MAU", this._constants.LOOP_MAU_TYPE.ROOM_DELETE]
+        );
       }.bind(this));
     },
 
@@ -499,7 +509,10 @@ loop.store = loop.store || {};
      * @param {sharedActions.OpenRoom} actionData The action data.
      */
     openRoom: function(actionData) {
-      loop.request("Rooms:Open", actionData.roomToken);
+      loop.requestMulti(
+        ["Rooms:Open", actionData.roomToken],
+        ["TelemetryAddValue", "LOOP_MAU", this._constants.LOOP_MAU_TYPE.ROOM_OPEN]
+      );
     },
 
     /**

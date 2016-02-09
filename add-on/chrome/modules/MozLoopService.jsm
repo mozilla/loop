@@ -69,6 +69,20 @@ const SHARING_SCREEN = {
   RESUMED: 1
 };
 
+ /**
+ * Values that we segment MAUs telemetry probes into.
+ *
+ * @type {{OPEN_PANEL: Number, OPEN_CONVERSATION: Number,
+ *        ROOM_OPEN: Number, ROOM_SHARE: Number, ROOM_DELETE: Number}}
+ */
+const LOOP_MAU_TYPE = {
+  OPEN_PANEL: 0,
+  OPEN_CONVERSATION: 1,
+  ROOM_OPEN: 2,
+  ROOM_SHARE: 3,
+  ROOM_DELETE: 4
+};
+
 // See LOG_LEVELS in Console.jsm. Common examples: "All", "Info", "Warn", & "Error".
 const PREF_LOG_LEVEL = "loop.debug.loglevel";
 
@@ -91,7 +105,7 @@ Cu.import("resource://gre/modules/FxAccountsOAuthClient.jsm");
 
 Cu.importGlobalProperties(["URL"]);
 
-this.EXPORTED_SYMBOLS = ["MozLoopService", "LOOP_SESSION_TYPE",
+this.EXPORTED_SYMBOLS = ["MozLoopService", "LOOP_SESSION_TYPE", "LOOP_MAU_TYPE",
   "TWO_WAY_MEDIA_CONN_LENGTH", "SHARING_ROOM_URL", "SHARING_SCREEN",
   "ROOM_CREATE", "ROOM_DELETE"];
 
@@ -101,6 +115,7 @@ XPCOMUtils.defineConstant(this, "SHARING_ROOM_URL", SHARING_ROOM_URL);
 XPCOMUtils.defineConstant(this, "SHARING_SCREEN", SHARING_SCREEN);
 XPCOMUtils.defineConstant(this, "ROOM_CREATE", ROOM_CREATE);
 XPCOMUtils.defineConstant(this, "ROOM_DELETE", ROOM_DELETE);
+XPCOMUtils.defineConstant(this, "LOOP_MAU_TYPE", LOOP_MAU_TYPE);
 
 XPCOMUtils.defineLazyModuleGetter(this, "LoopAPI",
   "chrome://loop/content/modules/MozLoopAPI.jsm");

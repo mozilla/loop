@@ -160,6 +160,12 @@ var WindowListener = {
 
             mm.sendAsyncMessage("Social:WaitForDocumentVisible");
             mm.addMessageListener("Social:DocumentVisible", () => resolve(mm));
+
+            let buckets = this.constants.LOOP_MAU_TYPE;
+            this.LoopAPI.sendMessageToHandler({
+              name: "TelemetryAddValue",
+              data: ["LOOP_MAU", buckets.OPEN_PANEL]
+            });
           };
 
           // Used to clear the temporary "login" state from the button.

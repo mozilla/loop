@@ -43,10 +43,18 @@ describe("loop.store.RoomStore", function() {
           ROOM_DELETE: {
             DELETE_SUCCESS: 0,
             DELETE_FAIL: 1
+          },
+          LOOP_MAU_TYPE: {
+            OPEN_PANEL: 0,
+            OPEN_CONVERSATION: 1,
+            ROOM_OPEN: 2,
+            ROOM_SHARE: 3,
+            ROOM_DELETE: 4
           }
         };
       },
       CopyString: sinon.stub(),
+      ComposeEmail: sinon.stub(),
       GetLoopPref: function(prefName) {
         if (prefName === "debug.dispatcher") {
           return false;
@@ -60,6 +68,7 @@ describe("loop.store.RoomStore", function() {
       "Rooms:Open": sinon.stub(),
       "Rooms:Rename": sinon.stub(),
       "Rooms:PushSubscription": sinon.stub(),
+      "SetLoopPref": sinon.stub(),
       TelemetryAddValue: sinon.stub()
     });
 
@@ -433,8 +442,8 @@ describe("loop.store.RoomStore", function() {
           roomToken: fakeRoomToken
         }));
 
-        sinon.assert.calledOnce(requestStubs.TelemetryAddValue);
-        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue,
+        sinon.assert.calledTwice(requestStubs.TelemetryAddValue);
+        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue.getCall(0),
           "LOOP_ROOM_DELETE", 0);
       });
 
@@ -447,8 +456,8 @@ describe("loop.store.RoomStore", function() {
           roomToken: fakeRoomToken
         }));
 
-        sinon.assert.calledOnce(requestStubs.TelemetryAddValue);
-        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue,
+        sinon.assert.calledTwice(requestStubs.TelemetryAddValue);
+        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue.getCall(0),
           "LOOP_ROOM_DELETE", 1);
       });
     });
@@ -470,8 +479,8 @@ describe("loop.store.RoomStore", function() {
           from: "panel"
         }));
 
-        sinon.assert.calledOnce(requestStubs.TelemetryAddValue);
-        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue,
+        sinon.assert.calledTwice(requestStubs.TelemetryAddValue);
+        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue.getCall(0),
           "LOOP_SHARING_ROOM_URL", 0);
       });
 
@@ -481,8 +490,8 @@ describe("loop.store.RoomStore", function() {
           from: "conversation"
         }));
 
-        sinon.assert.calledOnce(requestStubs.TelemetryAddValue);
-        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue,
+        sinon.assert.calledTwice(requestStubs.TelemetryAddValue);
+        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue.getCall(0),
           "LOOP_SHARING_ROOM_URL", 1);
       });
     });
@@ -575,8 +584,8 @@ describe("loop.store.RoomStore", function() {
           roomUrl: "http://invalid"
         }));
 
-        sinon.assert.calledOnce(requestStubs.TelemetryAddValue);
-        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue,
+        sinon.assert.calledTwice(requestStubs.TelemetryAddValue);
+        sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue.getCall(0),
           "LOOP_SHARING_ROOM_URL", 4);
       });
 
@@ -758,7 +767,9 @@ describe("loop.store.RoomStore", function() {
     var store;
 
     beforeEach(function() {
-      store = new loop.store.RoomStore(dispatcher, { constants: {} });
+      store = new loop.store.RoomStore(dispatcher, {
+        constants: requestStubs.GetAllConstants()
+      });
     });
 
     it("should open the room via mozLoop", function() {
@@ -907,5 +918,77 @@ describe("loop.store.RoomStore", function() {
         sinon.assert.notCalled(updateRoomStub);
         expect(store.getStoreState().savingContext).to.eql(false);
       });
+  });
+
+  describe("MAU telemetry events", function() {
+    var getLoopPrefStub, store;
+
+    beforeEach(function() {
+      getLoopPrefStub = function(pref) {
+        if (pref === "facebook.shareUrl") {
+          return "https://shared.site/?u=%ROOM_URL%";
+        }
+        return 0;
+      };
+
+      LoopMochaUtils.stubLoopRequest({
+        GetLoopPref: getLoopPrefStub
+      });
+
+      store = new loop.store.RoomStore(dispatcher, {
+        constants: requestStubs.GetAllConstants()
+      });
+    });
+
+    it("should log telemetry event when opening a room", function() {
+      store.openRoom(new sharedActions.OpenRoom({ roomToken: "42abc" }));
+
+      sinon.assert.calledOnce(requestStubs["TelemetryAddValue"]);
+      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"],
+        "LOOP_MAU", store._constants.LOOP_MAU_TYPE.ROOM_OPEN);
+    });
+
+    it("should log telemetry event when sharing a room (copy link)", function() {
+      store.copyRoomUrl(new sharedActions.CopyRoomUrl({
+        roomUrl: "http://invalid",
+        from: "conversation"
+      }));
+
+      sinon.assert.calledTwice(requestStubs["TelemetryAddValue"]);
+      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"].getCall(1),
+        "LOOP_MAU", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
+    });
+
+    it("should log telemetry event when sharing a room (email)", function() {
+      store.emailRoomUrl(new sharedActions.EmailRoomUrl({
+        roomUrl: "http://invalid",
+        from: "conversation"
+      }));
+
+      sinon.assert.calledTwice(requestStubs["TelemetryAddValue"]);
+      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"].getCall(1),
+        "LOOP_MAU", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
+    });
+
+    it("should log telemetry event when sharing a room (facebook)", function() {
+      store.facebookShareRoomUrl(new sharedActions.FacebookShareRoomUrl({
+        roomUrl: "http://invalid",
+        from: "conversation"
+      }));
+
+      sinon.assert.calledTwice(requestStubs["TelemetryAddValue"]);
+      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"].getCall(1),
+        "LOOP_MAU", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
+    });
+
+    it("should log telemetry event when deleting a room", function() {
+      store.deleteRoom(new sharedActions.DeleteRoom({
+        roomToken: "42abc"
+      }));
+
+      sinon.assert.calledTwice(requestStubs["TelemetryAddValue"]);
+      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"].getCall(1),
+        "LOOP_MAU", store._constants.LOOP_MAU_TYPE.ROOM_DELETE);
+    });
   });
 });

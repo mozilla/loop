@@ -50,11 +50,12 @@ loop.shared.views.chat = (function(mozL10n) {
 
     render: function() {
       var classes = classNames({
-        "text-chat-entry": true,
+        "text-chat-entry": this.props.contentType !== CHAT_CONTENT_TYPES.NOTIFICATION,
         "received": this.props.type === CHAT_MESSAGE_TYPES.RECEIVED,
         "sent": this.props.type === CHAT_MESSAGE_TYPES.SENT,
         "special": this.props.type === CHAT_MESSAGE_TYPES.SPECIAL,
-        "room-name": this.props.contentType === CHAT_CONTENT_TYPES.ROOM_NAME
+        "room-name": this.props.contentType === CHAT_CONTENT_TYPES.ROOM_NAME,
+        "text-chat-notif": this.props.contentType === CHAT_CONTENT_TYPES.NOTIFICATION
       });
 
       var optionalProps = {};
@@ -76,6 +77,18 @@ loop.shared.views.chat = (function(mozL10n) {
               useDesktopPaths={this.props.useDesktopPaths} />
             {this.props.showTimestamp ? this._renderTimestamp() : null}
           </div>
+        );
+      }
+
+      if (this.props.contentType === CHAT_CONTENT_TYPES.NOTIFICATION) {
+        return (
+          <div className={classes}>
+            <div className="content-wrapper">
+              <img className="notification-icon" src="shared/img/leave_notification.svg" />
+              <p>{mozL10n.get(this.props.message)}</p>
+            </div>
+            {this.props.showTimestamp ? this._renderTimestamp() : null}
+           </div>
         );
       }
 

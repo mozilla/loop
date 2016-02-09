@@ -667,5 +667,29 @@ describe("loop.shared.views.TextChatView", function() {
 
       expect(textBox.placeholder).not.contain("placeholder");
     });
+
+    it("should add `text-chat-notif` CSS class selector to msg of contentType NOTIFICATION",
+      function() {
+        view = mountTestComponent();
+
+        store.remotePeerDisconnected(new sharedActions.RemotePeerDisconnected({
+          peerHungup: true
+        }));
+
+        var node = view.getDOMNode();
+        expect(node.querySelector(".text-chat-notif")).to.not.eql(null);
+    });
+
+    it("should render an icon for contentType NOTIFICATION",
+        function() {
+          view = mountTestComponent();
+
+          store.remotePeerDisconnected(new sharedActions.RemotePeerDisconnected({
+            peerHungup: true
+          }));
+
+          var node = view.getDOMNode();
+          expect(node.querySelectorAll(".notification-icon").length).to.eql(1);
+        });
   });
 });

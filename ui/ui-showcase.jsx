@@ -374,6 +374,11 @@
     message: "8:00 PM",
     receivedTimestamp: "2015-06-23T22:27:45.590Z"
   }));
+  dispatcher.dispatch(new sharedActions.ReceivedTextChatMessage({
+    contentType: loop.shared.utils.CHAT_CONTENT_TYPES.NOTIFICATION,
+    message: "peer_unexpected_quit",
+    receivedTimestamp: "2015-06-23T22:28:45.590Z"
+  }));
 
   loop.store.StoreMixin.register({
     activeRoomStore: activeRoomStore,

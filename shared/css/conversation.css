@@ -1030,6 +1030,43 @@ html[dir="rtl"] .text-chat-entry.received > p:after {
   align-self: auto;
 }
 
+.text-chat-notif {
+  display: flex;
+  margin-bottom: .5em;
+}
+
+.text-chat-notif > .content-wrapper {
+  margin-left: 10px;
+  display: flex;
+  border: 1px solid #B1B1B1;
+}
+
+.content-wrapper > .notification-icon {
+  margin: 8px 5px 8px 10px;
+}
+
+.content-wrapper > p {
+  margin-top: 8px;
+  margin-right: 10px;
+  margin-bottom: 8px;
+  color: #757575;
+  font-size: 12px;
+}
+
+html[dir="rtl"] .text-chat-notif > .content-wrapper {
+  margin-right: 10px;
+  margin-left: 0px;
+}
+
+html[dir="rtl"] .content-wrapper > .notification-icon {
+  margin: 8px 10px 8px 5px;
+}
+
+html[dir="rtl"] .content-wrapper > p {
+  margin-left: 10px;
+  margin-right: 0px;
+}
+
 html[dir="rtl"] .text-chat-arrow {
   transform: scaleX(-1);
 }

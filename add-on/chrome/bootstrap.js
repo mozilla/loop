@@ -713,10 +713,18 @@ var WindowListener = {
     window.LoopUI = LoopUI;
   },
 
-  tearDownBrowserUI: function() {
-    // Take any steps to remove UI or anything from the browser window
-    // document.getElementById() etc. will work here
-    // XXX Add in tear-down of the panel.
+  /**
+   * Take any steps to remove UI or anything from the browser window
+   * document.getElementById() etc. will work here.
+   *
+   * @param {Object} window The window to remove the integration from.
+   */
+  tearDownBrowserUI: function(window) {
+    if (window.LoopUI) {
+      window.LoopUI.removeMenuItem();
+
+      // XXX Bug 1229352 - Add in tear-down of the panel.
+    }
   },
 
   // nsIWindowMediatorListener functions.

@@ -171,6 +171,7 @@ var gFxAOAuthClientPromise = null;
 var gFxAOAuthClient = null;
 var gErrors = new Map();
 var gConversationWindowData = new Map();
+var gAddonVersion = "unknown";
 
 /**
  * Internal helper methods and state
@@ -614,7 +615,11 @@ var MozLoopServiceInternal = {
       throw error;
     };
 
-    return gHawkClient.request(path, method, credentials, payloadObj).then(
+    var extraHeaders = {
+      "x-loop-addon-ver": gAddonVersion
+    };
+
+    return gHawkClient.request(path, method, credentials, payloadObj, extraHeaders).then(
       (result) => {
         this.clearError("network");
         return result;
@@ -1250,13 +1255,17 @@ this.MozLoopService = {
    *
    * Note: this returns a promise for unit test purposes.
    *
+   * @param {String} addonVersion The name of the add-on
+   *
    * @return {Promise}
    */
-  initialize: Task.async(function*() {
+  initialize: Task.async(function*(addonVersion) {
     // Ensure we don't setup things like listeners more than once.
     if (gServiceInitialized) {
       return Promise.resolve();
     }
+
+    gAddonVersion = addonVersion;
 
     gServiceInitialized = true;
 

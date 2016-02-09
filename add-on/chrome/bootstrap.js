@@ -29,6 +29,9 @@ XPCOMUtils.defineLazyModuleGetter(this, "Task",
  * to provide the required loop functions for the window.
  */
 var WindowListener = {
+  // Records the add-on version once we know it.
+  addonVersion: "unknown",
+
   /**
    * Sets up the chrome integration within browser windows for Loop.
    *
@@ -229,7 +232,7 @@ var WindowListener = {
       init: function() {
         // This is a promise for test purposes, but we don't want to be logging
         // expected errors to the console, so we catch them here.
-        this.MozLoopService.initialize().catch(ex => {
+        this.MozLoopService.initialize(WindowListener.addonVersion).catch(ex => {
           if (!ex.message ||
               (!ex.message.contains("not enabled") &&
                !ex.message.contains("not needed"))) {
@@ -823,7 +826,10 @@ function loadDefaultPrefs() {
 /**
  * Called when the add-on is started, e.g. when installed or when Firefox starts.
  */
-function startup() {
+function startup(data) {
+  // Record the add-on version for when the UI is initialised.
+  WindowListener.addonVersion = data.version;
+
   loadDefaultPrefs();
 
   createLoopButton();

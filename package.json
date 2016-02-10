@@ -29,7 +29,7 @@
     "compression": "1.6.1",
     "eslint": "1.10.3",
     "eslint-plugin-react": "3.16.1",
-    "exports-loader": "0.6.2",
+    "exports-loader": "0.6.3",
     "expose-loader": "0.7.x",
     "express": "4.13.4",
     "firefox-profile": "0.3.11",

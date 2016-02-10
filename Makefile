@@ -243,6 +243,15 @@ $(BUILT)/add-on/chrome/content/panels/js/%.js: add-on/panels/js/%.jsx
 	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
+add_on_vendor_jsx_files=$(wildcard add-on/panels/vendor/*.jsx)
+built_add_on_vendor_js_files=$(patsubst add-on/panels/vendor/%.jsx, \
+	 $(BUILT)/add-on/chrome/content/panels/vendor/%.js, \
+	 $(add_on_vendor_jsx_files))
+
+$(BUILT)/add-on/chrome/content/panels/vendor/%.js: add-on/panels/vendor/%.jsx
+	@mkdir -p $(@D)
+	$(BABEL) $< --out-file $@
+
 add_on_l10n_files=$(wildcard locale/*/add-on.properties)
 built_add_on_l10n_files=$(patsubst locale/%/add-on.properties, \
 	$(BUILT)/add-on/chrome/locale/%/loop.properties, \
@@ -273,6 +282,7 @@ standalone: node_modules $(built_standalone_js_files) $(built_standalone_shared_
 add-on: node_modules \
 	      $(built_add_on_js_files) \
 	      $(built_add_on_shared_js_files) \
+	      $(built_add_on_vendor_js_files) \
 	      $(built_add_on_l10n_files) \
 	      $(BUILT)/$(ADD-ON)/chrome.manifest \
 	      $(BUILT)/$(ADD-ON)/chrome/locale/chrome.manifest \

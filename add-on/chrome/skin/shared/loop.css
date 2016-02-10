@@ -312,11 +312,11 @@
   }
 
   #loop-slideshow-browser {
-    width: 480px;
-    height: 360px;
-    margin-top: 40px;
+    width: 620px;
+    height:450px;
+    margin-top: 10%;
 
-    /* XXX derived from width, so should be 50% - 480px / 2? */
-    -moz-margin-start: calc(50% - 240px);
+    /* XXX derived from width, so should be 50% - (620px / 2)? */
+    -moz-margin-start: calc(50% - 310px);
   }
 }

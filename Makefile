@@ -270,7 +270,13 @@ standalone: node_modules $(built_standalone_js_files) $(built_standalone_shared_
 	$(RSYNC) shared $(BUILT)/$@/content
 
 .PHONY: add-on
-add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(built_add_on_l10n_files) $(BUILT)/$(ADD-ON)/chrome.manifest $(BUILT)/add-on/chrome/content/preferences/prefs.js
+add-on: node_modules \
+	      $(built_add_on_js_files) \
+	      $(built_add_on_shared_js_files) \
+	      $(built_add_on_l10n_files) \
+	      $(BUILT)/$(ADD-ON)/chrome.manifest \
+	      $(BUILT)/$(ADD-ON)/chrome/locale/chrome.manifest \
+	      $(BUILT)/add-on/chrome/content/preferences/prefs.js
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@/chrome/bootstrap.js $(BUILT)/$@
 	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \
@@ -286,8 +292,13 @@ add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(
 	$(RSYNC) $@/chrome/skin $(BUILT)/$@/chrome/
 
 $(BUILT)/$(ADD-ON)/chrome.manifest: $(ADD-ON)/jar.mn
-	mkdir -p $(BUILT)/$(ADD-ON)
-	python bin/generateChromeManifest.py --input-file=$^ --output-file=$@ --src=locale
+	@mkdir -p $(@D)
+	python bin/generateChromeManifest.py --input-file=$^ --output-file=$@
+
+shared_l10n_files=$(wildcard locale/*/shared.properties)
+$(BUILT)/$(ADD-ON)/chrome/locale/chrome.manifest: $(add_on_l10n_files) $(shared_l10n_files)
+	@mkdir -p $(@D)
+	python bin/generateLocaleManifest.py --output-file=$@ --src=locale
 
 # In this RSYNC, the order of exclude and includes generally matters.
 # The items below are:
@@ -349,8 +360,10 @@ dist_export:
 	$(RSYNC) $(ADD-ON)/install.rdf.in $(DIST_EXPORT_DIR)
 	# jar.mn is used for Firefox build
 	rm -f $(DIST_EXPORT_DIR)/chrome.manifest
-	# Add the jar file.
+	rm -f $(DIST_EXPORT_DIR)/chrome/locale/chrome.manifest
+	# Add the jar files.
 	$(RSYNC) $(ADD-ON)/jar.mn $(DIST_EXPORT_DIR)
+	$(RSYNC) locale/jar.mn $(DIST_EXPORT_DIR)/chrome/locale
 	# Use the original prefs.js.
 	$(RSYNC) $(ADD-ON)/preferences/prefs.js $(DIST_EXPORT_DIR)/chrome/content/preferences/prefs.js
 	# Copy the vendor files that support the unit tests.

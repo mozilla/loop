@@ -17,13 +17,14 @@ import io
 import os
 import re
 import shutil
+import localeUtils
 from git import Repo
 
 # defaults
 DEF_L10N_SRC = os.path.join(os.pardir, "loop-client-l10n")
 DEF_L10N_DST = os.path.join("locale")
 DEF_INDEX_FILE_NAME = os.path.join("standalone", "content", os.extsep.join(["index", "html"]))
-DEF_JAR_FILE_NAME = os.path.join("add-on", os.extsep.join(["jar", "mn"]))
+DEF_JAR_FILE_NAME = os.path.join("locale", os.extsep.join(["jar", "mn"]))
 
 
 def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
@@ -48,7 +49,7 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
 
     def create_locale(src_dir):
         # Convert loop-client-l10n repo names to loop repo names.
-        dst_dir = src_dir.replace('_', '-').replace('templates', 'en-US')
+        dst_dir = localeUtils.convertLocale(src_dir)
 
         # Don't copy the en-US files. Stick with what's in our tree as that might
         # be a later version.
@@ -59,18 +60,12 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
                             ignore=shutil.ignore_patterns(".keep"))
         return dst_dir
 
-    locale_dirs = os.listdir(l10n_src_files_dir)
-    locale_list = sorted([create_locale(x) for x in locale_dirs if x[0] != "."])
+    for x in os.listdir(l10n_src_files_dir):
+        if x[0] != ".":
+            create_locale(x)
 
-    def filter_locales_with_no_files(locale):
-        files = os.listdir(os.path.join(l10n_dst, locale))
-
-        # Find just the .properties files.
-        files = [file for file in files if ".properties" in file]
-
-        return len(files) != 0
-
-    locale_list = [x for x in locale_list if filter_locales_with_no_files(x)]
+    # Note: Use the destination directory here to get en-US as well.
+    locale_list = localeUtils.getLocalesList(l10n_dst)
 
     print("updating locales list in", index_file_name)
     with io.open(index_file_name, "r+") as index_file:
@@ -122,7 +117,7 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Loop Stand-alone Client localization update script")
+        description="Loop localization update script")
     parser.add_argument('--src',
                         default=DEF_L10N_SRC,
                         metavar="path",

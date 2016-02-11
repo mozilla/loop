@@ -144,9 +144,6 @@ XPCOMUtils.defineLazyModuleGetter(this, "HawkClient",
 XPCOMUtils.defineLazyModuleGetter(this, "deriveHawkCredentials",
                                   "resource://services-common/hawkrequest.js");
 
-XPCOMUtils.defineLazyModuleGetter(this, "hookWindowCloseForPanelClose",
-                                  "resource://gre/modules/MozSocialAPI.jsm");
-
 XPCOMUtils.defineLazyModuleGetter(this, "LoopRooms",
                                   "chrome://loop/content/modules/LoopRooms.jsm");
 
@@ -962,8 +959,6 @@ var MozLoopServiceInternal = {
               "socialFrameDetached", "socialFrameHide", "socialFrameShow"]
           });
 
-          let chatbar = chatbox.parentNode;
-
           const kEventNamesMap = {
             socialFrameAttached: "Loop:ChatWindowAttached",
             socialFrameDetached: "Loop:ChatWindowDetached",
@@ -988,13 +983,6 @@ var MozLoopServiceInternal = {
 
               UITour.clearAvailableTargetsCache();
               UITour.notify(eventName);
-
-              if (eventName == "Loop:ChatWindowDetached" || eventName == "Loop:ChatWindowAttached") {
-                // After detach, re-attach of the chatbox, refresh its reference so
-                // we can keep using it here.
-                let ref = chatbar.chatboxForURL.get(chatbox.src);
-                chatbox = ref && ref.get() || chatbox;
-              }
             } else {
               // When the chat box or messages are shown, resize the panel or window
               // to be slightly higher to accomodate them.
@@ -1010,7 +998,7 @@ var MozLoopServiceInternal = {
           });
 
           // Handle window.close correctly on the chatbox.
-          hookWindowCloseForPanelClose(chatbox.content);
+          mm.sendAsyncMessage("Social:HookWindowCloseForPanelClose");
           messageName = "DOMWindowClose";
           mm.addMessageListener(messageName, listeners[messageName] = () => {
             // Remove message listeners.
@@ -1030,6 +1018,8 @@ var MozLoopServiceInternal = {
                 data: [conversationWindowData.roomToken, windowId]
               });
             }
+
+            chatbox.close();
           });
 
           mm.sendAsyncMessage("Loop:MonitorPeerConnectionLifecycle");
@@ -1060,6 +1050,27 @@ var MozLoopServiceInternal = {
                   }
                   break;
               }
+            }
+          });
+
+          // When a chat window is attached or detached, the docShells hosting
+          // about:loopconverstation is swapped to the newly created chat window.
+          // (Be it inside a popup or back inside a chatbox element attached to the
+          // chatbar.)
+          // Since a swapDocShells call does not swap the messageManager instances
+          // attached to a browser, we'll need to add the message listeners to
+          // the new messageManager. This is not a bug in swapDocShells, merely
+          // a design decision.
+          chatbox.content.addEventListener("SwapDocShells", function swapped(ev) {
+            chatbox.content.removeEventListener("SwapDocShells", swapped);
+
+            let otherBrowser = ev.detail;
+            chatbox = otherBrowser.ownerDocument.getBindingParent(otherBrowser);
+            mm = otherBrowser.messageManager;
+            otherBrowser.addEventListener("SwapDocShells", swapped);
+
+            for (let name of Object.getOwnPropertyNames(listeners)) {
+              mm.addMessageListener(name, listeners[name]);
             }
           });
 

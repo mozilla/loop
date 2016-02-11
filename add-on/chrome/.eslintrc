@@ -59,6 +59,7 @@
     "roomsPushNotification": true,
     "Services": false,
     "SHARING_ROOM_URL": false,
+    "SHARING_SCREEN": false,
     "Social": false,
     "SocialShare": false,
     "Task": false,

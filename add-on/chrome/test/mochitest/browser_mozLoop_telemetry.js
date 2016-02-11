@@ -132,3 +132,23 @@ add_task(function* test_mozLoop_telemetryAdd_roomSessionWithChat() {
     Assert.strictEqual(snapshot.counts[0], i);
   }
 });
+
+add_task(function* test_mozLoop_telemetryAdd_infobarActionButtons() {
+  let histogramId = "LOOP_INFOBAR_ACTION_BUTTONS";
+  let histogram = Services.telemetry.getHistogramById(histogramId);
+  const ACTION_TYPES = gConstants.SHARING_SCREEN;
+
+  histogram.clear();
+
+  for (let value of [ACTION_TYPES.PAUSED,
+                     ACTION_TYPES.PAUSED,
+                     ACTION_TYPES.RESUMED]) {
+    gHandlers.TelemetryAddValue({ data: [histogramId, value] }, () => {});
+  }
+
+  let snapshot = histogram.snapshot();
+  Assert.strictEqual(snapshot.counts[ACTION_TYPES.RESUMED], 1,
+    "SHARING_SCREEN.RESUMED");
+  Assert.strictEqual(snapshot.counts[ACTION_TYPES.PAUSED], 2,
+    "SHARING_SCREEN.PAUSED");
+});

@@ -78,6 +78,22 @@ var WindowListener = {
       },
 
       /**
+       * @return {Object} Getter for the Loop constants
+       */
+      get constants() {
+        if (!this._constants) {
+          // GetAllConstants is synchronous even though it's using a callback.
+          this.LoopAPI.sendMessageToHandler({
+            name: "GetAllConstants"
+          }, result => {
+            this._constants = result;
+          });
+        }
+
+        return this._constants;
+      },
+
+      /**
        * @return {Promise}
        */
       promiseDocumentVisible(aDocument) {
@@ -486,6 +502,39 @@ var WindowListener = {
         gBrowser.removeEventListener("mousemove", this);
         this._listeningToTabSelect = false;
         this._browserSharePaused = false;
+        this._sendTelemetryEventsIfNeeded();
+      },
+
+      /**
+       * Sends telemetry events for pause/ resume buttons if needed.
+       */
+      _sendTelemetryEventsIfNeeded: function() {
+        // The user can't click Resume button without clicking Pause button first.
+        if (!this._pauseButtonClicked) {
+          return;
+        }
+
+        let buckets = this.constants.SHARING_SCREEN;
+        this.LoopAPI.sendMessageToHandler({
+          name: "TelemetryAddValue",
+          data: [
+            "LOOP_INFOBAR_ACTION_BUTTONS",
+            buckets.PAUSED
+          ]
+        });
+
+        if (this._resumeButtonClicked) {
+          this.LoopAPI.sendMessageToHandler({
+            name: "TelemetryAddValue",
+            data: [
+              "LOOP_INFOBAR_ACTION_BUTTONS",
+              buckets.RESUMED
+            ]
+          });
+        }
+
+        this._pauseButtonClicked = false;
+        this._resumeButtonClicked = false;
       },
 
       /**
@@ -542,6 +591,11 @@ var WindowListener = {
               buttonNode.label = stringObj.label;
               buttonNode.accessKey = stringObj.accesskey;
               LoopUI.MozLoopService.toggleBrowserSharing(this._browserSharePaused);
+              if (this._browserSharePaused) {
+                this._pauseButtonClicked = true;
+              } else {
+                this._resumeButtonClicked = true;
+              }
               return true;
             },
             type: "pause"

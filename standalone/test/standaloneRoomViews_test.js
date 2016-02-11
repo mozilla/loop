@@ -14,8 +14,16 @@ describe("loop.standaloneRoomViews", function() {
   var sharedUtils = loop.shared.utils;
   var fixtures = document.querySelector("#fixtures");
 
-  var sandbox, dispatcher, activeRoomStore, dispatch;
-  var clock, fakeWindow, view;
+  var sandbox,
+      dispatch,
+      dispatcher,
+      activeRoomStore,
+      textChatStore,
+      remoteCursorStore;
+
+  var clock,
+      fakeWindow,
+      view;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
@@ -25,10 +33,14 @@ describe("loop.standaloneRoomViews", function() {
       mozLoop: {},
       sdkDriver: {}
     });
-    var textChatStore = new loop.store.TextChatStore(dispatcher, {
+    textChatStore = new loop.store.TextChatStore(dispatcher, {
+      sdkDriver: {}
+    });
+    remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
       sdkDriver: {}
     });
     loop.store.StoreMixin.register({
+      cursorStore: remoteCursorStore,
       activeRoomStore: activeRoomStore,
       textChatStore: textChatStore
     });
@@ -431,10 +443,13 @@ describe("loop.standaloneRoomViews", function() {
       return TestUtils.renderIntoDocument(
         React.createElement(
           loop.standaloneRoomViews.StandaloneRoomView, {
-        dispatcher: dispatcher,
-        activeRoomStore: activeRoomStore,
-        isFirefox: true
-      }));
+            cursorStore: remoteCursorStore,
+            dispatcher: dispatcher,
+            activeRoomStore: activeRoomStore,
+            isFirefox: true
+          }
+        )
+      );
     }
 
     function expectActionDispatched() {
@@ -1068,9 +1083,12 @@ describe("loop.standaloneRoomViews", function() {
       return TestUtils.renderIntoDocument(
         React.createElement(
           loop.standaloneRoomViews.StandaloneRoomControllerView, {
-        dispatcher: dispatcher,
-        isFirefox: true
-      }));
+            cursorStore: remoteCursorStore,
+            dispatcher: dispatcher,
+            isFirefox: true
+          }
+        )
+      );
     }
 
     beforeEach(function() {

@@ -500,6 +500,7 @@ var WindowListener = {
         gBrowser.tabContainer.removeEventListener("TabSelect", this);
         gBrowser.removeEventListener("DOMTitleChanged", this);
         gBrowser.removeEventListener("mousemove", this);
+        this.removeRemoteCursor();
         this._listeningToTabSelect = false;
         this._browserSharePaused = false;
         this._sendTelemetryEventsIfNeeded();
@@ -535,6 +536,52 @@ var WindowListener = {
 
         this._pauseButtonClicked = false;
         this._resumeButtonClicked = false;
+      },
+
+      /**
+       *  If sharing is active, paints and positions the remote cursor
+       *  over the screen
+       *
+       *  @param cursorData Object with the correct position for the cursor
+       *                    {
+       *                      ratioX: position on the X axis (percentage value)
+       *                      ratioY: position on the Y axis (percentage value)
+       *                    }
+       */
+      addRemoteCursor: function(cursorData) {
+        if (!this._listeningToTabSelect) {
+          return;
+        }
+
+        let browser = gBrowser.selectedBrowser;
+
+        let cursor = document.getElementById("loop-remote-cursor");
+        if (!cursor) {
+          cursor = document.createElement("image");
+          cursor.setAttribute("id", "loop-remote-cursor");
+        }
+
+        // Update the cursor's position.
+        cursor.setAttribute("left",
+                            cursorData.ratioX * browser.boxObject.width);
+        cursor.setAttribute("top",
+                            cursorData.ratioY * browser.boxObject.height);
+
+        // browser's parent is a xul:stack, so positioning with left/top works.
+        browser.parentNode.appendChild(cursor);
+      },
+
+      /**
+       *  Removes the remote cursor from the screen
+       *
+       *  @param browser OPT browser where the cursor should be removed from.
+       */
+      removeRemoteCursor: function() {
+        let cursor = document.getElementById("loop-remote-cursor");
+
+        if (cursor) {
+          cursor.parentNode.removeChild(cursor);
+        }
       },
 
       /**
@@ -662,7 +709,10 @@ var WindowListener = {
             let wasVisible = false;
             // Hide the infobar from the previous tab.
             if (event.detail.previousTab) {
-              wasVisible = this._hideBrowserSharingInfoBar(event.detail.previousTab.linkedBrowser);
+              wasVisible = this._hideBrowserSharingInfoBar(
+                            event.detail.previousTab.linkedBrowser);
+              // And remove the cursor.
+              this.removeRemoteCursor();
             }
 
             // We've changed the tab, so get the new window id.

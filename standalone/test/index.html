@@ -44,23 +44,29 @@
   <script src="/shared/js/actions.js"></script>
   <script src="/shared/js/validate.js"></script>
   <script src="/shared/js/dispatcher.js"></script>
+  <script src="/shared/js/otSdkDriver.js"></script>
+
+
+  <!-- Stores need to be loaded before the views that uses them -->
   <script src="/shared/js/store.js"></script>
   <script src="/shared/js/activeRoomStore.js"></script>
-  <script src="/shared/js/views.js"></script>
   <script src="/shared/js/textChatStore.js"></script>
-  <script src="/shared/js/textChatView.js"></script>
-  <script src="/shared/js/otSdkDriver.js"></script>
+  <script src="/shared/js/remoteCursorStore.js"></script>
   <script src="/js/standaloneAppStore.js"></script>
+  <script src="/js/standaloneMetricsStore.js"></script>
+
+  <!-- Views -->
+  <script src="/shared/js/views.js"></script>
+  <script src="/shared/js/textChatView.js"></script>
   <script src="/js/standaloneMozLoop.js"></script>
   <script src="/js/standaloneRoomViews.js"></script>
-  <script src="/js/standaloneMetricsStore.js"></script>
   <script src="/js/webapp.js"></script>
-  <script src="/shared/js/remoteCursorStore.js"></script>
+
   <!-- Test scripts -->
   <script src="standaloneAppStore_test.js"></script>
+  <script src="standaloneMetricsStore_test.js"></script>
   <script src="standaloneMozLoop_test.js"></script>
   <script src="standaloneRoomViews_test.js"></script>
-  <script src="standaloneMetricsStore_test.js"></script>
   <script src="webapp_test.js"></script>
   <script>
     LoopMochaUtils.addErrorCheckingTests();

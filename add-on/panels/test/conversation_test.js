@@ -147,15 +147,18 @@ describe("loop.conversation", function() {
   });
 
   describe("AppControllerView", function() {
-    var activeRoomStore, ccView;
-    var conversationAppStore, roomStore, feedbackPeriodMs = 15770000000;
+    var activeRoomStore, ccView, addRemoteCursorStub;
+    var conversationAppStore,
+        roomStore,
+        feedbackPeriodMs = 15770000000;
     var ROOM_STATES = loop.store.ROOM_STATES;
 
     function mountTestComponent() {
       return TestUtils.renderIntoDocument(
         React.createElement(loop.conversation.AppControllerView, {
-          roomStore: roomStore,
-          dispatcher: dispatcher
+          cursorStore: remoteCursorStore,
+          dispatcher: dispatcher,
+          roomStore: roomStore
         }));
     }
 
@@ -168,6 +171,9 @@ describe("loop.conversation", function() {
         activeRoomStore: activeRoomStore,
         constants: {}
       });
+      remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+        sdkDriver: {}
+      });
       conversationAppStore = new loop.store.ConversationAppStore({
         activeRoomStore: activeRoomStore,
         dispatcher: dispatcher,
@@ -179,10 +185,41 @@ describe("loop.conversation", function() {
       loop.store.StoreMixin.register({
         conversationAppStore: conversationAppStore
       });
+
+      addRemoteCursorStub = sandbox.stub();
+      LoopMochaUtils.stubLoopRequest({
+        AddRemoteCursorOverlay: addRemoteCursorStub
+      });
     });
 
     afterEach(function() {
       ccView = undefined;
+    });
+
+    it("should request AddRemoteCursorOverlay when cursor position changes", function() {
+
+      mountTestComponent();
+      remoteCursorStore.setStoreState({
+        "remoteCursorPosition": {
+          "ratioX": 10,
+          "ratioY": 10
+        }
+      });
+
+      sinon.assert.calledOnce(addRemoteCursorStub);
+    });
+
+    it("should NOT request AddRemoteCursorOverlay when cursor position DOES NOT changes", function() {
+
+      mountTestComponent();
+      remoteCursorStore.setStoreState({
+        "realVideoSize": {
+          "height": 400,
+          "width": 600
+        }
+      });
+
+      sinon.assert.notCalled(addRemoteCursorStub);
     });
 
     it("should display the RoomView for rooms", function() {

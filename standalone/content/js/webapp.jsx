@@ -107,6 +107,7 @@ loop.webapp = (function(_, OT, mozL10n) {
 
     propTypes: {
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       standaloneAppStore: React.PropTypes.instanceOf(
         loop.store.StandaloneAppStore).isRequired
@@ -142,6 +143,7 @@ loop.webapp = (function(_, OT, mozL10n) {
           return (
             <loop.standaloneRoomViews.StandaloneRoomControllerView
               activeRoomStore={this.props.activeRoomStore}
+              cursorStore={this.props.cursorStore}
               dispatcher={this.props.dispatcher}
               isFirefox={this.state.isFirefox} />
           );
@@ -211,6 +213,7 @@ loop.webapp = (function(_, OT, mozL10n) {
 
     React.render(<WebappRootView
       activeRoomStore={activeRoomStore}
+      cursorStore={remoteCursorStore}
       dispatcher={dispatcher}
       standaloneAppStore={standaloneAppStore} />, document.querySelector("#main"));
 

@@ -518,6 +518,7 @@ describe("loop.shared.views", function() {
 
   describe("MediaView", function() {
     var view;
+    var remoteCursorStore;
 
     function mountTestComponent(props) {
       props = _.extend({
@@ -526,6 +527,13 @@ describe("loop.shared.views", function() {
       return TestUtils.renderIntoDocument(
         React.createElement(sharedViews.MediaView, props));
     }
+
+    beforeEach(function() {
+      remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+        sdkDriver: {}
+      });
+      loop.store.StoreMixin.register({ remoteCursorStore: remoteCursorStore });
+    });
 
     it("should display an avatar view", function() {
       view = mountTestComponent({
@@ -580,13 +588,14 @@ describe("loop.shared.views", function() {
     // We test this function by itself, as otherwise we'd be into creating fake
     // streams etc.
     describe("#attachVideo", function() {
-      var fakeViewElement, fakeVideoElement;
+      var fakeViewElement,
+          fakeVideoElement;
 
       beforeEach(function() {
         fakeVideoElement = {
           play: sinon.stub(),
           tagName: "VIDEO",
-          addEventListener: function() {}
+          addEventListener: sinon.stub()
         };
 
         fakeViewElement = {
@@ -597,8 +606,10 @@ describe("loop.shared.views", function() {
         };
 
         view = mountTestComponent({
+          cursorStore: remoteCursorStore,
           displayAvatar: false,
           mediaType: "local",
+          shareCursor: true,
           srcMediaElement: {
             fake: 1
           }
@@ -616,7 +627,8 @@ describe("loop.shared.views", function() {
           tagName: "DIV",
           querySelector: function() {
             return {
-              tagName: "DIV"
+              tagName: "DIV",
+              addEventListener: sinon.stub()
             };
           }
         });
@@ -636,6 +648,18 @@ describe("loop.shared.views", function() {
         });
 
         expect(fakeVideoElement.srcObject).eql({ fake: 1 });
+      });
+
+      it("should attach events to the video", function() {
+        fakeVideoElement.srcObject = null;
+        sinon.stub(view, "getDOMNode").returns(fakeViewElement);
+        view.attachVideo({
+          src: { fake: 1 }
+        });
+
+        sinon.assert.calledTwice(fakeVideoElement.addEventListener);
+        sinon.assert.calledWith(fakeVideoElement.addEventListener, "loadeddata");
+        sinon.assert.calledWith(fakeVideoElement.addEventListener, "mousemove");
       });
 
       it("should attach a video object for Firefox", function() {
@@ -705,10 +729,13 @@ describe("loop.shared.views", function() {
   });
 
   describe("MediaLayoutView", function() {
-    var textChatStore, view;
+    var textChatStore,
+        remoteCursorStore,
+        view;
 
     function mountTestComponent(extraProps) {
       var defaultProps = {
+        cursorStore: remoteCursorStore,
         dispatcher: dispatcher,
         displayScreenShare: false,
         isLocalLoading: false,
@@ -728,6 +755,9 @@ describe("loop.shared.views", function() {
 
     beforeEach(function() {
       textChatStore = new loop.store.TextChatStore(dispatcher, {
+        sdkDriver: {}
+      });
+      remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
         sdkDriver: {}
       });
 

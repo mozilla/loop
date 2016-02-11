@@ -227,7 +227,7 @@ loop.roomViews = (function(mozL10n) {
    */
   var DesktopRoomInvitationView = React.createClass({
     statics: {
-      TRIGGERED_RESET_DELAY: 2000
+      TRIGGERED_RESET_DELAY: 3000
     },
 
     mixins: [sharedMixins.DropdownMenuMixin(".room-invitation-overlay")],
@@ -306,33 +306,40 @@ loop.roomViews = (function(mozL10n) {
       }
 
       var cx = classNames;
+
       return (
         <div className="room-invitation-overlay">
           <div className="room-invitation-content">
-            <p>
-              <span className="room-context-header">{mozL10n.get("invite_header_text_bold")}</span>&nbsp;
-              <span>{mozL10n.get("invite_header_text3")}</span>
-            </p>
+            <div className="room-context-header">{mozL10n.get("invite_header_text_bold2")}</div>
+            <div>{mozL10n.get("invite_header_text4")}</div>
+          </div>
+          <div className="input-button-group">
+            <div className="input-button-group-label">{mozL10n.get("invite_your_link")}</div>
+            <div className="input-button-content">
+              <div className="input-group group-item-top">
+                <input readOnly={true} type="text" value={this.props.roomData.roomUrl} />
+              </div>
+              <div className={cx({
+                  "group-item-bottom": true,
+                  "btn": true,
+                  "invite-button": true,
+                  "btn-copy": true,
+                  "triggered": this.state.copiedUrl
+                })}
+                   onClick={this.handleCopyButtonClick}>{mozL10n.get(this.state.copiedUrl ?
+                "invite_copied_link_button" : "invite_copy_link_button")}
+              </div>
+            </div>
           </div>
           <div className={cx({
             "btn-group": true,
-            "call-action-group": true
+            "share-action-group": true
           })}>
-            <div className={cx({
-                "btn-copy": true,
-                "invite-button": true,
-                "triggered": this.state.copiedUrl
-              })}
-              onClick={this.handleCopyButtonClick}>
-              <img src="shared/img/glyph-link-16x16.svg" />
-              <p>{mozL10n.get(this.state.copiedUrl ?
-                "invite_copied_link_button" : "invite_copy_link_button")}</p>
-            </div>
             <div className="btn-email invite-button"
               onClick={this.handleEmailButtonClick}
               onMouseOver={this.resetTriggeredButtons}>
               <img src="shared/img/glyph-email-16x16.svg" />
-              <p>{mozL10n.get("invite_email_link_button")}</p>
+              <div>{mozL10n.get("invite_email_link_button")}</div>
             </div>
             {(() => {
               if (this.props.facebookEnabled) {
@@ -340,7 +347,7 @@ loop.roomViews = (function(mozL10n) {
                             onClick={this.handleFacebookButtonClick}
                             onMouseOver={this.resetTriggeredButtons}>
                   <img src="shared/img/glyph-facebook-16x16.svg" />
-                  <p>{mozL10n.get("invite_facebook_button3")}</p>
+                  <div>{mozL10n.get("invite_facebook_button3")}</div>
                 </div>);
               }
             })()}

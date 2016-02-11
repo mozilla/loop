@@ -875,7 +875,6 @@ loop.panel = (function(_, mozL10n) {
     propTypes: {
       onClick: React.PropTypes.func.isRequired
     },
-
     componentWillMount: function() {
       loop.request("SetPanelHeight", 262);
     },

@@ -191,6 +191,17 @@ var WindowListener = {
       },
 
       /**
+       * Wrapper for openPanel - to support Firefox 46 and 45.
+       *
+       * @param {event}  event   The event opening the panel, used to anchor
+       *                         the panel to the button which triggers it.
+       * @return {Promise}
+       */
+      openCallPanel: function(event) {
+        return this.openPanel(event);
+      },
+
+      /**
        * Method to know whether actions to open the panel should instead resume the tour.
        *
        * We need the panel to be opened via UITour so that it gets @noautohide.

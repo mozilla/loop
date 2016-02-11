@@ -520,26 +520,53 @@ describe("loop.store.RoomStore", function() {
 
     describe("#facebookShareRoomUrl", function() {
       var getLoopPrefStub;
+      var sharingSite = "www.sharing-site.com",
+          shareURL = sharingSite +
+                     "?app_id=%APP_ID%" +
+                     "&link=%ROOM_URL%" +
+                     "&redirect_uri=%REDIRECT_URI%",
+          appId = "1234567890",
+          fallback = "www.fallback.com";
 
       beforeEach(function() {
-        getLoopPrefStub = function() {
-          return "https://shared.site/?u=%ROOM_URL%";
-        };
+        getLoopPrefStub = sinon.stub();
+        getLoopPrefStub.withArgs("facebook.appId").returns(appId);
+        getLoopPrefStub.withArgs("facebook.shareUrl").returns(shareURL);
+        getLoopPrefStub.withArgs("facebook.fallbackUrl").returns(fallback);
 
         LoopMochaUtils.stubLoopRequest({
           GetLoopPref: getLoopPrefStub
         });
       });
 
-      it("should open the facebook url with room URL", function() {
+      it("should open the facebook share url with correct room and redirection", function() {
+        var room = "invalid.room",
+            origin = "origin.url";
 
         store.facebookShareRoomUrl(new sharedActions.FacebookShareRoomUrl({
           from: "conversation",
-          roomUrl: "http://invalid"
+          originUrl: origin,
+          roomUrl: room
         }));
 
         sinon.assert.calledOnce(requestStubs.OpenURL);
-        sinon.assert.calledWithExactly(requestStubs.OpenURL, "https://shared.site/?u=http%3A%2F%2Finvalid");
+        sinon.assert.calledWithMatch(requestStubs.OpenURL, sharingSite);
+        sinon.assert.calledWithMatch(requestStubs.OpenURL, room);
+        sinon.assert.calledWithMatch(requestStubs.OpenURL, origin);
+      });
+
+      it("if no origin URL, send fallback URL", function() {
+        var room = "invalid.room";
+
+        store.facebookShareRoomUrl(new sharedActions.FacebookShareRoomUrl({
+          from: "conversation",
+          roomUrl: room
+        }));
+
+        sinon.assert.calledOnce(requestStubs.OpenURL);
+        sinon.assert.calledWithMatch(requestStubs.OpenURL, sharingSite);
+        sinon.assert.calledWithMatch(requestStubs.OpenURL, room);
+        sinon.assert.calledWithMatch(requestStubs.OpenURL, fallback);
       });
 
       it("should send a telemetry event for facebook share from conversation", function() {

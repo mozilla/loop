@@ -3,7 +3,6 @@ pref("loop.remote.autostart", false);
 pref("loop.server", "https://loop.services.mozilla.com/v0");
 pref("loop.linkClicker.url", "https://hello.firefox.com/");
 pref("loop.gettingStarted.latestFTUVersion", 1);
-pref("loop.facebook.shareUrl", "https://www.facebook.com/sharer/sharer.php?u=%ROOM_URL%");
 pref("loop.gettingStarted.url", "https://www.mozilla.org/%LOCALE%/firefox/%VERSION%/hello/start/");
 pref("loop.gettingStarted.resumeOnFirstJoin", false);
 pref("loop.legal.ToS_url", "https://www.mozilla.org/about/legal/terms/firefox-hello/");
@@ -34,3 +33,6 @@ pref("loop.facebook.enabled", true);
 #else
 pref("loop.facebook.enabled", false);
 #endif
+pref("loop.facebook.appId", "1519239075036718");
+pref("loop.facebook.shareUrl", "https://www.facebook.com/dialog/send?app_id=%APP_ID%&link=%ROOM_URL%&redirect_uri=%REDIRECT_URI%");
+pref("loop.facebook.fallbackUrl", "https://hello.firefox.com/");

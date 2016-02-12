@@ -9,13 +9,14 @@ describe("loop.conversation", function() {
   var expect = chai.expect;
   var TestUtils = React.addons.TestUtils;
   var sharedActions = loop.shared.actions;
-  var fakeWindow, sandbox, setLoopPrefStub, mozL10nGet, remoteCursorStore, dispatcher;
+  var fakeWindow, sandbox, setLoopPrefStub, mozL10nGet,
+    remoteCursorStore, dispatcher, requestStubs;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
     setLoopPrefStub = sandbox.stub();
 
-    LoopMochaUtils.stubLoopRequest({
+    LoopMochaUtils.stubLoopRequest(requestStubs = {
       GetDoNotDisturb: function() { return true; },
       GetAllStrings: function() {
         return JSON.stringify({ textContent: "fakeText" });
@@ -38,6 +39,13 @@ describe("loop.conversation", function() {
           LOOP_SESSION_TYPE: {
             GUEST: 1,
             FXA: 2
+          },
+          LOOP_MAU_TYPE: {
+            OPEN_PANEL: 0,
+            OPEN_CONVERSATION: 1,
+            ROOM_OPEN: 2,
+            ROOM_SHARE: 3,
+            ROOM_DELETE: 4
           }
         };
       },
@@ -57,7 +65,8 @@ describe("loop.conversation", function() {
       },
       GetConversationWindowData: function() {
         return {};
-      }
+      },
+      TelemetryAddValue: sinon.stub()
     });
 
     fakeWindow = {
@@ -143,6 +152,15 @@ describe("loop.conversation", function() {
         new loop.shared.actions.GetWindowData({
           windowId: "42"
         }));
+    });
+
+    it("should log a telemetry event when opening the conversation window", function() {
+      var constants = requestStubs.GetAllConstants();
+      loop.conversation.init();
+
+      sinon.assert.calledOnce(requestStubs["TelemetryAddValue"]);
+      sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"],
+        "LOOP_MAU", constants.LOOP_MAU_TYPE.OPEN_CONVERSATION);
     });
   });
 

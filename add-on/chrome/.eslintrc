@@ -40,6 +40,7 @@
     "Iterator": false,
     "Log": false,
     "log": true,
+    "LOOP_MAU_TYPE": false,
     "LOOP_SESSION_TYPE": true,
     "LoopAPI": true,
     "LoopCalls": true,

@@ -138,6 +138,12 @@ const kMessageName = "Loop:Message";
 const kPushMessageName = "Loop:Message:Push";
 const kPushSubscription = "pushSubscription";
 const kRoomsPushPrefix = "Rooms:";
+const kMauPrefMap = new Map(
+  Object.getOwnPropertyNames(LOOP_MAU_TYPE).map(name => {
+    let parts = name.toLowerCase().split("_");
+    return [LOOP_MAU_TYPE[name], parts[0] + parts[1].charAt(0).toUpperCase() + parts[1].substr(1)];
+  })
+);
 const kMessageHandlers = {
   /**
    * Start browser sharing, which basically means to start listening for tab
@@ -390,6 +396,7 @@ const kMessageHandlers = {
   GetAllConstants: function(message, reply) {
     reply({
       LOOP_SESSION_TYPE: LOOP_SESSION_TYPE,
+      LOOP_MAU_TYPE: LOOP_MAU_TYPE,
       ROOM_CREATE: ROOM_CREATE,
       ROOM_DELETE: ROOM_DELETE,
       SHARING_ROOM_URL: SHARING_ROOM_URL,
@@ -1026,10 +1033,29 @@ const kMessageHandlers = {
    */
   TelemetryAddValue: function(message, reply) {
     let [histogramId, value] = message.data;
-    try {
-      Services.telemetry.getHistogramById(histogramId).add(value);
-    } catch (ex) {
-      MozLoopService.log.error("TelemetryAddValue failed for histogram '" + histogramId + "'", ex);
+
+    if (histogramId === "LOOP_MAU") {
+      let pref = "mau." + kMauPrefMap.get(value);
+      let prefDate = MozLoopService.getLoopPref(pref) * 1000;
+      let delta = Date.now() - prefDate;
+
+      // Send telemetry event if period (30 days) passed.
+      // 0 is default value for pref.
+      // 2592000 seconds in 30 days
+      if (pref === 0 || delta >= 2592000 * 1000) {
+        try {
+          Services.telemetry.getHistogramById(histogramId).add(value);
+        } catch (ex) {
+          MozLoopService.log.error("TelemetryAddValue failed for histogram '" + histogramId + "'", ex);
+        }
+        MozLoopService.setLoopPref(pref, Math.floor(Date.now() / 1000));
+      }
+    } else {
+      try {
+        Services.telemetry.getHistogramById(histogramId).add(value);
+      } catch (ex) {
+        MozLoopService.log.error("TelemetryAddValue failed for histogram '" + histogramId + "'", ex);
+      }
     }
     reply();
   }

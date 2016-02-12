@@ -223,6 +223,8 @@ loop.conversation = (function(mozL10n) {
       dispatcher.dispatch(new sharedActions.GetWindowData({
         windowId: windowId
       }));
+
+      loop.request("TelemetryAddValue", "LOOP_MAU", constants.LOOP_MAU_TYPE.OPEN_CONVERSATION);
     });
   }
 

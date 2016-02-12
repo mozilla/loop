@@ -37,7 +37,7 @@
     "fx-runner": "1.0.1",
     "imports-loader": "0.6.5",
     "jpm": "1.0.5",
-    "karma": "0.12.37",
+    "karma": "0.13.21",
     "karma-chrome-launcher": "0.2.2",
     "karma-coverage": "0.5.3",
     "karma-firefox-launcher": "0.1.6",

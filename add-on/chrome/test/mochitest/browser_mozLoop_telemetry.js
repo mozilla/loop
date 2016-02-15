@@ -133,6 +133,8 @@ add_task(function* test_mozLoop_telemetryAdd_roomSessionWithChat() {
   }
 });
 
+// Skip until bug 1208416 has landed.
+/*
 add_task(function* test_mozLoop_telemetryAdd_infobarActionButtons() {
   let histogramId = "LOOP_INFOBAR_ACTION_BUTTONS";
   let histogram = Services.telemetry.getHistogramById(histogramId);
@@ -180,10 +182,12 @@ add_task(function* test_mozLoop_telemetryAdd_loopMauType_buckets() {
   Assert.strictEqual(snapshot.counts[ACTION_TYPES.ROOM_DELETE], 1,
     "LOOP_MAU_TYPE.ROOM_DELETE");
 });
-
+*/
 /**
  * Tests that only one event is sent every 30 days
  */
+// Skip until bug 1208416 has landed.
+/*
 add_task(function* test_mozLoop_telemetryAdd_loopMau_more_than_30_days() {
   let histogramId = "LOOP_MAU";
   let histogram = Services.telemetry.getHistogramById(histogramId);
@@ -208,7 +212,7 @@ add_task(function* test_mozLoop_telemetryAdd_loopMau_more_than_30_days() {
   Services.prefs.clearUserPref("loop.mau.openPanel");
 });
 
-add_task(function* test_mozLoop_telemetryAdd_loopMau_less_than_30_days() {
+add_task.skip(function* test_mozLoop_telemetryAdd_loopMau_less_than_30_days() {
   let histogramId = "LOOP_MAU";
   let histogram = Services.telemetry.getHistogramById(histogramId);
   const ACTION_TYPES = gConstants.LOOP_MAU_TYPE;
@@ -230,3 +234,4 @@ add_task(function* test_mozLoop_telemetryAdd_loopMau_less_than_30_days() {
 
   Services.prefs.clearUserPref("loop.mau.openPanel");
 });
+*/

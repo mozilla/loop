@@ -95,7 +95,6 @@ var WindowListener = {
       },
 
       set isSlideshowOpen(aOpen) {
-        log.info("in isSlideshowOpen setter, aOpen = ", aOpen);
         isSlideshowOpen = aOpen;
         this.updateToolbarState();
       },

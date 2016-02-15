@@ -703,9 +703,10 @@ describe("VideoMuteButton", function() {
           src: { fake: 1 }
         });
 
-        sinon.assert.calledTwice(fakeVideoElement.addEventListener);
+        sinon.assert.calledThrice(fakeVideoElement.addEventListener);
         sinon.assert.calledWith(fakeVideoElement.addEventListener, "loadeddata");
         sinon.assert.calledWith(fakeVideoElement.addEventListener, "mousemove");
+        sinon.assert.calledWith(fakeVideoElement.addEventListener, "click");
       });
 
       it("should attach a video object for Firefox", function() {

@@ -663,6 +663,7 @@ loop.shared.views = (function(_, mozL10n) {
       window.removeEventListener("resize", this.handleVideoDimensions);
       videoElement.removeEventListener("loadeddata", this.handleVideoDimensions);
       videoElement.removeEventListener("mousemove", this.handleMousemove);
+      videoElement.removeEventListener("click", this.handleMouseClick);
     },
 
     componentDidUpdate: function() {
@@ -731,6 +732,12 @@ loop.shared.views = (function(_, mozL10n) {
       }));
     },
 
+    handleMouseClick: function() {
+      this.props.dispatcher.dispatch(new sharedActions.SendCursorData({
+        type: loop.shared.utils.CURSOR_MESSAGE_TYPES.CLICK
+      }));
+    },
+
     /**
      * Attaches a video stream from a donor video element to this component's
      * video element if the component is displaying one.
@@ -756,6 +763,7 @@ loop.shared.views = (function(_, mozL10n) {
       if (this.props.shareCursor) {
         videoElement.addEventListener("loadeddata", this.handleVideoDimensions);
         videoElement.addEventListener("mousemove", this.handleMouseMove);
+        videoElement.addEventListener("click", this.handleMouseClick);
       }
 
       // Set the src of our video element
@@ -1080,7 +1088,7 @@ loop.shared.views = (function(_, mozL10n) {
       var cx = classNames;
       var cursorClasses = cx({
         "remote-cursor-container": true,
-        "remote-cursor-clicked": !!this.state.remoteCursorClick ? true : false
+        "remote-cursor-clicked": this.state.remoteCursorClick
       });
 
       if (this.state.remoteCursorClick) {

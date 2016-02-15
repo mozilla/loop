@@ -165,7 +165,10 @@ describe("loop.conversation", function() {
   });
 
   describe("AppControllerView", function() {
-    var activeRoomStore, ccView, addRemoteCursorStub;
+    var activeRoomStore,
+        ccView,
+        addRemoteCursorStub,
+        clickRemoteCursorStub;
     var conversationAppStore,
         roomStore,
         feedbackPeriodMs = 15770000000;
@@ -205,8 +208,10 @@ describe("loop.conversation", function() {
       });
 
       addRemoteCursorStub = sandbox.stub();
+      clickRemoteCursorStub = sandbox.stub();
       LoopMochaUtils.stubLoopRequest({
-        AddRemoteCursorOverlay: addRemoteCursorStub
+        AddRemoteCursorOverlay: addRemoteCursorStub,
+        ClickRemoteCursor: clickRemoteCursorStub
       });
     });
 
@@ -238,6 +243,26 @@ describe("loop.conversation", function() {
       });
 
       sinon.assert.notCalled(addRemoteCursorStub);
+    });
+
+    it("should request ClickRemoteCursor when click event detected", function() {
+
+      mountTestComponent();
+      remoteCursorStore.setStoreState({
+        "remoteCursorClick": true
+      });
+
+      sinon.assert.calledOnce(clickRemoteCursorStub);
+    });
+
+    it("should NOT request ClickRemoteCursor when reset click on store", function() {
+
+      mountTestComponent();
+      remoteCursorStore.setStoreState({
+        "remoteCursorClick": false
+      });
+
+      sinon.assert.notCalled(clickRemoteCursorStub);
     });
 
     it("should display the RoomView for rooms", function() {

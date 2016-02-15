@@ -10,7 +10,6 @@ loop.OTSdkDriver = (function() {
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var STREAM_PROPERTIES = loop.shared.utils.STREAM_PROPERTIES;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
-  var CURSOR_MESSAGE_TYPES = loop.shared.utils.CURSOR_MESSAGE_TYPES;
 
   /**
    * This is a wrapper for the OT sdk. It is used to translate the SDK events into
@@ -808,7 +807,7 @@ loop.OTSdkDriver = (function() {
     },
 
     /**
-     * Sends the cursor position on the data channel.
+     * Sends the cursor events through the data channel.
      *
      * @param {String} message The message to send.
      */

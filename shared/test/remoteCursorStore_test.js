@@ -40,15 +40,16 @@ describe("loop.store.RemoteCursorStore", function() {
       }).to.Throw(/sdkDriver/);
     });
 
-    it("should add a CursorPositionChange event listener", function() {
+    it("should add a event listeners", function() {
       sandbox.stub(loop, "subscribe");
       new loop.store.RemoteCursorStore(dispatcher, { sdkDriver: fakeSdkDriver });
-      sinon.assert.calledOnce(loop.subscribe);
+      sinon.assert.calledTwice(loop.subscribe);
       sinon.assert.calledWith(loop.subscribe, "CursorPositionChange");
+      sinon.assert.calledWith(loop.subscribe, "CursorClick");
     });
   });
 
-  describe("#_cursorPositionChangeListener", function() {
+  describe("#cursor position change", function() {
     it("should send cursor data through the sdk", function() {
       var fakeEvent = {
         ratioX: 10,
@@ -62,6 +63,19 @@ describe("loop.store.RemoteCursorStore", function() {
         type: CURSOR_MESSAGE_TYPES.POSITION,
         ratioX: fakeEvent.ratioX,
         ratioY: fakeEvent.ratioY
+      });
+    });
+  });
+
+  describe("#cursor click", function() {
+    it("should send cursor data through the sdk", function() {
+      var fakeClick = true;
+
+      LoopMochaUtils.publish("CursorClick", fakeClick);
+
+      sinon.assert.calledOnce(fakeSdkDriver.sendCursorMessage);
+      sinon.assert.calledWith(fakeSdkDriver.sendCursorMessage, {
+        type: CURSOR_MESSAGE_TYPES.CLICK
       });
     });
   });

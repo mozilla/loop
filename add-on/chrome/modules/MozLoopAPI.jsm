@@ -195,7 +195,7 @@ const kMessageHandlers = {
    * Creates a layout for the remote cursor on the browser chrome,
    * and positions it on the received coordinates.
    *
-   * @param {Object}  message Message meant for the handler function, containing
+   * @param {Object}  message Message meant for the handler function, contains
    *                          the following parameters in its 'data' property:
    *                          {
    *                            ratioX: cursor's X position (between 0-1)
@@ -210,6 +210,25 @@ const kMessageHandlers = {
     let win = Services.wm.getMostRecentWindow("navigator:browser");
     if (win) {
       win.LoopUI.addRemoteCursor(message.data[0]);
+    }
+
+    reply();
+  },
+
+  /**
+   * Shows the click event on the remote cursor.
+   *
+   * @param {Object}  message Message meant for the handler function, contains
+   *                          a boolean for the click event in its 'data' prop.
+   *
+   * @param {Function} reply  Callback function, invoked with the result of the
+   *                          message handler. The result will be sent back to
+   *                          the senders' channel.
+   */
+  ClickRemoteCursor: function(message, reply) {
+    let win = Services.wm.getMostRecentWindow("navigator:browser");
+    if (win) {
+      win.LoopUI.clickRemoteCursor(message.data[0]);
     }
 
     reply();

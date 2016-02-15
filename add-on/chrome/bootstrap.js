@@ -10,8 +10,9 @@ const { interfaces: Ci, utils: Cu, classes: Cc } = Components;
 const kNSXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 const kBrowserSharingNotificationId = "loop-sharing-notification";
 
-const MIN_CURSOR_DELTA = 3;
-const MIN_CURSOR_INTERVAL = 100;
+const CURSOR_MIN_DELTA = 3;
+const CURSOR_MIN_INTERVAL = 100;
+const CURSOR_CLICK_DELAY = 1000;
 
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -547,6 +548,7 @@ var WindowListener = {
 
         // Remove shared pointers related events
         gBrowser.removeEventListener("mousemove", this);
+        gBrowser.removeEventListener("click", this);
         this.removeRemoteCursor();
 
         this._listeningToTabSelect = false;
@@ -603,26 +605,48 @@ var WindowListener = {
 
         let browser = gBrowser.selectedBrowser;
 
-        let cursor = document.getElementById("loop-remote-cursor");
-        if (!cursor) {
-          cursor = document.createElement("image");
+        let cursorContainer = document.getElementById("loop-remote-cursor-container");
+        if (!cursorContainer) {
+          cursorContainer = document.createElement("img");
+          cursorContainer.setAttribute("id", "loop-remote-cursor-container");
+          let cursor = document.createElement("img");
           cursor.setAttribute("id", "loop-remote-cursor");
+          cursorContainer.appendChild(cursor);
+
+          browser.parentNode.appendChild(cursorContainer);
         }
 
-        // Update the cursor's position.
-        cursor.setAttribute("left",
+        // Update the cursor's position. Cursor container (browser.parent)
+        // is a xul:stack, so positioning with left/top works.
+        cursorContainer.setAttribute("left",
                             cursorData.ratioX * browser.boxObject.width);
-        cursor.setAttribute("top",
+        cursorContainer.setAttribute("top",
                             cursorData.ratioY * browser.boxObject.height);
+      },
 
-        // browser's parent is a xul:stack, so positioning with left/top works.
-        browser.parentNode.appendChild(cursor);
+      /**
+       *  Adds the ripple effect animation to the cursor to show a click on the
+       *  remote end of the conversation
+       *
+       *  @param clickData bool click event
+       */
+      clickRemoteCursor: function(clickData) {
+        if (!clickData || !this._listeningToTabSelect) {
+          return;
+        }
+
+        let class_name = "clicked";
+        let cursor = document.getElementById("loop-remote-cursor");
+        cursor.classList.add(class_name);
+
+        // after the proper time, we get rid of the animation
+        window.setTimeout(() => {
+          cursor.classList.remove(class_name);
+        }, CURSOR_CLICK_DELAY);
       },
 
       /**
        *  Removes the remote cursor from the screen
-       *
-       *  @param browser OPT browser where the cursor should be removed from.
        */
       removeRemoteCursor: function() {
         let cursor = document.getElementById("loop-remote-cursor");
@@ -794,7 +818,7 @@ var WindowListener = {
 
         // Only update every so often.
         let now = Date.now();
-        if (now - this.lastCursorTime < MIN_CURSOR_INTERVAL) {
+        if (now - this.lastCursorTime < CURSOR_MIN_INTERVAL) {
           return;
         }
         this.lastCursorTime = now;
@@ -805,8 +829,8 @@ var WindowListener = {
         let deltaY = event.screenY - browserBox.screenY;
         if (deltaX < 0 || deltaX > browserBox.width ||
             deltaY < 0 || deltaY > browserBox.height ||
-            (Math.abs(deltaX - this.lastCursorX) < MIN_CURSOR_DELTA &&
-             Math.abs(deltaY - this.lastCursorY) < MIN_CURSOR_DELTA)) {
+            (Math.abs(deltaX - this.lastCursorX) < CURSOR_MIN_DELTA &&
+             Math.abs(deltaY - this.lastCursorY) < CURSOR_MIN_DELTA)) {
           return;
         }
         this.lastCursorX = deltaX;
@@ -823,7 +847,12 @@ var WindowListener = {
        * with all the data needed for sending link generator cursor click position
        * through the sdk.
        */
-      handleMouseClick: function(event) {
+      handleMouseClick: function() {
+        // We want to stop sending events if sharing is paused.
+        if (this._browserSharePaused) {
+          return;
+        }
+
         this.LoopAPI.broadcastPushMessage("CursorClick");
       },
 

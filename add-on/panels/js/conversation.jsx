@@ -34,12 +34,29 @@ loop.conversation = (function(mozL10n) {
 
     componentWillMount: function() {
       this.listenTo(this.props.cursorStore, "change:remoteCursorPosition",
-                    this._onRemoteCursorChange);
+                    this._onRemoteCursorPositionChange);
+      this.listenTo(this.props.cursorStore, "change:remoteCursorClick",
+                    this._onRemoteCursorClick);
     },
 
-    _onRemoteCursorChange: function() {
-      return loop.request("AddRemoteCursorOverlay",
-                          this.props.cursorStore.getStoreState("remoteCursorPosition"));
+    _onRemoteCursorPositionChange: function() {
+      loop.request("AddRemoteCursorOverlay",
+                  this.props.cursorStore.getStoreState("remoteCursorPosition"));
+    },
+
+    _onRemoteCursorClick: function() {
+      let click = this.props.cursorStore.getStoreState("remoteCursorClick");
+      // if the click is 'false', assume it is a storeState reset,
+      // so don't do anything
+      if (!click) {
+        return;
+      }
+
+      this.props.cursorStore.setStoreState({
+        remoteCursorClick: false
+      });
+
+      loop.request("ClickRemoteCursor", click);
     },
 
     getInitialState: function() {

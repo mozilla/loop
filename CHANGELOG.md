@@ -1,6 +1,97 @@
 # Changelog
 
-## 0.3.0
+## 1.1.0
+
+### New
+
+* No Bug - remove left-over console.info statement. r=me. [mikedeboer]
+
+* Bug 1245666 - Select &amp; style or implement react slideshow component. r=Standard8. [Chris Rafuse]
+
+* Bug 1245608 - Implement slideshow frame for Hello, r=Standard8. [Dan Mosedale]
+
+* Bug 1238530 - Clicker UI top bar. r=mikedeboer. [Manuel Casas Barrado]
+
+* No Bug. Fix the invitiation view on the ui-showcase. r=Mardak. [Mark Banner]
+
+* Bug 1245813 - When docShells have been swapped during chat window detach or re-attach, make sure the messageListeners are re-initialized. r=Standard8. [mikedeboer]
+
+* Bug 1247424 - Import l10n changes from m-c and get git-export working again. r=Mardak. [Mark Banner]
+
+* Bug 1208416 - Report on Hello MAUs per new MAU definition. r=mikedeboer. [Manuel Casas Barrado]
+
+* Bug 1242706 - Make sharing affordances in desktop invitation view clearer and modal. Content changes. [David Critchley]
+
+* Bug 1239241 - Facebook SEND button for sharing conversation. [Fernando Campo]
+
+* Bug 1247255 - Include a workaround for opening the Loop panel from the Hello homepage until FF is updated with the new API. r=mikedeboer. [Mark Banner]
+
+* Bug 1210606 - share pointer from standalone to desktop [3/3] [Fernando Campo]
+
+* Bug 1210606 - share pointer from standalone to desktop [1/3] [Fernando Campo]
+
+* Bug 1245486 - Send Telemetry events for use of the &quot;Pause&quot; and &quot;Restart&quot; buttons. r=mikedeboer. [Manuel Casas Barrado]
+
+* Bug 1246934 - Report the add-on version to the server. r=mikedeboer. [Mark Banner]
+
+* Bug 1225038 - Remove obsolete functions from NotificationCollection, r=Standard8. [malayaleecoder]
+
+* Bug 1240970 - Design/Copy/UX for Hello FTU Initiator Slideshow Strings, r=dmose. [Chris Rafuse]
+
+* Bug 1239970 - Locale string changes for FTU content in room list. [David Critchley]
+
+* Bug 1242706 - Make sharing affordances in desktop invitation view clearer and modal. String changes. [David Critchley]
+
+* Bug 1245815 - Add documentation for a lot of the release process and various tidy ups for the repo/workflow. r=Mardak. [Mark Banner]
+
+* Bug 1245815 - Add automation to locale_update to make it update the source repo and give a suggested commit. r=Mardak. [Mark Banner]
+
+* Bug 1239972 - Adapt infobar message based on whether a link clicker is in the room or not, r=dmose. [Chris Rafuse]
+
+* Bug 1229195 - MozLoopService#openChatWindow should return a Promise that is resolved with the window ID. r=Standard8. [mikedeboer]
+
+* Bug 1246168 - When the UI gets torn down, make sure we remove the menuitem as well. r=mikedeboer. [Mark Banner]
+
+* Bug 1245149 - Inform link clickers on mobile that they should use a desktop. r=mikedeboer. [Manuel Casas Barrado]
+
+* Bug 1246621 - Fix functional test failures adjusting for the e10s changes made to the chat window. r=mikedeboer. [Mark Banner]
+
+* Bug 1246621 - Make functional tests lintable. r=mikedeboer. [Mark Banner]
+
+* Bug 1244621 - Change link clicker UI favicon to Firefox Hello logo. r=Standard8. [Manuel Casas Barrado]
+
+* Bug 1239828 - Fix the locale_update script to not include locales if they don't have any properties files. [Mark Banner]
+
+* Bug 1245478 - Move display name setting for room joins to a central location in the content code. r=dcritch. [Mark Banner]
+
+### Chores
+
+* Update L10n from changeset 3f8ae4aef19ca1dcd86b909052f03a6cc573ecf1. [Mark Banner]
+
+* Update L10n from changeset c802f9afb25920431287327317b9a69ebac89014. [Mark Banner]
+
+* Update babel-plugin-transform-react-jsx to version 6.5.2. r=standard8. [greenkeeperio-bot]
+
+* Update rimraf to version 2.5.2. r=standard8. [greenkeeperio-bot]
+
+* Update exports-loader to version 0.6.3. r=standard8. [greenkeeperio-bot]
+
+* Update babel-plugin-transform-react-display-name to version 6.5.0. r=standard8. [greenkeeperio-bot]
+
+* Update babel-plugin-transform-react-jsx to version 6.5.0. r=standard8. [greenkeeperio-bot]
+
+* Update babel-cli to version 6.5.1. r=standard8. [greenkeeperio-bot]
+
+* Update webpack to version 1.12.13. r=standard8. [greenkeeperio-bot]
+
+### Other
+
+* Bug 1210606 - share pointer from standalone to desktop [2/3] [Fernando Campo]
+
+* Update master version following 0.3.0 release. [Mark Banner]
+
+
+## v0.3.0 (2016-02-04)
 
 ### New
 
@@ -63,6 +154,8 @@
 * Update master's version post 0.2.0 release. [Mark Banner]
 
 ### Other
+
+* 0.3.0. [Mark Banner]
 
 * Fix the tiles support url used for local standalone server instances. rs=dmose. [Mark Banner]
 

@@ -41,7 +41,7 @@
     "karma-chrome-launcher": "0.2.2",
     "karma-coverage": "0.5.3",
     "karma-firefox-launcher": "0.1.6",
-    "karma-mocha": "0.2.0",
+    "karma-mocha": "0.2.2",
     "mkdirp": "0.5.1",
     "mocha": "2.4.5",
     "nodemon": "1.8.1",

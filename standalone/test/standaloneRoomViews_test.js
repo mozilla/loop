@@ -379,43 +379,6 @@ describe("loop.standaloneRoomViews", function() {
     });
   });
 
-  describe("StandaloneRoomInfoArea in fixture", function() {
-    it("should dispatch a RecordClick action when the tile is clicked", function(done) {
-      // Point the iframe to a page that will auto-"click"
-      loop.config.tilesIframeUrl = "data:text/html,<script>parent.postMessage('tile-click', '*');</script>";
-
-      // Render the iframe into the fixture to cause it to load
-      view = React.render(
-        React.createElement(
-          loop.standaloneRoomViews.StandaloneRoomInfoArea, {
-            activeRoomStore: activeRoomStore,
-            dispatcher: dispatcher,
-            isFirefox: true,
-            joinRoom: sandbox.stub(),
-            roomState: ROOM_STATES.INIT,
-            roomUsed: false
-          }), fixtures);
-
-      // Change states and move time to get the iframe to load
-      view.setProps({ roomState: ROOM_STATES.JOINING });
-      clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
-
-      // Wait for the iframe to load and trigger a message that should also
-      // cause the RecordClick action
-      window.addEventListener("message", function onMessage() {
-        window.removeEventListener("message", onMessage);
-
-        sinon.assert.calledTwice(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.RecordClick({
-            linkInfo: "Tiles iframe click"
-          }));
-
-        done();
-      });
-    });
-  });
-
   describe("StandaloneInfoBar", function() {
     function mountTestComponent(extraProps) {
       var props = _.extend({
@@ -526,15 +489,17 @@ describe("loop.standaloneRoomViews", function() {
   });
 
   describe("StandaloneRoomView", function() {
-    function mountTestComponent() {
+    function mountTestComponent(props) {
+      props = _.extend({
+        cursorStore: remoteCursorStore,
+        dispatcher: dispatcher,
+        activeRoomStore: activeRoomStore,
+        isFirefox: true
+      }, props);
+
       return TestUtils.renderIntoDocument(
         React.createElement(
-          loop.standaloneRoomViews.StandaloneRoomView, {
-            cursorStore: remoteCursorStore,
-            dispatcher: dispatcher,
-            activeRoomStore: activeRoomStore,
-            isFirefox: true
-          }
+          loop.standaloneRoomViews.StandaloneRoomView, props
         )
       );
     }
@@ -604,6 +569,12 @@ describe("loop.standaloneRoomViews", function() {
     describe("#componentDidUpdate", function() {
       beforeEach(function() {
         view = mountTestComponent();
+        activeRoomStore.setStoreState({
+          roomContextUrls: [{
+            description: "fakeStartPage",
+            location: null
+          }]
+        });
         activeRoomStore.setStoreState({ roomState: ROOM_STATES.JOINING });
         activeRoomStore.setStoreState({ roomState: ROOM_STATES.JOINED });
       });
@@ -655,7 +626,14 @@ describe("loop.standaloneRoomViews", function() {
         view = mountTestComponent();
 
         // Pretend the user waited a little bit
-        activeRoomStore.setStoreState({ roomState: ROOM_STATES.JOINING, roomName: "fakeName" });
+        activeRoomStore.setStoreState({
+          roomState: ROOM_STATES.JOINING,
+          roomName: "fakeName",
+          roomContextUrls: [{
+            description: "fakeStartPage",
+            location: null
+          }]
+        });
         clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY - 1);
       });
 
@@ -741,7 +719,14 @@ describe("loop.standaloneRoomViews", function() {
     describe("#render", function() {
       beforeEach(function() {
         view = mountTestComponent();
-        activeRoomStore.setStoreState({ roomState: ROOM_STATES.JOINING, roomName: "fakeName" });
+        activeRoomStore.setStoreState({
+          roomState: ROOM_STATES.JOINING,
+          roomName: "fakeName",
+          roomContextUrls: [{
+            description: "fakeStartPage",
+            location: "http://fakeurl.com"
+          }]
+        });
       });
 
       describe("Empty room message", function() {
@@ -749,7 +734,7 @@ describe("loop.standaloneRoomViews", function() {
           function() {
             activeRoomStore.setStoreState({ roomState: ROOM_STATES.JOINED });
 
-            expect(view.getDOMNode().querySelector(".empty-room-message"))
+            expect(view.getDOMNode().querySelector(".room-notification-header h2"))
               .eql(null);
           });
 
@@ -758,15 +743,17 @@ describe("loop.standaloneRoomViews", function() {
             activeRoomStore.setStoreState({ roomState: ROOM_STATES.JOINED });
             clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
 
-            expect(view.getDOMNode().querySelector(".empty-room-message"))
+            expect(view.getDOMNode().querySelector(".room-notification-header h2"))
               .not.eql(null);
+            expect(view.getDOMNode().querySelector(".room-notification-header h2").textContent)
+              .eql("rooms_only_occupant_label2");
           });
 
         it("should not display an message immediately in the SESSION_CONNECTED state",
           function() {
             activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
 
-            expect(view.getDOMNode().querySelector(".empty-room-message"))
+            expect(view.getDOMNode().querySelector(".room-notification-header h2"))
               .eql(null);
           });
 
@@ -775,15 +762,17 @@ describe("loop.standaloneRoomViews", function() {
             activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
             clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
 
-            expect(view.getDOMNode().querySelector(".empty-room-message"))
+            expect(view.getDOMNode().querySelector(".room-notification-header h2"))
               .not.eql(null);
+            expect(view.getDOMNode().querySelector(".room-notification-header h2").textContent)
+              .eql("rooms_only_occupant_label2");
           });
 
         it("should not display an message immediately in the HAS_PARTICIPANTS state",
           function() {
             activeRoomStore.setStoreState({ roomState: ROOM_STATES.HAS_PARTICIPANTS });
 
-            expect(view.getDOMNode().querySelector(".empty-room-message"))
+            expect(view.getDOMNode().querySelector(".room-notification-header h2"))
               .eql(null);
           });
 
@@ -792,38 +781,21 @@ describe("loop.standaloneRoomViews", function() {
             activeRoomStore.setStoreState({ roomState: ROOM_STATES.HAS_PARTICIPANTS });
             clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
 
-            expect(view.getDOMNode().querySelector(".empty-room-message"))
+            expect(view.getDOMNode().querySelector(".room-notification-header h2"))
               .eql(null);
           });
-      });
 
-      describe("Empty room tile offer", function() {
-        it("should display a waiting room message and tile iframe on JOINED", function() {
-          var DUMMY_TILE_URL = "http://tile/";
-          loop.config.tilesIframeUrl = DUMMY_TILE_URL;
-          activeRoomStore.setStoreState({ roomState: ROOM_STATES.JOINED });
-          clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
+        it("should display an empty room message when the room owner left the room ",
+          function() {
+            activeRoomStore.setStoreState({
+              roomState: ROOM_STATES.SESSION_CONNECTED,
+              remotePeerDisconnected: true
+            });
+            clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
 
-          expect(view.getDOMNode().querySelector(".room-waiting-area")).not.eql(null);
-
-          var tile = view.getDOMNode().querySelector(".room-waiting-tile");
-          expect(tile).not.eql(null);
-          expect(tile.src).eql(DUMMY_TILE_URL);
-        });
-
-        it("should dispatch a RecordClick action when the tile support link is clicked", function() {
-          activeRoomStore.setStoreState({ roomState: ROOM_STATES.JOINED });
-          clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
-
-          TestUtils.Simulate.click(view.getDOMNode().querySelector(".room-waiting-area a"));
-
-          sinon.assert.calledTwice(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.RecordClick({
-              linkInfo: "Tiles support link click"
-            }));
-        });
-
+            expect(view.getDOMNode().querySelector(".room-notification-header h2").textContent)
+              .eql("room_owner_left_label");
+          });
       });
 
       describe("Prompt media message", function() {
@@ -863,6 +835,30 @@ describe("loop.standaloneRoomViews", function() {
           var ice_failed_message = view.getDOMNode().querySelector(".failed-room-message").textContent;
           expect(ice_failed_message).eql("rooms_ice_failure_message");
           expect(view.getDOMNode().querySelector(".btn-info")).not.eql(null);
+        });
+      });
+
+      describe("Ended session message", function() {
+        it("should display an ended session message and a rejoin button", function() {
+          activeRoomStore.setStoreState({ roomState: ROOM_STATES.ENDED });
+
+          expect(view.getDOMNode().querySelector(".room-notification-header h2"))
+            .not.eql(null);
+          expect(view.getDOMNode().querySelector(".room-notification-header h2").textContent)
+            .eql("You have disconnected.");
+          expect(view.getDOMNode().querySelector(".btn-join"))
+            .not.eql(null);
+        });
+
+        it("should display a promote firefox message", function() {
+          view = mountTestComponent({
+            isFirefox: false
+          });
+
+          activeRoomStore.setStoreState({ roomState: ROOM_STATES.ENDED });
+
+          expect(view.getDOMNode().querySelector(".promote-firefox"))
+            .not.eql(null);
         });
       });
 

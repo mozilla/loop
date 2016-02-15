@@ -305,16 +305,51 @@ loop.standaloneRoomViews = (function(mozL10n) {
       );
     },
 
+    _renderPromoteFirefoxView: function() {
+      return (
+        <div className="promote-firefox">
+          <h2>{mozL10n.get("rooms_promote_firefox_label")}</h2>
+          <button className="btn btn-info"
+                  onClick={this.props.joinRoom}>
+            {mozL10n.get("rooms_promote_firefox_button", {
+              brandShortname: mozL10n.get("brandShortname")
+            })}
+          </button>
+        </div>
+      );
+    },
+
     render: function() {
       switch (this.props.roomState) {
-        case ROOM_STATES.ENDED:
+        case ROOM_STATES.ENDED: {
+          return (
+            <div className="room-notification-area">
+              <div className="room-notification-header">
+                <h2>You have disconnected.</h2>
+              </div>
+              <div className="room-notification-content">
+                <button className="btn btn-join btn-info"
+                        onClick={this.props.joinRoom}>
+                  Rejoin
+                </button>
+                {!this.props.isFirefox ? this._renderPromoteFirefoxView() : null}
+              </div>
+            </div>
+          );
+        }
         case ROOM_STATES.READY: {
           return (
-            <div className="room-inner-info-area">
-              <button className="btn btn-join btn-info"
-                      onClick={this.props.joinRoom}>
-                {mozL10n.get("rooms_room_join_label")}
-              </button>
+            <div className="room-notification-area">
+              <div className="room-notification-header brand-header"></div>
+              <div className="room-notification-content">
+                <h2>{mozL10n.get("rooms_welcome_label")}</h2>
+                <p>{mozL10n.get("rooms_welcome_description")}</p>
+                <p>{mozL10n.get("rooms_welcome_get_started")}</p>
+                <button className="btn btn-join btn-info"
+                        onClick={this.props.joinRoom}>
+                  {mozL10n.get("rooms_room_join_label")}
+                </button>
+              </div>
             </div>
           );
         }
@@ -333,11 +368,9 @@ loop.standaloneRoomViews = (function(mozL10n) {
             "other": !isChrome && !isFirefox && !isOpera
           });
           return (
-            <div className="room-inner-info-area">
-              <p className={promptMediaMessageClasses}>
-                {msg}
-              </p>
-            </div>
+            <p className={promptMediaMessageClasses}>
+              {msg}
+            </p>
           );
         }
         case ROOM_STATES.JOINING:
@@ -349,21 +382,51 @@ loop.standaloneRoomViews = (function(mozL10n) {
             return null;
           }
 
+          var storeState = this.props.activeRoomStore.getStoreState("roomContextUrls");
+          var context = storeState[0] || [];
+
+          // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
+          // Try catch to not produce output if invalid url
+          try {
+            var sanitizeURL = loop.shared.utils.formatURL(context.location, true).hostname;
+          } catch (ex) {
+            sanitizeURL = null;
+          }
+
+          var thumbnail = context.thumbnail;
+
+          if (!thumbnail) {
+            thumbnail = "shared/img/icons-16x16.svg#globe";
+          }
+
+          var title = mozL10n.get(this.props.activeRoomStore.getStoreState("remotePeerDisconnected") ?
+            "room_owner_left_label" : "rooms_only_occupant_label2");
+
           return (
-            <div className="room-inner-info-area">
-              <p className="empty-room-message">
-                {mozL10n.get("rooms_only_occupant_label2")}
-              </p>
-              <p className="room-waiting-area">
-                {mozL10n.get("rooms_read_while_wait_offer")}
-                <a href={loop.config.tilesSupportUrl}
-                  onClick={this.recordTilesSupport}
-                  rel="noreferrer"
-                  target="_blank">
-                  <i className="room-waiting-help"></i>
-                </a>
-              </p>
-              <iframe className="room-waiting-tile" src={loop.config.tilesIframeUrl} />
+            <div className="room-notification-area">
+              <div className="room-notification-header">
+                <h2>{title}</h2>
+              </div>
+              <div className="room-notification-content">
+                <p>
+                  {mozL10n.get("rooms_wait_message")}
+                </p>
+
+                <div className="room-notification-context">
+                  <a className="context-wrapper"
+                     href={context.location ? context.location : null}
+                     rel="noreferrer"
+                     target="_blank">
+                    <img className="context-preview" src={thumbnail} />
+                    <span className="context-info">
+                      {context.description}
+                      <span className="context-url">
+                        {sanitizeURL}
+                      </span>
+                    </span>
+                  </a>
+                </div>
+              </div>
             </div>
           );
         }

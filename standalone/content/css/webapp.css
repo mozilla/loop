@@ -416,7 +416,6 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
 .room-inner-info-area {
   color: #4a4a4a;
   margin: auto;
-  padding: 0 5px;
   width: 100%;
 }
 
@@ -467,15 +466,99 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
   width: 290px;
 }
 
-/* Terms of Service */
-
-.room-inner-info-area > .terms-service {
-  margin-top: 20px;
+/* Notifications */
+.room-notification-area {
+  color: #4a4a4a;
+  margin: auto;
+  width: 300px;
+  background-color: rgba(250,250,250,.9);
+  border: solid 1px #a6a6a6;
+  box-shadow: 0 2px 4px rgba(0,0,0,.25);
 }
 
-.room-inner-info-area > .terms-service,
-.room-inner-info-area > .terms-service > a {
-  color: #999;
+.room-notification-area > .room-notification-header {
+  font-size: 16px;
+  line-height: 20px;
+  background-color: #fff;
+  box-shadow: 0 1px 1px rgba(0,0,0,.15);
+  text-align: center;
+  padding: 15px;
+}
+
+.room-notification-area > .room-notification-header.brand-header {
+  padding: 0;
+}
+
+.room-notification-area > .room-notification-header.brand-header:before {
+  content: "";
+  display: block;
+  background: url("../../shared/img/hello_logo.svg") center center no-repeat;
+  background-size: contain;
+  width: 120px;
+  height: 43px;
+  margin: auto;
+}
+
+.room-notification-area > .room-notification-content {
+  padding: 15px 20px 20px;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: left;
+}
+
+.room-notification-area > .room-notification-content > h2 {
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.room-notification-area > .room-notification-content > p {
+  margin: 0;
+  margin-bottom: 15px;
+}
+
+.room-notification-area > .room-notification-content button {
+  font-size: 1.2em;
+  padding: .5em 1.2em;
+  cursor: pointer;
+  width: 100%;
+}
+
+.room-notification-area > .room-notification-content > .room-notification-context > .context-wrapper {
+  background: #fff;
+  border: solid 1px #d4d4d4;
+  padding: 10px;
+  box-shadow: 0 1px 1px rgba(0,0,0,.15);
+  border-radius: 0;
+}
+
+.room-notification-area > .room-notification-content > .promote-firefox {
+  border-top: solid 1px #cecece;
+  margin: 15px 0 0;
+}
+
+.room-notification-area > .room-notification-content > .promote-firefox > h2 {
+  font-size: 12px;
+  color: #4a4a4a;
+  margin-bottom: 15px;
+}
+
+.room-notification-area > .room-notification-content > .promote-firefox > h2:before {
+  content: "";
+  display: block;
+  background: url("../../shared/img/firefox-logo.png") center center no-repeat;
+  background-size: contain;
+  width: 60px;
+  height: 60px;
+  margin: 15px auto;
+}
+
+.room-notification-area > .room-notification-content > .promote-firefox > button {
+  background: #ebebeb;
+  border: solid 1px #a6a6a6;
+  color: #4a4a4a;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 1rem;
 }
 
 @media screen and (max-width:620px) {

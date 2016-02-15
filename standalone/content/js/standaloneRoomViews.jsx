@@ -210,7 +210,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
       isFirefox: React.PropTypes.bool.isRequired,
       joinRoom: React.PropTypes.func.isRequired,
       roomState: React.PropTypes.string.isRequired,
-      roomUsed: React.PropTypes.bool.isRequired
+      roomUsed: React.PropTypes.bool.isRequired,
+      screenSharingPaused: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -305,6 +306,18 @@ loop.standaloneRoomViews = (function(mozL10n) {
       );
     },
 
+    _renderScreenSharingPausedView: function() {
+      return (
+        <div className="room-inner-info-area">
+          <div className="remote-stream-paused">
+            <h1>
+              {mozL10n.get("rooms_screen_share_paused")}
+            </h1>
+          </div>
+        </div>
+      );
+    },
+
     render: function() {
       switch (this.props.roomState) {
         case ROOM_STATES.ENDED:
@@ -384,6 +397,11 @@ loop.standaloneRoomViews = (function(mozL10n) {
               failureReason={this.props.failureReason} />
           );
         }
+        case ROOM_STATES.HAS_PARTICIPANTS:
+          if (this.props.screenSharingPaused) {
+            return this._renderScreenSharingPausedView();
+          }
+          return null;
         case ROOM_STATES.INIT:
         case ROOM_STATES.GATHER:
         default: {
@@ -765,6 +783,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
             renderRemoteVideo={this.shouldRenderRemoteVideo()}
             screenShareMediaElement={this.state.screenShareMediaElement}
             screenSharePosterUrl={this.props.screenSharePosterUrl}
+            screenSharingPaused={this.state.streamPaused}
             showInitialContext={true}
             useDesktopPaths={false}>
             <StandaloneRoomInfoArea activeRoomStore={this.props.activeRoomStore}
@@ -773,7 +792,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
               isFirefox={this.props.isFirefox}
               joinRoom={this.joinRoom}
               roomState={this.state.roomState}
-              roomUsed={this.state.used} />
+              roomUsed={this.state.used}
+              screenSharingPaused={this.state.streamPaused} />
           </sharedViews.MediaLayoutView>
           {(this.state.introSeen) ? null : <IntroOverlayView joinRoom={this.joinRoom} />}
         </div>

@@ -894,6 +894,19 @@ describe("loop.standaloneRoomViews", function() {
         });
       });
 
+      describe("Screen sharing paused", function() {
+        it("should display paused view if the screen share has been stopped", function() {
+          activeRoomStore.setStoreState({
+            roomState: ROOM_STATES.HAS_PARTICIPANTS,
+            streamPaused: true
+          });
+
+          var element = view.getDOMNode().querySelector(".remote-stream-paused h1");
+          expect(element).not.eql(null);
+          expect(element.textContent).eql("rooms_screen_share_paused");
+        });
+      });
+
       describe("screenShare", function() {
         it("should show a loading screen if receivingScreenShare is true " +
            "but no screenShareMediaElement is present", function() {

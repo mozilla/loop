@@ -16,7 +16,7 @@ DEF_OUTPUT_FILE_NAME = os.path.join("built", "add-on", os.extsep.join(["chrome",
 
 
 def main(input_file_name, output_file_name):
-    input_file = io.open(input_file_name, "r")
+    input_file = io.open(input_file_name, "r", encoding="UTF-8")
 
     jar_mn = input_file.read()
 
@@ -50,7 +50,7 @@ def main(input_file_name, output_file_name):
     # Now add a reference to the sub-manifest.
     manifest_output += "manifest chrome/locale/chrome.manifest\n"
 
-    output_file = io.open(output_file_name, "w")
+    output_file = io.open(output_file_name, "w", encoding="UTF-8")
 
     output_file.write(manifest_output)
 

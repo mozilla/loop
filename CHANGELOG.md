@@ -1,6 +1,17 @@
 # Changelog
 
-## 1.1.0
+## 1.1.1
+
+### New
+
+* No bug. Enable the facebook button for shipped builds. [Mark Banner]
+
+* No Bug. Disable MAU telemetry tests until the core part of bug 1208416 has landed. [Mark Banner]
+
+* No bug. Fix xpcshell-test failures from bug 1245608 - update the number of listeners. rs=me for test bustage fix. [Mark Banner]
+
+
+## v1.1.0 (2016-02-15)
 
 ### New
 
@@ -85,6 +96,8 @@
 * Update webpack to version 1.12.13. r=standard8. [greenkeeperio-bot]
 
 ### Other
+
+* 1.1.0. [Mark Banner]
 
 * Bug 1210606 - share pointer from standalone to desktop [2/3] [Fernando Campo]
 

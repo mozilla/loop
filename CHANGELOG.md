@@ -1,6 +1,13 @@
 # Changelog
 
-## 1.1.1
+## 1.1.2
+
+### New
+
+* No bug. Fix case-sensitive bug for the FTU tour. Follow-up to bug 1245666. [Mark Banner]
+
+
+## v1.1.1 (2016-02-15)
 
 ### New
 
@@ -9,6 +16,10 @@
 * No Bug. Disable MAU telemetry tests until the core part of bug 1208416 has landed. [Mark Banner]
 
 * No bug. Fix xpcshell-test failures from bug 1245608 - update the number of listeners. rs=me for test bustage fix. [Mark Banner]
+
+### Other
+
+* 1.1.1. [Mark Banner]
 
 
 ## v1.1.0 (2016-02-15)

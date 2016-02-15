@@ -17,16 +17,26 @@ import io
 import os
 import re
 import shutil
+import localeUtils
+from git import Repo
 
 # defaults
-DEF_L10N_SRC = os.path.join(os.pardir, "loop-client-l10n", "l10n")
+DEF_L10N_SRC = os.path.join(os.pardir, "loop-client-l10n")
 DEF_L10N_DST = os.path.join("locale")
 DEF_INDEX_FILE_NAME = os.path.join("standalone", "content", os.extsep.join(["index", "html"]))
-DEF_JAR_FILE_NAME = os.path.join("add-on", os.extsep.join(["jar", "mn"]))
+DEF_JAR_FILE_NAME = os.path.join("locale", os.extsep.join(["jar", "mn"]))
 
 
 def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
+    repo = Repo(os.path.abspath(l10n_src))
+
+    print("Updating L10n repo:", l10n_src)
+
+    repo.remotes.origin.pull()
+
     print("deleting existing l10n content tree:", l10n_dst)
+
+    l10n_src_files_dir = os.path.join(l10n_src, "l10n")
 
     old_locale_dirs = os.listdir(l10n_dst)
 
@@ -35,23 +45,27 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
         if dir != "en-US":
             shutil.rmtree(os.path.join(l10n_dst, dir), ignore_errors=True)
 
-    print("updating l10n tree from", l10n_src)
+    print("updating l10n tree from", l10n_src_files_dir)
 
     def create_locale(src_dir):
         # Convert loop-client-l10n repo names to loop repo names.
-        dst_dir = src_dir.replace('_', '-').replace('templates', 'en-US')
+        dst_dir = localeUtils.convertLocale(src_dir)
 
         # Don't copy the en-US files. Stick with what's in our tree as that might
         # be a later version.
         if dst_dir != "en-US":
             # Copy the l10n files, but ignore any `.keep`
-            shutil.copytree(os.path.join(l10n_src, src_dir),
+            shutil.copytree(os.path.join(l10n_src_files_dir, src_dir),
                             os.path.join(l10n_dst, dst_dir),
                             ignore=shutil.ignore_patterns(".keep"))
         return dst_dir
 
-    locale_dirs = os.listdir(l10n_src)
-    locale_list = sorted([create_locale(x) for x in locale_dirs if x[0] != "."])
+    for x in os.listdir(l10n_src_files_dir):
+        if x[0] != ".":
+            create_locale(x)
+
+    # Note: Use the destination directory here to get en-US as well.
+    locale_list = localeUtils.getLocalesList(l10n_dst)
 
     print("updating locales list in", index_file_name)
     with io.open(index_file_name, "r+") as index_file:
@@ -97,9 +111,13 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
         jar_file.truncate(0)
         jar_file.write(new_content)
 
+    print("Please check the diffs, and then commit the result. Suggested commit message:")
+    print("chore(package): Update L10n from changeset", repo.heads.master.commit.hexsha)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Loop Stand-alone Client localization update script")
+        description="Loop localization update script")
     parser.add_argument('--src',
                         default=DEF_L10N_SRC,
                         metavar="path",

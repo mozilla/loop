@@ -315,7 +315,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
                       onClick={this.props.joinRoom}>
                 {mozL10n.get("rooms_room_join_label")}
               </button>
-              <ToSView dispatcher={this.props.dispatcher} />
             </div>
           );
         }
@@ -394,6 +393,135 @@ loop.standaloneRoomViews = (function(mozL10n) {
     }
   });
 
+  var StandaloneInfoBar = React.createClass({
+    propTypes: {
+      audio: React.PropTypes.object.isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      leaveRoom: React.PropTypes.func.isRequired,
+      room: React.PropTypes.object.isRequired,
+      video: React.PropTypes.object.isRequired
+    },
+
+    getDefaultProps: function() {
+      return {
+        video: { enabled: true, visible: true },
+        audio: { enabled: true, visible: true }
+      };
+    },
+
+    handleClick: function(event) {
+      event.stopPropagation();
+      event.preventDefault();
+      if (event.currentTarget.href) {
+        loop.request("OpenURL", event.currentTarget.href);
+      }
+    },
+
+    renderButtons: function() {
+      var showButtons = this.props.video.visible || this.props.audio.visible;
+      if (!showButtons) {
+        return (
+          <div className="media-control-buttons">
+            <GeneralSupportURL dispatcher={this.props.dispatcher} />
+          </div>
+        );
+      }
+
+      return (
+        <div className="media-control-buttons">
+          <sharedViews.VideoMuteButton
+            dispatcher={this.props.dispatcher}
+            muted={!this.props.video.enabled}/>
+          <sharedViews.AudioMuteButton
+            dispatcher={this.props.dispatcher}
+            muted={!this.props.audio.enabled}/>
+          <GeneralSupportURL dispatcher={this.props.dispatcher} />
+          <sharedViews.HangUpControlButton
+            action={this.props.leaveRoom}
+            title={mozL10n.get("rooms_leave_button_label")}/>
+        </div>
+      );
+    },
+
+    render: function() {
+      return (
+        <div className="standalone-info-bar">
+          <div className="hello-logo"></div>
+          <div className="standalone-info-bar-spacer">
+            <StandaloneInfoView
+              dispatcher={this.props.dispatcher}
+              room={this.props.room}/>
+          </div>
+          {this.renderButtons()}
+        </div>
+      );
+    }
+  });
+
+  var StandaloneInfoView = React.createClass({
+    propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      room: React.PropTypes.object.isRequired
+    },
+
+    renderIcon: function() {
+      var urlData = (this.props.room.roomContextUrls || [])[0] || {};
+      if (urlData.location) {
+        return (
+          <img className="context-favicon" src={urlData.thumbnail || "shared/img/icons-16x16.svg#globe"} />
+        );
+      }
+
+      return (
+        <img className="context-favicon" src="shared/img/icons-16x16.svg#globe" />
+      );
+    },
+
+    renderContext: function() {
+      var urlData = (this.props.room.roomContextUrls || [])[0] || {};
+      var roomTitle = this.props.room.roomName ||
+        urlData.description || urlData.location ||
+        mozL10n.get("room_name_untitled_page");
+
+      return (
+        <div className="context-info">
+          <a href={urlData.location}
+            rel="noreferrer"
+            target="_blank"
+            title={urlData.description}>
+            {this.renderIcon()}
+            <h2>{roomTitle}</h2>
+          </a>
+        </div>
+      );
+    },
+
+    render: function() {
+      switch (this.props.room.roomState) {
+        case ROOM_STATES.ENDED:
+        case ROOM_STATES.READY:
+        case ROOM_STATES.FULL:
+        case ROOM_STATES.FAILED:
+        case ROOM_STATES.INIT:
+        case ROOM_STATES.GATHER:
+          return (
+            <div className="context-info">
+              <ToSView dispatcher={this.props.dispatcher} />
+            </div>
+          );
+        case ROOM_STATES.MEDIA_WAIT:
+        case ROOM_STATES.JOINING:
+        case ROOM_STATES.JOINED:
+        case ROOM_STATES.SESSION_CONNECTED:
+          return (
+            this.renderContext()
+          );
+        default:
+          return null;
+      }
+    }
+  });
+
   var StandaloneRoomView = React.createClass({
     mixins: [
       Backbone.Events,
@@ -406,6 +534,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
       // We pass conversationStore here rather than use the mixin, to allow
       // easy configurability for the ui-showcase.
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isFirefox: React.PropTypes.bool.isRequired,
       // The poster URLs are for UI-showcase testing and development
@@ -489,19 +618,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
     leaveRoom: function() {
       this.props.dispatcher.dispatch(new sharedActions.LeaveRoom());
-    },
-
-    /**
-     * Toggles streaming status for a given stream type.
-     *
-     * @param  {String}  type     Stream type ("audio" or "video").
-     * @param  {Boolean} enabled  Enabled stream flag.
-     */
-    publishStream: function(type, enabled) {
-      this.props.dispatcher.dispatch(new sharedActions.SetMute({
-        type: type,
-        enabled: enabled
-      }));
     },
 
     /**
@@ -609,7 +725,16 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
       return (
         <div className="room-conversation-wrapper standalone-room-wrapper">
+          <StandaloneInfoBar
+            audio={{ enabled: !this.state.audioMuted,
+                     visible: this._roomIsActive() }}
+            dispatcher={this.props.dispatcher}
+            leaveRoom={this.leaveRoom}
+            room={this.props.activeRoomStore.getStoreState()}
+            video={{ enabled: !this.state.videoMuted,
+                     visible: this._roomIsActive() }} />
           <sharedViews.MediaLayoutView
+            cursorStore={this.props.cursorStore}
             dispatcher={this.props.dispatcher}
             displayScreenShare={displayScreenShare}
             isLocalLoading={this._isLocalLoading()}
@@ -626,7 +751,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
             screenSharePosterUrl={this.props.screenSharePosterUrl}
             showInitialContext={true}
             useDesktopPaths={false}>
-            <StandaloneOverlayWrapper dispatcher={this.props.dispatcher} />
             <StandaloneRoomInfoArea activeRoomStore={this.props.activeRoomStore}
               dispatcher={this.props.dispatcher}
               failureReason={this.state.failureReason}
@@ -634,32 +758,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
               joinRoom={this.joinRoom}
               roomState={this.state.roomState}
               roomUsed={this.state.used} />
-            <sharedViews.ConversationToolbar
-              audio={{ enabled: !this.state.audioMuted,
-                      visible: this._roomIsActive() }}
-              dispatcher={this.props.dispatcher}
-              hangup={this.leaveRoom}
-              publishStream={this.publishStream}
-              showHangup={true}
-              video={{ enabled: !this.state.videoMuted,
-                      visible: this._roomIsActive() }} />
           </sharedViews.MediaLayoutView>
-        </div>
-      );
-    }
-  });
-
-  var StandaloneOverlayWrapper = React.createClass({
-    propTypes: {
-      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
-    },
-
-    render: function() {
-      return (
-        <div className="standalone-overlay-wrapper">
-          <div className="hello-logo"></div>
-          <GeneralSupportURL dispatcher={this.props.dispatcher} />
-          <img className="standalone-moz-logo" src="/img/mozilla-logo.svg#logo-white" />
         </div>
       );
     }
@@ -695,6 +794,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
     ],
 
     propTypes: {
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isFirefox: React.PropTypes.bool.isRequired
     },
@@ -719,6 +819,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
       return (
         <StandaloneRoomView
           activeRoomStore={this.getStore()}
+          cursorStore={this.props.cursorStore}
           dispatcher={this.props.dispatcher}
           isFirefox={this.props.isFirefox} />
       );
@@ -727,10 +828,11 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
   return {
     StandaloneHandleUserAgentView: StandaloneHandleUserAgentView,
+    StandaloneInfoBar: StandaloneInfoBar,
+    StandaloneInfoView: StandaloneInfoView,
     StandaloneRoomControllerView: StandaloneRoomControllerView,
     StandaloneRoomFailureView: StandaloneRoomFailureView,
     StandaloneRoomInfoArea: StandaloneRoomInfoArea,
-    StandaloneOverlayWrapper: StandaloneOverlayWrapper,
     StandaloneRoomView: StandaloneRoomView,
     ToSView: ToSView
   };

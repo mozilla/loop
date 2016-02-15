@@ -34,7 +34,8 @@ dist: build dist_xpi dist_export dist_standalone
 
 .PHONY: distclean
 distclean: clean
-	rm -fr dist
+	rm -rf dist
+	rm -rf node_modules
 
 .PHONY: distserver
 distserver: remove_old_config dist
@@ -242,6 +243,15 @@ $(BUILT)/add-on/chrome/content/panels/js/%.js: add-on/panels/js/%.jsx
 	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
+add_on_vendor_jsx_files=$(wildcard add-on/panels/vendor/*.jsx)
+built_add_on_vendor_js_files=$(patsubst add-on/panels/vendor/%.jsx, \
+	 $(BUILT)/add-on/chrome/content/panels/vendor/%.js, \
+	 $(add_on_vendor_jsx_files))
+
+$(BUILT)/add-on/chrome/content/panels/vendor/%.js: add-on/panels/vendor/%.jsx
+	@mkdir -p $(@D)
+	$(BABEL) $< --out-file $@
+
 add_on_l10n_files=$(wildcard locale/*/add-on.properties)
 built_add_on_l10n_files=$(patsubst locale/%/add-on.properties, \
 	$(BUILT)/add-on/chrome/locale/%/loop.properties, \
@@ -269,7 +279,14 @@ standalone: node_modules $(built_standalone_js_files) $(built_standalone_shared_
 	$(RSYNC) shared $(BUILT)/$@/content
 
 .PHONY: add-on
-add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(built_add_on_l10n_files) $(BUILT)/$(ADD-ON)/chrome.manifest $(BUILT)/add-on/chrome/content/preferences/prefs.js
+add-on: node_modules \
+	      $(built_add_on_js_files) \
+	      $(built_add_on_shared_js_files) \
+	      $(built_add_on_vendor_js_files) \
+	      $(built_add_on_l10n_files) \
+	      $(BUILT)/$(ADD-ON)/chrome.manifest \
+	      $(BUILT)/$(ADD-ON)/chrome/locale/chrome.manifest \
+	      $(BUILT)/add-on/chrome/content/preferences/prefs.js
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@/chrome/bootstrap.js $(BUILT)/$@
 	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \
@@ -285,8 +302,13 @@ add-on: node_modules $(built_add_on_js_files) $(built_add_on_shared_js_files) $(
 	$(RSYNC) $@/chrome/skin $(BUILT)/$@/chrome/
 
 $(BUILT)/$(ADD-ON)/chrome.manifest: $(ADD-ON)/jar.mn
-	mkdir -p $(BUILT)/$(ADD-ON)
-	python bin/generateChromeManifest.py --input-file=$^ --output-file=$@ --src=locale
+	@mkdir -p $(@D)
+	python bin/generateChromeManifest.py --input-file=$^ --output-file=$@
+
+shared_l10n_files=$(wildcard locale/*/shared.properties)
+$(BUILT)/$(ADD-ON)/chrome/locale/chrome.manifest: $(add_on_l10n_files) $(shared_l10n_files)
+	@mkdir -p $(@D)
+	python bin/generateLocaleManifest.py --output-file=$@ --src=locale
 
 # In this RSYNC, the order of exclude and includes generally matters.
 # The items below are:
@@ -340,6 +362,7 @@ dist_xpi: add-on_dist
 .PHONY: dist_export
 dist_export:
 	rm -rf $(DIST_EXPORT_DIR)
+	@mkdir -p $(DIST_EXPORT_DIR)
 	# Do a basic copy of the add-on.
 	$(RSYNC) $(BUILT)/$(ADD-ON)/* $(DIST_EXPORT_DIR)
 	# Use the install.rdf.in rather than install.rdf.
@@ -347,8 +370,10 @@ dist_export:
 	$(RSYNC) $(ADD-ON)/install.rdf.in $(DIST_EXPORT_DIR)
 	# jar.mn is used for Firefox build
 	rm -f $(DIST_EXPORT_DIR)/chrome.manifest
-	# Add the jar file.
+	rm -f $(DIST_EXPORT_DIR)/chrome/locale/chrome.manifest
+	# Add the jar files.
 	$(RSYNC) $(ADD-ON)/jar.mn $(DIST_EXPORT_DIR)
+	$(RSYNC) locale/jar.mn $(DIST_EXPORT_DIR)/chrome/locale
 	# Use the original prefs.js.
 	$(RSYNC) $(ADD-ON)/preferences/prefs.js $(DIST_EXPORT_DIR)/chrome/content/preferences/prefs.js
 	# Copy the vendor files that support the unit tests.
@@ -357,6 +382,9 @@ dist_export:
 	@mkdir -p $(DIST_EXPORT_DIR)/test/functional
 	$(RSYNC) test/functional/* $(DIST_EXPORT_DIR)/test/functional
 
+.PHONY: update_locale
+update_locale: $(VENV)
+	$(VENV)/bin/python bin/locale_update.py
 
 #
 # Tests
@@ -416,6 +444,15 @@ runfx:
 frontend:
 	@echo "Not implemented yet."
 
+.PHONY: upload_xpi
+upload_xpi:
+	@if [[ -z "${JPM_API_KEY}" || -z "${JPM_API_SECRET}" ]]; then \
+	  echo "JPM_API_KEY and JPM_API_SECRET should be defined"; \
+	  exit 1; \
+	  fi
+	$(NODE_LOCAL_BIN)/jpm sign --api-key=${JPM_API_KEY} --api-secret=${JPM_API_SECRET} \
+	  --xpi $(DIST)/$(XPI_NAME)
+
 # The local node server used for client dev (server.js) used to use a static
 # content/config.js.  Now that information is server up dynamically.  This
 # target is depended on by runserver, and removes any copies of that to avoid
@@ -439,4 +476,3 @@ config:
 	@echo "loop.config.generalSupportUrl = 'https://support.mozilla.org/kb/respond-firefox-hello-invitation-guest-mode';" >> content/config.js
 	@echo "loop.config.tilesIframeUrl = 'https://tiles.cdn.mozilla.net/iframe.html';" >> content/config.js
 	@echo "loop.config.tilesSupportUrl = 'https://support.mozilla.org/kb/tiles-firefox-hello';" >> content/config.js
-	@echo "loop.config.unsupportedPlatformUrl = 'https://support.mozilla.org/en-US/kb/which-browsers-will-work-firefox-hello-video-chat';" >> content/config.js

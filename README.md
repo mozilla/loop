@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/mozilla/loop.svg?branch=master)](https://travis-ci.org/mozilla/loop)
+
 This is the development repository for Firefox Hello, codenamed Loop. For
 background information on Loop, please see our
 [wiki page](https://wiki.mozilla.org/Loop). Loop is developed in two parts:

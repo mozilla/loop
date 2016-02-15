@@ -79,14 +79,16 @@ describe("loop.webapp", function() {
   });
 
   describe("WebappRootView", function() {
-    var sdk, standaloneAppStore;
-    var activeRoomStore;
+    var sdk,
+        standaloneAppStore,
+        activeRoomStore;
 
     function mountTestComponent() {
       return TestUtils.renderIntoDocument(
         React.createElement(
           loop.webapp.WebappRootView, {
             activeRoomStore: activeRoomStore,
+            cursorStore: remoteCursorStore,
             dispatcher: dispatcher,
             standaloneAppStore: standaloneAppStore
           }));
@@ -103,6 +105,9 @@ describe("loop.webapp", function() {
       standaloneAppStore = new loop.store.StandaloneAppStore({
         dispatcher: dispatcher,
         sdk: sdk
+      });
+      remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+        sdkDriver: sdk
       });
     });
 

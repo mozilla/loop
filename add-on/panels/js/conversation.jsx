@@ -27,8 +27,19 @@ loop.conversation = (function(mozL10n) {
     ],
 
     propTypes: {
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       roomStore: React.PropTypes.instanceOf(loop.store.RoomStore)
+    },
+
+    componentWillMount: function() {
+      this.listenTo(this.props.cursorStore, "change:remoteCursorPosition",
+                    this._onRemoteCursorChange);
+    },
+
+    _onRemoteCursorChange: function() {
+      return loop.request("AddRemoteCursorOverlay",
+                          this.props.cursorStore.getStoreState("remoteCursorPosition"));
     },
 
     getInitialState: function() {
@@ -69,6 +80,7 @@ loop.conversation = (function(mozL10n) {
         case "room": {
           return (<DesktopRoomConversationView
             chatWindowDetached={this.state.chatWindowDetached}
+            cursorStore={this.props.cursorStore}
             dispatcher={this.props.dispatcher}
             facebookEnabled={this.state.facebookEnabled}
             onCallTerminated={this.handleCallTerminated}
@@ -200,6 +212,7 @@ loop.conversation = (function(mozL10n) {
 
       React.render(
         <AppControllerView
+          cursorStore={remoteCursorStore}
           dispatcher={dispatcher}
           roomStore={roomStore} />, document.querySelector("#main"));
 
@@ -210,6 +223,8 @@ loop.conversation = (function(mozL10n) {
       dispatcher.dispatch(new sharedActions.GetWindowData({
         windowId: windowId
       }));
+
+      loop.request("TelemetryAddValue", "LOOP_MAU", constants.LOOP_MAU_TYPE.OPEN_CONVERSATION);
     });
   }
 

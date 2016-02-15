@@ -152,7 +152,7 @@ describe("loop.StandaloneMozLoop", function() {
     });
 
     it("should call the callback with success parameters", function() {
-      var promise = loop.request("Rooms:Join", "fakeToken").then(function(result) {
+      var promise = loop.request("Rooms:Join", "fakeToken", "guest").then(function(result) {
         expect(result).eql(sessionData);
       });
 
@@ -170,7 +170,7 @@ describe("loop.StandaloneMozLoop", function() {
     });
 
     it("should call the callback with failure parameters", function() {
-      var promise = loop.request("Rooms:Join", "fakeToken").then(function(result) {
+      var promise = loop.request("Rooms:Join", "fakeToken", "guest").then(function(result) {
         expect(result.isError).eql(true);
         expect(/HTTP 401 Unauthorized/.test(result.message)).eql(true);
       });
@@ -182,7 +182,7 @@ describe("loop.StandaloneMozLoop", function() {
     });
 
     it("should call the callback on xhr error", function() {
-      var promise = loop.request("Rooms:Join", "fakeToken").then(function(result) {
+      var promise = loop.request("Rooms:Join", "fakeToken", "guest").then(function(result) {
         expect(result.isError).eql(true);
         expect(/HTTP 0/.test(result.message)).eql(true);
       });

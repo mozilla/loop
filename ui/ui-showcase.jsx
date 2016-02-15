@@ -112,6 +112,7 @@
       remoteVideoEnabled: options.remoteVideoEnabled,
       roomName: "A Very Long Conversation Name",
       roomState: options.roomState,
+      roomUrl: options.roomUrl,
       used: !!options.roomUsed,
       videoMuted: !!options.videoMuted
     });
@@ -254,7 +255,8 @@
   var invitationRoomStore = new loop.store.RoomStore(dispatcher, {
     constants: {},
     activeRoomStore: makeActiveRoomStore({
-      roomState: ROOM_STATES.INIT
+      roomState: ROOM_STATES.INIT,
+      roomUrl: "http://showcase"
     })
   });
 
@@ -899,7 +901,6 @@
                   chatWindowDetached={false}
                   dispatcher={dispatcher}
                   facebookEnabled={true}
-                  localPosterUrl="sample-img/video-screen-local.png"
                   onCallTerminated={function() {}}
                   roomState={ROOM_STATES.INIT}
                   roomStore={invitationRoomStore} />

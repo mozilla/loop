@@ -1,12 +1,21 @@
 # Changelog
 
-## 1.1.3
+## 1.1.4
+
+### Other
+
+* Fix bustage from previous switch to unicode. [Mark Banner]
+
+
+## v1.1.3 (2016-02-15)
 
 ### New
 
 * No bug. Attempt to fix bustage for standalone when language isn't defined. [Mark Banner]
 
 ### Other
+
+* 1.1.3. [Mark Banner]
 
 * Backout bug 1237677 - OpenTok library update to 2.7.2 due to regressions on standalone UI (bug 1248407) [Mark Banner]
 

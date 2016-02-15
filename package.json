@@ -1,7 +1,7 @@
 {
   "name": "loop",
   "description": "Web sharing application powered by WebRTC",
-  "version": "0.4.0-alpha",
+  "version": "1.2.0-alpha",
   "repository": {
     "type": "git",
     "url": "git@github.com:mozilla/loop.git"

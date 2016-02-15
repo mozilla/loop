@@ -632,6 +632,7 @@ loop.shared.views = (function(_, mozL10n) {
       isLoading: React.PropTypes.bool.isRequired,
       mediaType: React.PropTypes.string.isRequired,
       posterUrl: React.PropTypes.string,
+      screenSharingPaused: React.PropTypes.bool,
       shareCursor: React.PropTypes.bool,
       // Expecting "local" or "remote".
       srcMediaElement: React.PropTypes.object
@@ -760,7 +761,7 @@ loop.shared.views = (function(_, mozL10n) {
         return;
       }
 
-      if (this.props.shareCursor) {
+      if (this.props.shareCursor && !this.props.screenSharingPaused) {
         videoElement.addEventListener("loadeddata", this.handleVideoDimensions);
         videoElement.addEventListener("mousemove", this.handleMouseMove);
         videoElement.addEventListener("click", this.handleMouseClick);
@@ -853,6 +854,7 @@ loop.shared.views = (function(_, mozL10n) {
       renderRemoteVideo: React.PropTypes.bool.isRequired,
       screenShareMediaElement: React.PropTypes.object,
       screenSharePosterUrl: React.PropTypes.string,
+      screenSharingPaused: React.PropTypes.bool,
       showInitialContext: React.PropTypes.bool.isRequired,
       useDesktopPaths: React.PropTypes.bool.isRequired
     },
@@ -920,7 +922,8 @@ loop.shared.views = (function(_, mozL10n) {
 
       var screenShareStreamClasses = classNames({
         "screen": true,
-        "focus-stream": this.props.displayScreenShare
+        "focus-stream": this.props.displayScreenShare,
+        "screen-sharing-paused": this.props.screenSharingPaused
       });
 
       var mediaWrapperClasses = classNames({
@@ -957,6 +960,7 @@ loop.shared.views = (function(_, mozL10n) {
                 isLoading={this.props.isScreenShareLoading}
                 mediaType="screen-share"
                 posterUrl={this.props.screenSharePosterUrl}
+                screenSharingPaused={this.props.screenSharingPaused}
                 shareCursor={true}
                 srcMediaElement={this.props.screenShareMediaElement} />
               {this.props.displayScreenShare ? this.props.children : null}

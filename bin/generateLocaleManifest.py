@@ -25,7 +25,7 @@ def main(l10n_src, output_file_name):
 
     manifest_output = "\n".join(localeLines) + "\n"
 
-    output_file.write(manifest_output)
+    output_file.write(unicode(manifest_output))
 
     output_file.close()
 

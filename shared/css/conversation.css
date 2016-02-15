@@ -859,7 +859,7 @@ body[platform="win"] .share-service-dropdown.overflow > .dropdown-menu-item {
 .text-chat-view > .text-chat-entries {
   width: 100%;
   overflow: auto;
-  padding-top: .6rem;
+  padding-top: 15px;
   /* 40px is the height of .text-chat-box. */
   height: calc(100% - 40px);
 }

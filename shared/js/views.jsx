@@ -47,12 +47,12 @@ loop.shared.views = (function(_, mozL10n) {
    * - {String}   scope   Media scope, can be "local" or "remote".
    * - {String}   type    Media type, can be "audio" or "video".
    * - {Function} action  Function to be executed on click.
-   * - {Enabled}  enabled Stream activation status (default: true).
+   * - {Bool} muted Stream activation status (default: false).
    */
   var MediaControlButton = React.createClass({
     propTypes: {
       action: React.PropTypes.func.isRequired,
-      enabled: React.PropTypes.bool.isRequired,
+      muted: React.PropTypes.bool.isRequired,
       scope: React.PropTypes.string.isRequired,
       title: React.PropTypes.string,
       type: React.PropTypes.string.isRequired,
@@ -60,7 +60,7 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     getDefaultProps: function() {
-      return { enabled: true, visible: true };
+      return { muted: false, visible: true };
     },
 
     handleClick: function() {
@@ -75,7 +75,7 @@ loop.shared.views = (function(_, mozL10n) {
         "media-control": true,
         "transparent-button": true,
         "local-media": this.props.scope === "local",
-        "muted": !this.props.enabled,
+        "muted": this.props.muted,
         "hide": !this.props.visible
       };
       classesObj["btn-mute-" + this.props.type] = true;
@@ -87,7 +87,7 @@ loop.shared.views = (function(_, mozL10n) {
         return this.props.title;
       }
 
-      var prefix = this.props.enabled ? "mute" : "unmute";
+      var prefix = this.props.muted ? "unmute" : "mute";
       var suffix = (this.props.type === "video") ? "button_title2" : "button_title";
       var msgId = [prefix, this.props.scope, this.props.type, suffix].join("_");
       return mozL10n.get(msgId);
@@ -124,21 +124,12 @@ loop.shared.views = (function(_, mozL10n) {
       audio: React.PropTypes.object.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       hangup: React.PropTypes.func.isRequired,
-      publishStream: React.PropTypes.func.isRequired,
       showHangup: React.PropTypes.bool,
       video: React.PropTypes.object.isRequired
     },
 
     handleClickHangup: function() {
       this.props.hangup();
-    },
-
-    handleToggleVideo: function() {
-      this.props.publishStream("video", !this.props.video.enabled);
-    },
-
-    handleToggleAudio: function() {
-      this.props.publishStream("audio", !this.props.audio.enabled);
     },
 
     componentDidMount: function() {
@@ -225,17 +216,57 @@ loop.shared.views = (function(_, mozL10n) {
 
           <li className="conversation-toolbar-btn-box">
             <div className={mediaButtonGroupCssClasses}>
-                <MediaControlButton action={this.handleToggleVideo}
-                                    enabled={this.props.video.enabled}
-                                    scope="local" type="video"
-                                    visible={this.props.video.visible}/>
-                <MediaControlButton action={this.handleToggleAudio}
-                                    enabled={this.props.audio.enabled}
-                                    scope="local" type="audio"
-                                    visible={this.props.audio.visible}/>
+                <VideoMuteButton dispatcher={this.props.dispatcher}
+                                 muted={!this.props.video.enabled}/>
+                <AudioMuteButton dispatcher={this.props.dispatcher}
+                                 muted={!this.props.audio.enabled}/>
             </div>
           </li>
         </ul>
+      );
+    }
+  });
+
+  var AudioMuteButton = React.createClass({
+    propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher),
+      muted: React.PropTypes.bool.isRequired
+    },
+
+    toggleAudio: function() {
+      this.props.dispatcher.dispatch(
+        new sharedActions.SetMute({ type: "audio", enabled: this.props.muted })
+      );
+    },
+
+    render: function() {
+      return (
+        <MediaControlButton action={this.toggleAudio}
+                            muted={this.props.muted}
+                            scope="local"
+                            type="audio" />
+      );
+    }
+  });
+
+  var VideoMuteButton = React.createClass({
+    propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher),
+      muted: React.PropTypes.bool.isRequired
+    },
+
+    toggleVideo: function() {
+      this.props.dispatcher.dispatch(
+        new sharedActions.SetMute({ type: "video", enabled: this.props.muted })
+      );
+    },
+
+    render: function() {
+      return (
+        <MediaControlButton action={this.toggleVideo}
+                            muted={this.props.muted}
+                            scope="local"
+                            type="video" />
       );
     }
   });
@@ -1035,17 +1066,20 @@ loop.shared.views = (function(_, mozL10n) {
   });
 
   return {
+    AudioMuteButton: AudioMuteButton,
     AvatarView: AvatarView,
     Button: Button,
     ButtonGroup: ButtonGroup,
     Checkbox: Checkbox,
     ContextUrlView: ContextUrlView,
     ConversationToolbar: ConversationToolbar,
+    HangUpControlButton: HangUpControlButton,
     MediaControlButton: MediaControlButton,
     MediaLayoutView: MediaLayoutView,
     MediaView: MediaView,
     LoadingView: LoadingView,
     NotificationListView: NotificationListView,
-    RemoteCursorView: RemoteCursorView
+    RemoteCursorView: RemoteCursorView,
+    VideoMuteButton: VideoMuteButton
   };
 })(_, navigator.mozL10n || document.mozL10n);

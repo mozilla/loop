@@ -282,28 +282,6 @@ describe("loop.standaloneRoomViews", function() {
     });
   });
 
-  describe("StandaloneRoomHeader", function() {
-    function mountTestComponent() {
-      return TestUtils.renderIntoDocument(
-        React.createElement(
-          loop.standaloneRoomViews.StandaloneOverlayWrapper, {
-            dispatcher: dispatcher
-          }));
-    }
-
-    it("should dispatch a RecordClick action when the support link is clicked", function() {
-      view = mountTestComponent();
-
-      TestUtils.Simulate.click(view.getDOMNode().querySelector("a"));
-
-      sinon.assert.calledOnce(dispatcher.dispatch);
-      sinon.assert.calledWithExactly(dispatcher.dispatch,
-        new sharedActions.RecordClick({
-          linkInfo: "Support link click"
-        }));
-    });
-  });
-
   describe("StandaloneRoomFailureView", function() {
     function mountTestComponent(extraProps) {
       var props = _.extend({
@@ -434,6 +412,115 @@ describe("loop.standaloneRoomViews", function() {
           }));
 
         done();
+      });
+    });
+  });
+
+  describe("StandaloneInfoBar", function() {
+    function mountTestComponent(extraProps) {
+      var props = _.extend({
+        audio: {
+          enabled: true,
+          visible: true
+        },
+        dispatcher: dispatcher,
+        leaveRoom: function() {},
+        room: {
+          roomName: "fakeName",
+          roomContextUrls: []
+        },
+        video: {
+          enabled: true,
+          visible: true
+        }
+      }, extraProps);
+      return TestUtils.renderIntoDocument(
+        React.createElement(loop.standaloneRoomViews.StandaloneInfoBar, props)
+      );
+    }
+
+    beforeEach(function() {
+      view = mountTestComponent();
+    });
+
+    it("should dispatch a RecordClick action when the support link is clicked", function() {
+      view = mountTestComponent();
+
+      TestUtils.Simulate.click(view.getDOMNode().querySelector("a"));
+
+      sinon.assert.calledOnce(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new sharedActions.RecordClick({
+          linkInfo: "Support link click"
+        }));
+    });
+
+    it("should display the hello-logo element", function() {
+      view = mountTestComponent();
+
+      expect(view.getDOMNode().querySelector(".hello-logo"))
+        .instanceOf(HTMLDivElement);
+    });
+
+    it("should display the support url button", function() {
+      view = mountTestComponent();
+
+      expect(view.getDOMNode().querySelector(".general-support-url"))
+        .instanceOf(HTMLAnchorElement);
+    });
+
+    it("should display the media control buttons if the user has joined to the room", function() {
+      view = mountTestComponent({
+        room: {
+          roomState: ROOM_STATES.JOINED
+        }
+      });
+
+      expect(view.getDOMNode().querySelector(".btn-mute-audio"))
+        .instanceOf(HTMLButtonElement);
+      expect(view.getDOMNode().querySelector(".btn-mute-video"))
+        .instanceOf(HTMLButtonElement);
+    });
+
+    it("should display the hangup button if the user has joined to the room", function() {
+      view = mountTestComponent({
+        room: {
+          roomState: ROOM_STATES.JOINED
+        }
+      });
+
+      expect(view.getDOMNode().querySelector(".btn-hangup"))
+        .instanceOf(HTMLButtonElement);
+    });
+
+    describe("StandaloneInfoView", function() {
+      it("should display ToS link", function() {
+        view = mountTestComponent({
+          room: {
+            roomState: ROOM_STATES.READY
+          }
+        });
+
+        expect(view.getDOMNode().querySelector(".terms-service"))
+          .instanceOf(HTMLParagraphElement);
+      });
+
+      it("should display room context info", function() {
+        view = mountTestComponent({
+          room: {
+            roomState: ROOM_STATES.JOINED,
+            roomName: "FakeRoomName",
+            roomContextUrls: [{
+              location: "http://fakeurl.com",
+              thumbnail: "fakeFavicon.ico"
+            }]
+          }
+        });
+
+        expect(view.getDOMNode().querySelector(".context-info h2").textContent)
+          .eql("FakeRoomName");
+        expect(view.getDOMNode().querySelector(".context-info img"))
+          .not.eql(null);
       });
     });
   });
@@ -620,6 +707,7 @@ describe("loop.standaloneRoomViews", function() {
 
     describe("#publishStream", function() {
       beforeEach(function() {
+        activeRoomStore.setStoreState({ roomState: ROOM_STATES.JOINED });
         view = mountTestComponent();
         view.setState({
           audioMuted: true,

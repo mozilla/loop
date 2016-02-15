@@ -1,10 +1,25 @@
 # Changelog
 
-## 1.1.2
+## 1.1.3
+
+### New
+
+* No bug. Attempt to fix bustage for standalone when language isn't defined. [Mark Banner]
+
+### Other
+
+* Backout bug 1237677 - OpenTok library update to 2.7.2 due to regressions on standalone UI (bug 1248407) [Mark Banner]
+
+
+## v1.1.2 (2016-02-15)
 
 ### New
 
 * No bug. Fix case-sensitive bug for the FTU tour. Follow-up to bug 1245666. [Mark Banner]
+
+### Other
+
+* 1.1.2. [Mark Banner]
 
 
 ## v1.1.1 (2016-02-15)

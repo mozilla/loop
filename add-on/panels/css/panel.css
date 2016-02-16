@@ -567,8 +567,8 @@ html[dir="rtl"] .generate-url-spinner {
 /* Settings (gear) menu */
 
 .button-settings {
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   margin: 0;
   padding: 0;
   border: none;
@@ -578,7 +578,6 @@ html[dir="rtl"] .generate-url-spinner {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  -moz-margin-start: .5em;
 }
 
 .settings-menu .dropdown-menu {

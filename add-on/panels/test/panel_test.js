@@ -1122,10 +1122,10 @@ describe("loop.panel", function() {
       sinon.assert.calledOnce(fakeWindow.close);
     });
 
-    it("should have room-list-empty element and not room-list element when no rooms", function() {
+    it("should have FTE element and not room-list element when room-list is empty", function() {
       var view = createTestComponent();
       var node = view.getDOMNode();
-      expect(node.querySelectorAll(".room-list-empty").length).to.eql(1);
+      expect(node.querySelectorAll(".fte-get-started-content").length).to.eql(1);
       expect(node.querySelectorAll(".room-list").length).to.eql(0);
     });
 

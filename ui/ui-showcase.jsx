@@ -1402,6 +1402,11 @@
                            warnings={caughtWarnings} />,
                    document.querySelector("#results"));
     }, 1000);
+
+    // Page needs to scroll to hashtag again after iframe heights have been adjusted.
+    setTimeout(function() {
+      location.hash = location.hash;
+    }, 5000);
   });
 
 })();

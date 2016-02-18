@@ -1,8 +1,17 @@
 # Changelog
 
-## 1.1.4
+## 1.1.5
+
+### New
+
+* Bug 1248491 - Simplify the standalone dist build process to not build the add-on artifacts to help with deployment. r=phrawzty. [Mark Banner]
+
+
+## v1.1.4 (2016-02-15)
 
 ### Other
+
+* 1.1.4. [Mark Banner]
 
 * Fix bustage from previous switch to unicode. [Mark Banner]
 

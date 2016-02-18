@@ -241,7 +241,7 @@ loop.conversation = (function(mozL10n) {
         windowId: windowId
       }));
 
-      loop.request("TelemetryAddValue", "LOOP_MAU", constants.LOOP_MAU_TYPE.OPEN_CONVERSATION);
+      loop.request("TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", constants.LOOP_MAU_TYPE.OPEN_CONVERSATION);
     });
   }
 

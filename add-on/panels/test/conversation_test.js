@@ -160,7 +160,7 @@ describe("loop.conversation", function() {
 
       sinon.assert.calledOnce(requestStubs["TelemetryAddValue"]);
       sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"],
-        "LOOP_MAU", constants.LOOP_MAU_TYPE.OPEN_CONVERSATION);
+        "LOOP_ACTIVITY_COUNTER", constants.LOOP_MAU_TYPE.OPEN_CONVERSATION);
     });
   });
 

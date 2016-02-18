@@ -190,7 +190,7 @@ var WindowListener = {
             let buckets = this.constants.LOOP_MAU_TYPE;
             this.LoopAPI.sendMessageToHandler({
               name: "TelemetryAddValue",
-              data: ["LOOP_MAU", buckets.OPEN_PANEL]
+              data: ["LOOP_ACTIVITY_COUNTER", buckets.OPEN_PANEL]
             });
           };
 

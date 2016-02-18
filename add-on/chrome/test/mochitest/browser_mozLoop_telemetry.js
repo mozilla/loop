@@ -154,7 +154,7 @@ add_task(function* test_mozLoop_telemetryAdd_infobarActionButtons() {
 });
 
 add_task(function* test_mozLoop_telemetryAdd_loopMauType_buckets() {
-  let histogramId = "LOOP_MAU";
+  let histogramId = "LOOP_ACTIVITY_COUNTER";
   let histogram = Services.telemetry.getHistogramById(histogramId);
   const ACTION_TYPES = gConstants.LOOP_MAU_TYPE;
 
@@ -185,7 +185,7 @@ add_task(function* test_mozLoop_telemetryAdd_loopMauType_buckets() {
  * Tests that only one event is sent every 30 days
  */
 add_task(function* test_mozLoop_telemetryAdd_loopMau_more_than_30_days() {
-  let histogramId = "LOOP_MAU";
+  let histogramId = "LOOP_ACTIVITY_COUNTER";
   let histogram = Services.telemetry.getHistogramById(histogramId);
   const ACTION_TYPES = gConstants.LOOP_MAU_TYPE;
 
@@ -209,7 +209,7 @@ add_task(function* test_mozLoop_telemetryAdd_loopMau_more_than_30_days() {
 });
 
 add_task(function* test_mozLoop_telemetryAdd_loopMau_less_than_30_days() {
-  let histogramId = "LOOP_MAU";
+  let histogramId = "LOOP_ACTIVITY_COUNTER";
   let histogram = Services.telemetry.getHistogramById(histogramId);
   const ACTION_TYPES = gConstants.LOOP_MAU_TYPE;
 

@@ -38,7 +38,7 @@ distclean: clean
 	rm -rf node_modules
 
 .PHONY: distserver
-distserver: remove_old_config dist
+distserver: remove_old_config dist_standalone
 	LOOP_CONTENT_DIR=`pwd`/dist/standalone node bin/server.js
 
 BUILT := ./built
@@ -106,6 +106,7 @@ BACKBONE_OBJS = \
 	$(BUILT)/ui/shared/vendor/backbone.js
 
 $(BACKBONE_OBJS): node_modules/backbone/backbone.js
+	@mkdir -p $(@D)
 	$(RSYNC) $< $@
 
 CLASSNAME_OBJS = \
@@ -114,6 +115,7 @@ CLASSNAME_OBJS = \
 	$(BUILT)/ui/shared/vendor/classnames.js
 
 $(CLASSNAME_OBJS): node_modules/classnames/index.js
+	@mkdir -p $(@D)
 	$(RSYNC) $< $@
 
 LODASH_OBJS = \
@@ -122,6 +124,7 @@ LODASH_OBJS = \
 	$(BUILT)/ui/shared/vendor/lodash.js
 
 $(LODASH_OBJS): node_modules/lodash/index.js
+	@mkdir -p $(@D)
 	$(RSYNC) $< $@
 
 REACT_OBJS = \
@@ -130,6 +133,7 @@ REACT_OBJS = \
 	$(BUILT)/ui/shared/vendor/react.js
 
 $(REACT_OBJS): node_modules/react/dist/react-with-addons.js
+	@mkdir -p $(@D)
 	$(RSYNC) $< $@
 
 REACT_PROD_OBJECTS = \
@@ -138,6 +142,7 @@ REACT_PROD_OBJECTS = \
 	$(BUILT)/ui/shared/vendor/react-prod.js
 
 $(REACT_PROD_OBJECTS): node_modules/react/dist/react-with-addons.min.js
+	@mkdir -p $(@D)
 	$(RSYNC) $< $@
 
 $(BUILT)/test/vendor:
@@ -272,7 +277,12 @@ ui: node_modules $(built_ui_js_files) $(built_ui_shared_js_files)
 	$(RSYNC) shared $(BUILT)/$@
 
 .PHONY: standalone
-standalone: node_modules $(built_standalone_js_files) $(built_standalone_shared_js_files) $(built_standalone_l10n_files)
+standalone: node_modules \
+            $(BACKBONE_OBJS) \
+            $(LODASH_OBJS) \
+            $(built_standalone_js_files) \
+            $(built_standalone_shared_js_files) \
+            $(built_standalone_l10n_files)
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@ $(BUILT)
 	mkdir -p $(BUILT)/$@/content/shared
@@ -335,7 +345,7 @@ add-on_dist: $(DIST)/add-on/chrome/content/preferences/prefs.js
 	   $(DIST)/add-on/chrome/content/shared/vendor/react.js
 
 .PHONY: dist_standalone
-dist_standalone: build
+dist_standalone: standalone
 	mkdir -p $(DIST)/standalone
 	# Standalone based on the built output
 	$(RSYNC) $(BUILT)/standalone/content/* $(DIST)/standalone

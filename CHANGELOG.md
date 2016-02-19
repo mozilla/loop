@@ -1,8 +1,10 @@
 # Changelog
 
-## 1.1.6
+## v1.1.6 (2016-02-19)
 
 ### Other
+
+* 1.1.6. [Mark Banner]
 
 * Reland bug 1237677 - OpenTok library update to 2.7.2 for a 1.1.6 release bump. [Mark Banner]
 

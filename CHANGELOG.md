@@ -1,10 +1,21 @@
 # Changelog
 
-## 1.1.5
+## 1.1.6
+
+### Other
+
+* Reland bug 1237677 - OpenTok library update to 2.7.2 for a 1.1.6 release bump. [Mark Banner]
+
+
+## v1.1.5 (2016-02-18)
 
 ### New
 
 * Bug 1248491 - Simplify the standalone dist build process to not build the add-on artifacts to help with deployment. r=phrawzty. [Mark Banner]
+
+### Other
+
+* 1.1.5. [Mark Banner]
 
 
 ## v1.1.4 (2016-02-15)

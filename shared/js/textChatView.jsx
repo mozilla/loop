@@ -27,8 +27,7 @@ loop.shared.views.chat = (function(mozL10n) {
       message: React.PropTypes.string.isRequired,
       showTimestamp: React.PropTypes.bool.isRequired,
       timestamp: React.PropTypes.string.isRequired,
-      type: React.PropTypes.string.isRequired,
-      useDesktopPaths: React.PropTypes.bool
+      type: React.PropTypes.string.isRequired
     },
 
     /**
@@ -73,8 +72,7 @@ loop.shared.views.chat = (function(mozL10n) {
               description={this.props.message}
               dispatcher={this.props.dispatcher}
               thumbnail={this.props.extraData.newRoomThumbnail}
-              url={this.props.extraData.newRoomURL}
-              useDesktopPaths={this.props.useDesktopPaths} />
+              url={this.props.extraData.newRoomURL} />
             {this.props.showTimestamp ? this._renderTimestamp() : null}
           </div>
         );
@@ -137,8 +135,7 @@ loop.shared.views.chat = (function(mozL10n) {
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       messageList: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-      showInitialContext: React.PropTypes.bool.isRequired,
-      useDesktopPaths: React.PropTypes.bool.isRequired
+      showInitialContext: React.PropTypes.bool.isRequired
     },
 
     getInitialState: function() {
@@ -222,8 +219,7 @@ loop.shared.views.chat = (function(mozL10n) {
                             description={entry.message}
                             dispatcher={this.props.dispatcher}
                             thumbnail={entry.extraData.thumbnail}
-                            url={entry.extraData.location}
-                            useDesktopPaths={this.props.useDesktopPaths} />
+                            url={entry.extraData.location} />
                         </div>
                       );
                     default:
@@ -252,8 +248,7 @@ loop.shared.views.chat = (function(mozL10n) {
                                  message={entry.message}
                                  showTimestamp={shouldShowTimestamp}
                                  timestamp={timestamp}
-                                 type={entry.type}
-                                 useDesktopPaths={this.props.useDesktopPaths} />
+                                 type={entry.type} />
                   );
               }, this)
             }
@@ -403,8 +398,7 @@ loop.shared.views.chat = (function(mozL10n) {
 
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      showInitialContext: React.PropTypes.bool.isRequired,
-      useDesktopPaths: React.PropTypes.bool.isRequired
+      showInitialContext: React.PropTypes.bool.isRequired
     },
 
     getInitialState: function() {
@@ -440,8 +434,7 @@ loop.shared.views.chat = (function(mozL10n) {
           <TextChatEntriesView
             dispatcher={this.props.dispatcher}
             messageList={messageList}
-            showInitialContext={this.props.showInitialContext}
-            useDesktopPaths={this.props.useDesktopPaths} />
+            showInitialContext={this.props.showInitialContext} />
           <TextChatInputView
             dispatcher={this.props.dispatcher}
             showPlaceholder={!hasSentMessages}

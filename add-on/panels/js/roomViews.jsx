@@ -566,8 +566,7 @@ loop.roomViews = (function(mozL10n) {
                 renderRemoteVideo={this.shouldRenderRemoteVideo()}
                 screenShareMediaElement={this.state.screenShareMediaElement}
                 screenSharePosterUrl={null}
-                showInitialContext={false}
-                useDesktopPaths={true}>
+                showInitialContext={false}>
                 <sharedViews.ConversationToolbar
                   audio={{ enabled: !this.state.audioMuted, visible: true }}
                   dispatcher={this.props.dispatcher}

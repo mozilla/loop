@@ -604,29 +604,35 @@ var WindowListener = {
         }
 
         let browser = gBrowser.selectedBrowser;
-
-        let cursorContainer = document.getElementById("loop-remote-cursor-container");
-        if (!cursorContainer) {
-          cursorContainer = document.createElement("img");
+        let cursor = document.getElementById("loop-remote-cursor");
+        if (!cursor) {
+          // Create a container to keep the pointer inside.
+          // This allows us to hide the overflow when out of bounds.
+          let cursorContainer = document.createElement("div");
           cursorContainer.setAttribute("id", "loop-remote-cursor-container");
-          let cursor = document.createElement("img");
+
+          cursor = document.createElement("img");
           cursor.setAttribute("id", "loop-remote-cursor");
           cursorContainer.appendChild(cursor);
-
+          // Note that browser.parent is a xul:stack so container will use
+          // 100% of space if no other constrains added.
           browser.parentNode.appendChild(cursorContainer);
         }
 
-        // Update the cursor's position. Cursor container (browser.parent)
-        // is a xul:stack, so positioning with left/top works.
-        cursorContainer.setAttribute("left",
-                            cursorData.ratioX * browser.boxObject.width);
-        cursorContainer.setAttribute("top",
-                            cursorData.ratioY * browser.boxObject.height);
+        // Update the cursor's position with CSS.
+        cursor.style.left =
+          Math.abs(cursorData.ratioX * browser.boxObject.width) + "px";
+        cursor.style.top =
+          Math.abs(cursorData.ratioY * browser.boxObject.height) + "px";
       },
 
       /**
        *  Adds the ripple effect animation to the cursor to show a click on the
-       *  remote end of the conversation
+       *  remote end of the conversation.
+       *  Will only add it when:
+       *  - A click is received (cursorData = true)
+       *  - Sharing is active (this._listeningToTabSelect = true)
+       *  - Remote cursor is being painted (cursor != undefined)
        *
        *  @param clickData bool click event
        */
@@ -637,6 +643,10 @@ var WindowListener = {
 
         let class_name = "clicked";
         let cursor = document.getElementById("loop-remote-cursor");
+        if (!cursor) {
+          return;
+        }
+
         cursor.classList.add(class_name);
 
         // after the proper time, we get rid of the animation

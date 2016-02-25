@@ -190,7 +190,6 @@ function getJSONPref(aName) {
 
 var gHawkClient = null;
 var gLocalizedStrings = new Map();
-var gFxAEnabled = true;
 var gFxAOAuthClientPromise = null;
 var gFxAOAuthClient = null;
 var gErrors = new Map();
@@ -1325,13 +1324,6 @@ this.MozLoopService = {
       return Promise.reject(new Error("loop is not enabled"));
     }
 
-    if (Services.prefs.getPrefType("loop.fxa.enabled") == Services.prefs.PREF_BOOL) {
-      gFxAEnabled = Services.prefs.getBoolPref("loop.fxa.enabled");
-      if (!gFxAEnabled) {
-        yield this.logOutFromFxA();
-      }
-    }
-
     // The Loop toolbar button should change icon when the room participant count
     // changes from 0 to something.
     const onRoomsChange = (e) => {
@@ -1570,10 +1562,6 @@ this.MozLoopService = {
    */
   set doNotDisturb(aFlag) {
     MozLoopServiceInternal.doNotDisturb = aFlag;
-  },
-
-  get fxAEnabled() {
-    return gFxAEnabled;
   },
 
   /**

@@ -44,7 +44,6 @@ describe("loop.panel", function() {
       GetDoNotDisturb: function() { return true; },
       SetDoNotDisturb: sinon.stub(),
       GetErrors: function() { return null; },
-      GetFxAEnabled: function() { return true; },
       GetAllStrings: function() {
         return JSON.stringify({ textContent: "fakeText" });
       },
@@ -82,7 +81,6 @@ describe("loop.panel", function() {
     });
 
     loop.storedRequests = {
-      GetFxAEnabled: true,
       GetHasEncryptionKey: true,
       GetUserProfile: null,
       GetDoNotDisturb: false,
@@ -283,8 +281,7 @@ describe("loop.panel", function() {
 
     it("should hide the account entry when FxA is not enabled", function() {
       LoopMochaUtils.stubLoopRequest({
-        GetUserProfile: function() { return { email: "test@example.com" }; },
-        GetFxAEnabled: function() { return false; }
+        GetUserProfile: function() { return { email: "test@example.com" }; }
       });
 
       var view = TestUtils.renderIntoDocument(
@@ -326,27 +323,12 @@ describe("loop.panel", function() {
         sinon.assert.calledOnce(prevent);
       });
 
-      it("should be hidden if FxA is not enabled", function() {
-        LoopMochaUtils.stubLoopRequest({
-          GetFxAEnabled: function() { return false; }
-        });
-
-        var view = TestUtils.renderIntoDocument(
-          React.createElement(loop.panel.AccountLink, {
-            fxAEnabled: false,
-            userProfile: null
-          }));
-
-        expect(view.getDOMNode()).to.be.null;
-      });
-
       it("should warn when user profile is different from {} or null",
          function() {
           var warnstub = sandbox.stub(console, "warn");
 
           TestUtils.renderIntoDocument(React.createElement(
             loop.panel.AccountLink, {
-              fxAEnabled: false,
               userProfile: []
             }
           ));
@@ -362,7 +344,6 @@ describe("loop.panel", function() {
 
           TestUtils.renderIntoDocument(React.createElement(
             loop.panel.AccountLink, {
-              fxAEnabled: false,
               userProfile: {}
             }
           ));

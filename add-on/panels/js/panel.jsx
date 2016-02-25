@@ -192,7 +192,6 @@ loop.panel = (function(_, mozL10n) {
     getInitialState: function() {
       return {
         signedIn: !!loop.getStoredRequest(["GetUserProfile"]),
-        fxAEnabled: loop.getStoredRequest(["GetFxAEnabled"]),
         doNotDisturb: loop.getStoredRequest(["GetDoNotDisturb"])
       };
     },
@@ -201,12 +200,10 @@ loop.panel = (function(_, mozL10n) {
       if (nextState.showMenu !== this.state.showMenu) {
         loop.requestMulti(
           ["GetUserProfile"],
-          ["GetFxAEnabled"],
           ["GetDoNotDisturb"]
         ).then(function(results) {
           this.setState({
             signedIn: !!results[0],
-            fxAEnabled: results[1],
             doNotDisturb: results[2]
           });
         }.bind(this));
@@ -284,7 +281,7 @@ loop.panel = (function(_, mozL10n) {
                 label={mozL10n.get(notificationsLabel)}
                 onClick={this.handleToggleNotifications} />
             <SettingsDropdownEntry
-                displayed={this.state.signedIn && this.state.fxAEnabled}
+                displayed={this.state.signedIn}
                 extraCSSClass="entry-settings-account"
                 label={mozL10n.get("settings_menu_item_account")}
                 onClick={this.handleClickAccountEntry} />
@@ -296,8 +293,7 @@ loop.panel = (function(_, mozL10n) {
             <SettingsDropdownEntry extraCSSClass="entry-settings-feedback"
                                    label={mozL10n.get("settings_menu_item_feedback")}
                                    onClick={this.handleSubmitFeedback} />
-            <SettingsDropdownEntry displayed={this.state.fxAEnabled}
-                                   extraCSSClass={accountEntryCSSClass}
+            <SettingsDropdownEntry extraCSSClass={accountEntryCSSClass}
                                    label={this.state.signedIn ?
                                           mozL10n.get("settings_menu_item_signout") :
                                           mozL10n.get("settings_menu_item_signin")}
@@ -318,7 +314,6 @@ loop.panel = (function(_, mozL10n) {
     mixins: [sharedMixins.WindowCloseMixin],
 
     propTypes: {
-      fxAEnabled: React.PropTypes.bool.isRequired,
       userProfile: userProfileValidator
     },
 
@@ -328,10 +323,6 @@ loop.panel = (function(_, mozL10n) {
     },
 
     render: function() {
-      if (!this.props.fxAEnabled) {
-        return null;
-      }
-
       if (this.props.userProfile && this.props.userProfile.email) {
         return (
           <div className="user-identity">
@@ -923,7 +914,6 @@ loop.panel = (function(_, mozL10n) {
 
     getInitialState: function() {
       return {
-        fxAEnabled: loop.getStoredRequest(["GetFxAEnabled"]),
         hasEncryptionKey: loop.getStoredRequest(["GetHasEncryptionKey"]),
         userProfile: loop.getStoredRequest(["GetUserProfile"]),
         gettingStartedSeen: loop.getStoredRequest(["GetLoopPref", "gettingStarted.latestFTUVersion"]) >= FTU_VERSION,
@@ -1057,8 +1047,7 @@ loop.panel = (function(_, mozL10n) {
             <RoomList dispatcher={this.props.dispatcher}
               store={this.props.roomStore} />
           <div className="footer">
-              <AccountLink fxAEnabled={this.state.fxAEnabled}
-                           userProfile={this.props.userProfile || this.state.userProfile}/>
+              <AccountLink userProfile={this.props.userProfile || this.state.userProfile}/>
             <div className="signin-details">
               <SettingsDropdown />
             </div>
@@ -1084,7 +1073,6 @@ loop.panel = (function(_, mozL10n) {
       ["GetLoopPref", "legal.privacy_url"],
       ["GetLoopPref", "remote.autostart"],
       ["GetUserProfile"],
-      ["GetFxAEnabled"],
       ["GetDoNotDisturb"],
       ["GetHasEncryptionKey"],
       ["IsMultiProcessActive"]

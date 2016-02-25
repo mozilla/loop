@@ -8,3 +8,5 @@ mozbuild==0.2
 gitchangelog==2.3.0
 pystache==0.5.4
 gitpython==1.0.1
+marionette_client==2.2.0
+pyperclip==1.5.26

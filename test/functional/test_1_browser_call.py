@@ -2,6 +2,7 @@ from marionette_driver.by import By
 from marionette_driver.errors import NoSuchElementException, StaleElementException
 # noinspection PyUnresolvedReferences
 from marionette_driver import Wait
+from marionette_driver.addons import Addons
 from marionette import MarionetteTestCase
 
 import os
@@ -25,10 +26,20 @@ class Test1BrowserCall(MarionetteTestCase):
 
         MarionetteTestCase.setUp(self)
 
-        # Unfortunately, enforcing preferences currently comes with the side
-        # effect of launching and restarting the browser before running the
-        # real functional tests.  Bug 1048554 has been filed to track this.
-        self.marionette.enforce_gecko_prefs(FIREFOX_PREFERENCES)
+        # Although some of these preferences might require restart, we don't
+        # use enforce_gecko_prefs (which would restart), as we need to restart
+        # for the add-on installation anyway.
+        self.marionette.set_prefs(FIREFOX_PREFERENCES)
+
+        xpi_file = os.environ.get("LOOP_XPI_FILE")
+
+        if xpi_file:
+            addons = Addons(self.marionette)
+            addons.install(os.path.abspath(xpi_file), temp=True)
+
+        # Restart the browser nicely, so the preferences and add-on installation
+        # take full effect.
+        self.marionette.restart(in_app=True)
 
         # this is browser chrome, kids, not the content window just yet
         self.marionette.set_context("chrome")

@@ -19,6 +19,8 @@ from config import CONTENT_SERVER_PORT, LOOP_SERVER_PORT, LOOP_SERVER_URL, \
 
 hanging_threads.start_monitoring()
 
+WORKING_DIR = os.getcwd()
+
 CONTENT_SERVER_COMMAND = ["make", "runserver_nowatch"]
 CONTENT_SERVER_ENV = os.environ.copy()
 # Set PORT so that it does not interfere with any other
@@ -42,6 +44,9 @@ LOOP_SERVER_ENV.update({"NODE_ENV": "dev",
 class LoopTestServers:
     def __init__(self):
         loop_server_location = os.environ.get('LOOP_SERVER')
+        if not loop_server_location:
+            raise Exception('LOOP_SERVER variable not set')
+
         if loop_server_location.startswith("http"):
             FIREFOX_PREFERENCES["loop.server"] = loop_server_location
             return
@@ -65,8 +70,8 @@ class LoopTestServers:
     def start_content_server():
         content_server_location = os.environ.get('STANDALONE_SERVER')
         if content_server_location is None:
-            content_server_location = os.path.join(os.path.dirname(__file__),
-                                                   "../../standalone")
+            content_server_location = WORKING_DIR
+
         os.chdir(content_server_location)
 
         p = processhandler.ProcessHandler(CONTENT_SERVER_COMMAND,

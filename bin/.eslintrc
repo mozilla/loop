@@ -1,4 +1,9 @@
 {
+  "env": {
+    "node": true,
+    // Can't enable this until we upgrade node.
+    "es6": false
+  },
   "rules": {
     "no-extra-parens": [2, "functions"],
     "no-invalid-this": 2,

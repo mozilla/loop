@@ -413,6 +413,16 @@ karma: build
 	$(NODE_LOCAL_BIN)/karma start test/karma/karma.coverage.desktop.js
 	$(NODE_LOCAL_BIN)/karma start test/karma/karma.coverage.shared_standalone.js
 
+LOOP_SERVER := $(shell echo $${LOOP_SERVER-../loop-server})
+TEST_BROWSER := $(shell echo $${TEST_BROWSER-nightly})
+
+functional: build $(XPI_FILE)
+	@mkdir -p $(BUILT)/functional
+	@LOOP_SERVER=$(LOOP_SERVER) LOOP_XPI_FILE=$(XPI_FILE) \
+	$(VENV)/bin/marionette --binary `./bin/getfx.js -b $(TEST_BROWSER)` \
+	                       --type=browser \
+	                       --gecko-log $(BUILT)/functional/gecko.log \
+	                       test/functional/manifest.ini
 
 #
 # Build & run

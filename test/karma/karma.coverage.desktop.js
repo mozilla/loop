@@ -17,6 +17,7 @@ module.exports = function(config) {
     "built/add-on/chrome/content/shared/vendor/react.js",
     "built/add-on/chrome/content/shared/vendor/classnames.js",
     "built/add-on/chrome/content/shared/vendor/backbone.js",
+    "built/add-on/chrome/content/panels/vendor/simpleSlideshow.js",
     "built/test/vendor/chai.js",
     "built/test/vendor/chai-as-promised.js",
     "built/test/vendor/mocha.js",
@@ -42,6 +43,7 @@ module.exports = function(config) {
     "built/add-on/chrome/content/panels/js/roomViews.js",
     "built/add-on/chrome/content/panels/js/conversation.js",
     "built/add-on/chrome/content/panels/js/panel.js",
+    "built/add-on/chrome/content/panels/js/slideshow.js",
     "add-on/panels/test/*.js",
     "test/karma/tail.js"
   ]);

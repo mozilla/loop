@@ -51,7 +51,9 @@ describe("loop.panel", function() {
       GetLocale: function() {
         return "en-US";
       },
-      GetPluralRule: sinon.stub(),
+      GetPluralRule: function() {
+        return 1;
+      },
       SetLoopPref: sinon.stub(),
       GetLoopPref: function(prefName) {
         if (prefName === "debug.dispatcher") {
@@ -76,6 +78,7 @@ describe("loop.panel", function() {
       NotifyUITour: sinon.stub(),
       OpenURL: sinon.stub(),
       GettingStartedURL: sinon.stub().returns("http://fakeFTUUrl.com"),
+      OpenGettingStartedTour: sinon.stub(),
       GetSelectedTabMetadata: sinon.stub().returns({}),
       GetUserProfile: function() { return null; }
     });
@@ -679,6 +682,18 @@ describe("loop.panel", function() {
         }).to.not.Throw();
       });
 
+    });
+
+    describe("GettingStartedView", function() {
+      it("should render the Slidehow when clicked on the button", function() {
+        loop.storedRequests["GetLoopPref|gettingStarted.latestFTUVersion"] = 0;
+
+        var view = createTestPanelView();
+
+        TestUtils.Simulate.click(view.getDOMNode().querySelector(".fte-get-started-button"));
+
+        sinon.assert.calledOnce(requestStubs.OpenGettingStartedTour);
+      });
     });
   });
 

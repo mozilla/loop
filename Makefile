@@ -427,6 +427,11 @@ LOOP_SERVER := $(shell echo $${LOOP_SERVER-../loop-server})
 # Either path to the browser, or one of nightly, aurora, beta, firefox.
 TEST_BROWSER := $(shell echo $${TEST_BROWSER-nightly})
 
+.PHONY: functional
+ifeq ($(SKIP_FUNCTIONAL),1)
+functional:
+	# Do nothing.
+else
 functional: build $(XPI_FILE)
 	@mkdir -p $(BUILT)/functional
 	TEST_SERVER=$(TEST_SERVER) \
@@ -437,6 +442,7 @@ functional: build $(XPI_FILE)
 	                       --type=browser \
 	                       --gecko-log $(BUILT)/functional/gecko.log \
 	                       test/functional/manifest.ini
+endif
 
 #
 # Build & run
@@ -465,7 +471,7 @@ clean:
 .PHONY: cleanbuild
 cleanbuild: clean build
 
-test: lint karma
+test: lint karma functional
 
 .PHONY: runserver
 runserver: remove_old_config

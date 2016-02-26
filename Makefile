@@ -413,12 +413,26 @@ karma: build
 	$(NODE_LOCAL_BIN)/karma start test/karma/karma.coverage.desktop.js
 	$(NODE_LOCAL_BIN)/karma start test/karma/karma.coverage.shared_standalone.js
 
+# Which test server to run against. Defaults to the dev server so that anyone
+# can run the tests. Possible values: local, dev, stage, production.
+TEST_SERVER := $(shell echo $${TEST_SERVER-dev})
+
+# Defaults to using the local standalone. If 0 will use the standalone associated
+# with the server defined by TEST_SERVER.
+USE_LOCAL_STANDALONE := $(shell echo $${USE_LOCAL_STANDALONE-1})
+
+# Path to the local loop server. Only used if TEST_SERVER=local.
 LOOP_SERVER := $(shell echo $${LOOP_SERVER-../loop-server})
+
+# Either path to the browser, or one of nightly, aurora, beta, firefox.
 TEST_BROWSER := $(shell echo $${TEST_BROWSER-nightly})
 
 functional: build $(XPI_FILE)
 	@mkdir -p $(BUILT)/functional
-	@LOOP_SERVER=$(LOOP_SERVER) LOOP_XPI_FILE=$(XPI_FILE) \
+	TEST_SERVER=$(TEST_SERVER) \
+	 LOOP_SERVER=$(LOOP_SERVER) \
+	 USE_LOCAL_STANDALONE=$(USE_LOCAL_STANDALONE) \
+	 LOOP_XPI_FILE=$(XPI_FILE) \
 	$(VENV)/bin/marionette --binary `./bin/getfx.js -b $(TEST_BROWSER)` \
 	                       --type=browser \
 	                       --gecko-log $(BUILT)/functional/gecko.log \

@@ -138,6 +138,50 @@ mozilla-central is required. We are
 [working on improving](https://bugzilla.mozilla.org/show_bug.cgi?id=1238570) this
 situation.
 
+Functional Tests
+----------------
+
+These are tests that verify Loop at a higher level. The basic test is to set up
+a room, connect a remote standalone user to it, and check there is two-way video.
+
+The functional tests by default will communicate with a development loop server.
+
+To run the functional tests you can do:
+
+```shell
+$ make functional
+```
+
+By default the tests run against the dev server (hosted online), using Firefox
+Nightly build.
+
+There are various options you can specify as environment variables, e.g.
+
+```shell
+$ TEST_BROWSER=aurora make functional
+```
+
+The options are:
+
+* `TEST_BROWSER`
+  * A branch reference for the type of Firefox to run, e.g. `nightly`, `aurora`,
+    `beta` or `firefox`
+  * The path to the browser you wish to run the tests against.
+* `TEST_SERVER`
+  * A reference to the loop-server to use for testing:
+    * `local` - use a locally set-up loop-server. Use `LOOP_SERVER` to set the
+      file location, it defaults to `../loop-server`.
+    * `dev` - use the dev server.
+    * `stage` - use the staging server.
+    * `prod` - use the production server. Please only use this setting for testing
+      releases.
+* `USE_LOCAL_STANDALONE`
+  * This is by default set to `1` and will use the files from the local repo for
+    the standalone part of Loop.
+  * If set to `0` this will cause the remote pages associated with the server to
+    be tested, e.g. using `stage` with `0` will use the staging loop-server and
+    the staging standalone pages.
+
 Standalone UI
 =============
 

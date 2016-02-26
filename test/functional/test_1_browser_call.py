@@ -5,6 +5,7 @@ from marionette_driver import Wait
 from marionette_driver.addons import Addons
 from marionette import MarionetteTestCase
 
+import re
 import os
 import sys
 import time
@@ -13,8 +14,8 @@ sys.path.insert(1, os.path.dirname(os.path.abspath(__file__)))
 
 import pyperclip
 
-from serversetup import LoopTestServers
-from config import FIREFOX_PREFERENCES
+from serversetup import LoopTestServers, ROOMS_WEB_APP_URL_BASE
+from config import FIREFOX_PREFERENCES, USE_LOCAL_STANDALONE
 
 
 class Test1BrowserCall(MarionetteTestCase):
@@ -118,6 +119,14 @@ class Test1BrowserCall(MarionetteTestCase):
 
         self.check_video(".local-video")
 
+    def adjust_url(self, room_url):
+        if USE_LOCAL_STANDALONE != "1":
+            return room_url
+
+        # If we're not using the local standalone, then we need to adjust the room
+        # url that the server gives us to use the local standalone.
+        return re.sub("https?://.*/", ROOMS_WEB_APP_URL_BASE + "/", room_url)
+
     def local_get_and_verify_room_url(self):
         self.switch_to_chatbox()
         button = self.wait_for_element_displayed(By.CLASS_NAME, "btn-copy")
@@ -126,6 +135,8 @@ class Test1BrowserCall(MarionetteTestCase):
 
         # click the element
         room_url = pyperclip.paste()
+
+        room_url = self.adjust_url(room_url)
 
         self.assertIn(urlparse.urlparse(room_url).scheme, ['http', 'https'],
                       "room URL returned by server: '" + room_url +

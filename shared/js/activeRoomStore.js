@@ -1021,6 +1021,7 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
      */
     remotePeerConnected: function() {
       this.setStoreState({
+        remotePeerDisconnected: false,
         roomState: ROOM_STATES.HAS_PARTICIPANTS,
         used: true
       });
@@ -1044,6 +1045,7 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
         mediaConnected: false,
         participants: participants,
         roomState: ROOM_STATES.SESSION_CONNECTED,
+        remotePeerDisconnected: true,
         remoteSrcMediaElement: null
       });
     },

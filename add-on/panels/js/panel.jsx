@@ -407,16 +407,35 @@ loop.panel = (function(_, mozL10n) {
 
     getInitialState: function() {
       return {
-        eventPosY: 0
+        editMode: false,
+        eventPosY: 0,
+        newRoomName: this._getRoomTitle()
       };
+    },
+
+    _getRoomTitle: function() {
+      var urlData = (this.props.room.decryptedContext.urls || [])[0] || {};
+      return this.props.room.decryptedContext.roomName ||
+        urlData.description || urlData.location ||
+        mozL10n.get("room_name_untitled_page");
     },
 
     _isActive: function() {
       return this.props.room.participants.length > 0;
     },
 
+    componentDidUpdate: function() {
+      if (this.state.editMode) {
+        this.getDOMNode().querySelector(".edit-room-input").focus();
+      }
+    },
+
     handleClickEntry: function(event) {
       event.preventDefault();
+
+      if (this.state.editMode) {
+        return;
+      }
 
       this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
         roomToken: this.props.room.roomToken
@@ -450,6 +469,39 @@ loop.panel = (function(_, mozL10n) {
       this.toggleDropdownMenu();
     },
 
+    handleEditButtonClick: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Enter Edit mode
+      this.setState({ editMode: true });
+      this.toggleDropdownMenu();
+    },
+
+    /**
+     * Handles a key being pressed - looking for the return key for saving
+     * the new room name.
+     */
+    handleKeyDown: function(event) {
+      if (event.which === 13) {
+        this.exitEditMode();
+      }
+    },
+
+    exitEditMode: function() {
+      this.props.dispatcher.dispatch(
+        new sharedActions.UpdateRoomContext({
+          roomToken: this.props.room.roomToken,
+          newRoomName: this.state.newRoomName
+        })
+      );
+      this.setState({ editMode: false });
+    },
+
+    handleEditInputChange: function(event) {
+      this.setState({ newRoomName: event.target.value });
+    },
+
     /**
      * Callback called when moving cursor away from the conversation entry.
      * Will close the dropdown menu.
@@ -466,10 +518,7 @@ loop.panel = (function(_, mozL10n) {
         "room-active": this._isActive(),
         "room-opened": this.props.isOpenedRoom
       });
-      var urlData = (this.props.room.decryptedContext.urls || [])[0] || {};
-      var roomTitle = this.props.room.decryptedContext.roomName ||
-        urlData.description || urlData.location ||
-        mozL10n.get("room_name_untitled_page");
+      var roomTitle = this._getRoomTitle();
 
       return (
         <div className={roomClasses}
@@ -478,12 +527,21 @@ loop.panel = (function(_, mozL10n) {
           ref="roomEntry">
           <RoomEntryContextItem
             roomUrls={this.props.room.decryptedContext.urls} />
-          <h2>{roomTitle}</h2>
-          {this.props.isOpenedRoom ? null :
+          {!this.state.editMode ?
+            <h2>{roomTitle}</h2> :
+            <input
+              className="edit-room-input"
+              onBlur={this.exitEditMode}
+              onChange={this.handleEditInputChange}
+              onKeyDown={this.handleKeyDown}
+              type="text"
+              value={this.state.newRoomName}/>}
+          {this.props.isOpenedRoom || this.state.editMode ? null :
             <RoomEntryContextButtons
               dispatcher={this.props.dispatcher}
               eventPosY={this.state.eventPosY}
               handleClick={this.handleClick}
+              handleEditButtonClick={this.handleEditButtonClick}
               ref="contextActions"
               room={this.props.room}
               showMenu={this.state.showMenu}
@@ -503,6 +561,7 @@ loop.panel = (function(_, mozL10n) {
       dispatcher: React.PropTypes.object.isRequired,
       eventPosY: React.PropTypes.number.isRequired,
       handleClick: React.PropTypes.func.isRequired,
+      handleEditButtonClick: React.PropTypes.func.isRequired,
       room: React.PropTypes.object.isRequired,
       showMenu: React.PropTypes.bool.isRequired,
       toggleDropdownMenu: React.PropTypes.func.isRequired
@@ -557,6 +616,7 @@ loop.panel = (function(_, mozL10n) {
               eventPosY={this.props.eventPosY}
               handleCopyButtonClick={this.handleCopyButtonClick}
               handleDeleteButtonClick={this.handleDeleteButtonClick}
+              handleEditButtonClick={this.props.handleEditButtonClick}
               handleEmailButtonClick={this.handleEmailButtonClick}
               ref="menu" /> :
             null}
@@ -577,6 +637,7 @@ loop.panel = (function(_, mozL10n) {
       eventPosY: React.PropTypes.number.isRequired,
       handleCopyButtonClick: React.PropTypes.func.isRequired,
       handleDeleteButtonClick: React.PropTypes.func.isRequired,
+      handleEditButtonClick: React.PropTypes.func.isRequired,
       handleEmailButtonClick: React.PropTypes.func.isRequired
     },
 
@@ -630,6 +691,12 @@ loop.panel = (function(_, mozL10n) {
             onClick={this.props.handleEmailButtonClick}
             ref="emailButton">
             {mozL10n.get("email_link_menuitem")}
+          </li>
+          <li
+            className="dropdown-menu-item"
+            onClick={this.props.handleEditButtonClick}
+            ref="editButton">
+            {mozL10n.get("edit_name_menuitem")}
           </li>
           <li
             className="dropdown-menu-item"

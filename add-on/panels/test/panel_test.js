@@ -926,12 +926,17 @@ describe("loop.panel", function() {
     });
 
     describe("Room name updated", function() {
-      it("should update room name", function() {
-        var roomEntry = mountRoomEntry({
+      var roomEntry;
+
+      beforeEach(function() {
+        roomEntry = mountRoomEntry({
           dispatcher: dispatcher,
           isOpenedRoom: false,
           room: new loop.store.Room(roomData)
         });
+      });
+
+      it("should update room name", function() {
         var updatedRoom = new loop.store.Room(_.extend({}, roomData, {
           decryptedContext: {
             roomName: "New room name"
@@ -944,6 +949,63 @@ describe("loop.panel", function() {
         expect(
           roomEntry.getDOMNode().textContent)
         .eql("New room name");
+      });
+
+      it("should enter in edit mode when edit button is clicked", function() {
+        roomEntry.handleEditButtonClick(fakeEvent);
+
+        expect(roomEntry.state.editMode).eql(true);
+      });
+
+      it("should render an input while edit mode is active", function() {
+        roomEntry.setState({
+          editMode: true
+        });
+
+        expect(roomEntry.getDOMNode().querySelector("input")).not.eql(null);
+      });
+
+      it("should exit edit mode and update the room name when input lose focus", function() {
+        roomEntry.setState({
+          editMode: true
+        });
+
+        sandbox.stub(dispatcher, "dispatch");
+
+        var input = roomEntry.getDOMNode().querySelector("input");
+        input.value = "fakeName";
+        TestUtils.Simulate.change(input);
+        TestUtils.Simulate.blur(input);
+
+        expect(roomEntry.state.editMode).eql(false);
+        sinon.assert.called(dispatcher.dispatch);
+        sinon.assert.calledWithExactly(dispatcher.dispatch, new sharedActions.UpdateRoomContext({
+          roomToken: roomData.roomToken,
+          newRoomName: "fakeName"
+        }));
+      });
+
+      it("should exit edit mode and update the room name when Enter key is pressed", function() {
+        roomEntry.setState({
+          editMode: true
+        });
+
+        sandbox.stub(dispatcher, "dispatch");
+
+        var input = roomEntry.getDOMNode().querySelector("input");
+        input.value = "fakeName";
+        TestUtils.Simulate.change(input);
+        TestUtils.Simulate.keyDown(input, {
+          key: "Enter",
+          which: 13
+        });
+
+        expect(roomEntry.state.editMode).eql(false);
+        sinon.assert.called(dispatcher.dispatch);
+        sinon.assert.calledWithExactly(dispatcher.dispatch, new sharedActions.UpdateRoomContext({
+          roomToken: roomData.roomToken,
+          newRoomName: "fakeName"
+        }));
       });
     });
 
@@ -1374,6 +1436,7 @@ describe("loop.panel", function() {
         React.createElement(loop.panel.ConversationDropdown, {
           handleCopyButtonClick: sandbox.stub(),
           handleDeleteButtonClick: sandbox.stub(),
+          handleEditButtonClick: sandbox.stub(),
           handleEmailButtonClick: sandbox.stub(),
           eventPosY: 0
         }));
@@ -1403,6 +1466,13 @@ describe("loop.panel", function() {
 
          sinon.assert.calledOnce(view.props.handleDeleteButtonClick);
        });
+
+    it("should trigger handleEditButtonClick when edit button is clicked",
+       function() {
+         TestUtils.Simulate.click(view.refs.editButton.getDOMNode());
+
+         sinon.assert.calledOnce(view.props.handleEditButtonClick);
+       });
   });
 
   describe("RoomEntryContextButtons", function() {
@@ -1415,7 +1485,8 @@ describe("loop.panel", function() {
         showMenu: false,
         room: roomData,
         toggleDropdownMenu: sandbox.stub(),
-        handleClick: sandbox.stub()
+        handleClick: sandbox.stub(),
+        handleEditButtonClick: sandbox.stub()
       }, extraProps);
       return TestUtils.renderIntoDocument(
         React.createElement(loop.panel.RoomEntryContextButtons, props));

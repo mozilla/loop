@@ -260,6 +260,14 @@ body {
   white-space: nowrap;
 }
 
+.room-list > .room-entry > input {
+  display: inline-block;
+  vertical-align: middle;
+  /* See .room-entry-context-item for the margin/size reductions. */
+  width: calc(100% - 1rem - 16px);
+  font-size: 1.3rem;
+}
+
 .room-list > .room-entry.room-active:not(.room-opened) > h2 {
   font-weight: bold;
 }

@@ -1,5 +1,65 @@
 # Changelog
 
+## 1.1.8
+
+### New
+
+* Bug 1245808 - Re-enable browser_mozLoop_chat.js for e10s mode now that the issues with it seem to have gone away. r=mikedeboer. [Mark Banner]
+
+* Bug 1251824 - Update OpenTok library to 2.7.3. r=Mardak. [Mark Banner]
+
+* Bug 1250126 - Moving l-clicker  pointer near bottom/right edge alters l-generator display (r=dmose) [Fernando Campo]
+
+* Bug 1250166 - Standalone -&gt; link generator cursor sharing still active when sharing is paused. [Fernando Campo]
+
+* Bug 1243594 (part 3) - leave the utf-8 encoding of the payload to rest.js instead of directly in loop. r=Standard8. [Mark Banner]
+
+* Bug 1250847: prefix DOMWindowClose with the Social: prefix to assure they won’t arrive at the global messageManager instance that TabBrowser is listening to. It mixes things up in twisted, unexpected ways if we don’t. r=Standard8. [mikedeboer]
+
+* No Bug - Timing change within the check video and switch to chatbox to allow DOM catch up. r=standard8. [David Critchley]
+
+* Bug 1245277 loop addon needs to respect prior set default prefs, not restartless, r=Standard8. [Mark Banner]
+
+* Bug 1250495 - Improved privacy by opening Hello FTU Url when there is no context url r=standard8. [David Critchley]
+
+* Bug 1248895 - Open Hello panel after FTU is closed. [David Critchley]
+
+* Bug 1229195: prevent a JS error related to the UITour on beta and allow for a longer period of time before timeout in mochitests. r=Standard8. [mikedeboer]
+
+* Bug 1249015 - Context is still updated in standalone when sharing is stopped. r=mancas. [Ed Lee]
+
+* Bug 1248491 - Simplify the standalone dist build process to not build the add-on artifacts to help with deployment. r=phrawzty. [Mark Banner]
+
+* Bug 1248960 - Add an option to run the dev server without watching files, and switch functional tests to use it, and update the url for the tests. r=Mardak. [Mark Banner]
+
+* Bug 1248530 - Wrong vertical offset for shared pointer on link clicker side (r=Mardak) [Fernando Campo]
+
+* No bug. Fix case-sensitive bug for the FTU tour. Follow-up to bug 1245666. [Mark Banner]
+
+* No bug. Fix xpcshell-test failures from bug 1245608 - update the number of listeners. rs=me for test bustage fix. [Mark Banner]
+
+* No Bug - remove left-over console.info statement. r=me. [mikedeboer]
+
+### Chores
+
+* Bump minimum version to 46.0a1 since 45 doesn't have the required e10s changes. rs=release. [Mark Banner]
+
+* Update L10n from changeset c7891ecea3c1474fe3e31afda0552fd06f50de47. [Mark Banner]
+
+* Update karma to version 0.13.21. r=standard8. [greenkeeperio-bot]
+
+* Update karma-mocha to version 0.2.2. r=standard8. [greenkeeperio-bot]
+
+* Update master version following v1.1.2 release. [Mark Banner]
+
+
+## v1.1.7 (2016-02-19)
+
+### Other
+
+* 1.1.7. [Mark Banner]
+
+
 ## v1.1.6 (2016-02-19)
 
 ### Other

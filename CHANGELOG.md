@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.8
+## 1.1.9
 
 ### New
 
@@ -51,6 +51,12 @@
 * Update karma-mocha to version 0.2.2. r=standard8. [greenkeeperio-bot]
 
 * Update master version following v1.1.2 release. [Mark Banner]
+
+### Other
+
+* Backout bug 1250126 / changeset da00826f24ee3301fbc989d5b3ec18b93c261616 from release due to regressions. [Mark Banner]
+
+* 1.1.8. [Mark Banner]
 
 
 ## v1.1.7 (2016-02-19)

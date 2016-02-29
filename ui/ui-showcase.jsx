@@ -1039,12 +1039,28 @@
             <FramedExample cssClass="standalone"
                            dashed={true}
                            height={483}
+                           summary="Standalone room introduction message"
+                           width={644} >
+              <div className="standalone">
+                <StandaloneRoomView
+                  activeRoomStore={readyRoomStore}
+                  dispatcher={dispatcher}
+                  introSeen={false}
+                  isFirefox={true}
+                  roomState={ROOM_STATES.READY} />
+              </div>
+            </FramedExample>
+
+            <FramedExample cssClass="standalone"
+                           dashed={true}
+                           height={483}
                            summary="Standalone room conversation (ready)"
                            width={644} >
               <div className="standalone">
                 <StandaloneRoomView
                   activeRoomStore={readyRoomStore}
                   dispatcher={dispatcher}
+                  introSeen={true}
                   isFirefox={true}
                   roomState={ROOM_STATES.READY} />
               </div>
@@ -1060,6 +1076,7 @@
                 <StandaloneRoomView
                   activeRoomStore={joinedRoomStore}
                   dispatcher={dispatcher}
+                  introSeen={true}
                   isFirefox={true}
                   localPosterUrl="sample-img/video-screen-local.png" />
               </div>
@@ -1075,6 +1092,7 @@
                 <StandaloneRoomView
                   activeRoomStore={loadingRemoteVideoRoomStore}
                   dispatcher={dispatcher}
+                  introSeen={true}
                   isFirefox={true}
                   localPosterUrl="sample-img/video-screen-local.png" />
               </div>
@@ -1090,6 +1108,7 @@
                   <StandaloneRoomView
                     activeRoomStore={updatingActiveRoomStore}
                     dispatcher={dispatcher}
+                    introSeen={true}
                     isFirefox={true}
                     localPosterUrl="sample-img/video-screen-local.png"
                     remotePosterUrl="sample-img/video-screen-remote.png"
@@ -1107,6 +1126,7 @@
                 <StandaloneRoomView
                   activeRoomStore={localFaceMuteRoomStore}
                   dispatcher={dispatcher}
+                  introSeen={true}
                   isFirefox={true}
                   localPosterUrl="sample-img/video-screen-local.png"
                   remotePosterUrl="sample-img/video-screen-remote.png" />
@@ -1123,6 +1143,7 @@
                 <StandaloneRoomView
                   activeRoomStore={remoteFaceMuteRoomStore}
                   dispatcher={dispatcher}
+                  introSeen={true}
                   isFirefox={true}
                   localPosterUrl="sample-img/video-screen-local.png"
                   remotePosterUrl="sample-img/video-screen-remote.png" />
@@ -1141,6 +1162,7 @@
                   <StandaloneRoomView
                     activeRoomStore={loadingRemoteLoadingScreenStore}
                     dispatcher={dispatcher}
+                    introSeen={true}
                     isFirefox={true}
                     localPosterUrl="sample-img/video-screen-local.png"
                     remotePosterUrl="sample-img/video-screen-remote.png"
@@ -1160,6 +1182,7 @@
                   <StandaloneRoomView
                     activeRoomStore={loadingScreenSharingRoomStore}
                     dispatcher={dispatcher}
+                    introSeen={true}
                     isFirefox={true}
                     localPosterUrl="sample-img/video-screen-local.png"
                     remotePosterUrl="sample-img/video-screen-remote.png"
@@ -1177,6 +1200,7 @@
                   <StandaloneRoomView
                     activeRoomStore={updatingSharingRoomStore}
                     dispatcher={dispatcher}
+                    introSeen={true}
                     isFirefox={true}
                     localPosterUrl="sample-img/video-screen-local.png"
                     remotePosterUrl="sample-img/video-screen-remote.png"
@@ -1194,6 +1218,7 @@
                 <StandaloneRoomView
                   activeRoomStore={fullActiveRoomStore}
                   dispatcher={dispatcher}
+                  introSeen={true}
                   isFirefox={true} />
               </div>
             </FramedExample>
@@ -1207,6 +1232,7 @@
                 <StandaloneRoomView
                   activeRoomStore={fullActiveRoomStore}
                   dispatcher={dispatcher}
+                  introSeen={true}
                   isFirefox={false} />
               </div>
             </FramedExample>
@@ -1220,6 +1246,7 @@
                 <StandaloneRoomView
                   activeRoomStore={failedRoomStore}
                   dispatcher={dispatcher}
+                  introSeen={true}
                   isFirefox={false} />
               </div>
             </FramedExample>
@@ -1236,6 +1263,7 @@
                   <StandaloneRoomView
                     activeRoomStore={updatingMobileActiveRoomStore}
                     dispatcher={dispatcher}
+                    introSeen={true}
                     isFirefox={true}
                     localPosterUrl="sample-img/video-screen-local.png"
                     remotePosterUrl="sample-img/video-screen-remote.png"
@@ -1253,6 +1281,7 @@
                   <StandaloneRoomView
                     activeRoomStore={updatingSharingRoomMobileStore}
                     dispatcher={dispatcher}
+                    introSeen={true}
                     isFirefox={true}
                     localPosterUrl="sample-img/video-screen-local.png"
                     remotePosterUrl="sample-img/video-screen-remote.png"

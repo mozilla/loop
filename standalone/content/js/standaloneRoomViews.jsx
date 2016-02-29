@@ -599,6 +599,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
       cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      introSeen: React.PropTypes.bool,
       isFirefox: React.PropTypes.bool.isRequired,
       // The poster URLs are for UI-showcase testing and development
       localPosterUrl: React.PropTypes.string,
@@ -606,12 +607,27 @@ loop.standaloneRoomViews = (function(mozL10n) {
       roomState: React.PropTypes.string,
       screenSharePosterUrl: React.PropTypes.string
     },
-
     getInitialState: function() {
+      // Uncomment this line to see the slideshow every time while developing:
+      // localStorage.removeItem("introSeen");
+
+      // Used by the UI showcase to override localStorage value to hide or show FTU slideshow.
+      // localStorage sourced data is always string or null
+      var introSeen = false;
+      if (this.props.introSeen !== undefined) {
+        if (this.props.introSeen) {
+          introSeen = true;
+        }
+      } else {
+        if (localStorage.getItem("introSeen") !== null) {
+          introSeen = true;
+        }
+      }
       var storeState = this.props.activeRoomStore.getStoreState();
       return _.extend({}, storeState, {
         // Used by the UI showcase.
-        roomState: this.props.roomState || storeState.roomState
+        roomState: this.props.roomState || storeState.roomState,
+        introSeen: introSeen
       });
     },
 
@@ -822,6 +838,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
               roomState={this.state.roomState}
               roomUsed={this.state.used} />
           </sharedViews.MediaLayoutView>
+          {(this.state.introSeen) ? null : <IntroOverlayView joinRoom={this.joinRoom} />}
         </div>
       );
     }
@@ -850,6 +867,105 @@ loop.standaloneRoomViews = (function(mozL10n) {
       );
     }
   });
+
+  var Slide = React.createClass({
+    propTypes: {
+      imageClass: React.PropTypes.string.isRequired,
+      indexClass: React.PropTypes.string.isRequired,
+      joinRoom: React.PropTypes.func.isRequired,
+      text: React.PropTypes.string.isRequired,
+      title: React.PropTypes.string.isRequired
+    },
+
+    handleGotItClick: function(event) {
+      event.stopPropagation();
+      event.preventDefault();
+
+      // XXX we shouldn't be unnecessarily messing with the DOM behind
+      // React's back, as this can confuse React.  Furthermore, on close, the
+      // parent's state should be updated so that it doesn't render this
+      // component at all, as per the usual React idiom.  The way to do this
+      // is to have the parent pass in a close callback, which updates the
+      // parents state (either directly or via action dispatch to a store),
+      // causing the parent not to render this overlay.  This should also
+      // allow us to fix the duplication of code in handleCloseClick.
+      // (bug 1252306).
+      var overlayElem = document.getElementsByClassName("intro-overlay")[0];
+      overlayElem.classList.add("hide");
+      // telemetry string data as to which button was clicked
+      localStorage.setItem("introSeen", "true");
+      this.props.joinRoom();
+    },
+
+    render: function() {
+      return (
+        <div className="slide">
+          <div className={this.props.indexClass}>
+            <div className="slide-layout">
+              <div className={this.props.imageClass} />
+              <h2>{this.props.title}</h2>
+              <div className="slide-text">{this.props.text}</div>
+              <button className="button-got-it" onClick={this.handleGotItClick}>
+                {mozL10n.get("intro_slide_button")}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  });
+
+  var IntroOverlayView = React.createClass({
+    propTypes: {
+      joinRoom: React.PropTypes.func.isRequired
+    },
+
+    handleCloseClick: function(event) {
+      event.stopPropagation();
+      event.preventDefault();
+
+      // XXX we shouldn't be unnecessarily messing with the DOM behind
+      // React's back, as this can confuse React.  Furthermore, on close, the
+      // parent's state should be updated so that it doesn't render this
+      // component at all, as per the usual React idiom.  The way to do this
+      // is to have the parent pass in a close callback, which updates the
+      // parents state (either directly or via action dispatch to a store),
+      // causing the parent not to render this overlay.  This should also
+      // allow us to fix the duplication of code in handleGotItClick.
+      // (bug 1252306).
+      var overlayElem = document.getElementsByClassName("intro-overlay")[0];
+      overlayElem.classList.add("hide");
+      // telemetry string data as to which button was clicked
+      localStorage.setItem("introSeen", "true");
+      this.props.joinRoom();
+    },
+
+    render: function() {
+      var slideNode = {
+        id: "slide1",
+        imageClass: "slide1-image",
+        title: mozL10n.get("intro_slide_title"),
+        text: mozL10n.get("intro_slide_copy", {
+          clientSuperShortname: mozL10n.get("clientSuperShortname")
+        })
+      };
+      return (
+        <div className="intro-overlay">
+          <div className="slideshow">
+            <div className="slideshow-header">
+              <button className="button-close" onClick={this.handleCloseClick} />
+            </div>
+            <Slide imageClass={slideNode.imageClass}
+                   indexClass={slideNode.id}
+                   joinRoom={this.props.joinRoom}
+                   text={slideNode.text}
+                   title={slideNode.title} />
+            </div>
+        </div>
+      );
+    }
+  });
+
 
   var StandaloneRoomControllerView = React.createClass({
     mixins: [

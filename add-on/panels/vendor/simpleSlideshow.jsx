@@ -95,10 +95,8 @@ loop.SimpleSlideshow = (function() {
         var isActive = state.currentSlide === index;
         return (
           <Slide active={isActive}
-                 imageAlt={slideNode.imageAlt}
                  imageClass={slideNode.imageClass}
                  indexClass={slideNode.id}
-                 key={slideNode.id}
                  text={slideNode.text}
                  title={slideNode.title} />
         );

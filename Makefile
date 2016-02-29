@@ -447,6 +447,10 @@ test: lint karma
 runserver: remove_old_config
 	$(REPO_BIN_DIR)/run-server.sh
 
+.PHONY: runserver_nowatch
+runserver_nowatch:
+	node bin/server.js
+
 .PHONY: runfx
 runfx:
 	bin/runfx.js ${ARGS}

@@ -981,7 +981,13 @@ var MozLoopServiceInternal = {
             if (kEventNamesMap[eventName]) {
               eventName = kEventNamesMap[eventName];
 
-              UITour.clearAvailableTargetsCache();
+              // `clearAvailableTargetsCache` is new in Firefox 46. The else branch
+              // supports Firefox 45.
+              if ("clearAvailableTargetsCache" in UITour) {
+                UITour.clearAvailableTargetsCache();
+              } else {
+                UITour.availableTargetsCache.clear();
+              }
               UITour.notify(eventName);
             } else {
               // When the chat box or messages are shown, resize the panel or window

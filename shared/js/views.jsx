@@ -701,8 +701,16 @@ loop.shared.views = (function(_, mozL10n) {
 
       var storeState = this.props.cursorStore.getStoreState();
 
-      var deltaX = event.clientX - storeState.videoLetterboxing.left;
-      var deltaY = event.clientY - storeState.videoLetterboxing.top;
+      // video is not at the top, so we need to calculate the offset
+      var video = this.getDOMNode().querySelector("video");
+      var offset = video.getBoundingClientRect();
+
+      var deltaX = event.clientX
+                    - storeState.videoLetterboxing.left
+                    - offset.left;
+      var deltaY = event.clientY
+                    - storeState.videoLetterboxing.top
+                    - offset.top;
 
       // Skip the update if cursor is out of bounds
       if (deltaX < 0 || deltaX > storeState.streamVideoWidth ||

@@ -313,6 +313,7 @@
 
   #loop-remote-cursor-container {
     position: absolute;
+    pointer-events: none;
     /* Hide overflow so that when the tail of the pointer gets to the edge
      * of shared area, it doesn't widen the viewport by adding a scrollbar.
      */

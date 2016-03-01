@@ -2029,6 +2029,7 @@ describe("loop.store.ActiveRoomStore", function() {
         audioMuted: true,
         localVideoDimensions: { x: 10 },
         receivingScreenShare: true,
+        remotePeerDisconnected: true,
         remoteVideoDimensions: { y: 10 },
         screenSharingState: true,
         videoMuted: true,
@@ -2040,6 +2041,7 @@ describe("loop.store.ActiveRoomStore", function() {
       expect(store._storeState.audioMuted).eql(false);
       expect(store._storeState.localVideoDimensions).eql({});
       expect(store._storeState.receivingScreenShare).eql(false);
+      expect(store._storeState.remotePeerDisconnected).eql(false);
       expect(store._storeState.remoteVideoDimensions).eql({});
       expect(store._storeState.screenSharingState).eql(SCREEN_SHARE_STATES.INACTIVE);
       expect(store._storeState.videoMuted).eql(false);

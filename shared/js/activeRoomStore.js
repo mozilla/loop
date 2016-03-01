@@ -109,6 +109,7 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
       "localVideoDimensions",
       "mediaConnected",
       "receivingScreenShare",
+      "remotePeerDisconnected",
       "remoteSrcMediaElement",
       "remoteVideoDimensions",
       "remoteVideoEnabled",
@@ -144,6 +145,7 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
         screenSharingState: SCREEN_SHARE_STATES.INACTIVE,
         sharingPaused: false,
         receivingScreenShare: false,
+        remotePeerDisconnected: false,
         // Any urls (aka context) associated with the room.
         roomContextUrls: null,
         // The description for a room as stored in the context data.

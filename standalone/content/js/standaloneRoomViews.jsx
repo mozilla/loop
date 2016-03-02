@@ -334,7 +334,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
               <div className="room-notification-header brand-header"></div>
               <div className="room-notification-content">
                 <h2>{mozL10n.get("rooms_welcome_label")}</h2>
-                <p>{mozL10n.get("rooms_welcome_description")}</p>
+                <p>{mozL10n.get("rooms_welcome_description2")}</p>
                 <p>{mozL10n.get("rooms_welcome_get_started")}</p>
                 <button className="btn btn-join btn-info"
                         onClick={this.props.joinRoom}>

@@ -113,6 +113,7 @@
       roomName: "A Very Long Conversation Name",
       roomState: options.roomState,
       roomUrl: options.roomUrl,
+      streamPaused: options.streamPaused,
       used: !!options.roomUsed,
       videoMuted: !!options.videoMuted
     });
@@ -308,6 +309,11 @@
   var desktopRemoteFaceMuteRoomStore = new loop.store.RoomStore(dispatcher, {
     constants: {},
     activeRoomStore: desktopRemoteFaceMuteActiveRoomStore
+  });
+
+  var screenSharePausedActiveRoomStore = makeActiveRoomStore({
+    roomState: ROOM_STATES.HAS_PARTICIPANTS,
+    streamPaused: true
   });
 
   var textChatStore = new loop.store.TextChatStore(dispatcher, {
@@ -1249,6 +1255,22 @@
                   introSeen={true}
                   isFirefox={false} />
               </div>
+            </FramedExample>
+
+            <FramedExample cssClass="standalone"
+                           dashed={true}
+                           height={483}
+                           onContentsRendered={screenSharePausedActiveRoomStore.forcedUpdate}
+                           summary="Standalone room sharing screan paused (has-participants)"
+                           width={644}>
+                <div className="standalone">
+                  <StandaloneRoomView
+                    activeRoomStore={screenSharePausedActiveRoomStore}
+                    dispatcher={dispatcher}
+                    isFirefox={true}
+                    localPosterUrl="sample-img/video-screen-local.png"
+                    roomState={ROOM_STATES.HAS_PARTICIPANTS} />
+                </div>
             </FramedExample>
           </Section>
 

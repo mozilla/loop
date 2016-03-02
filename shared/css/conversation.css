@@ -624,13 +624,13 @@ body[platform="win"] .share-service-dropdown.overflow > .dropdown-menu-item {
 
 .media-wrapper > .focus-stream {
   display: flex;
-  /* We want this to be the width, minus 200px which is for the right-side text
-     chat and video displays. */
-  width: calc(100% - 200px);
-  /* 100% height to fill up media-layout, thus forcing other elements into the
-     second column that's 200px wide */
-  height: 100%;
   background-color: #d8d8d8;
+  /* 100% height to fill up media-layout, thus forcing other elements into the
+     second column that's 272px wide */
+  height: 100%;
+  /* We want this to be the width, minus 272px which is for the right-side text
+     chat and video displays. */
+  width: calc(100% - 272px);
 }
 
 .media-wrapper > .focus-stream.screen-sharing-paused > .remote-video-box {
@@ -639,8 +639,8 @@ body[platform="win"] .share-service-dropdown.overflow > .dropdown-menu-item {
 
 .media-wrapper > .local {
   flex: 0 1 auto;
-  width: 200px;
-  height: 150px;
+  height: 204px;
+  width: 272px;
 }
 
 .media-wrapper > .local .local-video,
@@ -676,15 +676,15 @@ body[platform="win"] .share-service-dropdown.overflow > .dropdown-menu-item {
    fix its height. */
 .media-wrapper > .text-chat-view {
   flex: 0 0 auto;
-  /* Text chat is a fixed 200px width for normal displays. */
-  width: 200px;
   height: 100%;
+  /* Text chat is a fixed 272px width for normal displays. */
+  width: 272px;
 }
 
 .media-wrapper.showing-local-streams > .text-chat-view {
   /* When we're displaying the local streams, then we need to make the text
      chat view a bit shorter to give room. */
-  height: calc(100% - 150px);
+  height: calc(100% - 204px);
 }
 
 .media-wrapper.showing-local-streams.receiving-screen-share {
@@ -693,8 +693,8 @@ body[platform="win"] .share-service-dropdown.overflow > .dropdown-menu-item {
 
 .media-wrapper.showing-local-streams.receiving-screen-share > .text-chat-view {
   /* When we're displaying the local streams, then we need to make the text
-     chat view a bit shorter to give room. */
-  height: calc(100% - 300px);
+     chat view a bit shorter to give room. 2 streams x 204px each*/
+  height: calc(100% - 408px);
 }
 
 .media-wrapper.receiving-screen-share > .screen {
@@ -706,10 +706,11 @@ body[platform="win"] .share-service-dropdown.overflow > .dropdown-menu-item {
 }
 
 .media-wrapper.receiving-screen-share > .remote {
-  order: 3;
   flex: 0 1 auto;
-  width: 200px;
-  height: 150px;
+  order: 3;
+  /* to keep the 4:3 ratio set both height and width */
+  height: 204px;
+  width: 272px;
 }
 
 .media-wrapper.receiving-screen-share > .local {

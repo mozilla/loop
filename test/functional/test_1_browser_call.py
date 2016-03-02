@@ -36,7 +36,12 @@ class Test1BrowserCall(MarionetteTestCase):
 
         if xpi_file:
             addons = Addons(self.marionette)
-            addons.install(os.path.abspath(xpi_file), temp=True)
+            # XXX We should really use temp=True here, but due to the later
+            # restart to ensure the add-on is installed correctly, this won't work
+            # at the moment. What we need is a fully restartless add-on - bug 1229352
+            # at which point we should be able to make this install temporarily
+            # and after the restart.
+            addons.install(os.path.abspath(xpi_file))
 
         # Restart the browser nicely, so the preferences and add-on installation
         # take full effect.

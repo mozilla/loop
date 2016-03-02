@@ -881,7 +881,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
           href={loop.config.generalSupportUrl}
           onClick={this.generalSupportUrlClick}
           rel="noreferrer"
-          target="_blank">
+          target="_blank"
+          title={mozL10n.get("rooms_general_support_button_label")}>
           <div className="icon icon-help"></div>
         </a>
       );

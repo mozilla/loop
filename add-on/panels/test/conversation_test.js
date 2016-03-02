@@ -213,6 +213,11 @@ describe("loop.conversation", function() {
         AddRemoteCursorOverlay: addRemoteCursorStub,
         ClickRemoteCursor: clickRemoteCursorStub
       });
+
+      loop.config = {
+        tilesIframeUrl: null,
+        tilesSupportUrl: null
+      };
     });
 
     afterEach(function() {

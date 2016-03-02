@@ -218,11 +218,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
       return { waitToRenderWaiting: true };
     },
 
-    componentDidMount: function() {
-      // Watch for messages from the waiting-tile iframe
-      window.addEventListener("message", this.recordTileClick);
-    },
-
     /**
      * Change state to allow for the waiting message to be shown and send an
      * event to record that fact.
@@ -267,24 +262,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
           }
           break;
       }
-    },
-
-    componentWillUnmount: function() {
-      window.removeEventListener("message", this.recordTileClick);
-    },
-
-    recordTileClick: function(event) {
-      if (event.data === "tile-click") {
-        this.props.dispatcher.dispatch(new sharedActions.RecordClick({
-          linkInfo: "Tiles iframe click"
-        }));
-      }
-    },
-
-    recordTilesSupport: function() {
-      this.props.dispatcher.dispatch(new sharedActions.RecordClick({
-        linkInfo: "Tiles support link click"
-      }));
     },
 
     _renderCallToActionLink: function() {
@@ -823,6 +800,18 @@ loop.standaloneRoomViews = (function(mozL10n) {
              !this.props.screenSharePosterUrl;
     },
 
+    /**
+     * Should we render the ads when there is no participants in the room
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _shouldRenderTile: function() {
+      return this.state.roomState === ROOM_STATES.JOINED ||
+             this.state.roomState === ROOM_STATES.SESSION_CONNECTED &&
+             this.state.roomState !== ROOM_STATES.HAS_PARTICIPANTS;
+    },
+
     render: function() {
       var displayScreenShare = !!(this.state.receivingScreenShare ||
         this.props.screenSharePosterUrl);
@@ -854,7 +843,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
             screenShareMediaElement={this.state.screenShareMediaElement}
             screenSharePosterUrl={this.props.screenSharePosterUrl}
             screenSharingPaused={this.state.streamPaused}
-            showInitialContext={true}>
+            showInitialContext={true}
+            showTile={this._shouldRenderTile()}>
             <StandaloneRoomInfoArea activeRoomStore={this.props.activeRoomStore}
               dispatcher={this.props.dispatcher}
               failureReason={this.state.failureReason}

@@ -43,6 +43,11 @@ describe("loop.shared.views.TextChatView", function() {
     sandbox.stub(mozL10n, "get", function(string) {
       return string;
     });
+
+    // Need to stub these methods because when mounting the AdsTileView we are
+    // attaching listeners to the window object and "AdsTileView" tests will failed
+    sandbox.stub(window, "addEventListener");
+    sandbox.stub(window, "removeEventListener");
   });
 
   afterEach(function() {
@@ -409,7 +414,8 @@ describe("loop.shared.views.TextChatView", function() {
       var props = _.extend({
         dispatcher: dispatcher,
         showInitialContext: true,
-        showAlways: true
+        showAlways: true,
+        showTile: false
       }, extraProps);
       return TestUtils.renderIntoDocument(
         React.createElement(loop.shared.views.chat.TextChatView, props));

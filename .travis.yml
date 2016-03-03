@@ -25,7 +25,7 @@ before_install:
   # Get the code signing key from Google.
   - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   # Add the Google package list to the package manager.
-  - sudo sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+  - sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
   # Get new package lists (-qq = very quiet).
   - sudo apt-get update -qq
   # Install the Google Chrome stable package.

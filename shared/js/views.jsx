@@ -575,8 +575,16 @@ loop.shared.views = (function(_, mozL10n) {
       // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
       // Try catch to not produce output if invalid url
       try {
-        var sanitizeURL = loop.shared.utils.formatURL(this.props.url, true).hostname;
+        var sanitizedURL = loop.shared.utils.formatURL(this.props.url, true);
       } catch (ex) {
+        return null;
+      }
+
+      // Only allow specific types of URLs.
+      if (!sanitizedURL ||
+          (sanitizedURL.protocol !== "http:" &&
+           sanitizedURL.protocol !== "https:" &&
+           sanitizedURL.protocol !== "ftp:")) {
         return null;
       }
 
@@ -602,7 +610,7 @@ loop.shared.views = (function(_, mozL10n) {
             <span className="context-info">
               {this.props.description}
               <span className="context-url">
-                {sanitizeURL}
+                {sanitizedURL.hostname}
               </span>
             </span>
           </a>

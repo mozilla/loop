@@ -1,6 +1,29 @@
 # Changelog
 
-## 1.1.9
+## 1.1.10
+
+### New
+
+* Bug 1253013 - Display the context tile only for valid urls. r=dmose. [Mark Banner]
+
+* No bug. Fix Travis test bustage by limiting getting Google Chrome for 64 bit builds only. rs=bustage-fix. [Mark Banner]
+
+* Bug 1245147 - Inform the link clicker when tab sharing is paused. r=Standard8. [Manuel Casas Barrado]
+
+* Bug 1245710 - Fix RTL issues in the introductory display, and make functional tests work. r=Standard8. [Dan Mosedale]
+
+* Bug 1245710 - Add an introductorary screen to the standalone display. r=dmose. [Chris Rafuse]
+
+* Bug 1250126 [reg] - Moving the mouse pointer near the bottom of the standalone screen alters the link-generator display (r=mancas) [Fernando Campo]
+
+* Bug 1250126 - Moving l-clicker  pointer near bottom/right edge alters l-generator display (r=dmose) [Fernando Campo]
+
+### Chores
+
+* Update L10n from changeset 38755fbbc6a87fd405ac2eccf88e9147a0ee9b31. [Mark Banner]
+
+
+## v1.1.9 (2016-02-29)
 
 ### New
 
@@ -53,6 +76,8 @@
 * Update master version following v1.1.2 release. [Mark Banner]
 
 ### Other
+
+* 1.1.9. [Mark Banner]
 
 * Backout bug 1250126 / changeset da00826f24ee3301fbc989d5b3ec18b93c261616 from release due to regressions. [Mark Banner]
 

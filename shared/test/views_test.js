@@ -493,6 +493,24 @@ describe("VideoMuteButton", function() {
       expect(view.getDOMNode()).eql(null);
     });
 
+    it("should display nothing if it is an about url", function() {
+      view = mountTestComponent({
+        url: "about:config"
+      });
+
+      expect(view.getDOMNode()).eql(null);
+    });
+
+    it("should display nothing if it is a javascript url", function() {
+      /* eslint-disable no-script-url */
+      view = mountTestComponent({
+        url: "javascript:alert('hello')"
+      });
+
+      expect(view.getDOMNode()).eql(null);
+      /* eslint-enable no-script-url */
+    });
+
     it("should use a default thumbnail if one is not supplied", function() {
       view = mountTestComponent({
         url: "http://wonderful.invalid"

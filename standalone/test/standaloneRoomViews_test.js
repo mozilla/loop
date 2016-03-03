@@ -493,6 +493,7 @@ describe("loop.standaloneRoomViews", function() {
       props = _.extend({
         cursorStore: remoteCursorStore,
         dispatcher: dispatcher,
+        introSeen: true,
         activeRoomStore: activeRoomStore,
         isFirefox: true
       }, props);
@@ -509,6 +510,24 @@ describe("loop.standaloneRoomViews", function() {
       sinon.assert.calledWithExactly(dispatch,
         sinon.match.instanceOf(sharedActions.SetupStreamElements));
     }
+
+    describe("#introScreen", function() {
+      function getOKButton(elem) {
+        return elem.getDOMNode().querySelector(".button-got-it");
+      }
+
+      it("should show introduction screen if introSeen is set to false", function() {
+        view = mountTestComponent({ introSeen: false });
+        expect(getOKButton(view))
+          .not.eql(null);
+      });
+
+      it("should not show introduction screen if introSeen is set to true", function() {
+        view = mountTestComponent({ introSeen: true });
+        expect(getOKButton(view))
+          .eql(null);
+      });
+    });
 
     describe("#componentWillUpdate", function() {
       beforeEach(function() {

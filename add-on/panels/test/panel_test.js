@@ -1304,6 +1304,16 @@ describe("loop.panel", function() {
       var node = view.getDOMNode();
       expect(node.querySelector(".room-entry h2").textContent).to.equal("Fake title");
     });
+
+    describe("computeAdjustedTopPosition", function() {
+      it("should return 0 if clickYPos, menuNodeHeight, listTop, listHeight and clickOffset cause it to be less than 0",
+        function() {
+          var topPosTest = loop.panel.computeAdjustedTopPosition(119, 124, 0, 152, 10) < 0;
+
+          expect(topPosTest).to.equal(false);
+        });
+
+    });
   });
 
   describe("loop.panel.NewRoomView", function() {

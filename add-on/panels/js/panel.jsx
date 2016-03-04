@@ -652,6 +652,32 @@ loop.panel = (function(_, mozL10n) {
   });
 
   /**
+   * Compute Adjusted Top Position for Menu Dropdown
+   * Extracted from react component so we could run unit test against it
+   * takes clickYPos, menuNodeHeight, listTop, listHeight, clickOffset
+   * parameters, determines whether menu should be above or below click
+   * position and calculates where the top of the dropdown menu
+   * should reside. If less than 0, which will result in the top of the dropdown
+   * being cutoff, will set top position to 0
+   */
+  function computeAdjustedTopPosition(clickYPos, menuNodeHeight, listTop,
+                                      listHeight, clickOffset) {
+    var topPos = 0;
+
+    if (clickYPos + menuNodeHeight >= listTop + listHeight) {
+      // Position above click area.
+      topPos = clickYPos - menuNodeHeight - listTop - clickOffset;
+    } else {
+      // Position below click area.
+      topPos = clickYPos - listTop + clickOffset;
+    }
+    // Ensure menu is not cut off at top
+    if (topPos < 0) { topPos = 0; }
+
+    return topPos;
+  }
+
+  /**
    * Dropdown menu for each conversation entry.
    * Because the container element has overflow we need to position the menu
    * absolutely and have a different element as offset parent for it. We need
@@ -684,18 +710,10 @@ loop.panel = (function(_, mozL10n) {
       var listNodeRect = listNode.getBoundingClientRect();
 
       // Click offset to not display the menu right next to the area clicked.
-      var offset = 10;
+      var topPos = computeAdjustedTopPosition(this.props.eventPosY,
+        menuNodeRect.height, listNodeRect.top, listNodeRect.height, 10);
 
-      if (this.props.eventPosY + menuNodeRect.height >=
-          listNodeRect.top + listNodeRect.height) {
-        // Position above click area.
-        menuNode.style.top = this.props.eventPosY - menuNodeRect.height -
-                             listNodeRect.top - offset + "px";
-      } else {
-        // Position below click area.
-        menuNode.style.top = this.props.eventPosY - listNodeRect.top +
-                             offset + "px";
-      }
+      menuNode.style.top = topPos + "px";
     },
 
     render: function() {
@@ -1224,6 +1242,7 @@ loop.panel = (function(_, mozL10n) {
 
   return {
     AccountLink: AccountLink,
+    computeAdjustedTopPosition: computeAdjustedTopPosition,
     ConversationDropdown: ConversationDropdown,
     E10sNotSupported: E10sNotSupported,
     GettingStartedView: GettingStartedView,

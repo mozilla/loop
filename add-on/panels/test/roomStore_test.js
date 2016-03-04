@@ -945,7 +945,7 @@ describe("loop.store.RoomStore", function() {
 
       sinon.assert.calledOnce(requestStubs["TelemetryAddValue"]);
       sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"],
-        "LOOP_MAU", store._constants.LOOP_MAU_TYPE.ROOM_OPEN);
+        "LOOP_ACTIVITY_COUNTER", store._constants.LOOP_MAU_TYPE.ROOM_OPEN);
     });
 
     it("should log telemetry event when sharing a room (copy link)", function() {
@@ -956,7 +956,7 @@ describe("loop.store.RoomStore", function() {
 
       sinon.assert.calledTwice(requestStubs["TelemetryAddValue"]);
       sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"].getCall(1),
-        "LOOP_MAU", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
+        "LOOP_ACTIVITY_COUNTER", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
     });
 
     it("should log telemetry event when sharing a room (email)", function() {
@@ -967,7 +967,7 @@ describe("loop.store.RoomStore", function() {
 
       sinon.assert.calledTwice(requestStubs["TelemetryAddValue"]);
       sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"].getCall(1),
-        "LOOP_MAU", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
+        "LOOP_ACTIVITY_COUNTER", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
     });
 
     it("should log telemetry event when sharing a room (facebook)", function() {
@@ -978,7 +978,7 @@ describe("loop.store.RoomStore", function() {
 
       sinon.assert.calledTwice(requestStubs["TelemetryAddValue"]);
       sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"].getCall(1),
-        "LOOP_MAU", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
+        "LOOP_ACTIVITY_COUNTER", store._constants.LOOP_MAU_TYPE.ROOM_SHARE);
     });
 
     it("should log telemetry event when deleting a room", function() {
@@ -988,7 +988,7 @@ describe("loop.store.RoomStore", function() {
 
       sinon.assert.calledTwice(requestStubs["TelemetryAddValue"]);
       sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"].getCall(1),
-        "LOOP_MAU", store._constants.LOOP_MAU_TYPE.ROOM_DELETE);
+        "LOOP_ACTIVITY_COUNTER", store._constants.LOOP_MAU_TYPE.ROOM_DELETE);
     });
   });
 });

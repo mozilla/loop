@@ -1052,7 +1052,7 @@ const kMessageHandlers = {
   TelemetryAddValue: function(message, reply) {
     let [histogramId, value] = message.data;
 
-    if (histogramId === "LOOP_MAU") {
+    if (histogramId === "LOOP_ACTIVITY_COUNTER") {
       let pref = "mau." + kMauPrefMap.get(value);
       let prefDate = MozLoopService.getLoopPref(pref) * 1000;
       let delta = Date.now() - prefDate;

@@ -1,6 +1,13 @@
 # Changelog
 
-## 1.1.10
+## 1.1.11
+
+### New
+
+* Bug 1252817 - Stop using the timeout for requests across the content/chrome API as this interfers with network requests via the backend. Should fix a functional test issue. r=mikedeboer. [Mark Banner]
+
+
+## v1.1.10 (2016-03-03)
 
 ### New
 
@@ -21,6 +28,10 @@
 ### Chores
 
 * Update L10n from changeset 38755fbbc6a87fd405ac2eccf88e9147a0ee9b31. [Mark Banner]
+
+### Other
+
+* 1.1.10. [Mark Banner]
 
 
 ## v1.1.9 (2016-02-29)

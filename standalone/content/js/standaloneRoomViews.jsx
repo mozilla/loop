@@ -718,6 +718,12 @@ loop.standaloneRoomViews = (function(mozL10n) {
       this.props.dispatcher.dispatch(new sharedActions.LeaveRoom());
     },
 
+    closeIntroOverlay: function() {
+      localStorage.setItem("introSeen", "true");
+      this.setState({ introSeen: true });
+      this.joinRoom();
+    },
+
     /**
      * Checks if current room is active.
      *
@@ -858,7 +864,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
               roomUsed={this.state.used}
               screenSharingPaused={this.state.streamPaused} />
           </sharedViews.MediaLayoutView>
-          {(this.state.introSeen) ? null : <IntroOverlayView joinRoom={this.joinRoom} />}
+          {(this.state.introSeen) ? null : <IntroOverlayView closeCallback={this.closeIntroOverlay} joinRoom={this.joinRoom} />}
         </div>
       );
     }
@@ -891,6 +897,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
   var Slide = React.createClass({
     propTypes: {
+      closeCallback: React.PropTypes.func.isRequired,
       imageClass: React.PropTypes.string.isRequired,
       indexClass: React.PropTypes.string.isRequired,
       joinRoom: React.PropTypes.func.isRequired,
@@ -901,21 +908,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
     handleGotItClick: function(event) {
       event.stopPropagation();
       event.preventDefault();
-
-      // XXX we shouldn't be unnecessarily messing with the DOM behind
-      // React's back, as this can confuse React.  Furthermore, on close, the
-      // parent's state should be updated so that it doesn't render this
-      // component at all, as per the usual React idiom.  The way to do this
-      // is to have the parent pass in a close callback, which updates the
-      // parents state (either directly or via action dispatch to a store),
-      // causing the parent not to render this overlay.  This should also
-      // allow us to fix the duplication of code in handleCloseClick.
-      // (bug 1252306).
-      var overlayElem = document.getElementsByClassName("intro-overlay")[0];
-      overlayElem.classList.add("hide");
-      // telemetry string data as to which button was clicked
-      localStorage.setItem("introSeen", "true");
-      this.props.joinRoom();
+      this.props.closeCallback();
     },
 
     render: function() {
@@ -938,27 +931,14 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
   var IntroOverlayView = React.createClass({
     propTypes: {
+      closeCallback: React.PropTypes.func.isRequired,
       joinRoom: React.PropTypes.func.isRequired
     },
 
     handleCloseClick: function(event) {
       event.stopPropagation();
       event.preventDefault();
-
-      // XXX we shouldn't be unnecessarily messing with the DOM behind
-      // React's back, as this can confuse React.  Furthermore, on close, the
-      // parent's state should be updated so that it doesn't render this
-      // component at all, as per the usual React idiom.  The way to do this
-      // is to have the parent pass in a close callback, which updates the
-      // parents state (either directly or via action dispatch to a store),
-      // causing the parent not to render this overlay.  This should also
-      // allow us to fix the duplication of code in handleGotItClick.
-      // (bug 1252306).
-      var overlayElem = document.getElementsByClassName("intro-overlay")[0];
-      overlayElem.classList.add("hide");
-      // telemetry string data as to which button was clicked
-      localStorage.setItem("introSeen", "true");
-      this.props.joinRoom();
+      this.props.closeCallback();
     },
 
     render: function() {
@@ -976,11 +956,13 @@ loop.standaloneRoomViews = (function(mozL10n) {
             <div className="slideshow-header">
               <button className="button-close" onClick={this.handleCloseClick} />
             </div>
-            <Slide imageClass={slideNode.imageClass}
-                   indexClass={slideNode.id}
-                   joinRoom={this.props.joinRoom}
-                   text={slideNode.text}
-                   title={slideNode.title} />
+            <Slide
+                  closeCallback={this.props.closeCallback}
+                  imageClass={slideNode.imageClass}
+                  indexClass={slideNode.id}
+                  joinRoom={this.props.joinRoom}
+                  text={slideNode.text}
+                  title={slideNode.title} />
             </div>
         </div>
       );

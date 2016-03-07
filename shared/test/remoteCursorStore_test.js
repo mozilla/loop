@@ -126,7 +126,7 @@ describe("loop.store.RemoteCursorStore", function() {
       sinon.assert.notCalled(store.setStoreState);
     });
 
-    it("should save the state", function() {
+    it("should save the state of the cursor position", function() {
       store.receivedCursorData(new sharedActions.ReceivedCursorData({
         type: CURSOR_MESSAGE_TYPES.POSITION,
         ratioX: 10,
@@ -137,6 +137,14 @@ describe("loop.store.RemoteCursorStore", function() {
         ratioX: 10,
         ratioY: 10
       });
+    });
+
+    it("should save the state of the cursor click", function() {
+      store.receivedCursorData(new sharedActions.ReceivedCursorData({
+        type: CURSOR_MESSAGE_TYPES.CLICK
+      }));
+
+      expect(store.getStoreState().remoteCursorClick).eql(true);
     });
   });
 

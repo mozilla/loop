@@ -771,6 +771,24 @@ describe("VideoMuteButton", function() {
         });
       });
     });
+
+    describe("handleMouseClick", function() {
+      beforeEach(function() {
+        view = mountTestComponent({
+          dispatcher: dispatcher,
+          displayAvatar: false,
+          mediaType: "local",
+          srcMediaElement: {
+            fake: 1
+          }
+        });
+      });
+
+      it("should dispatch cursor click event when video element is clicked", function() {
+        view.handleMouseClick();
+        sinon.assert.calledOnce(dispatcher.dispatch);
+      });
+    });
   });
 
   describe("MediaLayoutView", function() {
@@ -1044,6 +1062,39 @@ describe("VideoMuteButton", function() {
           left: cursorPositionX + view.state.videoLetterboxing.left,
           top: cursorPositionY + view.state.videoLetterboxing.top
         });
+      });
+    });
+
+    describe("resetClickState", function() {
+      beforeEach(function() {
+        remoteCursorStore.setStoreState({ remoteCursorClick: true });
+        view = mountTestComponent({
+          videoElementSize: fakeVideoElementSize
+        });
+      });
+
+      it("should restore the state to its default value", function() {
+        view.resetClickState();
+
+        expect(view.getStore().getStoreState().remoteCursorClick).eql(false);
+      });
+    });
+
+    describe("#render", function() {
+      beforeEach(function() {
+        remoteCursorStore.setStoreState({ remoteCursorClick: true });
+        view = mountTestComponent({
+          videoElementSize: fakeVideoElementSize
+        });
+      });
+
+      it("should add click class to the remote cursor", function() {
+        expect(view.getDOMNode().classList.contains("remote-cursor-clicked")).eql(true);
+      });
+
+      it("should remove the click class when the animation is completed", function() {
+        clock.tick(sharedViews.RemoteCursorView.TRIGGERED_RESET_DELAY);
+        expect(view.getDOMNode().classList.contains("remote-cursor-clicked")).eql(false);
       });
     });
   });

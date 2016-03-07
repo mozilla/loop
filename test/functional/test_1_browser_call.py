@@ -43,6 +43,8 @@ class Test1BrowserCall(MarionetteTestCase):
             # and after the restart.
             addons.install(os.path.abspath(xpi_file))
 
+        self.e10s_enabled = os.environ.get("TEST_E10S") == "1"
+
         # Restart the browser nicely, so the preferences and add-on installation
         # take full effect.
         self.marionette.restart(in_app=True)
@@ -82,6 +84,7 @@ class Test1BrowserCall(MarionetteTestCase):
                    message="Timeout out waiting for " + attribute + " to be false")
 
     def switch_to_panel(self):
+        self.marionette.set_context("chrome")
         button = self.marionette.find_element(By.ID, "loop-button")
 
         # click the element
@@ -95,18 +98,27 @@ class Test1BrowserCall(MarionetteTestCase):
         self.marionette.set_context("chrome")
         self.marionette.switch_to_frame()
 
+        contentBox = "content"
+        if self.e10s_enabled:
+            contentBox = "remote-content"
+
         # Added time lapse to allow for DOM to catch up
         time.sleep(2)
         # XXX should be using wait_for_element_displayed, but need to wait
         # for Marionette bug 1094246 to be fixed.
         chatbox = self.wait_for_element_exists(By.TAG_NAME, 'chatbox')
         script = ("return document.getAnonymousElementByAttribute("
-                  "arguments[0], 'anonid', 'content');")
+                  "arguments[0], 'anonid', '" + contentBox + "');")
         frame = self.marionette.execute_script(script, [chatbox])
         self.marionette.switch_to_frame(frame)
 
     def switch_to_standalone(self):
         self.marionette.set_context("content")
+
+    def load_homepage(self):
+        self.switch_to_standalone()
+
+        self.marionette.navigate("about:home")
 
     def local_start_a_conversation(self):
         button = self.wait_for_element_displayed(By.CSS_SELECTOR, ".new-room-view .btn-info")
@@ -292,6 +304,11 @@ class Test1BrowserCall(MarionetteTestCase):
                            "> 0, noted_calls = " + str(noted_calls))
 
     def test_1_browser_call(self):
+        # Marionette doesn't make it easy to set up a page to load automatically
+        # on start. So lets load about:home. We need this for now, so that the
+        # various browser checks believe we've enabled e10s.
+        self.load_homepage()
+
         self.switch_to_panel()
 
         self.local_start_a_conversation()

@@ -427,6 +427,10 @@ LOOP_SERVER := $(shell echo $${LOOP_SERVER-../loop-server})
 # Either path to the browser, or one of nightly, aurora, beta, firefox.
 TEST_BROWSER := $(shell echo $${TEST_BROWSER-nightly})
 
+ifdef TEST_E10S
+E10S_ARGS = --e10s
+endif
+
 .PHONY: functional
 ifeq ($(SKIP_FUNCTIONAL),1)
 functional:
@@ -441,6 +445,7 @@ functional: build $(XPI_FILE)
 	$(VENV)/bin/marionette --binary `./bin/getfx.js -b $(TEST_BROWSER)` \
 	                       --type=browser \
 	                       --gecko-log $(BUILT)/functional/gecko.log \
+	                       $(E10S_ARGS) \
 	                       test/functional/manifest.ini
 endif
 

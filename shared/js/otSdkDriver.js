@@ -54,6 +54,17 @@ loop.OTSdkDriver = (function() {
       this._debugTwoWayMediaTelemetry = enabled;
     }.bind(this));
 
+    // Set loop.debug.sdk to true in the browser, or in standalone:
+    // localStorage.setItem("debug.sdk", true);
+    loop.shared.utils.getBoolPreference("debug.sdk", function(enabled) {
+      // We don't bother with the else case - as we only create one instance of
+      // OTSdkDriver per window, and hence, we leave the sdk set to its default
+      // value.
+      if (enabled) {
+        this.sdk.setLogLevel(this.sdk.DEBUG);
+      }
+    }.bind(this));
+
     /**
      * XXX This is a workaround for desktop machines that do not have a
      * camera installed. The SDK doesn't currently do use the new device

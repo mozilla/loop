@@ -961,7 +961,7 @@ html[dir="rtl"] .text-chat-entry.received {
   /* leave some room for the chat bubble arrow */
   max-width: 70%;
   border-radius: 15px;
-  border: 1px solid #5cccee;
+  border: 1px solid #d8d8d8;
   background: #fff;
   word-wrap: break-word;
   flex: 0 1 auto;
@@ -979,7 +979,7 @@ html[dir="rtl"] .text-chat-entry.received {
 
 .text-chat-entry.received > p {
   border-top-left-radius: 0;
-  border-color: #d8d8d8;
+  border-color: #5cccee;
 }
 
 html[dir="rtl"] .text-chat-entry.sent > p {

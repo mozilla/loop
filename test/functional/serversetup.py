@@ -14,7 +14,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(__file__))
 import hanging_threads
-from config import CONTENT_SERVER_PORT, LOOP_SERVER_PORT, LOOP_SERVER_URL, \
+from config import CONTENT_SERVER_PORT, CONTENT_SERVER_URL, LOOP_SERVER_PORT, LOOP_SERVER_URL, \
     FIREFOX_PREFERENCES, TEST_SERVER, USE_LOCAL_STANDALONE
 
 hanging_threads.start_monitoring()
@@ -28,7 +28,7 @@ CONTENT_SERVER_ENV = os.environ.copy()
 CONTENT_SERVER_ENV.update({"PORT": str(CONTENT_SERVER_PORT),
                            "LOOP_SERVER_URL": LOOP_SERVER_URL})
 
-ROOMS_WEB_APP_URL_BASE = "http://localhost:" + str(CONTENT_SERVER_PORT)
+ROOMS_WEB_APP_URL_BASE = CONTENT_SERVER_URL
 
 ROOMS_WEB_APP_URL = ROOMS_WEB_APP_URL_BASE + \
     "/{token}"

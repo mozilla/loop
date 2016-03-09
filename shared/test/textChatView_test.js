@@ -6,6 +6,7 @@ describe("loop.shared.views.TextChatView", function() {
 
   var expect = chai.expect;
   var sharedActions = loop.shared.actions;
+  var sharedViews = loop.shared.views;
   var TestUtils = React.addons.TestUtils;
   var CHAT_MESSAGE_TYPES = loop.store.CHAT_MESSAGE_TYPES;
   var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
@@ -255,6 +256,40 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
+          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+        }];
+
+        view.setProps({ messageList: messageList });
+
+        node = view.getDOMNode();
+
+        expect(node.scrollTop).eql(node.scrollHeight - node.clientHeight);
+      });
+
+      it("should scroll when a notification is added", function() {
+        var messageList = [{
+          type: CHAT_MESSAGE_TYPES.RECEIVED,
+          contentType: CHAT_CONTENT_TYPES.NOTIFICATION,
+          message: "Bye!",
+          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+        }];
+
+        view.setProps({ messageList: messageList });
+
+        node = view.getDOMNode();
+
+        expect(node.scrollTop).eql(node.scrollHeight - node.clientHeight);
+      });
+
+      it("should scroll when a context tile is added", function() {
+        var messageList = [{
+          type: CHAT_MESSAGE_TYPES.RECEIVED,
+          contentType: CHAT_CONTENT_TYPES.CONTEXT_TILE,
+          message: "A marvelous page!",
+          extraData: {
+            roomToken: "fake",
+            newRoomURL: "http://marvelous.invalid"
+          },
           receivedTimestamp: "2015-06-25T17:53:55.357Z"
         }];
 
@@ -576,6 +611,21 @@ describe("loop.shared.views.TextChatView", function() {
       expect(node.querySelector(".text-chat-entries")).to.not.eql(null);
 
       expect(node.querySelector(".context-url-view-wrapper")).to.not.eql(null);
+    });
+
+    it("should render a ContextUrlView for a CONTEXT_TILE", function() {
+      view = mountTestComponent();
+
+      store.updateRoomContext(new sharedActions.UpdateRoomContext({
+        newRoomDescription: "fake",
+        newRoomThumbnail: "favicon",
+        newRoomURL: "https://www.fakeurl.com",
+        roomToken: "fakeRoomToken"
+      }));
+
+      expect(function() {
+        TestUtils.findRenderedComponentWithType(view, sharedViews.ContextUrlView);
+      }).to.not.Throw();
     });
 
     it("should not render a room title and context url when show initial context is false", function() {

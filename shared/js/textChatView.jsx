@@ -146,7 +146,8 @@ loop.shared.views.chat = (function(mozL10n) {
 
     _hasChatMessages: function() {
       return this.props.messageList.some(function(message) {
-        return message.contentType === CHAT_CONTENT_TYPES.TEXT;
+        return message.contentType !== CHAT_CONTENT_TYPES.ROOM_NAME &&
+          message.contentType !== CHAT_CONTENT_TYPES.CONTEXT;
       });
     },
 

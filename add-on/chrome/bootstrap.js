@@ -178,10 +178,6 @@ var WindowListener = {
         return new Promise((resolve) => {
           let callback = iframe => {
             let mm = iframe.QueryInterface(Ci.nsIFrameLoaderOwner).frameLoader.messageManager;
-            if (!("messageManager" in iframe)) {
-              iframe.messageManager = mm;
-            }
-            this.hookWindowCloseForPanelClose(iframe);
 
             mm.sendAsyncMessage("Social:WaitForDocumentVisible");
             mm.addMessageListener("Social:DocumentVisible", () => resolve(mm));

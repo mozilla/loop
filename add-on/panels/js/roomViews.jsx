@@ -412,8 +412,14 @@ loop.roomViews = (function(mozL10n) {
      */
     leaveRoom: function() {
       if (this.state.used) {
+        // The room has been used, so we might want to display the feedback view.
+        // Therefore we leave the room to ensure that we have stopped sharing etc,
+        // then trigger the call terminated handler that'll do the right thing
+        // for the feedback view.
         this.props.dispatcher.dispatch(new sharedActions.LeaveRoom());
+        this.props.onCallTerminated();
       } else {
+        // If the room hasn't been used, we simply close the window.
         this.closeWindow();
       }
     },
@@ -502,14 +508,6 @@ loop.roomViews = (function(mozL10n) {
       return !!(this.state.roomState === ROOM_STATES.HAS_PARTICIPANTS &&
                 !this.state.remoteSrcMediaElement &&
                 !this.state.mediaConnected);
-    },
-
-    componentDidUpdate: function(prevProps, prevState) {
-      // Handle timestamp and window closing only when the call has terminated.
-      if (prevState.roomState === ROOM_STATES.ENDED &&
-          this.state.roomState === ROOM_STATES.ENDED) {
-        this.props.onCallTerminated();
-      }
     },
 
     handleContextMenu: function(e) {

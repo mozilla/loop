@@ -452,6 +452,37 @@ describe("loop.roomViews", function() {
         sinon.match.hasOwn("name", "setMute"));
     });
 
+    describe("#leaveRoom", function() {
+      it("should close the window when leaving a room that hasn't been used", function() {
+        view = mountTestComponent();
+        view.setState({ used: false });
+
+        view.leaveRoom();
+
+        sinon.assert.calledOnce(fakeWindow.close);
+      });
+
+      it("should dispatch `LeaveRoom` action when leaving a room that has been used", function() {
+        view = mountTestComponent();
+        view.setState({ used: true });
+
+        view.leaveRoom();
+
+        sinon.assert.calledOnce(dispatcher.dispatch);
+        sinon.assert.calledWithExactly(dispatcher.dispatch,
+          new sharedActions.LeaveRoom());
+      });
+
+      it("should call onCallTerminated when leaving a room that has been used", function() {
+        view = mountTestComponent();
+        view.setState({ used: true });
+
+        view.leaveRoom();
+
+        sinon.assert.calledOnce(onCallTerminatedStub);
+      });
+    });
+
     describe("#componentWillUpdate", function() {
       function expectActionDispatched() {
         sinon.assert.calledOnce(dispatcher.dispatch);
@@ -586,19 +617,6 @@ describe("loop.roomViews", function() {
           expect(TestUtils.findRenderedComponentWithType(view,
             loop.roomViews.DesktopRoomInvitationView).getDOMNode()).to.eql(null);
         });
-
-      it("should call onCallTerminated when the call ended", function() {
-        activeRoomStore.setStoreState({
-          roomState: ROOM_STATES.ENDED,
-          used: true
-        });
-
-        view = mountTestComponent();
-        // Force a state change so that it triggers componentDidUpdate
-        view.setState({ foo: "bar" });
-
-        sinon.assert.calledOnce(onCallTerminatedStub);
-      });
 
       it("should display loading spinner when localSrcMediaElement is null",
          function() {

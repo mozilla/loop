@@ -52,7 +52,7 @@ var WindowListener = {
    */
   setupBrowserUI: function(window) {
     let document = window.document;
-    let gBrowser = window.gBrowser;
+    let { gBrowser, gURLBar } = window;
     let xhrClass = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"];
     let FileReader = window.FileReader;
     let menuItem = null;
@@ -329,6 +329,7 @@ var WindowListener = {
 
         Services.obs.addObserver(this, "loop-status-changed", false);
 
+        this.maybeAddCopyPanel();
         this.updateToolbarState();
       },
 
@@ -358,6 +359,105 @@ var WindowListener = {
       removeMenuItem: function() {
         if (menuItem) {
           menuItem.parentNode.removeChild(menuItem);
+        }
+      },
+
+      /**
+       * Maybe add the copy panel if it's not throttled and passes other checks.
+       * @return {Promise} Resolved when decided and maybe panel-added.
+       */
+      maybeAddCopyPanel() {
+        // Don't bother adding the copy panel if we're in private browsing or
+        // we've already shown it.
+        if (PrivateBrowsingUtils.isWindowPrivate(window) ||
+            Services.prefs.getBoolPref("loop.copy.shown")) {
+          return Promise.resolve();
+        }
+
+        return Throttler.check("loop.copy").then(() => this.addCopyPanel());
+      },
+
+      /**
+       * Hook into the location bar copy command to open up the copy panel.
+       */
+      addCopyPanel() {
+        // Make a copy of the loop panel as a starting point for the copy panel.
+        let copy = this.panel.cloneNode(false);
+        copy.id = "loop-copy-notification-panel";
+        this.panel.parentNode.appendChild(copy);
+
+        // Record a telemetry copy panel action.
+        let addTelemetry = bucket => {
+          this.LoopAPI.sendMessageToHandler({
+            data: ["LOOP_COPY_PANEL_ACTIONS", this.constants.COPY_PANEL[bucket]],
+            name: "TelemetryAddValue"
+          });
+        };
+
+        // Handle events from the copy panel iframe content.
+        let onIframe = iframe => {
+          // Watch for events from the copy panel when loaded.
+          iframe.addEventListener("DOMContentLoaded", function onLoad() {
+            iframe.removeEventListener("DOMContentLoaded", onLoad);
+
+            // Size the panel to fit the rendered content adjusting for borders.
+            iframe.contentWindow.requestAnimationFrame(() => {
+              let height = iframe.contentDocument.documentElement.offsetHeight;
+              height += copy.boxObject.height - iframe.boxObject.height;
+              copy.style.height = height + "px";
+            });
+
+            // Hide the copy panel then show the loop panel.
+            iframe.contentWindow.addEventListener("CopyPanelClick", event => {
+              iframe.parentNode.hidePopup();
+
+              // Show the Loop panel if the user wants it.
+              let { accept, stop } = event.detail;
+              if (accept) {
+                LoopUI.openPanel();
+              }
+
+              // Stop showing the panel if the user says so.
+              if (stop) {
+                LoopUI.removeCopyPanel();
+                Services.prefs.setBoolPref("loop.copy.shown", true);
+              }
+
+              // Generate the appropriate NO_AGAIN, NO_NEVER, YES_AGAIN,
+              // YES_NEVER probe based on the user's action.
+              let probe = (accept ? "YES" : "NO") + "_" + (stop ? "NEVER" : "AGAIN");
+              addTelemetry(probe);
+            });
+          });
+        };
+
+        // Override the default behavior of the copy command.
+        let controller = gURLBar._copyCutController;
+        controller._doCommand = controller.doCommand;
+        controller.doCommand = () => {
+          // Do the normal behavior first.
+          controller._doCommand.apply(controller, arguments);
+
+          // Open up the copy panel at the loop button.
+          addTelemetry("SHOWN");
+          LoopUI.PanelFrame.showPopup(window, LoopUI.toolbarButton.anchor, "loop-copy",
+            null, "chrome://loop/content/panels/copy.html", null, onIframe);
+        };
+      },
+
+      /**
+       * Removes the copy panel copy hook and the panel.
+       */
+      removeCopyPanel() {
+        let controller = gURLBar && gURLBar._copyCutController;
+        if (controller && controller._doCommand) {
+          controller.doCommand = controller._doCommand;
+          delete controller._doCommand;
+        }
+
+        let copy = document.getElementById("loop-copy-notification-panel");
+        if (copy) {
+          copy.parentNode.removeChild(copy);
         }
       },
 
@@ -947,6 +1047,9 @@ var WindowListener = {
 
     LoopUI.init();
     window.LoopUI = LoopUI;
+
+    // Export the Throttler to allow tests to overwrite parts of it.
+    window.LoopThrottler = Throttler;
   },
 
   /**
@@ -957,6 +1060,7 @@ var WindowListener = {
    */
   tearDownBrowserUI: function(window) {
     if (window.LoopUI) {
+      window.LoopUI.removeCopyPanel();
       window.LoopUI.removeMenuItem();
 
       // XXX Bug 1229352 - Add in tear-down of the panel.
@@ -984,6 +1088,77 @@ var WindowListener = {
   },
 
   onWindowTitleChange: function() {
+  }
+};
+
+/**
+ * Provide a way to throttle functionality using DNS to distribute 3 numbers for
+ * various distributions channels. DNS is used to scale distribution of the
+ * numbers as an A record pointing to a loopback address (127.*.*.*). Prefs are
+ * used to control behavior (what domain to check) and keep state (a ticket
+ * number to track if it needs to initialize, to wait for its turn, or is
+ * completed).
+ */
+let Throttler = {
+  // Each 8-bit block of the IP address allows for 0% rollout (value 0) to 100%
+  // rollout (value 255).
+  TICKET_LIMIT: 255,
+
+  // Allow the DNS service to be overwritten for testing.
+  _dns: Cc["@mozilla.org/network/dns-service;1"].getService(Ci.nsIDNSService),
+
+  /**
+   * Check if a given feature should be throttled or not.
+   * @param {string} [prefPrefix] Start of the preference name for the feature.
+   * @return {Promise} Resolved on success, and rejected on throttled.
+   */
+  check(prefPrefix) {
+    return new Promise((resolve, reject) => {
+      // Initialize the ticket (0-254) if it doesn't have a valid value yet.
+      let prefTicket = prefPrefix + ".ticket";
+      let ticket = Services.prefs.getIntPref(prefTicket);
+      if (ticket < 0) {
+        ticket = Math.floor(Math.random() * this.TICKET_LIMIT);
+        Services.prefs.setIntPref(prefTicket, ticket);
+      }
+      // Short circuit if the special ticket value indicates we're good to go.
+      else if (ticket >= this.TICKET_LIMIT) {
+        resolve();
+        return;
+      }
+
+      // Handle responses from the DNS resolution service request.
+      let onDNS = (request, record) => {
+        // Use a specific part of the A-record IP address depending on the
+        // channel. I.e., 127.[release/other].[beta].[aurora/nightly].
+        let index = 1;
+        switch (Services.prefs.getCharPref("app.update.channel")) {
+          case "beta":
+            index = 2;
+            break;
+          case "aurora":
+          case "nightly":
+            index = 3;
+            break;
+        }
+
+        // Select the 1 out of 4 parts of the "."-separated IP address to check
+        // if the 8-bit threshold (0-255) exceeds the ticket (0-254).
+        let threshold = record && record.getNextAddrAsString().split(".")[index];
+        if (threshold && ticket < threshold) {
+          // Remember that we're good to go to avoid future DNS checks.
+          Services.prefs.setIntPref(prefTicket, this.TICKET_LIMIT);
+          resolve();
+        }
+        else {
+          reject();
+        }
+      };
+
+      // Look up the DNS A-record of a throttler hostname to decide to show.
+      this._dns.asyncResolve(Services.prefs.getCharPref(prefPrefix + ".throttler"),
+        this._dns.RESOLVE_DISABLE_IPV6, onDNS, Services.tm.mainThread);
+    });
   }
 };
 

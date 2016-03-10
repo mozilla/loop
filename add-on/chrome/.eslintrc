@@ -24,6 +24,7 @@
     "CommonUtils": false,
     "Components": false,
     "convertToRTCStatsReport": false,
+    "COPY_PANEL": false,
     "CustomizableUI": false,
     "deriveHawkCredentials": false,
     "DomainWhitelist": false,

@@ -422,6 +422,7 @@ const kMessageHandlers = {
    */
   GetAllConstants: function(message, reply) {
     reply({
+      COPY_PANEL: COPY_PANEL,
       LOOP_SESSION_TYPE: LOOP_SESSION_TYPE,
       LOOP_MAU_TYPE: LOOP_MAU_TYPE,
       ROOM_CREATE: ROOM_CREATE,

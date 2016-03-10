@@ -69,6 +69,24 @@ const SHARING_SCREEN = {
   RESUMED: 1
 };
 
+/**
+ * Values that we segment copy panel action telemetry probes into.
+ *
+ * @enum {Number}
+ */
+const COPY_PANEL = {
+  // Copy panel was shown to the user.
+  SHOWN: 0,
+  // User selected "no" and to allow the panel to show again.
+  NO_AGAIN: 1,
+  // User selected "no" and to never show the panel.
+  NO_NEVER: 2,
+  // User selected "yes" and to allow the panel to show again.
+  YES_AGAIN: 3,
+  // User selected "yes" and to never show the panel.
+  YES_NEVER: 4
+};
+
  /**
  * Values that we segment MAUs telemetry probes into.
  *
@@ -106,13 +124,14 @@ Cu.import("resource://gre/modules/FxAccountsOAuthClient.jsm");
 Cu.importGlobalProperties(["URL"]);
 
 this.EXPORTED_SYMBOLS = ["MozLoopService", "LOOP_SESSION_TYPE", "LOOP_MAU_TYPE",
-  "TWO_WAY_MEDIA_CONN_LENGTH", "SHARING_ROOM_URL", "SHARING_SCREEN",
+  "TWO_WAY_MEDIA_CONN_LENGTH", "SHARING_ROOM_URL", "SHARING_SCREEN", "COPY_PANEL",
   "ROOM_CREATE", "ROOM_DELETE"];
 
 XPCOMUtils.defineConstant(this, "LOOP_SESSION_TYPE", LOOP_SESSION_TYPE);
 XPCOMUtils.defineConstant(this, "TWO_WAY_MEDIA_CONN_LENGTH", TWO_WAY_MEDIA_CONN_LENGTH);
 XPCOMUtils.defineConstant(this, "SHARING_ROOM_URL", SHARING_ROOM_URL);
 XPCOMUtils.defineConstant(this, "SHARING_SCREEN", SHARING_SCREEN);
+XPCOMUtils.defineConstant(this, "COPY_PANEL", COPY_PANEL);
 XPCOMUtils.defineConstant(this, "ROOM_CREATE", ROOM_CREATE);
 XPCOMUtils.defineConstant(this, "ROOM_DELETE", ROOM_DELETE);
 XPCOMUtils.defineConstant(this, "LOOP_MAU_TYPE", LOOP_MAU_TYPE);

@@ -10,6 +10,7 @@
   // Stop the default init functions running to avoid conflicts.
   document.removeEventListener("DOMContentLoaded", loop.panel.init);
   document.removeEventListener("DOMContentLoaded", loop.conversation.init);
+  document.removeEventListener("DOMContentLoaded", loop.copy.init);
 
   var sharedActions = loop.shared.actions;
 
@@ -22,6 +23,8 @@
   // 1.2. Conversation Window
   var RoomFailureView = loop.roomViews.RoomFailureView;
   var DesktopRoomConversationView = loop.roomViews.DesktopRoomConversationView;
+  // 1.3. Copy Panel
+  var CopyView = loop.copy.CopyView;
 
   // 2. Standalone webapp
   var UnsupportedBrowserView = loop.webapp.UnsupportedBrowserView;
@@ -825,6 +828,17 @@
             </FramedExample>
           </Section>
 
+          <Section name="CopyView">
+            <FramedExample cssClass="fx-embedded-panel"
+                           dashed={true}
+                           summary="Copy panel"
+                           width={330}>
+              <div className="panel" height="100">
+                <CopyView />
+              </div>
+            </FramedExample>
+          </Section>
+
           <Section name="ConversationToolbar">
             <div>
               <FramedExample dashed={true}
@@ -1468,7 +1482,7 @@
     var consoleWarn = console.warn;
     var caughtWarnings = [];
     console.warn = function() {
-      var args = Array.slice(arguments);
+      var args = Array.prototype.slice.call(arguments);
       caughtWarnings.push(args);
       consoleWarn.apply(console, args);
     };

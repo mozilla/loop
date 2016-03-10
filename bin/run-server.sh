@@ -53,10 +53,9 @@ done
 
 if [[ -z "$no_auto" ]] ; then
   nodemon \
-    -w add-on -w shared -w standalone -w ui \
+    -w add-on -w bin -w locale -w shared -w standalone -w ui \
     -w Makefile \
-    -w bin \
-    -e .html,.js,.jsm,.jsx,.css,.png,.svg,.sh \
+    -e css,html,js,jsm,jsx,png,properties,sh,svg \
     --exec bash $0 -- --restart
 else
   run

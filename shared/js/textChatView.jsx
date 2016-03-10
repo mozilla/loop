@@ -399,7 +399,8 @@ loop.shared.views.chat = (function(mozL10n) {
 
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      showInitialContext: React.PropTypes.bool.isRequired
+      showInitialContext: React.PropTypes.bool.isRequired,
+      showTile: React.PropTypes.bool.isRequired
     },
 
     getInitialState: function() {
@@ -440,6 +441,9 @@ loop.shared.views.chat = (function(mozL10n) {
             dispatcher={this.props.dispatcher}
             showPlaceholder={!hasSentMessages}
             textChatEnabled={this.state.textChatEnabled} />
+          <sharedViews.AdsTileView
+            dispatcher={this.props.dispatcher}
+            showTile={this.props.showTile} />
         </div>
       );
     }

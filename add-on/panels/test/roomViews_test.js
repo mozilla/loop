@@ -354,6 +354,11 @@ describe("loop.roomViews", function() {
       });
       onCallTerminatedStub = sandbox.stub();
 
+      loop.config = {
+        tilesIframeUrl: null,
+        tilesSupportUrl: null
+      };
+
       activeRoomStore.setStoreState({ roomUrl: "http://invalid " });
     });
 

@@ -858,7 +858,8 @@ loop.shared.views = (function(_, mozL10n) {
       screenShareMediaElement: React.PropTypes.object,
       screenSharePosterUrl: React.PropTypes.string,
       screenSharingPaused: React.PropTypes.bool,
-      showInitialContext: React.PropTypes.bool.isRequired
+      showInitialContext: React.PropTypes.bool.isRequired,
+      showTile: React.PropTypes.bool.isRequired
     },
 
     isLocalMediaAbsolutelyPositioned: function(matchMedia) {
@@ -969,7 +970,8 @@ loop.shared.views = (function(_, mozL10n) {
             </div>
             <loop.shared.views.chat.TextChatView
               dispatcher={this.props.dispatcher}
-              showInitialContext={this.props.showInitialContext} />
+              showInitialContext={this.props.showInitialContext}
+              showTile={this.props.showTile} />
             {this.state.localMediaAboslutelyPositioned ?
               null : this.renderLocalVideo()}
           </div>
@@ -1108,7 +1110,60 @@ loop.shared.views = (function(_, mozL10n) {
     }
   });
 
+  var AdsTileView = React.createClass({
+    propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      showTile: React.PropTypes.bool.isRequired
+    },
+
+    componentDidMount: function() {
+      // Watch for messages from the waiting-tile iframe
+      window.addEventListener("message", this.recordTileClick);
+    },
+
+    componentWillUnmount: function() {
+      window.removeEventListener("message", this.recordTileClick);
+    },
+
+    recordTileClick: function(event) {
+      if (event.data === "tile-click") {
+        this.props.dispatcher.dispatch(new sharedActions.RecordClick({
+          linkInfo: "Tiles iframe click"
+        }));
+      }
+    },
+
+    recordTilesSupport: function() {
+      this.props.dispatcher.dispatch(new sharedActions.RecordClick({
+        linkInfo: "Tiles support link click"
+      }));
+    },
+
+    render: function() {
+      if (!this.props.showTile) {
+        window.removeEventListener("message", this.recordTileClick);
+        return null;
+      }
+
+      return (
+        <div className="ads-tile">
+          <div className="ads-wrapper">
+            <p>{mozL10n.get("rooms_read_while_wait_offer2")}</p>
+            <a href={loop.config.tilesSupportUrl}
+              onClick={this.recordTilesSupport}
+              rel="noreferrer"
+              target="_blank">
+              <i className="room-waiting-help"></i>
+            </a>
+            <iframe className="room-waiting-tile" src={loop.config.tilesIframeUrl} />
+          </div>
+        </div>
+      );
+    }
+  });
+
   return {
+    AdsTileView: AdsTileView,
     AudioMuteButton: AudioMuteButton,
     AvatarView: AvatarView,
     Button: Button,

@@ -797,7 +797,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
     _isScreenShareLoading: function() {
       return this.state.receivingScreenShare &&
              !this.state.screenShareMediaElement &&
-             !this.props.screenSharePosterUrl;
+             !this.props.screenSharePosterUrl &&
+             !this.state.streamPaused;
     },
 
     /**

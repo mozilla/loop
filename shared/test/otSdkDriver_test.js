@@ -1364,6 +1364,18 @@ describe("loop.OTSdkDriver", function() {
             new sharedActions.ReceivingScreenShare({ receiving: true }));
         });
 
+        it("should dispatch a VideoScreenStreamChanged action for paused screen sharing streams", function() {
+          fakeStream.videoType = "screen";
+          fakeStream.hasVideo = false;
+
+          session.trigger("streamCreated", { stream: fakeStream });
+
+          // Called twice due to the VideoDimensionsChanged above.
+          sinon.assert.called(dispatcher.dispatch);
+          sinon.assert.calledWithExactly(dispatcher.dispatch,
+            new sharedActions.VideoScreenStreamChanged({ hasVideo: false }));
+        });
+
         it("should dispatch a ReceivingScreenShare action for screen sharing streams", function() {
           fakeStream.videoType = "screen";
 

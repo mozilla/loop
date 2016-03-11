@@ -957,6 +957,17 @@ describe("loop.standaloneRoomViews", function() {
              expect(view.getDOMNode().querySelector(".screen .loading-stream"))
                  .eql(null);
         });
+
+        it("should not show a loading screen if receivingScreenShare is true" +
+           "and streamPaused is true", function() {
+             view.setState({
+               "receivingScreenShare": true,
+               "streamPaused": true
+             });
+
+             expect(view.getDOMNode().querySelector(".screen .loading-stream"))
+                 .eql(null);
+        });
       });
 
       describe("Participants", function() {

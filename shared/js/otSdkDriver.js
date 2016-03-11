@@ -557,7 +557,15 @@ loop.OTSdkDriver = (function() {
      * https://tokbox.com/opentok/libraries/client/js/reference/Stream.html
      */
     _handleRemoteScreenShareCreated: function(stream) {
-      // Let the stores know first so they can update the display.
+      // Let the stores know first if the screen sharing is paused or not so
+      // they can update the display properly
+      if (!stream[STREAM_PROPERTIES.HAS_VIDEO]) {
+        this.dispatcher.dispatch(new sharedActions.VideoScreenStreamChanged({
+          hasVideo: false
+        }));
+      }
+
+      // Let the stores know so they can update the display if needed.
       this.dispatcher.dispatch(new sharedActions.ReceivingScreenShare({
         receiving: true
       }));

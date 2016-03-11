@@ -1090,9 +1090,11 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
 
     /**
      * Handles a room being left.
+     *
+     * @param {sharedActions.LeaveRoom} actionData
      */
-    leaveRoom: function() {
-      this._leaveRoom(ROOM_STATES.ENDED);
+    leaveRoom: function(actionData) {
+      this._leaveRoom(ROOM_STATES.ENDED, false, actionData && actionData.windowStayingOpen);
     },
 
     /**
@@ -1136,8 +1138,11 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
      * @param {Boolean}     failedJoinRequest Optional. Set to true if the join
      *                                        request to loop-server failed. It
      *                                        will skip the leave message.
+     * @param {Boolean}     windowStayingOpen Optional. Set to true to ensure
+     *                                        that messages relating to ending
+     *                                        of the conversation are sent on desktop.
      */
-    _leaveRoom: function(nextState, failedJoinRequest) {
+    _leaveRoom: function(nextState, failedJoinRequest, windowStayingOpen) {
       if (this._storeState.standalone && this._storeState.userAgentHandlesRoom) {
         // If the user agent is handling the room, all we need to do is advance
         // to the next state.
@@ -1178,7 +1183,8 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
       // NOTE: when the window _is_ closed, hanging up the call is performed by
       //       MozLoopService, because we can't get a message across to LoopAPI
       //       in time whilst a window is closing.
-      if ((nextState === ROOM_STATES.FAILED || !this._isDesktop) && !failedJoinRequest) {
+      if ((nextState === ROOM_STATES.FAILED || windowStayingOpen || !this._isDesktop) &&
+          !failedJoinRequest) {
         loop.request("HangupNow", this._storeState.roomToken,
           this._storeState.sessionToken, this._storeState.windowId);
       }

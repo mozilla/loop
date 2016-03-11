@@ -170,8 +170,7 @@ describe("loop.conversation", function() {
         addRemoteCursorStub,
         clickRemoteCursorStub;
     var conversationAppStore,
-        roomStore,
-        feedbackPeriodMs = 15770000000;
+        roomStore;
     var ROOM_STATES = loop.store.ROOM_STATES;
 
     function mountTestComponent() {
@@ -218,6 +217,8 @@ describe("loop.conversation", function() {
         tilesIframeUrl: null,
         tilesSupportUrl: null
       };
+
+      sinon.stub(dispatcher, "dispatch");
     });
 
     afterEach(function() {
@@ -327,79 +328,14 @@ describe("loop.conversation", function() {
          TestUtils.findRenderedComponentWithType(ccView, FeedbackView);
        });
 
-    it("should dispatch a ShowFeedbackForm action if timestamp is 0",
-       function() {
-         conversationAppStore.setStoreState({ feedbackTimestamp: 0 });
-         sandbox.stub(dispatcher, "dispatch");
-
-         ccView = mountTestComponent();
-
-         ccView.handleCallTerminated();
-
-         sinon.assert.calledOnce(dispatcher.dispatch);
-         sinon.assert.calledWithExactly(dispatcher.dispatch,
-                                        new sharedActions.ShowFeedbackForm());
-       });
-
-    it("should set feedback timestamp if delta is > feedback period",
-       function() {
-         var feedbackTimestamp = new Date() - feedbackPeriodMs;
-         conversationAppStore.setStoreState({
-           feedbackTimestamp: feedbackTimestamp,
-           feedbackPeriod: feedbackPeriodMs
-         });
-
-         ccView = mountTestComponent();
-
-         ccView.handleCallTerminated();
-
-         sinon.assert.calledOnce(setLoopPrefStub);
-       });
-
-    it("should dispatch a ShowFeedbackForm action if delta > feedback period",
-       function() {
-         var feedbackTimestamp = new Date() - feedbackPeriodMs;
-         conversationAppStore.setStoreState({
-           feedbackTimestamp: feedbackTimestamp,
-           feedbackPeriod: feedbackPeriodMs
-         });
-         sandbox.stub(dispatcher, "dispatch");
-
-         ccView = mountTestComponent();
-
-         ccView.handleCallTerminated();
-
-         sinon.assert.calledOnce(dispatcher.dispatch);
-         sinon.assert.calledWithExactly(dispatcher.dispatch,
-                                        new sharedActions.ShowFeedbackForm());
-       });
-
-    it("should close the window if delta < feedback period", function() {
-      var feedbackTimestamp = new Date().getTime();
-      conversationAppStore.setStoreState({
-        feedbackTimestamp: feedbackTimestamp,
-        feedbackPeriod: feedbackPeriodMs
-      });
-
+    it("should dispatch LeaveConversation when handleCallTerminated is called", function() {
       ccView = mountTestComponent();
-      var closeWindowStub = sandbox.stub(ccView, "closeWindow");
+
       ccView.handleCallTerminated();
 
-      sinon.assert.calledOnce(closeWindowStub);
-    });
-
-    it("should set the correct timestamp for dateLastSeenSec", function() {
-      var feedbackTimestamp = new Date().getTime();
-      conversationAppStore.setStoreState({
-        feedbackTimestamp: feedbackTimestamp,
-        feedbackPeriod: feedbackPeriodMs
-      });
-
-      ccView = mountTestComponent();
-      var closeWindowStub = sandbox.stub(ccView, "closeWindow");
-      ccView.handleCallTerminated();
-
-      sinon.assert.calledOnce(closeWindowStub);
+      sinon.assert.calledOnce(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new sharedActions.LeaveConversation());
     });
   });
 });

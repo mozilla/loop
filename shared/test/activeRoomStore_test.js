@@ -2017,6 +2017,16 @@ describe("loop.store.ActiveRoomStore", function() {
       sinon.assert.calledWith(requestStubs["HangupNow"], "fakeToken", "1627384950");
     });
 
+    it("should call 'HangupNow' when _isDesktop is true and windowStayingOpen", function() {
+      store._isDesktop = true;
+
+      store.leaveRoom({
+        windowStayingOpen: true
+      });
+
+      sinon.assert.calledOnce(requestStubs["HangupNow"]);
+    });
+
     it("should not call 'HangupNow' Loop API when _isDesktop is true", function() {
       store._isDesktop = true;
 

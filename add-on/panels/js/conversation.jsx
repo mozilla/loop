@@ -75,17 +75,7 @@ loop.conversation = (function(mozL10n) {
      * the window.
      */
     handleCallTerminated: function() {
-      var delta = new Date() - new Date(this.state.feedbackTimestamp);
-
-      // Show timestamp if feedback period (6 months) passed.
-      // 0 is default value for pref. Always show feedback form on first use.
-      if (this.state.feedbackTimestamp === 0 ||
-          delta >= this.state.feedbackPeriod) {
-        this.props.dispatcher.dispatch(new sharedActions.ShowFeedbackForm());
-        return;
-      }
-
-      this.closeWindow();
+      this.props.dispatcher.dispatch(new sharedActions.LeaveConversation());
     },
 
     render: function() {

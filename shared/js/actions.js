@@ -512,9 +512,21 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     * Used to indicate the user wishes to leave the conversation. This is
+     * different to leaving the room, in that we might display the feedback
+     * view, or just close the window. Whereas, the leaveRoom action is for
+     * the action of leaving an activeRoomStore room.
+     */
+    LeaveConversation: Action.define("leaveConversation", {
+    }),
+
+    /**
      * Used to indicate the user wishes to leave the room.
      */
     LeaveRoom: Action.define("leaveRoom", {
+      // Optional, Used to indicate that we know the window is staying open,
+      // and hence any messages to ensure the call is fully ended must be sent.
+      // windowStayingOpen: Boolean,
     }),
 
     /**

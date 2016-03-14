@@ -1,6 +1,35 @@
 # Changelog
 
-## 1.1.12
+## 1.1.13
+
+### New
+
+* Bug 1256442 - Various updates to get the 1.1.x version of the system add-on ready for 45 release. r=Mardak. [Mark Banner]
+
+### Other
+
+* Backout fa9983c5b09ded16fd5f2ed8c60ef1c63486a3fd / bug 1154277 Part 1 - remove e10s related commits. [Mark Banner]
+
+* Backout 2354436cd1a6e7293609b4eb79aa1582013a8083 / bug 1154277 Part 2 - remove e10s related commits. [Mark Banner]
+
+* Backout 36af5ef9c60669695631127864cc0f40dd57174a / bug 1154277 Part 3 - remove e10s related commits. [Mark Banner]
+
+* Backout 991273be3ffcdbd111959a0a2e072a36fdd67d25 / bug 1229195 - MozLoopService#openChatWindow should return a Promise - remove e10s related commits. [Mark Banner]
+
+* Backout 712567ce9c21623fc46dc01f066fba7419706fb7 / bug 1245813 - remove e10s related commits. [Mark Banner]
+
+* Backout 1d1bd1a001103af8eff318dd83e611d7c78ede1b / bug 1250847 - remove e10s related commits. [Mark Banner]
+
+* Backout ebef3ce5140ad16f56a95c7842048c36c8564e5b / bug 1249365 - remove e10s related commits. [Mark Banner]
+
+* Backout e943fed2b0f497c7940eed64f46b8e067ae1147c / Bug 1250534 - remove e10s related commits. [Mark Banner]
+
+* Backout 6ceea4148fea695c65f45ff23b1be1475ba16b45 / Bug 1247255 - remove e10s related commits. [Mark Banner]
+
+* Backout changeset 45d3299328516bc18a21f77c508807f4f27ed612 / Bug 1154277 follow-up - remove e10s related commits. [Mark Banner]
+
+
+## v1.1.12 (2016-03-14)
 
 ### New
 
@@ -15,6 +44,10 @@
 * Update L10n from changeset cec3928c33bf6bf791744f40264970ebf7605b7d. [Mark Banner]
 
 * Update L10n from changeset 1d73d0787992e99529929b8cbf0b871e34e34fe3. [Mark Banner]
+
+### Other
+
+* 1.1.12. [Mark Banner]
 
 
 ## v1.1.11 (2016-03-04)

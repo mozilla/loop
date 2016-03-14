@@ -1,12 +1,21 @@
 # Changelog
 
-## 1.1.13
+## 1.1.14
+
+### New
+
+* No bug. Change the call for opening the call panel since bug 1154277 was backed out. rs=Mardak. [Mark Banner]
+
+
+## v1.1.13 (2016-03-14)
 
 ### New
 
 * Bug 1256442 - Various updates to get the 1.1.x version of the system add-on ready for 45 release. r=Mardak. [Mark Banner]
 
 ### Other
+
+* 1.1.13. [Mark Banner]
 
 * Backout fa9983c5b09ded16fd5f2ed8c60ef1c63486a3fd / bug 1154277 Part 1 - remove e10s related commits. [Mark Banner]
 

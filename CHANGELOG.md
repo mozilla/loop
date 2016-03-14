@@ -1,10 +1,31 @@
 # Changelog
 
-## 1.1.11
+## 1.1.12
+
+### New
+
+* Bug 1250534 - introduce a ChatboxClosed event that fires when a chatbox is closed in attached and detached mode. r=Standard8. [mikedeboer]
+
+* Bug 1249365 - Fix regression in e10s mode to re-allow the camera by default in Loop's conversation window. r=gcp. [Mark Banner]
+
+* Bug 1249577 - Fix height glitchiness in Hello FTU, r=Standard8. [Dan Mosedale]
+
+### Chores
+
+* Update L10n from changeset cec3928c33bf6bf791744f40264970ebf7605b7d. [Mark Banner]
+
+* Update L10n from changeset 1d73d0787992e99529929b8cbf0b871e34e34fe3. [Mark Banner]
+
+
+## v1.1.11 (2016-03-04)
 
 ### New
 
 * Bug 1252817 - Stop using the timeout for requests across the content/chrome API as this interfers with network requests via the backend. Should fix a functional test issue. r=mikedeboer. [Mark Banner]
+
+### Other
+
+* 1.1.11. [Mark Banner]
 
 
 ## v1.1.10 (2016-03-03)

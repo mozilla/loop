@@ -71,7 +71,7 @@ describe("loop.panel", function() {
       Confirm: sinon.stub(),
       GetHasEncryptionKey: function() { return true; },
       HangupAllChatWindows: function() {},
-      IsMultiProcessActive: sinon.stub(),
+      IsMultiProcessEnabled: sinon.stub(),
       LoginToFxA: sinon.stub(),
       LogoutFromFxA: sinon.stub(),
       NotifyUITour: sinon.stub(),
@@ -89,8 +89,7 @@ describe("loop.panel", function() {
       "GetLoopPref|gettingStarted.latestFTUVersion": 2,
       "GetLoopPref|legal.ToS_url": "",
       "GetLoopPref|legal.privacy_url": "",
-      "GetLoopPref|remote.autostart": false,
-      IsMultiProcessActive: false
+      IsMultiProcessEnabled: false
     };
 
     roomName = "First Room Name";
@@ -687,9 +686,8 @@ describe("loop.panel", function() {
         }
       });
 
-      it("should render a E10sNotSupported when multiprocess is enabled and active", function() {
-        loop.storedRequests.IsMultiProcessActive = true;
-        loop.storedRequests["GetLoopPref|remote.autostart"] = false;
+      it("should render a E10sNotSupported when multiprocess is enabled", function() {
+        loop.storedRequests.IsMultiProcessEnabled = true;
 
         var view = createTestPanelView();
 

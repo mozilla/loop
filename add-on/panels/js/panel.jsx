@@ -924,8 +924,7 @@ loop.panel = (function(_, mozL10n) {
         hasEncryptionKey: loop.getStoredRequest(["GetHasEncryptionKey"]),
         userProfile: loop.getStoredRequest(["GetUserProfile"]),
         gettingStartedSeen: loop.getStoredRequest(["GetLoopPref", "gettingStarted.latestFTUVersion"]) >= FTU_VERSION,
-        multiProcessActive: loop.getStoredRequest(["IsMultiProcessActive"]),
-        remoteAutoStart: loop.getStoredRequest(["GetLoopPref", "remote.autostart"])
+        multiProcessEnabled: loop.getStoredRequest(["IsMultiProcessEnabled"])
       };
     },
 
@@ -1022,7 +1021,7 @@ loop.panel = (function(_, mozL10n) {
     render: function() {
       var NotificationListView = sharedViews.NotificationListView;
 
-      if (this.state.multiProcessActive && !this.state.remoteAutoStart) {
+      if (this.state.multiProcessEnabled) {
         return (
           <E10sNotSupported onClick={this.launchNonE10sWindow} />
         );
@@ -1079,12 +1078,11 @@ loop.panel = (function(_, mozL10n) {
       ["GetLoopPref", "gettingStarted.latestFTUVersion"],
       ["GetLoopPref", "legal.ToS_url"],
       ["GetLoopPref", "legal.privacy_url"],
-      ["GetLoopPref", "remote.autostart"],
       ["GetUserProfile"],
       ["GetFxAEnabled"],
       ["GetDoNotDisturb"],
       ["GetHasEncryptionKey"],
-      ["IsMultiProcessActive"]
+      ["IsMultiProcessEnabled"]
     ];
 
     return loop.requestMulti.apply(null, requests.concat(prefetch)).then(function(results) {

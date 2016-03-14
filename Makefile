@@ -421,7 +421,7 @@ karma: build
 .PHONY: build
 build: add-on standalone ui vendor_libs
 
-GIT_EXPORT_LOCATION := ../gecko-dev
+GIT_EXPORT_LOCATION := ../mozilla-release
 GIT_EXPORT_DIR := $(GIT_EXPORT_LOCATION)/browser/extensions/loop
 
 .PHONY: git-export

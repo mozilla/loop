@@ -318,7 +318,8 @@ var WindowListener = {
           }
         });
 
-        this.addMenuItem();
+        // Disabled for 45, as 45 has its own menuitem.
+        // this.addMenuItem();
 
         // Don't do the rest if this is for the hidden window - we don't
         // have a toolbar there.
@@ -903,7 +904,8 @@ var WindowListener = {
    */
   tearDownBrowserUI: function(window) {
     if (window.LoopUI) {
-      window.LoopUI.removeMenuItem();
+      // Disabled for 45, as 45 has its own menuitem.
+      // window.LoopUI.removeMenuItem();
 
       // XXX Bug 1229352 - Add in tear-down of the panel.
     }

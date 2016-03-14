@@ -1949,7 +1949,7 @@ this.MozLoopService = {
       // Notify the UI, which has the side effect of re-enabling panel opening
       // and updating the toolbar.
       xulWin.LoopUI.isSlideshowOpen = false;
-      xulWin.LoopUI.openPanel();
+      xulWin.LoopUI.openCallPanel();
 
       xulWin.removeEventListener("CloseSlideshow", removeSlideshow);
 

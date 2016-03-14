@@ -83,13 +83,15 @@ class Test1BrowserCall(MarionetteTestCase):
             .until(lambda e: element.get_attribute(attribute) == "false",
                    message="Timeout out waiting for " + attribute + " to be false")
 
-    def switch_to_panel(self):
+    def open_panel(self):
         self.marionette.set_context("chrome")
         button = self.marionette.find_element(By.ID, "loop-button")
 
         # click the element
         button.click()
 
+    def switch_to_panel(self):
+        self.marionette.set_context("chrome")
         # switch to the frame
         frame = self.marionette.find_element(By.ID, "loop-panel-iframe")
         self.marionette.switch_to_frame(frame)
@@ -310,12 +312,33 @@ class Test1BrowserCall(MarionetteTestCase):
                            "OTSdkDriver._connectionLengthNotedCalls should be "
                            "> 0, noted_calls = " + str(noted_calls))
 
+    def local_close_conversation(self):
+        self.marionette.set_context("chrome")
+        self.marionette.switch_to_frame()
+
+        chatbox = self.wait_for_element_exists(By.TAG_NAME, 'chatbox')
+        close_button = chatbox.find_element(By.ANON_ATTRIBUTE, {"class": "chat-loop-hangup chat-toolbarbutton"})
+
+        close_button.click()
+
+    def check_feedback_form(self):
+        self.switch_to_chatbox()
+
+        feedbackPanel = self.wait_for_element_displayed(By.CSS_SELECTOR, ".feedback-view-container")
+        self.assertNotEqual(feedbackPanel, "")
+
+    def check_rename_layout(self):
+        self.switch_to_panel()
+
+        renameInput = self.wait_for_element_displayed(By.CSS_SELECTOR, ".rename-input")
+        self.assertNotEqual(renameInput, "")
+
     def test_1_browser_call(self):
         # Marionette doesn't make it easy to set up a page to load automatically
         # on start. So lets load about:home. We need this for now, so that the
         # various browser checks believe we've enabled e10s.
         self.load_homepage()
-
+        self.open_panel()
         self.switch_to_panel()
 
         self.local_start_a_conversation()
@@ -356,6 +379,13 @@ class Test1BrowserCall(MarionetteTestCase):
         self.remote_leave_room()
 
         self.local_check_connection_length_noted()
+
+        # Hangup on local will open feedback window first
+        self.local_close_conversation()
+        self.check_feedback_form()
+        # Close the window once again to see the rename layout
+        self.local_close_conversation()
+        self.check_rename_layout()
 
     def tearDown(self):
         self.loop_test_servers.shutdown()

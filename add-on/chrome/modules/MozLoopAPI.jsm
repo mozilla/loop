@@ -986,6 +986,23 @@ const kMessageHandlers = {
   },
 
   /**
+   * Called when a closing room has just been created, so user can change
+   * the name of the room to be stored.
+   *
+   * @param {Object}   message Message meant for the handler function, shouldn't
+                               contain any data.
+   * @param {Function} reply   Callback function, invoked with the result of this
+   *                           message handler. The result will be sent back to
+   *                           the senders' channel.
+   */
+  SetNameNewRoom: function(message, reply) {
+    let win = Services.wm.getMostRecentWindow("navigator:browser");
+    win && win.LoopUI.renameRoom();
+
+    reply();
+  },
+
+  /**
    * Used to record the screen sharing state for a window so that it can
    * be reflected on the toolbar button.
    *

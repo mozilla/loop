@@ -169,6 +169,15 @@ var WindowListener = {
       },
 
       /**
+       * Called when a closing room has just been created, so we offer the
+       * user the chance to modify the name. For that we need to open the panel.
+       * Showing the proper layout is done on panel.jsx
+       */
+      renameRoom: function() {
+        this.openPanel();
+      },
+
+      /**
        * Opens the panel for Loop and sizes it appropriately.
        *
        * @param {event}  event   The event opening the panel, used to anchor

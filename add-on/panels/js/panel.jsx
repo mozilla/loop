@@ -415,6 +415,21 @@ loop.panel = (function(_, mozL10n) {
   });
 
   /**
+   *  Aux function to retrieve the name of a room
+   */
+  function _getRoomTitle(room) {
+    if (!room) {
+      return mozL10n.get("room_name_untitled_page");
+    }
+
+    var urlData = (room.decryptedContext.urls || [])[0] || {};
+    return room.decryptedContext.roomName ||
+           urlData.description ||
+           urlData.location ||
+           mozL10n.get("room_name_untitled_page");
+  }
+
+  /**
    * Room list entry.
    *
    * Active Room means there are participants in the room.
@@ -436,15 +451,8 @@ loop.panel = (function(_, mozL10n) {
       return {
         editMode: false,
         eventPosY: 0,
-        newRoomName: this._getRoomTitle()
+        newRoomName: _getRoomTitle(this.props.room)
       };
-    },
-
-    _getRoomTitle: function() {
-      var urlData = (this.props.room.decryptedContext.urls || [])[0] || {};
-      return this.props.room.decryptedContext.roomName ||
-        urlData.description || urlData.location ||
-        mozL10n.get("room_name_untitled_page");
     },
 
     _isActive: function() {
@@ -545,7 +553,7 @@ loop.panel = (function(_, mozL10n) {
         "room-active": this._isActive(),
         "room-opened": this.props.isOpenedRoom
       });
-      var roomTitle = this._getRoomTitle();
+      var roomTitle = _getRoomTitle(this.props.room);
 
       return (
         <div className={roomClasses}
@@ -1109,17 +1117,105 @@ loop.panel = (function(_, mozL10n) {
     }
   });
 
+  var RenameRoomView = React.createClass({
+    mixins: [sharedMixins.WindowCloseMixin],
+
+    propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      roomName: React.PropTypes.string.isRequired,
+      roomToken: React.PropTypes.string.isRequired
+    },
+
+    getInitialState: function() {
+      return { focused: false };
+    },
+
+    componentDidMount: function() {
+      this.getDOMNode().querySelector("input").focus();
+    },
+
+    handleBlur: function() {
+      this.setState({ focused: false });
+    },
+
+    handleFocus: function() {
+      this.setState({ focused: true });
+      this.getDOMNode().querySelector("input").select();
+    },
+
+    handleKeyDown: function(event) {
+      if (event.which === 13) {
+        this.handleNameChange();
+      }
+    },
+
+    handleNameChange: function() {
+      let token = this.props.roomToken,
+          name = this.getDOMNode().querySelector("input").value || "";
+
+      if (name !== this.props.roomName) {
+        this.props.dispatcher.dispatch(
+          new sharedActions.UpdateRoomContext({
+            roomToken: token,
+            newRoomName: name
+          })
+        );
+      }
+
+      this.closeWindow();
+    },
+
+    render: function() {
+      let inputClass = classNames({
+        "input-group": true,
+        "focused": this.state.focused
+      });
+
+      return (
+        <div className="rename-newRoom">
+          <img src="shared/img/helloicon.svg" />
+          <div className="rename-container">
+            <h2 className="rename-header">
+              {mozL10n.get("door_hanger_bye")}
+            </h2>
+            <p className="rename-subheader">
+              {mozL10n.get("door_hanger_return2")}
+            </p>
+            <p className="rename-prompt">
+              {mozL10n.get("door_hanger_current")}
+            </p>
+            <div className={inputClass}>
+              <input className="rename-input"
+                     defaultValue={this.props.roomName}
+                     onBlur={this.handleBlur}
+                     onFocus={this.handleFocus}
+                     onKeyDown={this.handleKeyDown}
+                     type="text"/>
+            </div>
+          </div>
+          <Button additionalClass="rename-button"
+                  caption={mozL10n.get("door_hanger_button2")}
+                  onClick={this.handleNameChange} />
+        </div>
+      );
+    }
+  });
+
   /**
    * Panel view.
    */
   var PanelView = React.createClass({
+    mixins: [
+     Backbone.Events,
+     sharedMixins.DocumentVisibilityMixin
+    ],
+
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       // Only used for the ui-showcase:
       gettingStartedSeen: React.PropTypes.bool,
       notifications: React.PropTypes.object.isRequired,
-      roomStore:
-        React.PropTypes.instanceOf(loop.store.RoomStore).isRequired,
+      roomStore: React.PropTypes.instanceOf(loop.store.RoomStore).isRequired,
       // Only used for the ui-showcase:
       userProfile: React.PropTypes.object
     },
@@ -1137,6 +1233,7 @@ loop.panel = (function(_, mozL10n) {
         gettingStartedSeen: loop.getStoredRequest(["GetLoopPref", "gettingStarted.latestFTUVersion"]) >= FTU_VERSION,
         multiProcessActive: loop.getStoredRequest(["IsMultiProcessActive"]),
         remoteAutoStart: loop.getStoredRequest(["GetLoopPref", "remote.autostart"]),
+        renameRoom: null,
         sharePanelOpened: false
       };
     },
@@ -1209,8 +1306,37 @@ loop.panel = (function(_, mozL10n) {
       }.bind(this));
     },
 
+    _onClosingNewRoom: function() {
+      // If we close a recently created room, we offer the chance of renaming it
+      let storeState = this.props.roomStore.getStoreState();
+      if (!storeState.closingNewRoom || !storeState.openedRoom) {
+        return;
+      }
+
+      let closedRoom = storeState.rooms.filter(function(room) {
+        // closing room is the last that was opened.
+        return storeState.openedRoom === room.roomToken;
+      })[0];
+
+      this.setState({
+        renameRoom: storeState.closingNewRoom &&
+          {
+            token: storeState.openedRoom,
+            name: _getRoomTitle(closedRoom)
+          }
+      });
+    },
+
+    onDocumentHidden: function() {
+      // consider closing panel any other way than click OK button
+      // or Enter key the same as cancel renaming the room
+      this.setState({ renameRoom: null });
+    },
+
     componentWillMount: function() {
       this.updateServiceErrors();
+      this.listenTo(this.props.roomStore, "change:closingNewRoom",
+                    this._onClosingNewRoom);
     },
 
     componentDidMount: function() {
@@ -1219,6 +1345,7 @@ loop.panel = (function(_, mozL10n) {
 
     componentWillUnmount: function() {
       loop.unsubscribe("LoopStatusChanged", this._onStatusChanged);
+      this.stopListening(this.props.roomStore);
     },
 
     handleContextMenu: function(e) {
@@ -1258,8 +1385,18 @@ loop.panel = (function(_, mozL10n) {
           </div>
         );
       }
+
       if (!this.state.hasEncryptionKey) {
         return <SignInRequestView />;
+      }
+
+      if (this.state.renameRoom) {
+        return (
+          <RenameRoomView
+            dispatcher={this.props.dispatcher}
+            roomName={this.state.renameRoom.name}
+            roomToken={this.state.renameRoom.token} />
+        );
       }
 
       var cssClasses = classNames({
@@ -1314,7 +1451,8 @@ loop.panel = (function(_, mozL10n) {
       ["IsMultiProcessActive"]
     ];
 
-    return loop.requestMulti.apply(null, requests.concat(prefetch)).then(function(results) {
+    return loop.requestMulti.apply(null, requests.concat(prefetch))
+      .then(function(results) {
       // `requestIdx` is keyed off the order of the `requests` and `prefetch`
       // arrays. Be careful to update both when making changes.
       var requestIdx = 0;
@@ -1374,6 +1512,7 @@ loop.panel = (function(_, mozL10n) {
     init: init,
     NewRoomView: NewRoomView,
     PanelView: PanelView,
+    RenameRoomView: RenameRoomView,
     RoomEntry: RoomEntry,
     RoomEntryContextButtons: RoomEntryContextButtons,
     RoomList: RoomList,

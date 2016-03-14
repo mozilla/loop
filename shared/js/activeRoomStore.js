@@ -1099,7 +1099,9 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
      * @param {sharedActions.LeaveRoom} actionData
      */
     leaveRoom: function(actionData) {
-      this._leaveRoom(ROOM_STATES.ENDED, false, actionData && actionData.windowStayingOpen);
+      this._leaveRoom(ROOM_STATES.ENDED,
+                      false,
+                      actionData && actionData.windowStayingOpen);
     },
 
     /**

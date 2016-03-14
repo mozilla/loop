@@ -18,6 +18,7 @@
   var PanelView = loop.panel.PanelView;
   var SharePanelView = loop.panel.SharePanelView;
   var SignInRequestView = loop.panel.SignInRequestView;
+  var RenameRoomView = loop.panel.RenameRoomView;
   // 1.2. Conversation Window
   var RoomFailureView = loop.roomViews.RoomFailureView;
   var DesktopRoomConversationView = loop.roomViews.DesktopRoomConversationView;
@@ -440,6 +441,16 @@
 
   roomStoreNoRoomsPending.getAllRooms = function() {};
 
+  var roomStoreCloseNewRoom = new loop.store.RoomStore(new loop.Dispatcher(), {
+    constants: {},
+    activeRoomStore: new loop.store.ActiveRoomStore(new loop.Dispatcher(), {
+      sdkDriver: mockSDK
+    })
+  });
+  roomStoreCloseNewRoom.setStoreState({
+    renameRoom: "true"
+  });
+
   var mockUserProfileLoggedIn = {
     email: "text@example.com",
     uid: "0354b278a381d3cb408bb46ffc01266"
@@ -776,6 +787,18 @@
                            forceRender={true}
                            from={"conversation"}
                            store={sharePanelActiveRoomStore} />
+              </div>
+            </FramedExample>
+
+            <FramedExample cssClass="fx-embedded-panel"
+                           dashed={true}
+                           height={250}
+                           summary="Rename closed room"
+                           width={330}>
+              <div className="panel">
+                <RenameRoomView dispatcher={dispatcher}
+                                roomName={"Fake name"}
+                                roomToken={"fakeToken"} />
               </div>
             </FramedExample>
 

@@ -1856,6 +1856,26 @@ describe("loop.store.ActiveRoomStore", function() {
       expect(participants).to.have.length.of(1);
       expect(participants[0].owner).eql(true);
     });
+
+    it("should clear the streamPaused state", function() {
+      store.setStoreState({
+        streamPaused: true
+      });
+
+      store.remotePeerDisconnected();
+
+      expect(store.getStoreState().streamPaused).eql(false);
+    });
+
+    it("should set the remotePeerDisconnected to `true", function() {
+      store.setStoreState({
+        remotePeerDisconnected: false
+      });
+
+      store.remotePeerDisconnected();
+
+      expect(store.getStoreState().remotePeerDisconnected).eql(true);
+    });
   });
 
   describe("#connectionStatus", function() {

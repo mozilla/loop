@@ -1052,7 +1052,8 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
         participants: participants,
         roomState: ROOM_STATES.SESSION_CONNECTED,
         remotePeerDisconnected: true,
-        remoteSrcMediaElement: null
+        remoteSrcMediaElement: null,
+        streamPaused: false
       });
     },
 

@@ -1576,10 +1576,33 @@ describe("loop.store.ActiveRoomStore", function() {
           owner: false
         }]
       });
+
+      sandbox.stub(console, "error");
     });
 
     afterEach(function() {
       store.endScreenShare();
+    });
+
+    it("should log an error if the state is not inactive", function() {
+      store.setStoreState({
+        screenSharingState: SCREEN_SHARE_STATES.PENDING
+      });
+
+      store.startBrowserShare(new sharedActions.StartBrowserShare());
+
+      sinon.assert.calledOnce(console.error);
+    });
+
+    it("should not do anything if the state is not inactive", function() {
+      store.setStoreState({
+        screenSharingState: SCREEN_SHARE_STATES.PENDING
+      });
+
+      store.startBrowserShare(new sharedActions.StartBrowserShare());
+
+      sinon.assert.notCalled(requestStubs.AddBrowserSharingListener);
+      sinon.assert.notCalled(fakeSdkDriver.startScreenShare);
     });
 
     it("should set the state to 'pending'", function() {

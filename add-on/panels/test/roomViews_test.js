@@ -484,28 +484,42 @@ describe("loop.roomViews", function() {
     });
 
     describe("#componentWillUpdate", function() {
-      function expectActionDispatched() {
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          sinon.match.instanceOf(sharedActions.SetupStreamElements));
-      }
-
       it("should dispatch a `SetupStreamElements` action when the MEDIA_WAIT state is entered", function() {
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.READY });
-          mountTestComponent();
+          view = mountTestComponent();
+
+          sandbox.stub(view, "getDefaultPublisherConfig").returns({
+            fake: "config"
+          });
 
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.MEDIA_WAIT });
 
-          expectActionDispatched();
+          sinon.assert.calledOnce(dispatcher.dispatch);
+          sinon.assert.calledWithExactly(dispatcher.dispatch,
+            new sharedActions.SetupStreamElements({
+              publisherConfig: {
+                fake: "config"
+              }
+            }));
         });
 
       it("should dispatch a `SetupStreamElements` action on MEDIA_WAIT state is re-entered", function() {
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.ENDED });
-          mountTestComponent();
+          view = mountTestComponent();
+
+          sandbox.stub(view, "getDefaultPublisherConfig").returns({
+            fake: "config"
+          });
 
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.MEDIA_WAIT });
 
-          expectActionDispatched();
+          sinon.assert.calledOnce(dispatcher.dispatch);
+          sinon.assert.calledWithExactly(dispatcher.dispatch,
+            new sharedActions.SetupStreamElements({
+              publisherConfig: {
+                fake: "config"
+              }
+            }));
         });
 
       it("should dispatch a `StartBrowserShare` action when the SESSION_CONNECTED state is entered", function() {
@@ -514,7 +528,31 @@ describe("loop.roomViews", function() {
 
         activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
 
-        expectActionDispatched();
+        sinon.assert.calledOnce(dispatcher.dispatch);
+        sinon.assert.calledWithExactly(dispatcher.dispatch,
+          new sharedActions.StartBrowserShare());
+      });
+
+      it("should not dispatch a `StartBrowserShare` action when the previous state was HAS_PARTICIPANTS", function() {
+        activeRoomStore.setStoreState({ roomState: ROOM_STATES.HAS_PARTICIPANTS });
+        mountTestComponent();
+
+        activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
+
+        sinon.assert.notCalled(dispatcher.dispatch);
+      });
+
+      it("should not dispatch a `StartBrowserShare` action when the previous state was SESSION_CONNECTED", function() {
+        activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
+        mountTestComponent();
+
+        activeRoomStore.setStoreState({
+          roomState: ROOM_STATES.SESSION_CONNECTED,
+          // Additional change to force an update.
+          screenSharingState: "fake"
+        });
+
+        sinon.assert.notCalled(dispatcher.dispatch);
       });
     });
 

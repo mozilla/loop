@@ -970,6 +970,11 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
      * @param {sharedActions.StartBrowserShare} actionData
      */
     startBrowserShare: function() {
+      if (this._storeState.screenSharingState !== SCREEN_SHARE_STATES.INACTIVE) {
+        console.error("Attempting to start browser sharing when already running.");
+        return;
+      }
+
       // For the unit test we already set the state here, instead of indirectly
       // via an action, because actions are queued thus depending on the
       // asynchronous nature of `loop.request`.

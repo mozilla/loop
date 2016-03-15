@@ -11,7 +11,10 @@ LOOP_DOWNLOAD_FIREFOX_URL := $(shell echo $${LOOP_DOWNLOAD_FIREFOX_URL-"https://
 LOOP_PRIVACY_WEBSITE_URL := $(shell echo $${LOOP_PRIVACY_WEBSITE_URL-"https://www.mozilla.org/privacy/firefox-hello/"})
 LOOP_LEGAL_WEBSITE_URL := $(shell echo $${LOOP_LEGAL_WEBSITE_URL-"https://www.mozilla.org/about/legal/terms/firefox-hello/"})
 LOOP_PRODUCT_HOMEPAGE_URL := $(shell echo $${LOOP_PRODUCT_HOMEPAGE_URL-"https://www.firefox.com/hello/"})
-FIREFOX_VERSION=48.0
+# This should always be a nn.* version, so that the add-on is compatible with not
+# only the release but any security/stability releases as well.
+# Note that MOZ_APP_MAXVERSION is the variable name used by mozilla-central.
+MOZ_APP_MAXVERSION=48.*
 
 # Work around for realpath not working as expected
 NODE_LOCAL_BIN := $(abspath ./node_modules/.bin)
@@ -179,6 +182,13 @@ $(DIST)/add-on/chrome/content/preferences/prefs.js: $(VENV) add-on/preferences/p
 	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
 	         -D LOOP_BETA=1 -o $@ add-on/preferences/prefs.js
 
+$(BUILT)/add-on/install.rdf: add-on/install.rdf.in $(VENV) Makefile
+	@mkdir -p $(@D)
+	. $(VENV)/bin/activate && \
+	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
+	         -D MOZ_APP_MAXVERSION=$(MOZ_APP_MAXVERSION) \
+	         -o $@ $<
+
 
 # Build our jsx files into appropriately placed js files.  Note that the rules
 # are somewhat repetitive, and less elegant than they might be.  We _could_
@@ -296,11 +306,10 @@ add-on: node_modules \
 	      $(built_add_on_l10n_files) \
 	      $(BUILT)/$(ADD-ON)/chrome.manifest \
 	      $(BUILT)/$(ADD-ON)/chrome/locale/chrome.manifest \
+	      $(BUILT)/$(ADD-ON)/install.rdf \
 	      $(BUILT)/add-on/chrome/content/preferences/prefs.js
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@/chrome/bootstrap.js $(BUILT)/$@
-	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \
-		grep -v "#filter substitution" > $(BUILT)/$@/install.rdf
 	mkdir -p $(BUILT)/$@/chrome/content/panels
 	$(RSYNC) $@/panels $(BUILT)/$@/chrome/content
 	mkdir -p $(BUILT)/$@/chrome/content/modules

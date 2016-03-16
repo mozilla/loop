@@ -1008,6 +1008,17 @@ var MozLoopServiceInternal = {
             }
           });
 
+          // Disable drag feature if needed
+          if (!MozLoopService.getLoopPref("conversationPopOut.enabled")) {
+            let document = chatbox.ownerDocument;
+            let titlebarNode = document.getAnonymousElementByAttribute(chatbox, "class",
+              "chat-titlebar");
+            titlebarNode.addEventListener("dragend", event => {
+              event.stopPropagation();
+              return false;
+            });
+          }
+
           // Handle window.close correctly on the chatbox.
           mm.sendAsyncMessage("Social:HookWindowCloseForPanelClose");
           messageName = "Social:DOMWindowClose";
@@ -1117,7 +1128,11 @@ var MozLoopServiceInternal = {
         // away to circumvent glitches.
         chatboxInstance.setAttribute("customSize", "loopDefault");
         chatboxInstance.parentNode.setAttribute("customSize", "loopDefault");
-        Chat.loadButtonSet(chatboxInstance, "minimize,swap," + kChatboxHangupButton.id);
+        let buttons = "minimize,";
+        if (MozLoopService.getLoopPref("conversationPopOut.enabled")) {
+          buttons += "swap,";
+        }
+        Chat.loadButtonSet(chatboxInstance, buttons + kChatboxHangupButton.id);
       // Final fall-through in case a unit test overloaded Chat.open. Here we can
       // immediately resolve the promise.
       } else {

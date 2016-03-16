@@ -16,6 +16,9 @@ DEF_OUTPUT_FILE_NAME = os.path.join("built", "add-on", os.extsep.join(["chrome",
 
 
 def main(input_file_name, output_file_name):
+    # We use encoding="UTF-8" so that we have a known consistent encoding format.
+    # Sometimes the locale isn't always defined correctly for python, so we try
+    # to handle that here.
     input_file = io.open(input_file_name, "r", encoding="UTF-8")
 
     jar_mn = input_file.read()

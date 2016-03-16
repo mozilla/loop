@@ -21,11 +21,11 @@ def main(l10n_src, output_file_name):
 
     localeLines = ["locale loop {0} {0}/".format(x) for x in locale_list]
 
-    output_file = io.open(output_file_name, "w", encoding="UTF-8")
+    output_file = io.open(output_file_name, "wb")
 
     manifest_output = "\n".join(localeLines) + "\n"
 
-    output_file.write(unicode(manifest_output))
+    output_file.write(manifest_output)
 
     output_file.close()
 

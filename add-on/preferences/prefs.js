@@ -18,7 +18,7 @@ pref("loop.debug.sdk", false);
 pref("loop.debug.twoWayMediaTelemetry", false);
 pref("loop.feedback.dateLastSeenSec", 0);
 pref("loop.feedback.periodSec", 15770000); // 6 months.
-pref("loop.feedback.formURL", "https://www.mozilla.org/firefox/hello/npssurvey/");
+pref("loop.feedback.formURL", "https://www.surveygizmo.com/s3/2651383/Firefox-Hello-Product-Survey-II");
 pref("loop.feedback.manualFormURL", "https://www.mozilla.org/firefox/hello/feedbacksurvey/");
 pref("loop.mau.openPanel", 0);
 pref("loop.mau.openConversation", 0);

@@ -68,6 +68,9 @@ def main(l10n_src, l10n_dst, index_file_name, jar_file_name):
     locale_list = localeUtils.getLocalesList(l10n_dst)
 
     print("updating locales list in", index_file_name)
+    # We use encoding="UTF-8" so that we have a known consistent encoding format.
+    # Sometimes the locale isn't always defined correctly for python, so we try
+    # to handle that here.
     with io.open(index_file_name, "r+", encoding="UTF-8") as index_file:
         index_html = index_file.read()
 

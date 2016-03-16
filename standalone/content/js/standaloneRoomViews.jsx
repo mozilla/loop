@@ -218,11 +218,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
       return { waitToRenderWaiting: true };
     },
 
-    componentDidMount: function() {
-      // Watch for messages from the waiting-tile iframe
-      window.addEventListener("message", this.recordTileClick);
-    },
-
     /**
      * Change state to allow for the waiting message to be shown and send an
      * event to record that fact.
@@ -269,24 +264,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
       }
     },
 
-    componentWillUnmount: function() {
-      window.removeEventListener("message", this.recordTileClick);
-    },
-
-    recordTileClick: function(event) {
-      if (event.data === "tile-click") {
-        this.props.dispatcher.dispatch(new sharedActions.RecordClick({
-          linkInfo: "Tiles iframe click"
-        }));
-      }
-    },
-
-    recordTilesSupport: function() {
-      this.props.dispatcher.dispatch(new sharedActions.RecordClick({
-        linkInfo: "Tiles support link click"
-      }));
-    },
-
     _renderCallToActionLink: function() {
       if (this.props.isFirefox) {
         return (
@@ -306,6 +283,21 @@ loop.standaloneRoomViews = (function(mozL10n) {
       );
     },
 
+
+    _renderPromoteFirefoxView: function() {
+      return (
+        <div className="promote-firefox">
+          <h2>{mozL10n.get("rooms_promote_firefox_label")}</h2>
+          <button className="btn btn-info"
+                  onClick={this.props.joinRoom}>
+            {mozL10n.get("rooms_promote_firefox_button", {
+              brandShortname: mozL10n.get("brandShortname")
+            })}
+          </button>
+        </div>
+      );
+    },
+
     _renderScreenSharingPausedView: function() {
       return (
         <div className="room-inner-info-area">
@@ -320,14 +312,35 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
     render: function() {
       switch (this.props.roomState) {
-        case ROOM_STATES.ENDED:
+        case ROOM_STATES.ENDED: {
+          return (
+            <div className="room-notification-area">
+              <div className="room-notification-header">
+                <h2>You have disconnected.</h2>
+              </div>
+              <div className="room-notification-content">
+                <button className="btn btn-join btn-info"
+                        onClick={this.props.joinRoom}>
+                  Rejoin
+                </button>
+                {!this.props.isFirefox ? this._renderPromoteFirefoxView() : null}
+              </div>
+            </div>
+          );
+        }
         case ROOM_STATES.READY: {
           return (
-            <div className="room-inner-info-area">
-              <button className="btn btn-join btn-info"
-                      onClick={this.props.joinRoom}>
-                {mozL10n.get("rooms_room_join_label")}
-              </button>
+            <div className="room-notification-area">
+              <div className="room-notification-header brand-header"></div>
+              <div className="room-notification-content">
+                <h2>{mozL10n.get("rooms_welcome_label")}</h2>
+                <p>{mozL10n.get("rooms_welcome_description2")}</p>
+                <p>{mozL10n.get("rooms_welcome_get_started")}</p>
+                <button className="btn btn-join btn-info"
+                        onClick={this.props.joinRoom}>
+                  {mozL10n.get("rooms_room_join_label")}
+                </button>
+              </div>
             </div>
           );
         }
@@ -346,11 +359,9 @@ loop.standaloneRoomViews = (function(mozL10n) {
             "other": !isChrome && !isFirefox && !isOpera
           });
           return (
-            <div className="room-inner-info-area">
-              <p className={promptMediaMessageClasses}>
-                {msg}
-              </p>
-            </div>
+            <p className={promptMediaMessageClasses}>
+              {msg}
+            </p>
           );
         }
         case ROOM_STATES.JOINING:
@@ -362,21 +373,51 @@ loop.standaloneRoomViews = (function(mozL10n) {
             return null;
           }
 
+          var storeState = this.props.activeRoomStore.getStoreState("roomContextUrls");
+          var context = storeState[0] || [];
+
+          // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
+          // Try catch to not produce output if invalid url
+          try {
+            var sanitizeURL = loop.shared.utils.formatURL(context.location, true).hostname;
+          } catch (ex) {
+            sanitizeURL = null;
+          }
+
+          var thumbnail = context.thumbnail;
+
+          if (!thumbnail) {
+            thumbnail = "shared/img/icons-16x16.svg#globe";
+          }
+
+          var title = mozL10n.get(this.props.activeRoomStore.getStoreState("remotePeerDisconnected") ?
+            "room_owner_left_label" : "rooms_only_occupant_label2");
+
           return (
-            <div className="room-inner-info-area">
-              <p className="empty-room-message">
-                {mozL10n.get("rooms_only_occupant_label2")}
-              </p>
-              <p className="room-waiting-area">
-                {mozL10n.get("rooms_read_while_wait_offer")}
-                <a href={loop.config.tilesSupportUrl}
-                  onClick={this.recordTilesSupport}
-                  rel="noreferrer"
-                  target="_blank">
-                  <i className="room-waiting-help"></i>
-                </a>
-              </p>
-              <iframe className="room-waiting-tile" src={loop.config.tilesIframeUrl} />
+            <div className="room-notification-area">
+              <div className="room-notification-header">
+                <h2>{title}</h2>
+              </div>
+              <div className="room-notification-content">
+                <p>
+                  {mozL10n.get("rooms_wait_message")}
+                </p>
+
+                <div className="room-notification-context">
+                  <a className="context-wrapper"
+                     href={context.location ? context.location : null}
+                     rel="noreferrer"
+                     target="_blank">
+                    <img className="context-preview" src={thumbnail} />
+                    <span className="context-info">
+                      {context.description}
+                      <span className="context-url">
+                        {sanitizeURL}
+                      </span>
+                    </span>
+                  </a>
+                </div>
+              </div>
             </div>
           );
         }
@@ -654,6 +695,12 @@ loop.standaloneRoomViews = (function(mozL10n) {
       this.props.dispatcher.dispatch(new sharedActions.LeaveRoom());
     },
 
+    closeIntroOverlay: function() {
+      localStorage.setItem("introSeen", "true");
+      this.setState({ introSeen: true });
+      this.joinRoom();
+    },
+
     /**
      * Checks if current room is active.
      *
@@ -750,7 +797,20 @@ loop.standaloneRoomViews = (function(mozL10n) {
     _isScreenShareLoading: function() {
       return this.state.receivingScreenShare &&
              !this.state.screenShareMediaElement &&
-             !this.props.screenSharePosterUrl;
+             !this.props.screenSharePosterUrl &&
+             !this.state.streamPaused;
+    },
+
+    /**
+     * Should we render the ads when there is no participants in the room
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _shouldRenderTile: function() {
+      return this.state.roomState === ROOM_STATES.JOINED ||
+             this.state.roomState === ROOM_STATES.SESSION_CONNECTED &&
+             this.state.roomState !== ROOM_STATES.HAS_PARTICIPANTS;
     },
 
     render: function() {
@@ -785,7 +845,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
             screenSharePosterUrl={this.props.screenSharePosterUrl}
             screenSharingPaused={this.state.streamPaused}
             showInitialContext={true}
-            useDesktopPaths={false}>
+            showTile={this._shouldRenderTile()}>
             <StandaloneRoomInfoArea activeRoomStore={this.props.activeRoomStore}
               dispatcher={this.props.dispatcher}
               failureReason={this.state.failureReason}
@@ -795,7 +855,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
               roomUsed={this.state.used}
               screenSharingPaused={this.state.streamPaused} />
           </sharedViews.MediaLayoutView>
-          {(this.state.introSeen) ? null : <IntroOverlayView joinRoom={this.joinRoom} />}
+          {(this.state.introSeen) ? null : <IntroOverlayView closeCallback={this.closeIntroOverlay} joinRoom={this.joinRoom} />}
         </div>
       );
     }
@@ -818,7 +878,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
           href={loop.config.generalSupportUrl}
           onClick={this.generalSupportUrlClick}
           rel="noreferrer"
-          target="_blank">
+          target="_blank"
+          title={mozL10n.get("rooms_general_support_button_label")}>
           <div className="icon icon-help"></div>
         </a>
       );
@@ -827,6 +888,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
   var Slide = React.createClass({
     propTypes: {
+      closeCallback: React.PropTypes.func.isRequired,
       imageClass: React.PropTypes.string.isRequired,
       indexClass: React.PropTypes.string.isRequired,
       joinRoom: React.PropTypes.func.isRequired,
@@ -837,21 +899,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
     handleGotItClick: function(event) {
       event.stopPropagation();
       event.preventDefault();
-
-      // XXX we shouldn't be unnecessarily messing with the DOM behind
-      // React's back, as this can confuse React.  Furthermore, on close, the
-      // parent's state should be updated so that it doesn't render this
-      // component at all, as per the usual React idiom.  The way to do this
-      // is to have the parent pass in a close callback, which updates the
-      // parents state (either directly or via action dispatch to a store),
-      // causing the parent not to render this overlay.  This should also
-      // allow us to fix the duplication of code in handleCloseClick.
-      // (bug 1252306).
-      var overlayElem = document.getElementsByClassName("intro-overlay")[0];
-      overlayElem.classList.add("hide");
-      // telemetry string data as to which button was clicked
-      localStorage.setItem("introSeen", "true");
-      this.props.joinRoom();
+      this.props.closeCallback();
     },
 
     render: function() {
@@ -874,27 +922,14 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
   var IntroOverlayView = React.createClass({
     propTypes: {
+      closeCallback: React.PropTypes.func.isRequired,
       joinRoom: React.PropTypes.func.isRequired
     },
 
     handleCloseClick: function(event) {
       event.stopPropagation();
       event.preventDefault();
-
-      // XXX we shouldn't be unnecessarily messing with the DOM behind
-      // React's back, as this can confuse React.  Furthermore, on close, the
-      // parent's state should be updated so that it doesn't render this
-      // component at all, as per the usual React idiom.  The way to do this
-      // is to have the parent pass in a close callback, which updates the
-      // parents state (either directly or via action dispatch to a store),
-      // causing the parent not to render this overlay.  This should also
-      // allow us to fix the duplication of code in handleGotItClick.
-      // (bug 1252306).
-      var overlayElem = document.getElementsByClassName("intro-overlay")[0];
-      overlayElem.classList.add("hide");
-      // telemetry string data as to which button was clicked
-      localStorage.setItem("introSeen", "true");
-      this.props.joinRoom();
+      this.props.closeCallback();
     },
 
     render: function() {
@@ -912,11 +947,13 @@ loop.standaloneRoomViews = (function(mozL10n) {
             <div className="slideshow-header">
               <button className="button-close" onClick={this.handleCloseClick} />
             </div>
-            <Slide imageClass={slideNode.imageClass}
-                   indexClass={slideNode.id}
-                   joinRoom={this.props.joinRoom}
-                   text={slideNode.text}
-                   title={slideNode.title} />
+            <Slide
+                  closeCallback={this.props.closeCallback}
+                  imageClass={slideNode.imageClass}
+                  indexClass={slideNode.id}
+                  joinRoom={this.props.joinRoom}
+                  text={slideNode.text}
+                  title={slideNode.title} />
             </div>
         </div>
       );

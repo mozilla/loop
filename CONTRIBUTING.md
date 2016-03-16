@@ -51,13 +51,19 @@ Review
 
 * Reviewers should take the Definition of Done (below) into account when reviewing bugs
 * If you didn't get review granted, or have comments to address, then edit the
-files. If there's significant changes, it helps to address the comments in a
+files. If there are significant changes, it helps to address the comments in a
 separate commit, to make the follow-up review easier.
 * Once you have been granted review, please add `r=<name>` onto the end of the
 commit message and rebase it against latest `master` so that it is ready to land.
-* If there's no comments that need addressing, once you've added the annotation
-then you can add checkin-needed onto the bug and someone will land it for you if
-it hasn't been already.
+  * `git checkout master`
+  * `git pull mozilla master`
+  * `git checkout <branch>`
+  * `git rebase -i master`
+    * Change "pick" to "reword" on the commit message line, to amend the commit message after saving. Save and Quit ":wq"
+    * In next screen, amend the commit message by adding `r=<name>` to the end of it. Save and Quit ":wq"
+* If there are no comments that need addressed and once you've added the annotation
+then you can add `checkin-needed` into keywords on the bug in Bugzilla and someone will land it for you, if
+it hasn't landed already.
 
 Definition of Done
 ------------------
@@ -94,18 +100,27 @@ If you don't have permissions to the main repository, then you can ignore this s
 
 * Before a pull request can be landed it should:
   * Pass all automated tests
-  * Have been reviewed
-  * Have an appropriate commit structure
+  * Have been reviewed and been given a +r by the reviewer
+  * Have an appropriate commit structure (It should be one commit, or a couple of commits, if appropriate)
   * Each commit should have an appropriate message, e.g.
     * `Bug 123456 – Loop's RoomList view requires user profile data passed in when
 it doesn't need to. r=Standard8`
-    * If the PR is being merged with a merge commit due to limitations of branches,
-      then the merge commit should have the `r=Standard8` included in it.
-* If possible, a pull request should be landed without a merge commit. To do this:
+    * If the PR is being merged with Merge Pull Request due to limitations of branches,
+      then the Merge Pull Request comment should include `r=<reviewerName>`
+      or in the case of this example `r=Standard8`.
+* If possible, a pull request should be landed without a Merge Pull Request.
+  To do this:
   * the branch should be rebased on top of latest master
+    * `git checkout master`
+    * `git pull mozilla master`
+    * `git checkout <branch>`
+    * `git rebase -i master`
+    * `git push --force origin <branch>`
   * master should then be merged with the branch via fast-forward only:
-    * `git merge --ff master`
-  * If it was successful, push the result
+    * `git checkout master`
+    * `git merge --ff-only <branch>`
+  * If the merge was successful, push the result to master
+    * `git push mozilla master`
 
 Autolander (bot)
 ----------------

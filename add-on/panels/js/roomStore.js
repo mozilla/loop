@@ -324,7 +324,7 @@ loop.store = loop.store || {};
       }
       loop.requestMulti(
         ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
-        ["TelemetryAddValue", "LOOP_MAU", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
+        ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
       );
     },
 
@@ -348,7 +348,7 @@ loop.store = loop.store || {};
       loop.requestMulti(
         ["NotifyUITour", "Loop:RoomURLEmailed"],
         ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
-        ["TelemetryAddValue", "LOOP_MAU", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
+        ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
       );
     },
 
@@ -387,7 +387,7 @@ loop.store = loop.store || {};
       }
       loop.requestMulti(
         ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
-        ["TelemetryAddValue", "LOOP_MAU", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
+        ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
       );
     },
 
@@ -445,7 +445,7 @@ loop.store = loop.store || {};
         loop.requestMulti(
           ["TelemetryAddValue", "LOOP_ROOM_DELETE", buckets[isError ?
             "DELETE_FAIL" : "DELETE_SUCCESS"]],
-          ["TelemetryAddValue", "LOOP_MAU", this._constants.LOOP_MAU_TYPE.ROOM_DELETE]
+          ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_DELETE]
         );
       }.bind(this));
     },
@@ -511,7 +511,7 @@ loop.store = loop.store || {};
     openRoom: function(actionData) {
       loop.requestMulti(
         ["Rooms:Open", actionData.roomToken],
-        ["TelemetryAddValue", "LOOP_MAU", this._constants.LOOP_MAU_TYPE.ROOM_OPEN]
+        ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_OPEN]
       );
     },
 

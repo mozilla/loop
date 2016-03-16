@@ -354,6 +354,11 @@ describe("loop.roomViews", function() {
       });
       onCallTerminatedStub = sandbox.stub();
 
+      loop.config = {
+        tilesIframeUrl: null,
+        tilesSupportUrl: null
+      };
+
       activeRoomStore.setStoreState({ roomUrl: "http://invalid " });
     });
 
@@ -447,29 +452,74 @@ describe("loop.roomViews", function() {
         sinon.match.hasOwn("name", "setMute"));
     });
 
-    describe("#componentWillUpdate", function() {
-      function expectActionDispatched() {
+    describe("#leaveRoom", function() {
+      it("should close the window when leaving a room that hasn't been used", function() {
+        view = mountTestComponent();
+        view.setState({ used: false });
+
+        view.leaveRoom();
+
+        sinon.assert.calledOnce(fakeWindow.close);
+      });
+
+      it("should dispatch `LeaveRoom` action when leaving a room that has been used", function() {
+        view = mountTestComponent();
+        view.setState({ used: true });
+
+        view.leaveRoom();
+
         sinon.assert.calledOnce(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
-          sinon.match.instanceOf(sharedActions.SetupStreamElements));
-      }
+          new sharedActions.LeaveRoom());
+      });
 
+      it("should call onCallTerminated when leaving a room that has been used", function() {
+        view = mountTestComponent();
+        view.setState({ used: true });
+
+        view.leaveRoom();
+
+        sinon.assert.calledOnce(onCallTerminatedStub);
+      });
+    });
+
+    describe("#componentWillUpdate", function() {
       it("should dispatch a `SetupStreamElements` action when the MEDIA_WAIT state is entered", function() {
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.READY });
-          mountTestComponent();
+          view = mountTestComponent();
+
+          sandbox.stub(view, "getDefaultPublisherConfig").returns({
+            fake: "config"
+          });
 
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.MEDIA_WAIT });
 
-          expectActionDispatched();
+          sinon.assert.calledOnce(dispatcher.dispatch);
+          sinon.assert.calledWithExactly(dispatcher.dispatch,
+            new sharedActions.SetupStreamElements({
+              publisherConfig: {
+                fake: "config"
+              }
+            }));
         });
 
       it("should dispatch a `SetupStreamElements` action on MEDIA_WAIT state is re-entered", function() {
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.ENDED });
-          mountTestComponent();
+          view = mountTestComponent();
+
+          sandbox.stub(view, "getDefaultPublisherConfig").returns({
+            fake: "config"
+          });
 
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.MEDIA_WAIT });
 
-          expectActionDispatched();
+          sinon.assert.calledOnce(dispatcher.dispatch);
+          sinon.assert.calledWithExactly(dispatcher.dispatch,
+            new sharedActions.SetupStreamElements({
+              publisherConfig: {
+                fake: "config"
+              }
+            }));
         });
 
       it("should dispatch a `StartBrowserShare` action when the SESSION_CONNECTED state is entered", function() {
@@ -478,7 +528,31 @@ describe("loop.roomViews", function() {
 
         activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
 
-        expectActionDispatched();
+        sinon.assert.calledOnce(dispatcher.dispatch);
+        sinon.assert.calledWithExactly(dispatcher.dispatch,
+          new sharedActions.StartBrowserShare());
+      });
+
+      it("should not dispatch a `StartBrowserShare` action when the previous state was HAS_PARTICIPANTS", function() {
+        activeRoomStore.setStoreState({ roomState: ROOM_STATES.HAS_PARTICIPANTS });
+        mountTestComponent();
+
+        activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
+
+        sinon.assert.notCalled(dispatcher.dispatch);
+      });
+
+      it("should not dispatch a `StartBrowserShare` action when the previous state was SESSION_CONNECTED", function() {
+        activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
+        mountTestComponent();
+
+        activeRoomStore.setStoreState({
+          roomState: ROOM_STATES.SESSION_CONNECTED,
+          // Additional change to force an update.
+          screenSharingState: "fake"
+        });
+
+        sinon.assert.notCalled(dispatcher.dispatch);
       });
     });
 
@@ -581,19 +655,6 @@ describe("loop.roomViews", function() {
           expect(TestUtils.findRenderedComponentWithType(view,
             loop.roomViews.DesktopRoomInvitationView).getDOMNode()).to.eql(null);
         });
-
-      it("should call onCallTerminated when the call ended", function() {
-        activeRoomStore.setStoreState({
-          roomState: ROOM_STATES.ENDED,
-          used: true
-        });
-
-        view = mountTestComponent();
-        // Force a state change so that it triggers componentDidUpdate
-        view.setState({ foo: "bar" });
-
-        sinon.assert.calledOnce(onCallTerminatedStub);
-      });
 
       it("should display loading spinner when localSrcMediaElement is null",
          function() {

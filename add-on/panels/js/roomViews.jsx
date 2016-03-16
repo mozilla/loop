@@ -400,9 +400,12 @@ loop.roomViews = (function(mozL10n) {
         }));
       }
 
-      // Automatically start sharing a tab now we're ready to share.
-      if (this.state.roomState !== ROOM_STATES.SESSION_CONNECTED &&
-          nextState.roomState === ROOM_STATES.SESSION_CONNECTED) {
+      // Now that we're ready to share, automatically start sharing a tab only
+      // if we're not already connected to the room via the sdk, e.g. not in the
+      // case a remote participant just left.
+      if (nextState.roomState === ROOM_STATES.SESSION_CONNECTED &&
+          !(this.state.roomState === ROOM_STATES.SESSION_CONNECTED ||
+            this.state.roomState === ROOM_STATES.HAS_PARTICIPANTS)) {
         this.props.dispatcher.dispatch(new sharedActions.StartBrowserShare());
       }
     },
@@ -412,8 +415,14 @@ loop.roomViews = (function(mozL10n) {
      */
     leaveRoom: function() {
       if (this.state.used) {
+        // The room has been used, so we might want to display the feedback view.
+        // Therefore we leave the room to ensure that we have stopped sharing etc,
+        // then trigger the call terminated handler that'll do the right thing
+        // for the feedback view.
         this.props.dispatcher.dispatch(new sharedActions.LeaveRoom());
+        this.props.onCallTerminated();
       } else {
+        // If the room hasn't been used, we simply close the window.
         this.closeWindow();
       }
     },
@@ -504,14 +513,6 @@ loop.roomViews = (function(mozL10n) {
                 !this.state.mediaConnected);
     },
 
-    componentDidUpdate: function(prevProps, prevState) {
-      // Handle timestamp and window closing only when the call has terminated.
-      if (prevState.roomState === ROOM_STATES.ENDED &&
-          this.state.roomState === ROOM_STATES.ENDED) {
-        this.props.onCallTerminated();
-      }
-    },
-
     handleContextMenu: function(e) {
       e.preventDefault();
     },
@@ -567,7 +568,7 @@ loop.roomViews = (function(mozL10n) {
                 screenShareMediaElement={this.state.screenShareMediaElement}
                 screenSharePosterUrl={null}
                 showInitialContext={false}
-                useDesktopPaths={true}>
+                showTile={false}>
                 <sharedViews.ConversationToolbar
                   audio={{ enabled: !this.state.audioMuted, visible: true }}
                   dispatcher={this.props.dispatcher}

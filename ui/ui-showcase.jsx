@@ -380,6 +380,11 @@
     message: "8:00 PM",
     receivedTimestamp: "2015-06-23T22:27:45.590Z"
   }));
+  dispatcher.dispatch(new sharedActions.ReceivedTextChatMessage({
+    contentType: loop.shared.utils.CHAT_CONTENT_TYPES.NOTIFICATION,
+    message: "peer_unexpected_quit",
+    receivedTimestamp: "2015-06-23T22:28:45.590Z"
+  }));
 
   loop.store.StoreMixin.register({
     activeRoomStore: activeRoomStore,
@@ -1315,8 +1320,7 @@
                            width={298}>
               <div className="fx-embedded">
                 <TextChatView dispatcher={dispatcher}
-                              showInitialContext={false}
-                              useDesktopPaths={false} />
+                              showInitialContext={false} />
               </div>
             </FramedExample>
 
@@ -1329,8 +1333,7 @@
                 <div className="media-wrapper">
                   <TextChatView
                     dispatcher={dispatcher}
-                    showInitialContext={true}
-                    useDesktopPaths={false} />
+                    showInitialContext={true} />
                 </div>
               </div>
             </FramedExample>
@@ -1448,6 +1451,11 @@
                            warnings={caughtWarnings} />,
                    document.querySelector("#results"));
     }, 1000);
+
+    // Page needs to scroll to hashtag again after iframe heights have been adjusted.
+    setTimeout(function() {
+      location.hash = location.hash;
+    }, 5000);
   });
 
 })();

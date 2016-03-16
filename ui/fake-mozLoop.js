@@ -179,7 +179,6 @@ var fakeRooms = [
   });
 
   loop.storedRequests = {
-    GetFxAEnabled: true,
     GetHasEncryptionKey: true,
     GetUserProfile: null,
     GetDoNotDisturb: true,

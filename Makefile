@@ -11,7 +11,10 @@ LOOP_DOWNLOAD_FIREFOX_URL := $(shell echo $${LOOP_DOWNLOAD_FIREFOX_URL-"https://
 LOOP_PRIVACY_WEBSITE_URL := $(shell echo $${LOOP_PRIVACY_WEBSITE_URL-"https://www.mozilla.org/privacy/firefox-hello/"})
 LOOP_LEGAL_WEBSITE_URL := $(shell echo $${LOOP_LEGAL_WEBSITE_URL-"https://www.mozilla.org/about/legal/terms/firefox-hello/"})
 LOOP_PRODUCT_HOMEPAGE_URL := $(shell echo $${LOOP_PRODUCT_HOMEPAGE_URL-"https://www.firefox.com/hello/"})
-FIREFOX_VERSION=47.0
+# This should always be a nn.* version, so that the add-on is compatible with not
+# only the release but any security/stability releases as well.
+# Note that MOZ_APP_MAXVERSION is the variable name used by mozilla-central.
+MOZ_APP_MAXVERSION=48.*
 
 # Work around for realpath not working as expected
 NODE_LOCAL_BIN := $(abspath ./node_modules/.bin)
@@ -179,6 +182,13 @@ $(DIST)/add-on/chrome/content/preferences/prefs.js: $(VENV) add-on/preferences/p
 	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
 	         -D LOOP_BETA=1 -o $@ add-on/preferences/prefs.js
 
+$(BUILT)/add-on/install.rdf: add-on/install.rdf.in $(VENV) Makefile
+	@mkdir -p $(@D)
+	. $(VENV)/bin/activate && \
+	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
+	         -D MOZ_APP_MAXVERSION=$(MOZ_APP_MAXVERSION) \
+	         -o $@ $<
+
 
 # Build our jsx files into appropriately placed js files.  Note that the rules
 # are somewhat repetitive, and less elegant than they might be.  We _could_
@@ -296,11 +306,10 @@ add-on: node_modules \
 	      $(built_add_on_l10n_files) \
 	      $(BUILT)/$(ADD-ON)/chrome.manifest \
 	      $(BUILT)/$(ADD-ON)/chrome/locale/chrome.manifest \
+	      $(BUILT)/$(ADD-ON)/install.rdf \
 	      $(BUILT)/add-on/chrome/content/preferences/prefs.js
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@/chrome/bootstrap.js $(BUILT)/$@
-	sed "s/@FIREFOX_VERSION@/$(FIREFOX_VERSION)/g" add-on/install.rdf.in | \
-		grep -v "#filter substitution" > $(BUILT)/$@/install.rdf
 	mkdir -p $(BUILT)/$@/chrome/content/panels
 	$(RSYNC) $@/panels $(BUILT)/$@/chrome/content
 	mkdir -p $(BUILT)/$@/chrome/content/modules
@@ -356,6 +365,9 @@ dist_standalone: standalone
 		-p -v --display-errors )
 	sed 's#webappEntryPoint.js#js/standalone.js#' \
 		< $(BUILT)/standalone/content/index.html > $(DIST)/standalone/index.html
+	# Now create a version file.
+	@git describe --always --tag > $(DIST)/standalone/VERSION.txt
+	@git log -1 --format="%H%n%aD" >> $(DIST)/standalone/VERSION.txt
 
 # so we can type "make xpi" without depend on the file directly
 .PHONY: xpi
@@ -413,6 +425,41 @@ karma: build
 	$(NODE_LOCAL_BIN)/karma start test/karma/karma.coverage.desktop.js
 	$(NODE_LOCAL_BIN)/karma start test/karma/karma.coverage.shared_standalone.js
 
+# Which test server to run against. Defaults to the dev server so that anyone
+# can run the tests. Possible values: local, dev, stage, production.
+TEST_SERVER := $(shell echo $${TEST_SERVER-dev})
+
+# Defaults to using the local standalone. If 0 will use the standalone associated
+# with the server defined by TEST_SERVER.
+USE_LOCAL_STANDALONE := $(shell echo $${USE_LOCAL_STANDALONE-1})
+
+# Path to the local loop server. Only used if TEST_SERVER=local.
+LOOP_SERVER := $(shell echo $${LOOP_SERVER-../loop-server})
+
+# Either path to the browser, or one of nightly, aurora, beta, firefox.
+TEST_BROWSER := $(shell echo $${TEST_BROWSER-nightly})
+
+ifdef TEST_E10S
+E10S_ARGS = --e10s
+endif
+
+.PHONY: functional
+ifeq ($(SKIP_FUNCTIONAL),1)
+functional:
+	# Do nothing.
+else
+functional: build $(XPI_FILE)
+	@mkdir -p $(BUILT)/functional
+	TEST_SERVER=$(TEST_SERVER) \
+	 LOOP_SERVER=$(LOOP_SERVER) \
+	 USE_LOCAL_STANDALONE=$(USE_LOCAL_STANDALONE) \
+	 LOOP_XPI_FILE=$(XPI_FILE) \
+	$(VENV)/bin/marionette --binary `./bin/getfx.js -b $(TEST_BROWSER)` \
+	                       --type=browser \
+	                       --gecko-log $(BUILT)/functional/gecko.log \
+	                       $(E10S_ARGS) \
+	                       test/functional/manifest.ini
+endif
 
 #
 # Build & run
@@ -441,7 +488,7 @@ clean:
 .PHONY: cleanbuild
 cleanbuild: clean build
 
-test: lint karma
+test: lint karma functional
 
 .PHONY: runserver
 runserver: remove_old_config

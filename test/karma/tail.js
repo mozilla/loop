@@ -12,6 +12,9 @@ if (loop) {
   if (loop.conversation) {
     document.removeEventListener("DOMContentLoaded", loop.conversation.init);
   }
+  if (loop.slideshow) {
+    document.removeEventListener("DOMContentLoaded", loop.slideshow.init);
+  }
 }
 
 // Test for any errors and warnings that are raised.

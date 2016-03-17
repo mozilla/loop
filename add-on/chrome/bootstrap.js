@@ -299,6 +299,12 @@ var WindowListener = {
           }
         });
 
+        // If we're in private browsing mode, then don't add the menu item,
+        // also don't add the listeners as we don't want to update the button.
+        if (PrivateBrowsingUtils.isWindowPrivate(window)) {
+          return;
+        }
+
         this.addMenuItem();
 
         // Don't do the rest if this is for the hidden window - we don't

@@ -62,7 +62,11 @@ describe("loop.store.RoomStore", function() {
       },
       NotifyUITour: function() {},
       OpenURL: sinon.stub(),
-      "Rooms:Create": sinon.stub().returns({ roomToken: "fakeToken" }),
+      "Rooms:Create": sinon.stub().returns({
+        decryptedContext: [],
+        roomToken: "fakeToken",
+        roomUrl: "fakeUrl"
+      }),
       "Rooms:Delete": sinon.stub(),
       "Rooms:GetAll": sinon.stub(),
       "Rooms:Open": sinon.stub(),
@@ -290,7 +294,9 @@ describe("loop.store.RoomStore", function() {
           sinon.assert.calledOnce(dispatcher.dispatch);
           sinon.assert.calledWithExactly(dispatcher.dispatch,
             new sharedActions.CreatedRoom({
-              roomToken: "fakeToken"
+              decryptedContext: [],
+              roomToken: "fakeToken",
+              roomUrl: "fakeUrl"
             }));
         });
 
@@ -362,24 +368,38 @@ describe("loop.store.RoomStore", function() {
         store.setStoreState({ pendingCreation: true });
 
         store.createdRoom(new sharedActions.CreatedRoom({
-          roomToken: "fakeToken"
+          decryptedContext: [],
+          roomToken: "fakeToken",
+          roomUrl: "fakeUrl"
         }));
 
         expect(store.getStoreState().pendingCreation).eql(false);
       });
 
-      it("should dispatch an OpenRoom action once the operation is done",
+      it("should not dispatch an OpenRoom action once the operation is done",
         function() {
           store.createdRoom(new sharedActions.CreatedRoom({
-            roomToken: "fakeToken"
+            decryptedContext: [],
+            roomToken: "fakeToken",
+            roomUrl: "fakeUrl"
           }));
 
-          sinon.assert.calledOnce(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.OpenRoom({
-              roomToken: "fakeToken"
-            }));
+          sinon.assert.notCalled(dispatcher.dispatch);
         });
+
+      it("should save the state of the active room", function() {
+        store.createdRoom(new sharedActions.CreatedRoom({
+          decryptedContext: [],
+          roomToken: "fakeToken",
+          roomUrl: "fakeUrl"
+        }));
+
+        expect(store.getStoreState().activeRoom).eql({
+          decryptedContext: [],
+          roomToken: "fakeToken",
+          roomUrl: "fakeUrl"
+        });
+      });
     });
 
     describe("#createRoomError", function() {

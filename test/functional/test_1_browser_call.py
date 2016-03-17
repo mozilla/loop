@@ -127,6 +127,13 @@ class Test1BrowserCall(MarionetteTestCase):
 
         button.click()
 
+    def local_close_share_panel(self):
+        copyLink = self.wait_for_element_displayed(By.CLASS_NAME, "btn-copy")
+
+        self.wait_for_element_enabled(copyLink, 120)
+
+        copyLink.click()
+
     def local_check_room_self_video(self):
         self.switch_to_chatbox()
 
@@ -312,6 +319,9 @@ class Test1BrowserCall(MarionetteTestCase):
         self.switch_to_panel()
 
         self.local_start_a_conversation()
+
+        # Force to close the share panel
+        self.local_close_share_panel()
 
         # Check the self video in the conversation window
         self.local_check_room_self_video()

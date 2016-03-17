@@ -41,6 +41,15 @@ body {
   z-index: 1000;
 }
 
+.panel-container {
+  flex: 1;
+  display: flex;
+  flex-flow: column nowrap;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
 /* Notifications displayed over tabs */
 
 .panel .messages {
@@ -157,6 +166,7 @@ body {
 .rooms {
   display: block;
   width: 100%;
+  flex-grow: 2;
 }
 
 .rooms > .fte-get-started-content {

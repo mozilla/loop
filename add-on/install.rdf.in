@@ -11,6 +11,7 @@
     <em:bootstrap>true</em:bootstrap>
     <em:version>1.2.0alpha@LOOP_XPI_DATE@</em:version>
     <em:type>2</em:type>
+    <em:multiprocessCompatible>true</em:multiprocessCompatible>
 
     <!-- Target Application this extension can install into,
          with minimum and maximum supported versions. -->

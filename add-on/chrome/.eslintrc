@@ -26,6 +26,7 @@
     "convertToRTCStatsReport": false,
     "CustomizableUI": false,
     "deriveHawkCredentials": false,
+    "DomainWhitelist": false,
     "eventEmitter": false,
     "extProtocolSvc": false,
     "FxAccountsOAuthClient": false,

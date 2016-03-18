@@ -158,6 +158,8 @@ var fakeRooms = [
         // Ensure we skip FTE completely if FTU_VERSION = 1.
         case "gettingStarted.latestFTUVersion":
           return 1;
+        case "facebook.enabled":
+          return true;
       }
       return null;
     },

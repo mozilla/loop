@@ -33,6 +33,7 @@ describe("loop.panel", function() {
     fakeWindow = {
       close: sandbox.stub(),
       addEventListener: function() {},
+      removeEventListener: function() {},
       document: { addEventListener: function() {} },
       setTimeout: function(callback) { callback(); }
     };
@@ -58,7 +59,10 @@ describe("loop.panel", function() {
       GetLoopPref: function(prefName) {
         if (prefName === "debug.dispatcher") {
           return false;
+        } else if (prefName === "facebook.enabled") {
+          return true;
         }
+
         return 1;
       },
       SetPanelHeight: function() { return null; },
@@ -1125,7 +1129,7 @@ describe("loop.panel", function() {
       sinon.assert.calledWithExactly(dispatch, new sharedActions.GetAllRooms());
     });
 
-    it("should close the panel once a room is created and there is no error", function() {
+    it("should not close the panel once a room is created and there is no error", function() {
       createTestComponent();
 
       roomStore.setStoreState({ pendingCreation: true });
@@ -1134,7 +1138,7 @@ describe("loop.panel", function() {
 
       roomStore.setStoreState({ pendingCreation: false });
 
-      sinon.assert.calledOnce(fakeWindow.close);
+      sinon.assert.notCalled(fakeWindow.close);
     });
 
     it("should have FTE element and not room-list element when room-list is empty", function() {
@@ -1569,6 +1573,154 @@ describe("loop.panel", function() {
 
       sinon.assert.calledWithExactly(dispatcher.dispatch,
         new sharedActions.DeleteRoom({ roomToken: roomData.roomToken }));
+    });
+  });
+
+  describe("SharePanelView", function() {
+    var view, dispatcher, roomStore;
+
+    function createTestComponent(extraProps) {
+      var props = _.extend({
+        dispatcher: dispatcher,
+        onSharePanelDisplayChange: sinon.stub(),
+        store: roomStore
+      }, extraProps);
+      return TestUtils.renderIntoDocument(
+        React.createElement(loop.panel.SharePanelView, props));
+    }
+
+    beforeEach(function() {
+      dispatcher = new loop.Dispatcher();
+      sandbox.stub(dispatcher, "dispatch");
+      roomStore = new loop.store.RoomStore(dispatcher, {
+        constants: {}
+      });
+
+      roomStore.setStoreState({
+        activeRoom: {
+          roomToken: "fakeToken"
+        },
+        openedRoom: null,
+        pendingCreation: false,
+        pendingInitialRetrieval: false,
+        rooms: [],
+        error: undefined
+      });
+
+      view = createTestComponent();
+      sandbox.stub(view, "closeWindow");
+    });
+
+    it("should not open the panel if there is no room pending of creation", function() {
+      expect(view.getDOMNode()).eql(null);
+    });
+
+    it("should open the panel after room creation", function() {
+      var clock = sinon.useFakeTimers();
+      // Simulate that the user has click the browse button
+      roomStore.setStoreState({
+        pendingCreation: true
+      });
+
+      // Room has been created succesfully
+      roomStore.setStoreState({
+        pendingCreation: false
+      });
+
+      var panel = view.getDOMNode();
+      clock.tick(loop.panel.SharePanelView.SHOW_PANEL_DELAY);
+
+      expect(view.state.showPanel).eql(true);
+      expect(panel.classList.contains("share-panel-open")).eql(true);
+    });
+
+    it("should close the share panel when clicking the overlay", function() {
+      view.setState({
+        showPanel: true
+      });
+
+      var overlay = view.getDOMNode().querySelector(".share-panel-overlay");
+      var panel = view.getDOMNode();
+
+      TestUtils.Simulate.click(overlay);
+
+      expect(view.state.showPanel).eql(false);
+      expect(panel.classList.contains("share-panel-open")).eql(false);
+    });
+
+    it("should close the share panel when clicking outside the panel", function() {
+      view.setState({
+        showPanel: true
+      });
+
+      var panel = view.getDOMNode();
+
+      view._onDocumentVisibilityChanged({
+        target: {
+          hidden: true
+        }
+      });
+
+      expect(view.state.showPanel).eql(false);
+      expect(panel.classList.contains("share-panel-open")).eql(false);
+    });
+
+    it("should close the hello panel when clicking outside the panel", function() {
+      view.setState({
+        showPanel: true
+      });
+
+      view._onDocumentVisibilityChanged({
+        target: {
+          hidden: true
+        }
+      });
+
+      expect(view.state.showPanel).eql(false);
+      sinon.assert.calledOnce(view.closeWindow);
+    });
+
+    it("should call openRoom when hello panel is closed", function() {
+      var openRoomSpy = sinon.spy(view, "openRoom");
+      view.setState({
+        showPanel: true
+      });
+
+      view._onDocumentVisibilityChanged({
+        target: {
+          hidden: true
+        }
+      });
+
+      sinon.assert.calledOnce(openRoomSpy);
+    });
+
+    it("should invoke onSharePanelDisplayChange when hello panel is closed", function() {
+      view.setState({
+        showPanel: true
+      });
+
+      view._onDocumentVisibilityChanged({
+        target: {
+          hidden: true
+        }
+      });
+
+      sinon.assert.calledOnce(view.props.onSharePanelDisplayChange);
+    });
+
+    it("should invoke onSharePanelDisplayChange when hello panel is displayed", function() {
+      // Simulate that the user has click the browse button
+      roomStore.setStoreState({
+        pendingCreation: true
+      });
+
+      // Room has been created succesfully
+      roomStore.setStoreState({
+        pendingCreation: false
+      });
+
+      sinon.assert.calledOnce(view.props.onSharePanelDisplayChange);
     });
   });
 });

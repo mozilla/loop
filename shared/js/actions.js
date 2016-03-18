@@ -282,7 +282,9 @@ loop.shared.actions = (function() {
      * XXX: should move to some roomActions module - refs bug 1079284
      */
     CreatedRoom: Action.define("createdRoom", {
-      roomToken: String
+      decryptedContext: Object,
+      roomToken: String,
+      roomUrl: String
     }),
 
     /**

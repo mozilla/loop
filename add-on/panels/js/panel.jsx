@@ -6,10 +6,11 @@ var loop = loop || {};
 loop.panel = (function(_, mozL10n) {
   "use strict";
 
-  var sharedViews = loop.shared.views;
-  var sharedModels = loop.shared.models;
-  var sharedMixins = loop.shared.mixins;
   var sharedActions = loop.shared.actions;
+  var sharedMixins = loop.shared.mixins;
+  var sharedModels = loop.shared.models;
+  var sharedDesktopViews = loop.shared.desktopViews;
+  var sharedViews = loop.shared.views;
   var Button = sharedViews.Button;
 
   // XXX This must be kept in sync with the number in MozLoopService.jsm.
@@ -793,15 +794,6 @@ loop.panel = (function(_, mozL10n) {
       this.stopListening(this.props.store);
     },
 
-    componentWillUpdate: function(nextProps, nextState) {
-      // If we've just created a room, close the panel - the store will open
-      // the room.
-      if (this.state.pendingCreation &&
-          !nextState.pendingCreation && !nextState.error) {
-        this.closeWindow();
-      }
-    },
-
     _onStoreStateChanged: function() {
       this.setState(this.props.store.getStoreState());
     },
@@ -1002,6 +994,121 @@ loop.panel = (function(_, mozL10n) {
     }
   });
 
+  var SharePanelView = React.createClass({
+    statics: {
+      SHOW_PANEL_DELAY: 300
+    },
+
+    mixins: [
+      Backbone.Events,
+      sharedMixins.DocumentVisibilityMixin,
+      sharedMixins.WindowCloseMixin
+    ],
+
+    propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      // Force render for testing purpose
+      forceRender: React.PropTypes.bool,
+      onSharePanelDisplayChange: React.PropTypes.func.isRequired,
+      store: React.PropTypes.instanceOf(loop.store.RoomStore).isRequired
+    },
+
+    getInitialState: function() {
+      return this.props.store.getStoreState();
+    },
+
+    componentWillMount: function() {
+      loop.request("GetLoopPref", "facebook.enabled").then(result => {
+        this.setState({
+          facebookEnabled: result
+        });
+      });
+    },
+
+    componentDidMount: function() {
+      this.listenTo(this.props.store, "change", this._onStoreStateChanged);
+    },
+
+    componentDidUpdate: function() {
+      if (this.state.showPanel) {
+        setTimeout(() => {
+          this.getDOMNode().classList.add("share-panel-open");
+        }, this.constructor.SHOW_PANEL_DELAY);
+      }
+    },
+
+    componentWillUnmount: function() {
+      this.stopListening(this.props.store);
+    },
+
+    _onStoreStateChanged: function() {
+      this.setState(this.props.store.getStoreState());
+    },
+
+    onDocumentHidden: function() {
+      this.state.showPanel && this.handleClosePanel();
+    },
+
+    componentWillUpdate: function(nextProps, nextState) {
+      // If we've just created a room, open the panel
+      if (this.state.pendingCreation &&
+          !nextState.pendingCreation && !nextState.error) {
+        this.props.onSharePanelDisplayChange();
+        this.setState({
+          showPanel: true
+        });
+      }
+    },
+
+    handleClosePanel: function() {
+      this.props.onSharePanelDisplayChange();
+      this.setState({
+        showPanel: false
+      });
+
+      this.openRoom();
+      this.closeWindow();
+    },
+
+    openRoom: function() {
+      var activeRoom = this.state.activeRoom;
+      this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
+        roomToken: activeRoom.roomToken
+      }));
+    },
+
+    render: function() {
+      if (!this.state.showPanel && !this.props.forceRender) {
+        return null;
+      }
+
+      var sharePanelClasses = classNames({
+        "share-panel-container": true,
+        "share-panel-open": this.props.forceRender
+      });
+      var activeRoom = this.state.activeRoom;
+      var roomData = {
+        roomUrl: activeRoom.roomUrl,
+        roomContextUrls: (activeRoom.decryptedContext && activeRoom.decryptedContext.urls) || []
+      };
+
+      return (
+        <div className={sharePanelClasses}>
+          <div className="share-panel-overlay" onClick={this.handleClosePanel} />
+          <sharedDesktopViews.SharePanelView
+            callback={this.handleClosePanel}
+            dispatcher={this.props.dispatcher}
+            error={this.state.error}
+            facebookEnabled={this.state.facebookEnabled}
+            locationForMetrics="panel"
+            roomData={roomData}
+            show={true}
+            socialShareProviders={this.state.socialShareProviders} />
+        </div>
+      );
+    }
+  });
+
   /**
    * Panel view.
    */
@@ -1029,7 +1136,8 @@ loop.panel = (function(_, mozL10n) {
         userProfile: loop.getStoredRequest(["GetUserProfile"]),
         gettingStartedSeen: loop.getStoredRequest(["GetLoopPref", "gettingStarted.latestFTUVersion"]) >= FTU_VERSION,
         multiProcessActive: loop.getStoredRequest(["IsMultiProcessActive"]),
-        remoteAutoStart: loop.getStoredRequest(["GetLoopPref", "remote.autostart"])
+        remoteAutoStart: loop.getStoredRequest(["GetLoopPref", "remote.autostart"]),
+        sharePanelOpened: false
       };
     },
 
@@ -1123,6 +1231,12 @@ loop.panel = (function(_, mozL10n) {
       });
     },
 
+    toggleSharePanelState: function() {
+      this.setState({
+        sharePanelOpened: !this.state.sharePanelOpened
+      });
+    },
+
     render: function() {
       var NotificationListView = sharedViews.NotificationListView;
 
@@ -1148,20 +1262,31 @@ loop.panel = (function(_, mozL10n) {
         return <SignInRequestView />;
       }
 
+      var cssClasses = classNames({
+        "panel-content": true,
+        "showing-share-panel": this.state.sharePanelOpened
+      });
+
       return (
-        <div className="panel-content"
+        <div className={cssClasses}
              onContextMenu={this.handleContextMenu} >
           <div className="beta-ribbon" />
           <NotificationListView
             clearOnDocumentHidden={true}
             notifications={this.props.notifications} />
+          <div className="panel-container">
             <RoomList dispatcher={this.props.dispatcher}
               store={this.props.roomStore} />
-          <div className="footer">
-              <AccountLink userProfile={this.props.userProfile || this.state.userProfile}/>
-            <div className="signin-details">
-              <SettingsDropdown />
+            <div className="footer">
+                <AccountLink userProfile={this.props.userProfile || this.state.userProfile}/>
+              <div className="signin-details">
+                <SettingsDropdown />
+              </div>
             </div>
+            <SharePanelView
+              dispatcher={this.props.dispatcher}
+              onSharePanelDisplayChange={this.toggleSharePanelState}
+              store={this.props.roomStore} />
           </div>
         </div>
       );
@@ -1253,6 +1378,7 @@ loop.panel = (function(_, mozL10n) {
     RoomEntryContextButtons: RoomEntryContextButtons,
     RoomList: RoomList,
     SettingsDropdown: SettingsDropdown,
+    SharePanelView: SharePanelView,
     SignInRequestView: SignInRequestView,
     ToSView: ToSView
   };

@@ -16,6 +16,7 @@
   // 1. Desktop components
   // 1.1 Panel
   var PanelView = loop.panel.PanelView;
+  var SharePanelView = loop.panel.SharePanelView;
   var SignInRequestView = loop.panel.SignInRequestView;
   // 1.2. Conversation Window
   var RoomFailureView = loop.roomViews.RoomFailureView;
@@ -314,6 +315,13 @@
   var screenSharePausedActiveRoomStore = makeActiveRoomStore({
     roomState: ROOM_STATES.HAS_PARTICIPANTS,
     streamPaused: true
+  });
+
+  var sharePanelActiveRoomStore = makeActiveRoomStore({});
+  sharePanelActiveRoomStore.setStoreState({
+    activeRoom: {
+      roomUrl: "http://wonderfuk.invalid"
+    }
   });
 
   var textChatStore = new loop.store.TextChatStore(dispatcher, {
@@ -755,6 +763,19 @@
                 <PanelView dispatcher={dispatcher}
                            notifications={notifications}
                            roomStore={roomStoreNoRoomsPending} />
+              </div>
+            </FramedExample>
+
+            <FramedExample cssClass="fx-embedded-panel"
+                           dashed={true}
+                           height={250}
+                           summary="Share panel"
+                           width={330}>
+              <div className="panel">
+                <SharePanelView dispatcher={dispatcher}
+                           forceRender={true}
+                           from={"conversation"}
+                           store={sharePanelActiveRoomStore} />
               </div>
             </FramedExample>
 

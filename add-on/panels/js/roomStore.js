@@ -269,7 +269,9 @@ loop.store = loop.store || {};
         }
 
         this.dispatchAction(new sharedActions.CreatedRoom({
-          roomToken: result.roomToken
+          decryptedContext: result.decryptedContext,
+          roomToken: result.roomToken,
+          roomUrl: result.roomUrl
         }));
         loop.request("TelemetryAddValue", "LOOP_ROOM_CREATE", buckets.CREATE_SUCCESS);
       }.bind(this));
@@ -279,12 +281,14 @@ loop.store = loop.store || {};
      * Executed when a room has been created
      */
     createdRoom: function(actionData) {
-      this.setStoreState({ pendingCreation: false });
-
-      // Opens the newly created room
-      this.dispatchAction(new sharedActions.OpenRoom({
-        roomToken: actionData.roomToken
-      }));
+      this.setStoreState({
+        activeRoom: {
+          decryptedContext: actionData.decryptedContext,
+          roomToken: actionData.roomToken,
+          roomUrl: actionData.roomUrl
+        },
+        pendingCreation: false
+      });
     },
 
     /**

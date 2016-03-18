@@ -733,6 +733,7 @@ const kMessageHandlers = {
       windowId = sessionToken;
     }
 
+    LoopRooms.logDomains(roomToken);
     LoopRooms.leave(roomToken);
     MozLoopService.setScreenShareState(windowId, false);
     LoopAPI.sendMessageToHandler({

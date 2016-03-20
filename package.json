@@ -24,7 +24,7 @@
     "babel-plugin-transform-react-display-name": "6.5.0",
     "babel-plugin-transform-react-jsx": "6.6.5",
     "chai": "3.5.0",
-    "chai-as-promised": "5.2.0",
+    "chai-as-promised": "5.3.0",
     "commander": "2.9.0",
     "compression": "1.6.1",
     "eslint": "1.10.3",

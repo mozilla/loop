@@ -1,6 +1,31 @@
 # Changelog
 
-## 1.2.0
+## 1.2.1
+
+### New
+
+* Bug 1257924 - Remove SEC_NORMAL from MozLoopPushHandler.jsm. r=sicking. [Christoph Kerschbaumer]
+
+* No Bug. Move clientSuperShortname into shared strings to match loop-client-l10n repo and correct an l10n note. rs=dmose. [Mark Banner]
+
+* Bug 1256357 - Enable Hello in e10s windows by default. r=Standard8. [mikedeboer]
+
+* Bug 1256362 - Remove the 'Start a conversation' menuitem when in private browsing mode. r=mancas. [Mark Banner]
+
+* Bug 1252128 - Update desktop client FTU start sharing tabs message when create/join conversation, r=dcritch. [Chris Rafuse]
+
+* Bug 1211542 - Collect domain of shared URL in Hello through a whitelist. r=dcritch. [Ed Lee]
+
+* Bug 1220627 - As a desktop client user, I want to be able to share simply the Hello URL through a sharing panel after I create a room. r=Standard8. [Manuel Casas Barrado]
+
+### Chores
+
+* Update L10n from changeset e18973d6f04cabbf576c03f4bbd58cc3ae510839. [Mark Banner]
+
+* Update chai-as-promised to version 5.3.0. r=standard8. [greenkeeperio-bot]
+
+
+## v1.2.0 (2016-03-16)
 
 ### New
 
@@ -191,6 +216,8 @@
 * Update nodemon to version 1.9.0. r=standard8. [greenkeeperio-bot]
 
 ### Other
+
+* 1.2.0. [Mark Banner]
 
 * Avoid eslint rule deprecation warning for sort-prop-types. r=Standard8. [Ed Lee]
 

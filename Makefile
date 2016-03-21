@@ -57,6 +57,16 @@ BABEL := $(NODE_LOCAL_BIN)/babel
 ESLINT := $(NODE_LOCAL_BIN)/eslint
 FLAKE8 := $(NODE_LOCAL_BIN)/flake8
 
+# For building a dev xpi, set this in the environment/on the command line, e.g.
+# `DEV_XPI=1 make build`.
+ifdef DEV_XPI
+LOOP_XPI_DATE=`date +"%Y%m%d%H%M"`
+LOOP_DEV_XPI_DEFS=-D LOOP_DEV_XPI=1
+else
+LOOP_XPI_DATE=
+LOOP_DEV_XPI_DEFS=
+endif
+
 # In the PACKAGE_VERSION below we:
 # - parse package.json
 # - get the lines with version in
@@ -79,7 +89,7 @@ generate_changelog: $(VENV)
 .PHONY: change_versions
 change_versions:
 	@# Ubuntu's version of sed doesn't have -i
-	@sed -e 's/<em:version>.*<\/em:version>/<em:version>$(PACKAGE_VERSION)<\/em:version>/' \
+	@sed -e 's/<em:version>.*<\/em:version>/<em:version>$(PACKAGE_VERSION)@LOOP_XPI_DATE@<\/em:version>/' \
 	    $(ADD-ON)/install.rdf.in > $(ADD-ON)/install.rdf.in.gen
 	@mv $(ADD-ON)/install.rdf.in.gen $(ADD-ON)/install.rdf.in
 	@# Add package.json for the case where `npm version` is used with
@@ -170,23 +180,32 @@ vendor_libs: $(BACKBONE_OBJS) $(CLASSNAME_OBJS) $(LODASH_OBJS) $(REACT_OBJS) \
              $(BUILT)/test/vendor/mocha.js $(BUILT)/test/vendor/mocha.css \
              $(BUILT)/test/vendor/chai.js $(BUILT)/test/vendor/chai-as-promised.js
 
-$(BUILT)/add-on/chrome/content/preferences/prefs.js: $(VENV) add-on/preferences/prefs.js
+$(BUILT)/add-on/chrome/content/preferences/prefs.js: add-on/preferences/prefs.js \
+                                                     $(VENV) \
+                                                     Makefile
 	mkdir -p $(@D)
 	. $(VENV)/bin/activate && \
 	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
-	         -D DEBUG=1 -D LOOP_BETA=1 -o $@ add-on/preferences/prefs.js
+	         -D DEBUG=1 -D LOOP_BETA=1 $(LOOP_DEV_XPI_DEFS) \
+	         -o $@ $<
 
-$(DIST)/add-on/chrome/content/preferences/prefs.js: $(VENV) add-on/preferences/prefs.js
+$(DIST)/add-on/chrome/content/preferences/prefs.js: add-on/preferences/prefs.js \
+                                                    $(VENV) \
+                                                    Makefile
 	mkdir -p $(@D)
 	. $(VENV)/bin/activate && \
 	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
-	         -D LOOP_BETA=1 -o $@ add-on/preferences/prefs.js
+	         -D LOOP_BETA=1 $(LOOP_DEV_XPI_DEFS) \
+	         -o $@ $<
 
-$(BUILT)/add-on/install.rdf: add-on/install.rdf.in $(VENV) Makefile
+$(BUILT)/add-on/install.rdf: add-on/install.rdf.in \
+                             $(VENV) \
+                             Makefile
 	@mkdir -p $(@D)
 	. $(VENV)/bin/activate && \
 	  python $(VENV)/lib/python2.7/site-packages/mozbuild/preprocessor.py \
 	         -D MOZ_APP_MAXVERSION=$(MOZ_APP_MAXVERSION) \
+	         -D LOOP_XPI_DATE=$(LOOP_XPI_DATE) \
 	         -o $@ $<
 
 
@@ -280,7 +299,7 @@ $(BUILT)/add-on/chrome/locale/%/loop.properties: locale/%/add-on.properties loca
 # server.js magic to redirect?
 # XXX ecma3 transform for IE?
 .PHONY: ui
-ui: node_modules $(built_ui_js_files) $(built_ui_shared_js_files)
+ui: node_modules $(built_ui_js_files) $(built_ui_shared_js_files) vendor_libs
 	mkdir -p $(BUILT)/$@
 	$(RSYNC) $@ $(BUILT)
 	mkdir -p $(BUILT)/$@/shared
@@ -288,6 +307,7 @@ ui: node_modules $(built_ui_js_files) $(built_ui_shared_js_files)
 
 .PHONY: standalone
 standalone: node_modules \
+            vendor_libs \
             $(BACKBONE_OBJS) \
             $(LODASH_OBJS) \
             $(built_standalone_js_files) \
@@ -300,6 +320,7 @@ standalone: node_modules \
 
 .PHONY: add-on
 add-on: node_modules \
+	      vendor_libs \
 	      $(built_add_on_js_files) \
 	      $(built_add_on_shared_js_files) \
 	      $(built_add_on_vendor_js_files) \
@@ -346,7 +367,7 @@ RSYNC_DIST := $(RSYNC) -r \
   --exclude="*.*" --exclude "**/test" --exclude "*~"
 
 .PHONY: add-on_dist
-add-on_dist: $(DIST)/add-on/chrome/content/preferences/prefs.js
+add-on_dist: add-on $(DIST)/add-on/chrome/content/preferences/prefs.js
 	mkdir -p $(DIST)/add-on
 	# Copy just the files we need.
 	$(RSYNC_DIST) $(BUILT_ADD_ON)/ $(DIST)/add-on/
@@ -387,9 +408,11 @@ dist_export:
 	@mkdir -p $(DIST_EXPORT_DIR)
 	# Do a basic copy of the add-on.
 	$(RSYNC) $(BUILT)/$(ADD-ON)/* $(DIST_EXPORT_DIR)
-	# Use the install.rdf.in rather than install.rdf.
+	# Use a modified install.rdf.in rather than install.rdf.
 	rm -f $(DIST_EXPORT_DIR)/install.rdf
-	$(RSYNC) $(ADD-ON)/install.rdf.in $(DIST_EXPORT_DIR)
+	# mozilla-central and other Firefox repositories don't need the date field.
+	@sed -e 's/@LOOP_XPI_DATE@//' \
+	    $(ADD-ON)/install.rdf.in > $(DIST_EXPORT_DIR)/install.rdf.in
 	# jar.mn is used for Firefox build
 	rm -f $(DIST_EXPORT_DIR)/chrome.manifest
 	rm -f $(DIST_EXPORT_DIR)/chrome/locale/chrome.manifest
@@ -466,7 +489,7 @@ endif
 #
 
 .PHONY: build
-build: add-on standalone ui vendor_libs
+build: add-on standalone ui
 
 GIT_EXPORT_LOCATION := ../gecko-dev
 GIT_EXPORT_DIR := $(GIT_EXPORT_LOCATION)/browser/extensions/loop

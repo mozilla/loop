@@ -1,6 +1,21 @@
 # Changelog
 
-## 1.2.1
+## 1.2.2
+
+### New
+
+* Bug 1258834 - Disable Loop's e10s for FF 46 and Conversation pop-outs for FF 47. r=dmose. [Mark Banner]
+
+* Bug 1257386 - Fix decryption failure causing standalone call to fail, r=Standard8. [Dan Mosedale]
+
+* Bug 1255923 - Ice Failure log sanitization. r=Standard8. [David Critchley]
+
+### Chores
+
+* Update L10n from changeset 6e1a97d8e947fc20adac9b1c2a351ea31869cf38. [Mark Banner]
+
+
+## v1.2.1 (2016-03-21)
 
 ### New
 
@@ -23,6 +38,10 @@
 * Update L10n from changeset e18973d6f04cabbf576c03f4bbd58cc3ae510839. [Mark Banner]
 
 * Update chai-as-promised to version 5.3.0. r=standard8. [greenkeeperio-bot]
+
+### Other
+
+* 1.2.1. [Mark Banner]
 
 
 ## v1.2.0 (2016-03-16)

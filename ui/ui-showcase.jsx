@@ -924,7 +924,9 @@
           </Section>
 
           <Section name="DesktopRoomConversationView">
-            <FramedExample height={448}
+            <FramedExample
+              cssClass="desktop"
+              height={448}
               onContentsRendered={invitationRoomStore.activeRoomStore.forcedUpdate}
               summary="Desktop room conversation (invitation, text-chat inclusion/scrollbars don't happen in real client)"
               width={348}>

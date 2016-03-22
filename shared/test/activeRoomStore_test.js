@@ -88,6 +88,14 @@ describe("loop.store.ActiveRoomStore", function() {
     });
   });
 
+  describe("#getInitialStoreState", function() {
+    it("should return an object with roomContextUrls set to null", function() {
+      var initialState = store.getInitialStoreState();
+
+      expect(initialState).to.have.a.property("roomContextUrls", null);
+    });
+  });
+
   describe("#roomFailure", function() {
     var fakeError;
 

@@ -146,7 +146,7 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
         sharingPaused: false,
         receivingScreenShare: false,
         remotePeerDisconnected: false,
-        // Any urls (aka context) associated with the room.
+        // Any urls (aka context) associated with the room. null if no context.
         roomContextUrls: null,
         // The description for a room as stored in the context data.
         roomDescription: null,

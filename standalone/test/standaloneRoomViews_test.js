@@ -768,6 +768,51 @@ describe("loop.standaloneRoomViews", function() {
               .eql("rooms_only_occupant_label2");
           });
 
+          it("should display a context-info area after a wait when in the " +
+            "JOINED state and roomContextUrls is null",
+            function() {
+              activeRoomStore.setStoreState({
+                 roomState: ROOM_STATES.JOINED,
+                 roomName: "Monkeys",
+                 roomContextUrls: null
+               });
+
+              clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
+
+              expect(view.getDOMNode().querySelector(".context-info"))
+                .not.eql(null);
+            });
+
+            it("should display a context-info area after a wait when in the " +
+              "JOINED state and roomName is null",
+              function() {
+                activeRoomStore.setStoreState({
+                   roomState: ROOM_STATES.JOINED,
+                   roomName: null,
+                   roomContextUrls: { location: "http://example.com/" }
+                 });
+
+                clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
+
+                expect(view.getDOMNode().querySelector(".context-info"))
+                  .not.eql(null);
+              });
+
+              it("should display a context-info area after a wait when in the " +
+                "JOINED state and roomName and roomContextUrls are null",
+                function() {
+                  activeRoomStore.setStoreState({
+                     roomState: ROOM_STATES.JOINED,
+                     roomName: null,
+                     roomContextUrls: null
+                   });
+
+                  clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
+
+                  expect(view.getDOMNode().querySelector(".context-info"))
+                    .not.eql(null);
+                });
+
         it("should not display an message immediately in the SESSION_CONNECTED state",
           function() {
             activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });

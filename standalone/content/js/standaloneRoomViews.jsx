@@ -374,7 +374,13 @@ loop.standaloneRoomViews = (function(mozL10n) {
           }
 
           var storeState = this.props.activeRoomStore.getStoreState("roomContextUrls");
-          var context = storeState[0] || [];
+          var context;
+
+          if (storeState && storeState[0]) {
+            context = storeState[0];
+          } else {
+            context = [];
+          }
 
           // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
           // Try catch to not produce output if invalid url
@@ -392,6 +398,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
           var title = mozL10n.get(this.props.activeRoomStore.getStoreState("remotePeerDisconnected") ?
             "room_owner_left_label" : "rooms_only_occupant_label2");
+
+          // XXX why aren't we using ContextUrlView here?
 
           return (
             <div className="room-notification-area">

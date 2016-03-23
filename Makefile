@@ -494,9 +494,15 @@ build: add-on standalone ui
 GIT_EXPORT_LOCATION := ../gecko-dev
 GIT_EXPORT_DIR := $(GIT_EXPORT_LOCATION)/browser/extensions/loop
 
+ifeq ($(shell uname -s),Linux)
+  FIND_COMMAND := find $(GIT_EXPORT_DIR) -regextype posix-extended
+else
+  FIND_COMMAND := find -E $(GIT_EXPORT_DIR)
+endif
+
 .PHONY: git-export
 git-export: build dist_export
-	find -E $(GIT_EXPORT_DIR) -type f ! -regex \
+	$(FIND_COMMAND) -type f ! -regex \
 	  '.*/(moz.build|README.txt|.gitignore|run-all-loop-tests.sh|manifest.ini)' -delete
 	$(RSYNC) $(DIST_EXPORT_DIR)/* $(GIT_EXPORT_DIR)
 

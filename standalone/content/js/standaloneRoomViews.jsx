@@ -344,26 +344,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
             </div>
           );
         }
-        case ROOM_STATES.MEDIA_WAIT: {
-          var msg = mozL10n.get("call_progress_getting_media_description",
-                                { clientShortname: mozL10n.get("clientShortname2") });
-          var utils = loop.shared.utils;
-          var isChrome = utils.isChrome(navigator.userAgent);
-          var isFirefox = utils.isFirefox(navigator.userAgent);
-          var isOpera = utils.isOpera(navigator.userAgent);
-          var promptMediaMessageClasses = classNames({
-            "prompt-media-message": true,
-            "chrome": isChrome,
-            "firefox": isFirefox,
-            "opera": isOpera,
-            "other": !isChrome && !isFirefox && !isOpera
-          });
-          return (
-            <p className={promptMediaMessageClasses}>
-              {msg}
-            </p>
-          );
-        }
         case ROOM_STATES.JOINING:
         case ROOM_STATES.JOINED:
         case ROOM_STATES.SESSION_CONNECTED: {
@@ -853,6 +833,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
             screenSharePosterUrl={this.props.screenSharePosterUrl}
             screenSharingPaused={this.state.streamPaused}
             showInitialContext={true}
+            showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
             showTile={this._shouldRenderTile()}>
             <StandaloneRoomInfoArea activeRoomStore={this.props.activeRoomStore}
               dispatcher={this.props.dispatcher}

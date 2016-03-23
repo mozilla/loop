@@ -1,6 +1,31 @@
 # Changelog
 
-## 1.2.2
+## 1.2.3
+
+### New
+
+* Bug 1258014 - Makefile git-export find regexType on Ubuntu Linux, r=Standard8. [Chris Rafuse]
+
+* Bug 1257154 - Switch to getting DOM title updates via a frame script, and make the add-on truely multiprocess compatible to avoid shims. r=mikedeboer. [Mark Banner]
+
+* Bug 1258329 - Allow easy generation of a &quot;dev&quot; xpi for uploading to AMO's dev channel. r=dmose. [Mark Banner]
+
+* Bug 1253452 - Stop the invitiation view text being cut-off. r=mancas. [Mark Banner]
+
+* Bug 1255440 - Local and remote streams needs to be moved to the top of the text chat bar. r=crafuse. [Manuel Casas Barrado]
+
+### Chores
+
+* Update karma-chrome-launcher to version 0.2.3. r=standard8. [greenkeeperio-bot]
+
+* Update babel-plugin-transform-react-jsx to version 6.7.4. r=standard8. [greenkeeperio-bot]
+
+### Other
+
+* Fixes bug 1257947 - fall back to Linux skin for non Win/Mac. [Robert Helmer]
+
+
+## v1.2.2 (2016-03-22)
 
 ### New
 
@@ -13,6 +38,10 @@
 ### Chores
 
 * Update L10n from changeset 6e1a97d8e947fc20adac9b1c2a351ea31869cf38. [Mark Banner]
+
+### Other
+
+* 1.2.2. [Mark Banner]
 
 
 ## v1.2.1 (2016-03-21)

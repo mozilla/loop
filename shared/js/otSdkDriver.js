@@ -640,6 +640,7 @@ loop.OTSdkDriver = (function() {
       sdkSubscriberObject.on("videoDisabled", this._onVideoDisabled.bind(this));
 
       this.dispatcher.dispatch(new sharedActions.MediaStreamCreated({
+        hasAudio: sdkSubscriberObject.stream[STREAM_PROPERTIES.HAS_AUDIO],
         hasVideo: sdkSubscriberObject.stream[STREAM_PROPERTIES.HAS_VIDEO],
         isLocal: false,
         srcMediaElement: sdkSubscriberVideo
@@ -850,8 +851,10 @@ loop.OTSdkDriver = (function() {
 
       var sdkLocalVideo = this._mockPublisherEl.querySelector("video");
       var hasVideo = event.stream[STREAM_PROPERTIES.HAS_VIDEO];
+      var hasAudio = event.stream[STREAM_PROPERTIES.HAS_AUDIO];
 
       this.dispatcher.dispatch(new sharedActions.MediaStreamCreated({
+        hasAudio: hasAudio,
         hasVideo: hasVideo,
         isLocal: true,
         srcMediaElement: sdkLocalVideo

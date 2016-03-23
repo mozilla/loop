@@ -879,6 +879,7 @@ describe("loop.OTSdkDriver", function() {
     beforeEach(function() {
       fakeConnection = "fakeConnection";
       fakeStream = {
+        hasAudio: true,
         hasVideo: true,
         videoType: "camera",
         videoDimensions: { width: 1, height: 2 }
@@ -1037,6 +1038,7 @@ describe("loop.OTSdkDriver", function() {
 
         driver._mockPublisherEl.appendChild(fakeMockVideo);
         stream = {
+          hasAudio: true,
           hasVideo: true,
           videoType: "camera",
           videoDimensions: { width: 1, height: 2 }
@@ -1061,6 +1063,7 @@ describe("loop.OTSdkDriver", function() {
         sinon.assert.called(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
           new sharedActions.MediaStreamCreated({
+            hasAudio: true,
             hasVideo: true,
             isLocal: true,
             srcMediaElement: fakeMockVideo
@@ -1074,6 +1077,7 @@ describe("loop.OTSdkDriver", function() {
         sinon.assert.called(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
           new sharedActions.MediaStreamCreated({
+            hasAudio: true,
             hasVideo: false,
             isLocal: true,
             srcMediaElement: fakeMockVideo
@@ -1147,12 +1151,14 @@ describe("loop.OTSdkDriver", function() {
           driver.session = session;
           fakeStream.connection = fakeConnection;
           fakeStream.hasVideo = true;
+          fakeStream.hasAudio = true;
 
           session.trigger("streamCreated", { stream: fakeStream });
 
           sinon.assert.called(dispatcher.dispatch);
           sinon.assert.calledWithExactly(dispatcher.dispatch,
             new sharedActions.MediaStreamCreated({
+              hasAudio: true,
               hasVideo: true,
               isLocal: false,
               srcMediaElement: videoElement
@@ -1168,6 +1174,7 @@ describe("loop.OTSdkDriver", function() {
           sinon.assert.called(dispatcher.dispatch);
           sinon.assert.calledWithExactly(dispatcher.dispatch,
             new sharedActions.MediaStreamCreated({
+              hasAudio: true,
               hasVideo: false,
               isLocal: false,
               srcMediaElement: videoElement

@@ -82,7 +82,7 @@ window.queuedFrames = [];
             // element that does have a class on it, and we want it to return
             // in that case.
             if (parentHeadNode.hasAttribute("class") &&
-                parentHeadNode.getAttribute("class") !== this.props.cssClass) {
+                !parentHeadNode.getAttribute("class").includes(this.props.cssClass)) {
               return;
             }
           }

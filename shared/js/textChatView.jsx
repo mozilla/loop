@@ -201,6 +201,12 @@ loop.shared.views.chat = (function(mozL10n) {
       return (
         <div className={entriesClasses}>
           <div className="text-chat-scroller">
+            {loop.shared.utils.isDesktop() ? null :
+              <p className="welcome-message">
+                {mozL10n.get("rooms_welcome_text_chat_label",
+                  { clientShortname: mozL10n.get("clientShortname2") })}
+              </p>
+            }
             {
               this.props.messageList.map(function(entry, i) {
                 if (entry.type === CHAT_MESSAGE_TYPES.SPECIAL) {

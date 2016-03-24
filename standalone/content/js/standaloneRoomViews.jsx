@@ -370,9 +370,9 @@ loop.standaloneRoomViews = (function(mozL10n) {
               <p className="room-waiting-area">
                 {mozL10n.get("rooms_read_while_wait_offer")}
                 <a href={loop.config.tilesSupportUrl}
-                  onClick={this.recordTilesSupport}
-                  rel="noreferrer"
-                  target="_blank">
+                   onClick={this.recordTilesSupport}
+                   rel="noreferrer"
+                   target="_blank">
                   <i className="room-waiting-help"></i>
                 </a>
               </p>
@@ -496,20 +496,37 @@ loop.standaloneRoomViews = (function(mozL10n) {
     },
 
     renderContext: function() {
+      // XXX please make this code more human readable
       var urlData = (this.props.room.roomContextUrls || [])[0] || {};
+      var contextUrl;
+      try {
+        var sanitizedURL = loop.shared.utils.formatURL(urlData.location, true);
+      } catch (ex) {
+        contextUrl = null;
+      }
       var roomTitle = this.props.room.roomName ||
         urlData.description || urlData.location ||
         mozL10n.get("room_name_untitled_page");
 
+      // Only allow specific types of URLs.
+      if (!sanitizedURL ||
+        (sanitizedURL.protocol !== "http:" &&
+        sanitizedURL.protocol !== "https:" &&
+        sanitizedURL.protocol !== "ftp:")) {
+        contextUrl = null;
+      } else {
+        contextUrl = urlData.location;
+      }
+
       return (
         <div className="context-info">
-          <a href={urlData.location}
-            rel="noreferrer"
-            target="_blank"
-            title={urlData.description}>
-            {this.renderIcon()}
-            <h2>{roomTitle}</h2>
-          </a>
+            <a href={contextUrl ? contextUrl : null}
+              rel="noreferrer"
+              target="_blank"
+              title={urlData.description}>
+              {this.renderIcon()}
+              <h2>{roomTitle}</h2>
+            </a>
         </div>
       );
     },

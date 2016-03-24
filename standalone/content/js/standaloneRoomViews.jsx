@@ -365,8 +365,15 @@ loop.standaloneRoomViews = (function(mozL10n) {
           // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
           // Try catch to not produce output if invalid url
           try {
-            var sanitizeURL = loop.shared.utils.formatURL(context.location, true).hostname;
+            var sanitizeURL = loop.shared.utils.formatURL(context.location, true);
           } catch (ex) {
+            sanitizeURL = null;
+          }
+
+          if (!sanitizeURL ||
+            (sanitizeURL.protocol !== "http:" &&
+            sanitizeURL.protocol !== "https:" &&
+            sanitizeURL.protocol !== "ftp:")) {
             sanitizeURL = null;
           }
 
@@ -393,14 +400,14 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
                 <div className="room-notification-context">
                   <a className="context-wrapper"
-                     href={context.location ? context.location : null}
+                     href={sanitizeURL ? context.location : null}
                      rel="noreferrer"
                      target="_blank">
                     <img className="context-preview" src={thumbnail} />
                     <span className="context-info">
                       {context.description}
                       <span className="context-url">
-                        {sanitizeURL}
+                        {sanitizeURL ? sanitizeURL.hostname : null}
                       </span>
                     </span>
                   </a>
@@ -525,20 +532,37 @@ loop.standaloneRoomViews = (function(mozL10n) {
     },
 
     renderContext: function() {
+      // XXX please make this code more human readable
       var urlData = (this.props.room.roomContextUrls || [])[0] || {};
+      var contextUrl;
+      try {
+        var sanitizedURL = loop.shared.utils.formatURL(urlData.location, true);
+      } catch (ex) {
+        contextUrl = null;
+      }
       var roomTitle = this.props.room.roomName ||
         urlData.description || urlData.location ||
         mozL10n.get("room_name_untitled_page");
 
+      // Only allow specific types of URLs.
+      if (!sanitizedURL ||
+        (sanitizedURL.protocol !== "http:" &&
+        sanitizedURL.protocol !== "https:" &&
+        sanitizedURL.protocol !== "ftp:")) {
+        contextUrl = null;
+      } else {
+        contextUrl = urlData.location;
+      }
+
       return (
         <div className="context-info">
-          <a href={urlData.location}
-            rel="noreferrer"
-            target="_blank"
-            title={urlData.description}>
-            {this.renderIcon()}
-            <h2>{roomTitle}</h2>
-          </a>
+            <a href={contextUrl ? contextUrl : null}
+              rel="noreferrer"
+              target="_blank"
+              title={urlData.description}>
+              {this.renderIcon()}
+              <h2>{roomTitle}</h2>
+            </a>
         </div>
       );
     },

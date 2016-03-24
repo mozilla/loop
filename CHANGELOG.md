@@ -1,10 +1,303 @@
 # Changelog
 
-## 1.1.14
+## 1.1.15
+
+### New
+
+* Bug 1254517 - VERSION.txt is missing from loop standalone deployments. r=fcampo. [Mark Banner]
+
+* Bug 1253013 - Allow Whitelist urls to be clickable in context. r=dmose. [David Critchley]
+
+
+## v1.2.3 (2016-03-23)
+
+### New
+
+* Bug 1258014 - Makefile git-export find regexType on Ubuntu Linux, r=Standard8. [Chris Rafuse]
+
+* Bug 1257154 - Switch to getting DOM title updates via a frame script, and make the add-on truely multiprocess compatible to avoid shims. r=mikedeboer. [Mark Banner]
+
+* Bug 1258329 - Allow easy generation of a &quot;dev&quot; xpi for uploading to AMO's dev channel. r=dmose. [Mark Banner]
+
+* Bug 1253452 - Stop the invitiation view text being cut-off. r=mancas. [Mark Banner]
+
+* Bug 1255440 - Local and remote streams needs to be moved to the top of the text chat bar. r=crafuse. [Manuel Casas Barrado]
+
+### Chores
+
+* Update karma-chrome-launcher to version 0.2.3. r=standard8. [greenkeeperio-bot]
+
+* Update babel-plugin-transform-react-jsx to version 6.7.4. r=standard8. [greenkeeperio-bot]
+
+### Other
+
+* 1.2.3. [Mark Banner]
+
+* Fixes bug 1257947 - fall back to Linux skin for non Win/Mac. [Robert Helmer]
+
+
+## v1.2.2 (2016-03-22)
+
+### New
+
+* Bug 1258834 - Disable Loop's e10s for FF 46 and Conversation pop-outs for FF 47. r=dmose. [Mark Banner]
+
+* Bug 1257386 - Fix decryption failure causing standalone call to fail, r=Standard8. [Dan Mosedale]
+
+* Bug 1255923 - Ice Failure log sanitization. r=Standard8. [David Critchley]
+
+### Chores
+
+* Update L10n from changeset 6e1a97d8e947fc20adac9b1c2a351ea31869cf38. [Mark Banner]
+
+### Other
+
+* 1.2.2. [Mark Banner]
+
+
+## v1.2.1 (2016-03-21)
+
+### New
+
+* Bug 1257924 - Remove SEC_NORMAL from MozLoopPushHandler.jsm. r=sicking. [Christoph Kerschbaumer]
+
+* No Bug. Move clientSuperShortname into shared strings to match loop-client-l10n repo and correct an l10n note. rs=dmose. [Mark Banner]
+
+* Bug 1256357 - Enable Hello in e10s windows by default. r=Standard8. [mikedeboer]
+
+* Bug 1256362 - Remove the 'Start a conversation' menuitem when in private browsing mode. r=mancas. [Mark Banner]
+
+* Bug 1252128 - Update desktop client FTU start sharing tabs message when create/join conversation, r=dcritch. [Chris Rafuse]
+
+* Bug 1211542 - Collect domain of shared URL in Hello through a whitelist. r=dcritch. [Ed Lee]
+
+* Bug 1220627 - As a desktop client user, I want to be able to share simply the Hello URL through a sharing panel after I create a room. r=Standard8. [Manuel Casas Barrado]
+
+### Chores
+
+* Update L10n from changeset e18973d6f04cabbf576c03f4bbd58cc3ae510839. [Mark Banner]
+
+* Update chai-as-promised to version 5.3.0. r=standard8. [greenkeeperio-bot]
+
+### Other
+
+* 1.2.1. [Mark Banner]
+
+
+## v1.2.0 (2016-03-16)
+
+### New
+
+* No bug. When handling files, use UTF-8 encoding to avoid issues with locales not being defined correctly for python. r=dmose. [Mark Banner]
+
+* Bug 1254699 - Use new  NPS Survey for v1.2 r=Standard8. [David Critchley]
+
+* Bug 1257018 - Fix warning on standalone that was due to the wrong ordering of files to load. r=fcampo. [Mark Banner]
+
+* Bug 1255491 - Disable pop-out feature in conversation window. r=dcritch. [Manuel Casas Barrado]
+
+* Bug 1255750 - If the link clicker join a room whilst sharing is paused, the display is messed up. r=crafuse. [Manuel Casas Barrado]
+
+* Bug 1252562 - Welcome description on standalone is awkward. r=Mardak. [Manuel Casas Barrado]
+
+* Bug 1257009 - The link generator shouldn't try to setup tab browsing every time a link clicker leaves the room. r=Mardak. [Mark Banner]
+
+* Bug 1256694 - Use a better maximum version definition for the add-on. r=Mardak. [Mark Banner]
+
+* Bug 1229195 - resolve the promise when the chat window has actually finished loading, not right away. r=Standard8. [mikedeboer]
+
+* Bug 1254940 - If the link generator exits a room whilst sharing is paused, and then re-enters, the link-clicker display is messed up. r=dcritchley. [Manuel Casas Barrado]
+
+* Bug 1253559 - Adjust Roomlist Item dropdown menu so it does not get cut off. r=chrafuse. [David Critchley]
+
+* Bug 1250534 - introduce a ChatboxClosed event that fires when a chatbox is closed in attached and detached mode. r=Standard8. [mikedeboer]
+
+* Bug 1255410 - Ensure leaving the room works properly when using the leave button on the popped out conversation window. r=dmose. [Mark Banner]
+
+* Bug 1254511 - Improve functional tests so that they can work against production and pre-release production builds for QA. r=dcritch. [Mark Banner]
+
+* Bug 1254517 - VERSION.txt is missing from loop standalone deployments. r=fcampo. [Mark Banner]
+
+* Bug 1254132 - Start hooking up Loop's functional tests so they can be run in e10s mode. r=mancas. [Mark Banner]
+
+* Bug 1252061 - The clicker UI tile needs to be moved to the bottom right of the page. r=fcampo. [Manuel Casas Barrado]
+
+* Bug 1249577 - Fix height glitchiness in Hello FTU, r=Standard8. [Dan Mosedale]
+
+* Bug 1254958 - browser_mozLoop_telemetry.js fails due to not resetting prefs. r=mancas. [Mark Banner]
+
+* Bug 1250443 - Remote cursor color should be blue. r=Mardak. [Manuel Casas Barrado]
+
+* Bug 1250444 - Local speech bubbles should be grey, remote's should be blue. [Manuel Casas Barrado]
+
+* Bug 1254945 - If text chat consists of entirely context tiles, then it doesn't automatically scroll. r=mancas. [Mark Banner]
+
+* Bug 1252306 - Link clicker intro screen code upgrade, r=dcritchley. [Chris Rafuse]
+
+* Bug 1252162 - Link clicker intro screen tests, r=dcritchley. [Chris Rafuse]
+
+* No Bug. Update dependencies of packages that tend to get updated infrequently. rs=dmose. [Mark Banner]
+
+* Bug 1253013 - Add tests for checking the context tile is only shown for valid urls. r=dmose. [Mark Banner]
+
+* Bug 1254093 - Get the loop.debug.sdk preference working again. r=mancas. [Mark Banner]
+
+* Bug 1249365 - Fix regression in e10s mode to re-allow the camera by default in Loop's conversation window. r=gcp. [Mark Banner]
+
+* Bug 1249311 - additional unit tests for FTU slideshow. r=Standard8. [Vidhuran Harichandra Babu]
+
+* Bug 1252088 - Ripple click effect needs more unit tests. r=Standard8. [Manuel Casas Barrado]
+
+* Bug 1252817 - Stop using the timeout for requests across the content/chrome API as this interfers with network requests via the backend. Should fix a functional test issue. r=mikedeboer. [Mark Banner]
+
+* Bug 1220767 - Set right sidebar width wider in standalone/large screen (r=mancas, ui-r=sevaan) [Fernando Campo]
+
+* Bug 1252071 - If you re-enter a room that your peer has previously left, the UI says &quot;Your friend has left&quot;. r=dcritchley. [Manuel Casas Barrado]
+
+* Bug 1208416 - Report on Hello MAUs per new MAU definition. r=Mardak. [Manuel Casas Barrado]
+
+* Bug 1253013 - Display the context tile only for valid urls. r=dmose. [Mark Banner]
+
+* Bug 1249030 - Add tooltip to Help button in Standalone. r=Standard8. [David Critchley]
+
+* Bug 1247190 - useDesktopPaths is not used anymore and removed, r=Standard8. [jafar25]
+
+* No bug. Fix Travis test bustage by limiting getting Google Chrome for 64 bit builds only. rs=bustage-fix. [Mark Banner]
+
+* Bug 1245147 - Inform the link clicker when tab sharing is paused. r=Standard8. [Manuel Casas Barrado]
+
+* Bug 1245710 - Fix RTL issues in the introductory display, and make functional tests work. r=Standard8. [Dan Mosedale]
+
+* Bug 1245710 - Add an introductorary screen to the standalone display. r=dmose. [Chris Rafuse]
+
+* Bug 1252450 - Enable the facebook button for shipped builds. r=fcampo. [Mark Banner]
+
+* No bug. Fix installation of the add-on in functional tests - install it permanently rather that temporary as we still need to restart. [Mark Banner]
+
+* Bug 1238562 - Run functional tests by default, except on travis for now. r=dcritch. [Mark Banner]
+
+* Bug 1238562 - Add options to functional tests to run with different server setups. r=dcritch. [Mark Banner]
+
+* Bug 1238562 - Get functional tests running in the github repository. r=dcritch. [Mark Banner]
+
+* Bug 1239970 - Display FTU in empty room list. r=dmose. [David Critchley]
+
+* Bug 1250126 [reg] - Moving the mouse pointer near the bottom of the standalone screen alters the link-generator display (r=mancas) [Fernando Campo]
+
+* Bug 1251824 - Update OpenTok library to 2.7.3. r=Mardak. [Mark Banner]
+
+* Bug 1250126 - Moving l-clicker  pointer near bottom/right edge alters l-generator display (r=dmose) [Fernando Campo]
+
+* Bug 1250166 - Standalone -&gt; link generator cursor sharing still active when sharing is paused. [Fernando Campo]
+
+* Bug 1248567 - [Meta] Edit a room name from the panel. [Manuel Casas Barrado]
+
+* Bug 1245808 - Re-enable browser_mozLoop_chat.js for e10s mode now that the issues with it seem to have gone away. r=mikedeboer. [Mark Banner]
+
+* Bug 1238533 - Clicker UI notification UI. r=dcritchley. [Manuel Casas Barrado]
+
+* Bug 1250847: prefix DOMWindowClose with the Social: prefix to assure they won’t arrive at the global messageManager instance that TabBrowser is listening to. It mixes things up in twisted, unexpected ways if we don’t. r=Standard8. [mikedeboer]
+
+* Bug 1237677 - Update OpenTok library to 2.7.2. r=mikedeboer. [Mark Banner]
+
+* Bug 1243594 (part 3) - leave the utf-8 encoding of the payload to rest.js instead of directly in loop. r=Standard8. [Mark Banner]
+
+* Bug 1249552 - Remove the old unsupported loop.fxa.enabled preference. r=fcampo. [Mark Banner]
+
+* No Bug - Timing change within the check video and switch to chatbox to allow DOM catch up. r=standard8. [David Critchley]
+
+* Bug 1245277 loop addon needs to respect prior set default prefs, not restartless, r=Standard8. [Mark Banner]
+
+* Bug 1192208 - Ripple effect on click when in a tab sharing session with shared pointers [2/2] [Fernando Campo]
+
+* Bug 1192208 - Ripple effect on click when in a tab sharing session with shared pointers [1/2] [Manuel Casas Barrado]
+
+* Bug 1250495 - Improved privacy by opening Hello FTU Url when there is no context url r=standard8. [David Critchley]
+
+* Bug 1248895 - Open Hello panel after FTU is closed. [David Critchley]
+
+* Bug 1240516 - Add in-chat notification on peer disconnect by handling RemotePeerDisconnect event in textChatStore. r=Standard8. [Vidhuran Harichandra Babu]
+
+* Bug 1247785 - Remove unused strings for Invite Text header. [Manuel Casas Barrado]
+
+* Bug 1244721 - Make panel gear icon bigger. r=fcampo. [Manuel Casas Barrado]
+
+### Chores
+
+* Update eslint-plugin-react to version 4.2.3. r=standard8. [greenkeeperio-bot]
+
+* Update backbone to version 1.3.2. r=standard8. [greenkeeperio-bot]
+
+* Update eslint-plugin-react to version 4.2.2. r=standard8. [greenkeeperio-bot]
+
+* Update L10n from changeset cec3928c33bf6bf791744f40264970ebf7605b7d. [Mark Banner]
+
+* Update L10n from changeset 1d73d0787992e99529929b8cbf0b871e34e34fe3. [Mark Banner]
+
+* Update karma to version 0.13.22. r=standard8. [greenkeeperio-bot]
+
+* Update eslint-plugin-react to version 4.2.1. r=standard8. [greenkeeperio-bot]
+
+* Update Firefox max version to match the new nightly version. rs=bustage-fix. [Mark Banner]
+
+* Update karma-coverage to version 0.5.5. r=standard8. [greenkeeperio-bot]
+
+* Update babel-cli to version 6.6.5. r=standard8. [greenkeeperio-bot]
+
+* Update babel-plugin-transform-react-jsx to version 6.6.5. r=standard8. [greenkeeperio-bot]
+
+* Update eslint-plugin-react to version 4.2.0. r=standard8. [greenkeeperio-bot]
+
+* Update backbone to version 1.3.1. r=standard8. [greenkeeperio-bot]
+
+* Update babel-cli to version 6.6.4. r=standard8. [greenkeeperio-bot]
+
+* Update babel-plugin-transform-react-jsx to version 6.6.4. r=standard8. [greenkeeperio-bot]
+
+* Update karma-coverage to version 0.5.4. r=standard8. [greenkeeperio-bot]
+
+* Update L10n from changeset 38755fbbc6a87fd405ac2eccf88e9147a0ee9b31. [Mark Banner]
+
+* Update babel-plugin-transform-react-jsx to version 6.6.0. r=standard8. [greenkeeperio-bot]
+
+* Update fs-promise to version 0.5.0. r=standard8. [greenkeeperio-bot]
+
+* Bump minimum version to 46.0a1 since 45 doesn't have the required e10s changes. rs=release. [Mark Banner]
+
+* Update L10n from changeset c7891ecea3c1474fe3e31afda0552fd06f50de47. [Mark Banner]
+
+* Update nodemon to version 1.9.1. r=standard8. [greenkeeperio-bot]
+
+* Update jpm to version 1.0.6. r=standard8. [greenkeeperio-bot]
+
+* Update webpack to version 1.12.14. r=standard8. [greenkeeperio-bot]
+
+* Update nodemon to version 1.9.0. r=standard8. [greenkeeperio-bot]
+
+### Other
+
+* 1.2.0. [Mark Banner]
+
+* Avoid eslint rule deprecation warning for sort-prop-types. r=Standard8. [Ed Lee]
+
+* Follow-up to Bug 1255410 - fix the conversation window when leaving a conversation to make it work properly. r=Mardak. [Mark Banner]
+
+* Make nodemon watch locale directory and properties files and rebuild on change. r=dmose. [Ed Lee]
+
+* Changes to contributing document. r=standard8. [David Critchley]
+
+* Backout bug 1237677 due to bug 1248407 - causing devices not to be released properly. rs=backout-for-issues. [Mark Banner]
+
+
+## v1.1.14 (2016-03-14)
 
 ### New
 
 * No bug. Change the call for opening the call panel since bug 1154277 was backed out. rs=Mardak. [Mark Banner]
+
+### Other
+
+* 1.1.14. [Mark Banner]
 
 
 ## v1.1.13 (2016-03-14)

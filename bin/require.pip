@@ -1,12 +1,33 @@
-# Note: For flake 8 we include its dependencies so that we can fix their versions
-# to avoid updating when we don't expect it.
-flake8==2.5.1
-pep8==1.6.0
-mccabe==0.3.1
-pyflakes==1.0.0
-mozbuild==0.2
+# If you add new dependencies, please regenerate with `pip freeze` to ensure
+# all sub-dependencies are included.
+blessings==1.6
+browsermob-proxy==0.7.1
+flake8==2.5.4
 gitchangelog==2.3.0
+gitdb==0.6.4
+GitPython==1.0.2
+jsmin==2.2.1
+manifestparser==1.1
+marionette-client==2.3.0
+marionette-driver==1.4.0
+marionette-transport==1.2.0
+mccabe==0.4.0
+mozbuild==0.2
+mozcrash==0.17
+mozdevice==0.48
+mozfile==1.2
+mozinfo==0.9
+mozlog==3.1
+moznetwork==0.27
+mozprocess==0.22
+mozprofile==0.28
+mozrunner==6.11
+moztest==0.7
+mozversion==1.4
+pep8==1.7.0
+pyflakes==1.1.0
+pyperclip==1.5.27
 pystache==0.5.4
-gitpython==1.0.1
-marionette_client==2.2.0
-pyperclip==1.5.26
+requests==2.9.1
+smmap==0.9.0
+wptserve==1.4.0

@@ -1062,12 +1062,12 @@ loop.panel = (function(_, mozL10n) {
 
     handleClosePanel: function() {
       this.props.onSharePanelDisplayChange();
+      this.openRoom();
+      this.closeWindow();
+
       this.setState({
         showPanel: false
       });
-
-      this.openRoom();
-      this.closeWindow();
     },
 
     openRoom: function() {

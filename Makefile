@@ -23,7 +23,6 @@ RSYNC := rsync --archive --exclude='*.jsx'
 
 .PHONY: install
 install: node_modules
-	pip install -r require.pip
 
 node_modules: package.json
 	@mkdir -p node_modules

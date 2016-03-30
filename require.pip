@@ -1,2 +1,2 @@
 # This is for travis to give us an appropriate version of virtualenv
-virtualenv==13.1.2
+virtualenv==15.0.1

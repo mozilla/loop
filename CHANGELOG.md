@@ -1,6 +1,40 @@
 # Changelog
 
-## 1.2.3
+## 1.2.4
+
+### New
+
+* No bug. Update python packages to the latest version and improve handling of our pip requirements. r=dcritch. [Mark Banner]
+
+* No bug. Attempt to fix intermittent functional test failures by completing actions for closing the share panel before removing the panel itself. rs=dmose. [Mark Banner]
+
+* Bug 1253013 - Allow Whitelist urls to be clickable in context. r=dmose. [David Critchley]
+
+### Chores
+
+* Update L10n from changeset 90504350c02aacdf0621c55099fb2068222cf8ce. [Mark Banner]
+
+* Update firefox-profile to version 0.3.12. r=standard8. [greenkeeperio-bot]
+
+### Other
+
+* Backout bug 1257154 due to crashes and leaks seen in mozilla-central. rs=Standard8. [Mark Banner]
+
+
+## v1.1.15 (2016-03-24)
+
+### New
+
+* Bug 1254517 - VERSION.txt is missing from loop standalone deployments. r=fcampo. [Mark Banner]
+
+* Bug 1253013 - Allow Whitelist urls to be clickable in context. r=dmose. [David Critchley]
+
+### Other
+
+* 1.1.15. [David Critchley]
+
+
+## v1.2.3 (2016-03-23)
 
 ### New
 
@@ -21,6 +55,8 @@
 * Update babel-plugin-transform-react-jsx to version 6.7.4. r=standard8. [greenkeeperio-bot]
 
 ### Other
+
+* 1.2.3. [Mark Banner]
 
 * Fixes bug 1257947 - fall back to Linux skin for non Win/Mac. [Robert Helmer]
 

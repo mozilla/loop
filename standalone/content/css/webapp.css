@@ -244,33 +244,33 @@ html[dir="rtl"] .standalone-info-bar-spacer {
   margin-right: 15px;
 }
 
-.standalone-info-bar-spacer > .context-info {
+.standalone-info-bar-spacer > .standalone-info-bar-context {
   align-items: center;
   color: #666;
   display: flex;
   font-size: 12px;
 }
 
-.standalone-info-bar-spacer > .context-info > .terms-service {
+.standalone-info-bar-spacer > .standalone-info-bar-context > .terms-service {
   margin: 0;
 }
 
-.standalone-info-bar-spacer > .context-info > .terms-service > a {
+.standalone-info-bar-spacer > .standalone-info-bar-context > .terms-service > a {
   color: #666;
 }
 
-.standalone-info-bar-spacer > .context-info > a {
+.standalone-info-bar-spacer > .standalone-info-bar-context > a {
   align-items: center;
   display: flex;
   text-decoration: none;
 }
 
-.standalone-info-bar-spacer > .context-info > a > .context-favicon {
+.standalone-info-bar-spacer > .standalone-info-bar-context > a > .context-favicon {
   margin-right: 5px;
   width: 16px;
 }
 
-html[dir="rtl"] .standalone-info-bar-spacer > .context-info > a > .context-favicon {
+html[dir="rtl"] .standalone-info-bar-spacer > .standalone-info-bar-context > a > .context-favicon {
   margin-left: 5px;
   margin-right: 0;
   vertical-align: middle;

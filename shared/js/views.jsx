@@ -565,6 +565,61 @@ loop.shared.views = (function(_, mozL10n) {
   });
 
   /**
+   * Renders the a href link for context.
+   *
+   * @property {Boolean} allowClick         Set to true to allow the url to be clicked.
+   * @property {String}  description        The description for the context url.
+   * @property {Function}  handleClick      Function for handling click operation when
+   *                                        context link is clicked
+   * @property {String}  thumbnail          The thumbnail url (expected to be a data url) to
+   *                                        display. If not specified, a fallback url will be
+   *                                        shown.
+   * @property {String}  url                The url to be displayed. If not present or invalid,
+   *                                        the context link will not be clickable
+   */
+  var ContextUrlLink = React.createClass({
+    mixins: [React.addons.PureRenderMixin],
+
+    propTypes: {
+      allowClick: React.PropTypes.bool.isRequired,
+      children: React.PropTypes.node,
+      description: React.PropTypes.string,
+      handleClick: React.PropTypes.func,
+      url: React.PropTypes.string
+    },
+
+    render: function() {
+      var sanitizedURL = loop.shared.utils.formatSanitizedContextURL(this.props.url);
+
+      var opts = {};
+      opts.classNames = classNames({
+        "context-wrapper": true,
+        "clicks-allowed": this.props.allowClick
+      });
+      if (this.props.allowClick && sanitizedURL) {
+        opts.href = sanitizedURL.location;
+      }
+      if (this.props.handleClick) {
+        opts.onClick = this.props.handleClick;
+      }
+      if (this.props.description) {
+        opts.title = this.props.description;
+      }
+
+      return (
+        <a className={opts.classNames}
+           href={opts.href}
+           onClick={opts.onClick}
+           rel="noreferrer"
+           target="_blank"
+           title={opts.title}>
+          {this.props.children}
+        </a>
+      );
+    }
+  });
+
+  /**
    * Renders a url that's part of context on the display.
    *
    * @property {Boolean} allowClick         Set to true to allow the url to be clicked. If this
@@ -582,7 +637,7 @@ loop.shared.views = (function(_, mozL10n) {
 
     propTypes: {
       allowClick: React.PropTypes.bool.isRequired,
-      description: React.PropTypes.string.isRequired,
+      description: React.PropTypes.string,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher),
       thumbnail: React.PropTypes.string,
       url: React.PropTypes.string
@@ -602,48 +657,30 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     render: function() {
-      // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
-      // Try catch to not produce output if invalid url
-      try {
-        var sanitizedURL = loop.shared.utils.formatURL(this.props.url, true);
-      } catch (ex) {
-        return null;
-      }
-
-      // Only allow specific types of URLs.
-      if (!sanitizedURL ||
-          (sanitizedURL.protocol !== "http:" &&
-           sanitizedURL.protocol !== "https:" &&
-           sanitizedURL.protocol !== "ftp:")) {
-        return null;
-      }
-
+      var description = this.props.description || null;
       var thumbnail = this.props.thumbnail;
+      var url = this.props.url || null;
+      var sanitizedURL = loop.shared.utils.formatSanitizedContextURL(url) || {};
+      var hostname = sanitizedURL.hostname || null;
 
       if (!thumbnail) {
         thumbnail = "shared/img/icons-16x16.svg#globe";
       }
 
-      var wrapperClasses = classNames({
-        "context-wrapper": true,
-        "clicks-allowed": this.props.allowClick
-      });
-
       return (
         <div className="context-content">
-          <a className={wrapperClasses}
-             href={this.props.allowClick ? this.props.url : null}
-             onClick={this.handleLinkClick}
-             rel="noreferrer"
-             target="_blank">
+          <ContextUrlLink allowClick={this.props.allowClick}
+                          description={description}
+                          handleClick={this.handleLinkClick}
+                          url={url}>
             <img className="context-preview" src={thumbnail} />
             <span className="context-info">
-              {this.props.description}
+              {description}
               <span className="context-url">
-                {sanitizedURL.hostname}
+                {hostname}
               </span>
             </span>
-          </a>
+          </ContextUrlLink>
         </div>
       );
     }
@@ -1221,6 +1258,7 @@ loop.shared.views = (function(_, mozL10n) {
     Button: Button,
     ButtonGroup: ButtonGroup,
     Checkbox: Checkbox,
+    ContextUrlLink: ContextUrlLink,
     ContextUrlView: ContextUrlView,
     ConversationToolbar: ConversationToolbar,
     HangUpControlButton: HangUpControlButton,

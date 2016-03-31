@@ -362,21 +362,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
             context = [];
           }
 
-          // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
-          // Try catch to not produce output if invalid url
-          try {
-            var sanitizeURL = loop.shared.utils.formatURL(context.location, true);
-          } catch (ex) {
-            sanitizeURL = null;
-          }
-
-          if (!sanitizeURL ||
-            (sanitizeURL.protocol !== "http:" &&
-            sanitizeURL.protocol !== "https:" &&
-            sanitizeURL.protocol !== "ftp:")) {
-            sanitizeURL = null;
-          }
-
           var thumbnail = context.thumbnail;
 
           if (!thumbnail) {
@@ -385,8 +370,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
           var title = mozL10n.get(this.props.activeRoomStore.getStoreState("remotePeerDisconnected") ?
             "room_owner_left_label" : "rooms_only_occupant_label2");
-
-          // XXX why aren't we using ContextUrlView here?
 
           return (
             <div className="room-notification-area">
@@ -397,20 +380,13 @@ loop.standaloneRoomViews = (function(mozL10n) {
                 <p>
                   {mozL10n.get("rooms_wait_message")}
                 </p>
-
                 <div className="room-notification-context">
-                  <a className="context-wrapper"
-                     href={sanitizeURL ? context.location : null}
-                     rel="noreferrer"
-                     target="_blank">
-                    <img className="context-preview" src={thumbnail} />
-                    <span className="context-info">
-                      {context.description}
-                      <span className="context-url">
-                        {sanitizeURL ? sanitizeURL.hostname : null}
-                      </span>
-                    </span>
-                  </a>
+                  <sharedViews.ContextUrlView
+                    allowClick={true}
+                    description={context.description}
+                    dispatcher={this.props.dispatcher}
+                    thumbnail={thumbnail}
+                    url={context.location} />
                 </div>
               </div>
             </div>
@@ -524,51 +500,29 @@ loop.standaloneRoomViews = (function(mozL10n) {
       room: React.PropTypes.object.isRequired
     },
 
-    renderIcon: function() {
-      var urlData = (this.props.room.roomContextUrls || [])[0] || {};
-      if (urlData.location) {
-        return (
-          <img className="context-favicon" src={urlData.thumbnail || "shared/img/icons-16x16.svg#globe"} />
-        );
-      }
-
-      return (
-        <img className="context-favicon" src="shared/img/icons-16x16.svg#globe" />
-      );
-    },
-
     renderContext: function() {
-      // XXX please make this code more human readable
-      var urlData = (this.props.room.roomContextUrls || [])[0] || {};
-      var contextUrl;
-      try {
-        var sanitizedURL = loop.shared.utils.formatURL(urlData.location, true);
-      } catch (ex) {
-        contextUrl = null;
+      var urlData = {};
+      var roomContextUrls = this.props.room.roomContextUrls || [];
+      if (roomContextUrls.length > 0) {
+        urlData = roomContextUrls[0];
+      }
+      var thumbnail = "shared/img/icons-16x16.svg#globe";
+      if (urlData.location && urlData.thumbnail) {
+        thumbnail = urlData.thumbnail;
       }
       var roomTitle = this.props.room.roomName ||
         urlData.description || urlData.location ||
         mozL10n.get("room_name_untitled_page");
 
-      // Only allow specific types of URLs.
-      if (!sanitizedURL ||
-        (sanitizedURL.protocol !== "http:" &&
-        sanitizedURL.protocol !== "https:" &&
-        sanitizedURL.protocol !== "ftp:")) {
-        contextUrl = null;
-      } else {
-        contextUrl = urlData.location;
-      }
-
       return (
-        <div className="context-info">
-            <a href={contextUrl ? contextUrl : null}
-              rel="noreferrer"
-              target="_blank"
-              title={urlData.description}>
-              {this.renderIcon()}
-              <h2>{roomTitle}</h2>
-            </a>
+        <div className="standalone-info-bar-context">
+          <sharedViews.ContextUrlLink
+            allowClick={true}
+            title={urlData.description}
+            url={urlData.location}>
+            <img className="context-favicon" src={thumbnail} />
+            <h2>{roomTitle}</h2>
+          </sharedViews.ContextUrlLink>
         </div>
       );
     },
@@ -582,7 +536,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
         case ROOM_STATES.INIT:
         case ROOM_STATES.GATHER:
           return (
-            <div className="context-info">
+            <div className="standalone-info-bar-context">
               <ToSView dispatcher={this.props.dispatcher} />
             </div>
           );

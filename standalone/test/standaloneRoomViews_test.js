@@ -480,10 +480,58 @@ describe("loop.standaloneRoomViews", function() {
           }
         });
 
-        expect(view.getDOMNode().querySelector(".context-info h2").textContent)
+        expect(view.getDOMNode().querySelector(".standalone-info-bar-context h2").textContent)
           .eql("FakeRoomName");
-        expect(view.getDOMNode().querySelector(".context-info img"))
+        expect(view.getDOMNode().querySelector(".standalone-info-bar-context img"))
           .not.eql(null);
+      });
+
+      it("should allow context link if context location is http", function() {
+        view = mountTestComponent({
+          room: {
+            roomState: ROOM_STATES.JOINED,
+            roomName: "FakeRoomName",
+            roomContextUrls: [{
+              location: "http://fakeurl.com/",
+              thumbnail: "fakeFavicon.ico"
+            }]
+          }
+        });
+
+        expect(view.getDOMNode().querySelector(".standalone-info-bar-context a").getAttribute("href"))
+          .eql("http://fakeurl.com/");
+      });
+
+      it("should not allow context link if context location is about url", function() {
+        view = mountTestComponent({
+          room: {
+            roomState: ROOM_STATES.JOINED,
+            roomName: "aboutConfig",
+            roomContextUrls: [{
+              location: "about:config",
+              thumbnail: "fakeFavicon.ico"
+            }]
+          }
+        });
+
+        expect(view.getDOMNode().querySelector(".standalone-info-bar-context a").getAttribute("href"))
+          .eql(null);
+      });
+
+      it("should not allow context link if the context location protocol is not whitelisted", function() {
+        view = mountTestComponent({
+          room: {
+            roomState: ROOM_STATES.JOINED,
+            roomName: "nonWhitelistUrl",
+            roomContextUrls: [{
+              location: "somethingelse://somethingOtherThanWhitelist.com",
+              thumbnail: "fakeFavicon.ico"
+            }]
+          }
+        });
+
+        expect(view.getDOMNode().querySelector(".standalone-info-bar-context a").getAttribute("href"))
+          .eql(null);
       });
     });
   });
@@ -805,7 +853,7 @@ describe("loop.standaloneRoomViews", function() {
               .eql("rooms_only_occupant_label2");
           });
 
-          it("should display a context-info area after a wait when in the " +
+          it("should display a standalone-info-bar-context area after a wait when in the " +
             "JOINED state and roomContextUrls is null",
             function() {
               activeRoomStore.setStoreState({
@@ -816,11 +864,11 @@ describe("loop.standaloneRoomViews", function() {
 
               clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
 
-              expect(view.getDOMNode().querySelector(".context-info"))
+              expect(view.getDOMNode().querySelector(".standalone-info-bar-context"))
                 .not.eql(null);
             });
 
-            it("should display a context-info area after a wait when in the " +
+            it("should display a standalone-info-bar-context area after a wait when in the " +
               "JOINED state and roomName is null",
               function() {
                 activeRoomStore.setStoreState({
@@ -831,11 +879,11 @@ describe("loop.standaloneRoomViews", function() {
 
                 clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
 
-                expect(view.getDOMNode().querySelector(".context-info"))
+                expect(view.getDOMNode().querySelector(".standalone-info-bar-context"))
                   .not.eql(null);
               });
 
-              it("should display a context-info area after a wait when in the " +
+              it("should display a standalone-info-bar-context area after a wait when in the " +
                 "JOINED state and roomName and roomContextUrls are null",
                 function() {
                   activeRoomStore.setStoreState({
@@ -846,9 +894,43 @@ describe("loop.standaloneRoomViews", function() {
 
                   clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
 
-                  expect(view.getDOMNode().querySelector(".context-info"))
+                  expect(view.getDOMNode().querySelector(".standalone-info-bar-context"))
                     .not.eql(null);
                 });
+
+        it("should enable clicking of context link when url checks against url protocol whitelist",
+          function() {
+            activeRoomStore.setStoreState({
+              roomState: ROOM_STATES.JOINED,
+              roomName: "WhitelistTestRoom",
+              roomContextUrls: [{
+                description: "http",
+                location: "http://fakeurl.com/"
+              }]
+            });
+
+            clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
+
+            expect(view.getDOMNode().querySelector(".room-notification-context a").getAttribute("href"))
+              .eql("http://fakeurl.com/");
+          });
+
+        it("should not enable clicking of context link when url fails against url protocol whitelist",
+          function() {
+            activeRoomStore.setStoreState({
+              roomState: ROOM_STATES.JOINED,
+              roomName: "WhitelistTestRoom",
+              roomContextUrls: [{
+                description: "nonhttp",
+                location: "somethingelse://fakeurl.com"
+              }]
+            });
+
+            clock.tick(loop.standaloneRoomViews.StandaloneRoomInfoArea.RENDER_WAITING_DELAY);
+
+            expect(view.getDOMNode().querySelector(".room-notification-context a").getAttribute("href"))
+              .eql(null);
+          });
 
         it("should not display an message immediately in the SESSION_CONNECTED state",
           function() {

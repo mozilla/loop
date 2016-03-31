@@ -11,10 +11,16 @@ some parts will move to automation.
 
 Things still to be documented:
 
-* Release cycles.
 * Beta -> full Release details.
 * Setting up a Beta release.
 * Releasing to users.
+* Rolling/deploying a Dev release
+
+## There are three different kinds of releases
+
+* Real - intended for landing in mozilla-central as system add-on and updating standalone production server
+* Beta - intended for regular users of AMO to get semi-stable releases of the add-on, while pointing to the production (stable) standalone server.
+* Dev - intended for localizers, developers, and early-adopters who want to live on the bleeding edge.  Add-on intended to be automatically deployed to AMO dev channel once a week-ish (currently a manual process)
 
 ## Creating a Release
 

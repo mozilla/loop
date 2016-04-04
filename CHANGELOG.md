@@ -1,6 +1,17 @@
 # Changelog
 
-## 1.2.4
+## 1.2.5
+
+### Chores
+
+* Update L10n from changeset f04c0f7666d6a40756dff8fc36dcb288fad22cfa. [Mark Banner]
+
+### Other
+
+* Backout bug 1254517 / da209dbf0f17a02f8440730b5b2c5d777af72945 - due to breaking the standalone deployment build. [Mark Banner]
+
+
+## v1.2.4 (2016-03-30)
 
 ### New
 
@@ -17,6 +28,8 @@
 * Update firefox-profile to version 0.3.12. r=standard8. [greenkeeperio-bot]
 
 ### Other
+
+* 1.2.4. [Mark Banner]
 
 * Backout bug 1257154 due to crashes and leaks seen in mozilla-central. rs=Standard8. [Mark Banner]
 

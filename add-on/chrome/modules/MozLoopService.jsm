@@ -1354,7 +1354,7 @@ this.MozLoopService = {
    *
    * @return {Promise}
    */
-  initialize: Task.async(function*(addonVersion) {
+  initialize: Task.async(function* (addonVersion) {
     // Ensure we don't setup things like listeners more than once.
     if (gServiceInitialized) {
       return Promise.resolve();
@@ -1482,7 +1482,7 @@ this.MozLoopService = {
    * Can be called more than once (e.g. if the initial setup fails at some phase).
    * @param {Deferred} deferredInitialization
    */
-  delayedInitialize: Task.async(function*(deferredInitialization) {
+  delayedInitialize: Task.async(function* (deferredInitialization) {
     log.debug("delayedInitialize");
     // Set or clear an error depending on how deferredInitialization gets resolved.
     // We do this first so that it can handle the early returns below.
@@ -1834,7 +1834,7 @@ this.MozLoopService = {
    *
    * @return {Promise} that resolves when the FxA logout flow is complete.
    */
-  logOutFromFxA: Task.async(function*() {
+  logOutFromFxA: Task.async(function* () {
     log.debug("logOutFromFxA");
     try {
       yield MozLoopServiceInternal.unregisterFromLoopServer(LOOP_SESSION_TYPE.FXA);

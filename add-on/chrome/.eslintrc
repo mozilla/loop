@@ -2,15 +2,14 @@
 // This is applied on top of the basic .eslintrc for gecko specific directories
 // e.g. the modules directory.
 {
-  "ecmaFeatures": {
-    "arrowFunctions": true,
-    "blockBindings": true,
-    "destructuring": true,
-    "generators": true,
-    "objectLiteralShorthandMethods": true,
-    "restParams": true,
-    "spread": true,
-    "templateStrings": true,
+  "env": {
+    "es6": true,
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true,
+    },
+    "ecmaVersion": 6,
   },
   "globals": {
     // Bootstrap magic globals.
@@ -54,6 +53,7 @@
     "NewTabURL": false,
     "onmessage": true,
     "OS": false,
+    "PanelFrame": false,
     "PluralForm": false,
     "PrivateBrowsingUtils": false,
     "RemotePages": false,

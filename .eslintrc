@@ -4,19 +4,11 @@
   "plugins": [
     "react"
   ],
-  "ecmaFeatures": {
-    // Allow these.
-    "forOf": true,
-    "jsx": true,
-    // Disallow due to content.
-    "arrowFunctions": false,
-    "blockBindings": false,
-    "destructuring": false,
-    "generators": false,
-    "objectLiteralShorthandMethods": false,
-    "restParams": false,
-    "spread": false,
-    "templateStrings": false,
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true,
+    },
+    "ecmaVersion": 5,
   },
   "env": {
     "browser": true,
@@ -38,7 +30,12 @@
     "performance": false,
     "Promise": false,
     "React": false,
-    "sinon": false
+    "sinon": false,
+    // Items we specifically want to allow to be used, but eslint dumps
+    // under "ecmaVersion: 6" which we don't want to enable for now.
+    "Uint8Array": false,
+    "DataView": false,
+    "ArrayBuffer": false
   },
   "rules": {
     // turn off all kinds of stuff that we actually do want, because
@@ -62,6 +59,7 @@
     "generator-star-spacing": [2, {"before": false, "after": true}],
     "jsx-quotes": [2, "prefer-double"],
     "key-spacing": [2, {"beforeColon": false, "afterColon": true }],
+    "keyword-spacing": 2,
     "linebreak-style": [2, "unix"],
     "new-cap": 0,                 // TODO: set to 2
     "new-parens": 2,
@@ -75,7 +73,6 @@
     "no-duplicate-case": 2,
     "no-else-return": 2,
     "no-empty": 2,
-    "no-empty-label": 2,
     "no-eval": 2,
     "no-extend-native": 2, // XXX
     "no-extra-bind": 0,           // Leave as 0
@@ -121,13 +118,10 @@
     "quotes": [2, "double", "avoid-escape"],
     "semi": 2,
     "semi-spacing": [2, {"before": false, "after": true}],
-    "space-after-keywords": 2,
     "space-before-blocks": 2,
     "space-before-function-paren": [2, "never"],
-    "space-before-keywords": 2,
     "space-infix-ops": 2,
     "space-in-parens": [2, "never"],
-    "space-return-throw-case": 2,
     "space-unary-ops": [2, {"words": true, "nonwords": false}],
     "spaced-comment": [2, "always"],
     "strict": [2, "function"],

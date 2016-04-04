@@ -34,16 +34,18 @@ loop.panel = (function(_, mozL10n) {
     },
 
     renderGettingStartedButton: function() {
-      if (!this.props.displayRoomListContent) {
-        return (
-          <div className="fte-button-container">
-            <Button additionalClass="fte-get-started-button"
-                    caption={mozL10n.get("first_time_experience_button_label2")}
-                    htmlId="fte-button"
-                    onClick={this.handleButtonClick} />
-          </div>
-        );
+      if (this.props.displayRoomListContent) {
+        return null;
       }
+
+      return (
+        <div className="fte-button-container">
+          <Button additionalClass="fte-get-started-button"
+                  caption={mozL10n.get("first_time_experience_button_label2")}
+                  htmlId="fte-button"
+                  onClick={this.handleButtonClick} />
+        </div>
+      );
     },
 
     render: function() {
@@ -772,6 +774,7 @@ loop.panel = (function(_, mozL10n) {
       return new Error("Required prop `" + propName +
         "` was not correctly specified in `" + componentName + "`.");
     }
+    return null;
   }
 
   /**
@@ -838,6 +841,8 @@ loop.panel = (function(_, mozL10n) {
       if (this.state.rooms.length > 5) {
         return (<div className="room-list-blur" />);
       }
+
+      return null;
     },
 
     render: function() {

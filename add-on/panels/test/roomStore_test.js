@@ -59,6 +59,7 @@ describe("loop.store.RoomStore", function() {
         if (prefName === "debug.dispatcher") {
           return false;
         }
+        return true;
       },
       NotifyUITour: function() {},
       OpenURL: sinon.stub(),

@@ -808,11 +808,6 @@ loop.shared.views = (function(_, mozL10n) {
         return <div className="no-video"/>;
       }
 
-      var optionalProps = {};
-      if (this.props.posterUrl) {
-        optionalProps.poster = this.props.posterUrl;
-      }
-
       // For now, always mute media. For local media, we should be muted anyway,
       // as we don't want to hear ourselves speaking.
       //
@@ -828,9 +823,9 @@ loop.shared.views = (function(_, mozL10n) {
           <RemoteCursorView
             videoElementSize={this.state.videoElementSize} /> :
             null}
-          <video {...optionalProps}
-                 className={this.props.mediaType + "-video"}
-                 muted />
+          <video className={this.props.mediaType + "-video"}
+                 muted
+                 poster={this.props.posterUrl} />
         </div>
       );
     }

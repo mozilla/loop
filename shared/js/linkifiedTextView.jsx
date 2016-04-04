@@ -88,9 +88,13 @@ loop.shared.views.LinkifiedTextView = (function() {
         // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
         sanitizeURL = loop.shared.utils.formatURL(result[0]);
         if (sanitizeURL && sanitizeURL.location) {
+          var linkAttributes = this._generateLinkAttributes(sanitizeURL.location);
           elements.push(
-            <a { ...this._generateLinkAttributes(sanitizeURL.location) }
-              key={reactElementsCounter++}>
+            <a href={linkAttributes.href}
+               key={reactElementsCounter++}
+               onClick={linkAttributes.onClick}
+               rel={linkAttributes.rel}
+               target={linkAttributes.target}>
               {sanitizeURL.location}
             </a>
           );

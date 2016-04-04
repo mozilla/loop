@@ -616,7 +616,7 @@ var WindowListener = {
         this.activeSound.load();
         this.activeSound.play();
 
-        this.activeSound.addEventListener("ended", () => this.activeSound = undefined, false);
+        this.activeSound.addEventListener("ended", () => { this.activeSound = undefined; }, false);
       },
 
       /**
@@ -912,12 +912,13 @@ var WindowListener = {
        * Handles events from gBrowser.
        */
       handleEvent: function(event) {
+
         switch (event.type) {
           case "DOMTitleChanged":
             // Get the new title of the shared tab
             this._notifyBrowserSwitch();
             break;
-          case "TabSelect":
+          case "TabSelect": {
             let wasVisible = false;
             // Hide the infobar from the previous tab.
             if (event.detail.previousTab) {
@@ -936,6 +937,7 @@ var WindowListener = {
               this._maybeShowBrowserSharingInfoBar();
             }
             break;
+          }
           case "mousemove":
             this.handleMousemove(event);
             break;

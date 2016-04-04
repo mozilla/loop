@@ -53,8 +53,13 @@ function promiseNewTabLocation() {
   let tab = gBrowser.selectedTab;
   createdTabs.push(tab);
 
-  // Have the tab's content process pass back its location as a promise
-  return ContentTask.spawn(tab.linkedBrowser, null, () => content.location.href);
+  // If we're already loaded, then just get the location.
+  if (tab.linkedBrowser.contentDocument.readyState === "complete") {
+    return ContentTask.spawn(tab.linkedBrowser, null, () => content.location.href);
+  }
+
+  // Otherwise, wait for the load to complete.
+  return BrowserTestUtils.browserLoaded(tab.linkedBrowser);
 }
 
 function promiseRemoveTab(tab) {
@@ -74,6 +79,14 @@ function* removeTabs() {
 
   createdTabs = [];
 }
+
+add_task(function* test_setup() {
+  Services.prefs.setBoolPref("loop.remote.autostart", true);
+
+  registerCleanupFunction(() => {
+    Services.prefs.clearUserPref("loop.remote.autostart");
+  });
+});
 
 add_task(function* test_singleListener() {
   yield promiseWindowIdReceivedOnAdd(handlers[0]);
@@ -200,6 +213,7 @@ add_task(function* test_newtabLocation() {
   // Check location after sharing
   yield promiseWindowIdReceivedOnAdd(handlers[0]);
   let locationAfterSharing = yield promiseNewTabLocation();
+  info("Location after sharing: " + locationAfterSharing);
   Assert.ok(locationAfterSharing.match(/about:?home/));
 
   // Check location after stopping sharing

@@ -81,6 +81,7 @@ require("imports?loop=>window.loop!exports?loop!shared/js/store.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/activeRoomStore.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/remoteCursorStore.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/views.js");
+require("imports?loop=>window.loop!exports?loop!shared/js/toc.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/urlRegExps.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/textChatStore.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/textChatView.js");

@@ -70,13 +70,74 @@ loop.shared.toc = (function() {
       isDesktop: React.PropTypes.bool.isRequired
     },
 
+    getInitialState: function() {
+      return {
+        editMode: false,
+        roomName: "#ROOM NAME"
+      };
+    },
+
+    toggleEditMode: function() {
+      this.setState({
+        editMode: true
+      });
+    },
+
+    /**
+     * Handles a key being pressed - looking for the return key for saving
+     * the new room name.
+     */
+    handleKeyDown: function(event) {
+      if (event.which === 13) {
+        this.exitEditMode();
+      }
+    },
+
+    exitEditMode: function() {
+      this.setState({ editMode: false });
+    },
+
+    handleEditInputChange: function(event) {
+      this.setState({ roomName: event.target.value });
+    },
+
     render: function() {
       return (
         <div className="toc-room-info-bar">
-          <h1>#ROOM NAME</h1>
+          <div className="room-name">
+            {
+              !this.state.editMode ?
+              <h1 onClick={this.toggleEditMode}>{this.state.roomName}</h1> :
+              <input
+                className="edit-room-name"
+                onBlur={this.exitEditMode}
+                onChange={this.handleEditInputChange}
+                onKeyDown={this.handleKeyDown}
+                type="text"
+                value={this.state.roomName} />
+            }
+          </div>
+          <RoomPresenceView />
           <RoomActionsView
             addUrlTile={this.props.addUrlTile}
             isDesktop={this.props.isDesktop} />
+        </div>
+      );
+    }
+  });
+
+  var RoomPresenceView = React.createClass({
+    propTypes: {},
+
+    render: function() {
+      return (
+        <div className="room-active-users">
+          <div className="room-user" data-name="Pau Masiá">
+            <span>P</span>
+          </div>
+          <div className="room-user" data-name="Manu">
+            <span>M</span>
+          </div>
         </div>
       );
     }
@@ -218,6 +279,9 @@ loop.shared.toc = (function() {
     render: function() {
       return (
         <div className="toc-tile">
+          <div className="room-user" data-name="Pau Masiá">
+            <span>P</span>
+          </div>
           <img className="tile-screenshot" src={this.state.screenshot} />
           <div className="tile-info">
             <a

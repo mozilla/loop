@@ -21,12 +21,17 @@
 .toc-wrapper > .toc-room-info-bar {
   text-align: left;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.toc-wrapper > .toc-room-info-bar > h1 {
+.toc-wrapper > .toc-room-info-bar > .room-name {
+  font-size: 16px;
+  font-weight: bold;
+  flex-grow: 2;
+}
+
+.toc-wrapper > .toc-room-info-bar > .room-name > .edit-room-name {
   font-size: 16px;
   font-weight: bold;
 }
@@ -79,6 +84,55 @@
   width: 100%;
 }
 
+.toc-wrapper > .toc-room-info-bar > .room-active-users > .room-user,
+.toc-wrapper > .room-toc > .toc-tile > .room-user {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  background-color: #333;
+  color: #fff;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.toc-wrapper > .toc-room-info-bar > .room-active-users > .room-user:hover:after,
+.toc-wrapper > .room-toc > .toc-tile > .room-user:hover:after {
+  background: #333;
+  background: rgba(0,0,0,.8);
+  border-radius: 5px;
+  top: 37px;
+  color: #fff;
+  content: attr(data-name);
+  position: absolute;
+  z-index: 98;
+  min-width: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.toc-wrapper > .room-toc > .toc-tile > .room-user:hover:after {
+  left: 0;
+  transform: none;
+}
+
+.toc-wrapper > .toc-room-info-bar > .room-active-users > .room-user:hover:before,
+.toc-wrapper > .room-toc > .toc-tile > .room-user:hover:before {
+  border: solid;
+  border-color: #333 transparent;
+  border-width: 0 6px 6px;
+  top: 31px;
+  content: "";
+  left: 50%;
+  position: absolute;
+  z-index: 99;
+  transform: translateX(-50%);
+}
+
+/* TOC items */
+
 .toc-wrapper > .room-toc {
   width: 100%;
   display: flex;
@@ -93,6 +147,14 @@
   background: #a6a6a6;
   box-shadow: 1px 2px 4px rgba(0,0,0,.4);
   margin: 0 20px 20px 0;
+  position: relative;
+}
+
+.toc-wrapper > .room-toc > .toc-tile > .room-user {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  margin: 0;
 }
 
 .toc-wrapper > .room-toc > .toc-tile > .tile-screenshot {

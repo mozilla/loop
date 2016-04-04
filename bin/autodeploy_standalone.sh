@@ -58,6 +58,6 @@ make dist_standalone
 echo Copying...
 
 cp ${BASEDIR}/loop-config.js ${BASEDIR}/loop/dist/standalone/config.js
-/usr/bin/rsync --archive ${BASEDIR}/loop/dist/standalone/ ${BASEDIR}/ec2-user/loop-standalone/
+/usr/bin/rsync --archive ${BASEDIR}/loop/dist/standalone/ ${BASEDIR}/loop-standalone/
 
 echo Done

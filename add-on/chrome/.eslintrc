@@ -68,7 +68,6 @@
   },
   "rules": {
     "arrow-parens": 0,         // TBD
-    "arrow-spacing": 2,
     "eqeqeq": 0,               // TBD
     // We should fix the errors and enable this (set to 2)
     "no-var": 0,

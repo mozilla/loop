@@ -929,7 +929,7 @@
                            summary="Standalone Unsupported Browser"
                            width={480}>
               <div className="standalone">
-                <UnsupportedBrowserView isFirefox={false}/>
+                <UnsupportedBrowserView isFirefox={false} />
               </div>
             </FramedExample>
           </Section>
@@ -941,7 +941,7 @@
                            summary="Standalone Unsupported Device"
                            width={480}>
               <div className="standalone">
-                <UnsupportedDeviceView platform="ios"/>
+                <UnsupportedDeviceView platform="ios" />
               </div>
             </FramedExample>
           </Section>
@@ -1403,7 +1403,7 @@
             <FramedExample height={308}
                            summary="10x10"
                            width={730}>
-              <SVGIcons size="10x10"/>
+              <SVGIcons size="10x10" />
             </FramedExample>
             <FramedExample height={768}
                            summary="14x14"
@@ -1413,7 +1413,7 @@
             <FramedExample height={550}
                            summary="16x16"
                             width={730}>
-              <SVGIcons size="16x16"/>
+              <SVGIcons size="16x16" />
             </FramedExample>
           </Section>
 
@@ -1433,7 +1433,7 @@
     render: function() {
       // if no errors, return blank
       return !this.props.errorDetected ? null :
-      (<li className = "test fail">
+      (<li className="test fail">
           <h2>
             {this.props.summary}
           </h2>
@@ -1457,8 +1457,8 @@
       var totalFailures = warningsDetected + !!this.props.error;
 
       return (
-        <div className = "error-summary">
-          <div className = "failures">
+        <div className="error-summary">
+          <div className="failures">
             <a>failures: </a>
             <em>{totalFailures}</em>
           </div>

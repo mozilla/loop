@@ -466,15 +466,15 @@ loop.standaloneRoomViews = (function(mozL10n) {
           <sharedViews.VideoMuteButton
             disabled={this.props.forceVideoDisabled}
             dispatcher={this.props.dispatcher}
-            muted={!this.props.video.enabled}/>
+            muted={!this.props.video.enabled} />
           <sharedViews.AudioMuteButton
             disabled={this.props.forceAudioDisabled}
             dispatcher={this.props.dispatcher}
-            muted={!this.props.audio.enabled}/>
+            muted={!this.props.audio.enabled} />
           <GeneralSupportURL dispatcher={this.props.dispatcher} />
           <sharedViews.HangUpControlButton
             action={this.props.leaveRoom}
-            title={mozL10n.get("rooms_leave_button_label")}/>
+            title={mozL10n.get("rooms_leave_button_label")} />
         </div>
       );
     },
@@ -486,7 +486,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
           <div className="standalone-info-bar-spacer">
             <StandaloneInfoView
               dispatcher={this.props.dispatcher}
-              room={this.props.room}/>
+              room={this.props.room} />
           </div>
           {this.renderButtons()}
         </div>

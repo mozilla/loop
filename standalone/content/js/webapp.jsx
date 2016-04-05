@@ -40,7 +40,7 @@ loop.webapp = (function(_, OT, mozL10n) {
             <h1>{mozL10n.get("incompatible_browser_heading")}</h1>
             <h4>{mozL10n.get("incompatible_browser_message")}</h4>
           </div>
-          <PromoteFirefoxView isFirefox={this.props.isFirefox}/>
+          <PromoteFirefoxView isFirefox={this.props.isFirefox} />
         </div>
       );
     }
@@ -134,10 +134,10 @@ loop.webapp = (function(_, OT, mozL10n) {
     render: function() {
       switch (this.state.windowType) {
         case "unsupportedDevice": {
-          return <UnsupportedDeviceView platform={this.state.unsupportedPlatform}/>;
+          return <UnsupportedDeviceView platform={this.state.unsupportedPlatform} />;
         }
         case "unsupportedBrowser": {
-          return <UnsupportedBrowserView isFirefox={this.state.isFirefox}/>;
+          return <UnsupportedBrowserView isFirefox={this.state.isFirefox} />;
         }
         case "room": {
           return (

@@ -268,7 +268,7 @@ loop.shared.desktopViews = (function(mozL10n) {
             <i className="icon icon-add-share-service"></i>
             <span>{mozL10n.get("share_add_service_button")}</span>
           </li>
-          {this.props.socialShareProviders.length ? <li className="dropdown-menu-separator"/> : null}
+          {this.props.socialShareProviders.length ? <li className="dropdown-menu-separator" /> : null}
           {
             this.props.socialShareProviders.map(function(provider, idx) {
               return (
@@ -276,7 +276,7 @@ loop.shared.desktopViews = (function(mozL10n) {
                     data-provider={provider.origin}
                     key={"provider-" + idx}
                     onClick={this.handleProviderClick}>
-                  <img className="icon" src={provider.iconURL}/>
+                  <img className="icon" src={provider.iconURL} />
                   <span>{provider.name}</span>
                 </li>
               );

@@ -64,7 +64,7 @@ loop.panel = (function(_, mozL10n) {
                   mozL10n.get("first_time_experience_subheading2")}
             </div>
             {this.props.displayRoomListContent ?
-              null : <hr className="fte-separator"/>}
+              null : <hr className="fte-separator" />}
             <div className="fte-content">
               {this.props.displayRoomListContent ?
                 mozL10n.get("first_time_experience_content2") :
@@ -164,7 +164,7 @@ loop.panel = (function(_, mozL10n) {
         <div className="powered-by-wrapper" id="powered-by-wrapper">
           <p className="powered-by" id="powered-by">
             {mozL10n.get("powered_by_beforeLogo")}
-            <span className={locale} id="powered-by-logo"/>
+            <span className={locale} id="powered-by-logo" />
             {mozL10n.get("powered_by_afterLogo")}
           </p>
           <p className="terms-service"
@@ -572,7 +572,7 @@ loop.panel = (function(_, mozL10n) {
               onChange={this.handleEditInputChange}
               onKeyDown={this.handleKeyDown}
               type="text"
-              value={this.state.newRoomName}/>}
+              value={this.state.newRoomName} />}
           {this.props.isOpenedRoom || this.state.editMode ? null :
             <RoomEntryContextButtons
               dispatcher={this.props.dispatcher}
@@ -1197,7 +1197,7 @@ loop.panel = (function(_, mozL10n) {
                      onBlur={this.handleBlur}
                      onFocus={this.handleFocus}
                      onKeyDown={this.handleKeyDown}
-                     type="text"/>
+                     type="text" />
             </div>
           </div>
           <Button additionalClass="rename-button"
@@ -1422,7 +1422,7 @@ loop.panel = (function(_, mozL10n) {
             <RoomList dispatcher={this.props.dispatcher}
               store={this.props.roomStore} />
             <div className="footer">
-                <AccountLink userProfile={this.props.userProfile || this.state.userProfile}/>
+                <AccountLink userProfile={this.props.userProfile || this.state.userProfile} />
               <div className="signin-details">
                 <SettingsDropdown />
               </div>

@@ -35,7 +35,7 @@ loop.shared.views = (function(_, mozL10n) {
       return (
           <button className="btn btn-hangup"
                   onClick={this.handleClick}
-                  title={this.props.title}/>
+                  title={this.props.title} />
       );
     }
   });
@@ -216,16 +216,16 @@ loop.shared.views = (function(_, mozL10n) {
           this.props.showHangup && showButtons ?
           <li className="conversation-toolbar-btn-box btn-hangup-entry">
             <HangUpControlButton action={this.handleClickHangup}
-                                 title={mozL10n.get("rooms_leave_button_label")}/>
+                                 title={mozL10n.get("rooms_leave_button_label")} />
           </li> : null
         }
 
           <li className="conversation-toolbar-btn-box">
             <div className={mediaButtonGroupCssClasses}>
                 <VideoMuteButton dispatcher={this.props.dispatcher}
-                                 muted={!this.props.video.enabled}/>
+                                 muted={!this.props.video.enabled} />
                 <AudioMuteButton dispatcher={this.props.dispatcher}
-                                 muted={!this.props.audio.enabled}/>
+                                 muted={!this.props.audio.enabled} />
             </div>
           </li>
         </ul>
@@ -545,7 +545,7 @@ loop.shared.views = (function(_, mozL10n) {
     mixins: [React.addons.PureRenderMixin],
 
     render: function() {
-        return <div className="avatar"/>;
+        return <div className="avatar" />;
     }
   });
 
@@ -558,7 +558,7 @@ loop.shared.views = (function(_, mozL10n) {
     render: function() {
         return (
           <div className="loading-background">
-            <div className="loading-stream"/>
+            <div className="loading-stream" />
           </div>
         );
     }
@@ -872,7 +872,7 @@ loop.shared.views = (function(_, mozL10n) {
       }
 
       if (!this.props.srcMediaElement && !this.props.posterUrl) {
-        return <div className="no-video"/>;
+        return <div className="no-video" />;
       }
 
       // For now, always mute media. For local media, we should be muted anyway,
@@ -891,7 +891,7 @@ loop.shared.views = (function(_, mozL10n) {
             videoElementSize={this.state.videoElementSize} /> :
             null}
           <video className={this.props.mediaType + "-video"}
-                 muted
+                 muted={true}
                  poster={this.props.posterUrl} />
         </div>
       );

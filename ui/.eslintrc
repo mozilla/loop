@@ -5,4 +5,8 @@
   "parserOptions": {
     "ecmaVersion": 6,
   },
+  "rules": {
+    # Disable for the ui-showcase as it isn't production code.
+    "react/jsx-no-literals": 0
+  },
 }

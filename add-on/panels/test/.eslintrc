@@ -1,21 +1,4 @@
 {
-  "env": {
-    "es6": true,
-  },
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true,
-      "arrowFunctions": true,
-      "blockBindings": true,
-      "destructuring": true,
-      "generators": true,
-      "objectLiteralShorthandMethods": true,
-      "restParams": true,
-      "spread": true,
-      "templateStrings": true,
-    },
-    "ecmaVersion": 6,
-  },
   "rules": {
     // This is useful for some of the tests, e.g.
     // expect(new Foo()).to.Throw(/error/)

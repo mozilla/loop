@@ -224,7 +224,9 @@ describe("loop.panel", function() {
       },
       locale: "en-US"
     });
-    sandbox.stub(document.mozL10n, "get").returns("Fake title");
+    sandbox.stub(document.mozL10n, "get", function(stringName) {
+      return stringName;
+    });
   });
 
   afterEach(function() {
@@ -512,6 +514,18 @@ describe("loop.panel", function() {
           view = mountTestComponent();
         });
 
+        it("should show a message to turn notifications off when they are on", function() {
+          LoopMochaUtils.stubLoopRequest({
+            GetDoNotDisturb: function() { return false; }
+          });
+
+          view.showDropdownMenu();
+
+          var menuitem = view.getDOMNode().querySelector(".entry-settings-notifications");
+
+          expect(menuitem.textContent).eql("settings_menu_item_turnnotificationsoff");
+        });
+
         it("should toggle mozLoop.doNotDisturb to false", function() {
           var stub = sinon.stub();
           LoopMochaUtils.stubLoopRequest({
@@ -524,6 +538,18 @@ describe("loop.panel", function() {
 
           sinon.assert.calledOnce(stub);
           sinon.assert.calledWithExactly(stub, false);
+        });
+
+        it("should show a message to turn notifications on when they are off", function() {
+          LoopMochaUtils.stubLoopRequest({
+            GetDoNotDisturb: function() { return true; }
+          });
+
+          view.showDropdownMenu();
+
+          var menuitem = view.getDOMNode().querySelector(".entry-settings-notifications");
+
+          expect(menuitem.textContent).eql("settings_menu_item_turnnotificationson");
         });
 
         it("should toggle mozLoop.doNotDisturb to true", function() {
@@ -1384,7 +1410,7 @@ describe("loop.panel", function() {
       var view = createTestComponent();
 
       var node = view.getDOMNode();
-      expect(node.querySelector(".room-entry h2").textContent).to.equal("Fake title");
+      expect(node.querySelector(".room-entry h2").textContent).to.equal("room_name_untitled_page");
     });
 
     describe("computeAdjustedTopPosition", function() {

@@ -233,7 +233,7 @@ loop.panel = (function(_, mozL10n) {
         ).then(function(results) {
           this.setState({
             signedIn: !!results[0],
-            doNotDisturb: results[2]
+            doNotDisturb: results[1]
           });
         }.bind(this));
       }

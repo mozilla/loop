@@ -1155,6 +1155,17 @@ describe("loop.panel", function() {
       expect(view.getDOMNode().querySelectorAll(".room-list-loading").length).to.eql(1);
     });
 
+    it("should disable the room list after room creation", function() {
+      // Simulate that the user has clicked the browse button with other rooms.
+      var view = createTestComponent();
+      roomStore.setStoreState({
+        pendingCreation: true,
+        rooms: roomList
+      });
+
+      expect(view.getDOMNode().querySelectorAll(".room-list-pending-creation").length).to.eql(1);
+    });
+
     it("should show multiple rooms in list with no opened room", function() {
       roomStore.setStoreState({ rooms: roomList });
 

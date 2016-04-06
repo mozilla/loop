@@ -1,12 +1,59 @@
 # Changelog
 
-## 1.1.15
+## 1.1.16
+
+### Other
+
+* Backout bug 1254517 / changeset fe53ee3 as it broke the deployment process. [Mark Banner]
+
+
+## v1.2.5 (2016-04-04)
+
+### Chores
+
+* Update L10n from changeset f04c0f7666d6a40756dff8fc36dcb288fad22cfa. [Mark Banner]
+
+### Other
+
+* 1.2.5. [Mark Banner]
+
+* Backout bug 1254517 / da209dbf0f17a02f8440730b5b2c5d777af72945 - due to breaking the standalone deployment build. [Mark Banner]
+
+
+## v1.2.4 (2016-03-30)
+
+### New
+
+* No bug. Update python packages to the latest version and improve handling of our pip requirements. r=dcritch. [Mark Banner]
+
+* No bug. Attempt to fix intermittent functional test failures by completing actions for closing the share panel before removing the panel itself. rs=dmose. [Mark Banner]
+
+* Bug 1253013 - Allow Whitelist urls to be clickable in context. r=dmose. [David Critchley]
+
+### Chores
+
+* Update L10n from changeset 90504350c02aacdf0621c55099fb2068222cf8ce. [Mark Banner]
+
+* Update firefox-profile to version 0.3.12. r=standard8. [greenkeeperio-bot]
+
+### Other
+
+* 1.2.4. [Mark Banner]
+
+* Backout bug 1257154 due to crashes and leaks seen in mozilla-central. rs=Standard8. [Mark Banner]
+
+
+## v1.1.15 (2016-03-24)
 
 ### New
 
 * Bug 1254517 - VERSION.txt is missing from loop standalone deployments. r=fcampo. [Mark Banner]
 
 * Bug 1253013 - Allow Whitelist urls to be clickable in context. r=dmose. [David Critchley]
+
+### Other
+
+* 1.1.15. [David Critchley]
 
 
 ## v1.2.3 (2016-03-23)

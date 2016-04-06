@@ -316,12 +316,12 @@ loop.standaloneRoomViews = (function(mozL10n) {
           return (
             <div className="room-notification-area">
               <div className="room-notification-header">
-                <h2>You have disconnected.</h2>
+                <h2>{mozL10n.get("room_user_left_label")}</h2>
               </div>
               <div className="room-notification-content">
                 <button className="btn btn-join btn-info"
                         onClick={this.props.joinRoom}>
-                  Rejoin
+                  {mozL10n.get("rooms_rejoin_button")}
                 </button>
                 {!this.props.isFirefox ? this._renderPromoteFirefoxView() : null}
               </div>

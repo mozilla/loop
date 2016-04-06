@@ -909,7 +909,7 @@ describe("loop.standaloneRoomViews", function() {
           expect(view.getDOMNode().querySelector(".room-notification-header h2"))
             .not.eql(null);
           expect(view.getDOMNode().querySelector(".room-notification-header h2").textContent)
-            .eql("You have disconnected.");
+            .eql("room_user_left_label");
           expect(view.getDOMNode().querySelector(".btn-join"))
             .not.eql(null);
         });

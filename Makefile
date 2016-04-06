@@ -413,8 +413,9 @@ dist_export:
 	# Use a modified install.rdf.in rather than install.rdf.
 	rm -f $(DIST_EXPORT_DIR)/install.rdf
 	# mozilla-central and other Firefox repositories don't need the date field.
-	@sed -e 's/@LOOP_XPI_DATE@//' \
-	    $(ADD-ON)/install.rdf.in > $(DIST_EXPORT_DIR)/install.rdf.in
+	@sed -e 's/@LOOP_XPI_DATE@//' $(ADD-ON)/install.rdf.in | \
+	  sed -e 's/Firefox Hello Beta/Firefox Hello/' > \
+	    $(DIST_EXPORT_DIR)/install.rdf.in
 	# jar.mn is used for Firefox build
 	rm -f $(DIST_EXPORT_DIR)/chrome.manifest
 	rm -f $(DIST_EXPORT_DIR)/chrome/locale/chrome.manifest
@@ -493,7 +494,7 @@ endif
 .PHONY: build
 build: add-on standalone ui
 
-GIT_EXPORT_LOCATION := ../gecko-dev
+GIT_EXPORT_LOCATION := $(shell echo $${GIT_EXPORT_LOCATION-../gecko-dev})
 GIT_EXPORT_DIR := $(GIT_EXPORT_LOCATION)/browser/extensions/loop
 
 ifeq ($(shell uname -s),Linux)

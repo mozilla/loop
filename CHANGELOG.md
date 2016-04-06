@@ -1,12 +1,44 @@
 # Changelog
 
-## 1.2.5
+## 1.2.6
+
+### New
+
+* Bug 1259859 - Add a test that looks for misused characters in user-facing strings. r=dolske,jryans. [Jared Wein]
+
+* Bug 1138638 - Actually land the follow-up fixes. r=mikedeboer. [Mark Banner]
+
+* Bug 1138638 - Make Loop's browser sharing work properly in e10s mode and enable the mochitest. r=mikedeboer. [Mark Banner]
+
+* Bug 1262240 - Remove 'Beta' from Hello system add-on extension name when exported to be built into Firefox. r=mancas. [Mark Banner]
+
+* Bug 1261118 - Fix regression where the Turn notifications on/off button doesn't update its state. r=mancas. [Mark Banner]
+
+* Bug 1261843 - Two conversation can be opened while the new Sharing panel is shown. r=dcritch. [Ed Lee]
+
+### Chores
+
+* Update L10n from changeset 83bceac013cce01ab6024e8d026dccd8bd5500b7. [Mark Banner]
+
+
+## v1.1.16 (2016-04-06)
+
+### Other
+
+* 1.1.16. [Mark Banner]
+
+* Backout bug 1254517 / changeset fe53ee3 as it broke the deployment process. [Mark Banner]
+
+
+## v1.2.5 (2016-04-04)
 
 ### Chores
 
 * Update L10n from changeset f04c0f7666d6a40756dff8fc36dcb288fad22cfa. [Mark Banner]
 
 ### Other
+
+* 1.2.5. [Mark Banner]
 
 * Backout bug 1254517 / da209dbf0f17a02f8440730b5b2c5d777af72945 - due to breaking the standalone deployment build. [Mark Banner]
 

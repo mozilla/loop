@@ -51,15 +51,16 @@ function* promiseWindowIdReceivedNewTab(handlersParam = []) {
 function promiseNewTabLocation() {
   BrowserOpenTab();
   let tab = gBrowser.selectedTab;
+  let browser = tab.linkedBrowser;
   createdTabs.push(tab);
 
   // If we're already loaded, then just get the location.
-  if (tab.linkedBrowser.contentDocument.readyState === "complete") {
-    return ContentTask.spawn(tab.linkedBrowser, null, () => content.location.href);
+  if (browser.contentDocument.readyState === "complete") {
+    return ContentTask.spawn(browser, null, () => content.location.href);
   }
 
   // Otherwise, wait for the load to complete.
-  return BrowserTestUtils.browserLoaded(tab.linkedBrowser);
+  return BrowserTestUtils.browserLoaded(browser);
 }
 
 function promiseRemoveTab(tab) {
@@ -79,14 +80,6 @@ function* removeTabs() {
 
   createdTabs = [];
 }
-
-add_task(function* test_setup() {
-  Services.prefs.setBoolPref("loop.remote.autostart", true);
-
-  registerCleanupFunction(() => {
-    Services.prefs.clearUserPref("loop.remote.autostart");
-  });
-});
 
 add_task(function* test_singleListener() {
   yield promiseWindowIdReceivedOnAdd(handlers[0]);

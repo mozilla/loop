@@ -356,9 +356,6 @@ dist_standalone: standalone
 		-p -v --display-errors )
 	sed 's#webappEntryPoint.js#js/standalone.js#' \
 		< $(BUILT)/standalone/content/index.html > $(DIST)/standalone/index.html
-	# Now create a version file.
-	@git describe --always --tag > $(DIST)/standalone/VERSION.txt
-	@git log -1 --format="%H%n%aD" >> $(DIST)/standalone/VERSION.txt
 
 # so we can type "make xpi" without depend on the file directly
 .PHONY: xpi

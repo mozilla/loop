@@ -52,6 +52,7 @@ loop.shared.views = (function(_, mozL10n) {
   var MediaControlButton = React.createClass({
     propTypes: {
       action: React.PropTypes.func.isRequired,
+      disabled: React.PropTypes.bool,
       muted: React.PropTypes.bool.isRequired,
       scope: React.PropTypes.string.isRequired,
       title: React.PropTypes.string,
@@ -60,7 +61,11 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     getDefaultProps: function() {
-      return { muted: false, visible: true };
+      return {
+        disabled: false,
+        muted: false,
+        visible: true
+      };
     },
 
     handleClick: function() {
@@ -75,8 +80,9 @@ loop.shared.views = (function(_, mozL10n) {
         "media-control": true,
         "transparent-button": true,
         "local-media": this.props.scope === "local",
-        "muted": this.props.muted,
-        "hide": !this.props.visible
+        "muted": this.props.muted || this.props.disabled,
+        "hide": !this.props.visible,
+        "disabled": this.props.disabled
       };
       classesObj["btn-mute-" + this.props.type] = true;
       return cx(classesObj);
@@ -87,7 +93,7 @@ loop.shared.views = (function(_, mozL10n) {
         return this.props.title;
       }
 
-      var prefix = this.props.muted ? "unmute" : "mute";
+      var prefix = this.props.muted || this.props.disabled ? "unmute" : "mute";
       var suffix = (this.props.type === "video") ? "button_title2" : "button_title";
       var msgId = [prefix, this.props.scope, this.props.type, suffix].join("_");
       return mozL10n.get(msgId);
@@ -229,11 +235,22 @@ loop.shared.views = (function(_, mozL10n) {
 
   var AudioMuteButton = React.createClass({
     propTypes: {
+      disabled: React.PropTypes.bool,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher),
       muted: React.PropTypes.bool.isRequired
     },
 
+    getDefaultProps: function() {
+      return {
+        disabled: false
+      };
+    },
+
     toggleAudio: function() {
+      if (this.props.disabled) {
+        return;
+      }
+
       this.props.dispatcher.dispatch(
         new sharedActions.SetMute({ type: "audio", enabled: this.props.muted })
       );
@@ -242,6 +259,7 @@ loop.shared.views = (function(_, mozL10n) {
     render: function() {
       return (
         <MediaControlButton action={this.toggleAudio}
+                            disabled={this.props.disabled}
                             muted={this.props.muted}
                             scope="local"
                             type="audio" />
@@ -251,11 +269,22 @@ loop.shared.views = (function(_, mozL10n) {
 
   var VideoMuteButton = React.createClass({
     propTypes: {
+      disabled: React.PropTypes.bool,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher),
       muted: React.PropTypes.bool.isRequired
     },
 
+    getDefaultProps: function() {
+      return {
+        disabled: false
+      };
+    },
+
     toggleVideo: function() {
+      if (this.props.disabled) {
+        return;
+      }
+
       this.props.dispatcher.dispatch(
         new sharedActions.SetMute({ type: "video", enabled: this.props.muted })
       );
@@ -264,7 +293,8 @@ loop.shared.views = (function(_, mozL10n) {
     render: function() {
       return (
         <MediaControlButton action={this.toggleVideo}
-                            muted={this.props.muted}
+                            disabled={this.props.disabled}
+                            muted={this.props.muted || this.props.disabled}
                             scope="local"
                             type="video" />
       );

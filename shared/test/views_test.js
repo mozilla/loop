@@ -96,6 +96,34 @@ describe("loop.shared.views", function() {
 
       expect(comp.getDOMNode().classList.contains("muted")).eql(true);
     });
+
+    it("should render a muted and disabled local video button", function() {
+      var comp = TestUtils.renderIntoDocument(
+        React.createElement(sharedViews.MediaControlButton, {
+          scope: "local",
+          type: "video",
+          action: function() {},
+          disabled: true,
+          muted: true
+        }));
+
+      expect(comp.getDOMNode().classList.contains("muted")).eql(true);
+      expect(comp.getDOMNode().classList.contains("disabled")).eql(true);
+    });
+
+    it("should render a muted local audio button", function() {
+      var comp = TestUtils.renderIntoDocument(
+        React.createElement(sharedViews.MediaControlButton, {
+          scope: "local",
+          type: "audio",
+          action: function() {},
+          disabled: true,
+          muted: true
+        }));
+
+      expect(comp.getDOMNode().classList.contains("muted")).eql(true);
+      expect(comp.getDOMNode().classList.contains("disabled")).eql(true);
+    });
   });
 
   describe("AudioMuteButton", function() {

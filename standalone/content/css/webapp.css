@@ -314,6 +314,11 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
   background-color: #AF352C;
 }
 
+.standalone-info-bar > .media-control-buttons > .btn-mute-audio.disabled,
+.standalone-info-bar > .media-control-buttons > .btn-mute-video.disabled {
+  opacity: .3;
+}
+
 .standalone-info-bar > .media-control-buttons > .btn-mute-audio,
 .standalone-info-bar > .media-control-buttons > .btn-mute-video {
   background-color: inherit;

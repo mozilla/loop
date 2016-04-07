@@ -451,6 +451,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
     propTypes: {
       audio: React.PropTypes.object.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      forceAudioDisabled: React.PropTypes.bool,
+      forceVideoDisabled: React.PropTypes.bool,
       leaveRoom: React.PropTypes.func.isRequired,
       room: React.PropTypes.object.isRequired,
       video: React.PropTypes.object.isRequired
@@ -459,7 +461,9 @@ loop.standaloneRoomViews = (function(mozL10n) {
     getDefaultProps: function() {
       return {
         video: { enabled: true, visible: true },
-        audio: { enabled: true, visible: true }
+        audio: { enabled: true, visible: true },
+        forceVideoDisabled: false,
+        forceAudioDisabled: false
       };
     },
 
@@ -484,9 +488,11 @@ loop.standaloneRoomViews = (function(mozL10n) {
       return (
         <div className="media-control-buttons">
           <sharedViews.VideoMuteButton
+            disabled={this.props.forceVideoDisabled}
             dispatcher={this.props.dispatcher}
             muted={!this.props.video.enabled}/>
           <sharedViews.AudioMuteButton
+            disabled={this.props.forceAudioDisabled}
             dispatcher={this.props.dispatcher}
             muted={!this.props.audio.enabled}/>
           <GeneralSupportURL dispatcher={this.props.dispatcher} />
@@ -835,6 +841,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
             audio={{ enabled: !this.state.audioMuted,
                      visible: this._roomIsActive() }}
             dispatcher={this.props.dispatcher}
+            forceAudioDisabled={!this.state.localAudioEnabled}
+            forceVideoDisabled={!this.state.localVideoEnabled}
             leaveRoom={this.leaveRoom}
             room={this.props.activeRoomStore.getStoreState()}
             video={{ enabled: !this.state.videoMuted,
@@ -848,7 +856,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
             isScreenShareLoading={this._isScreenShareLoading()}
             localPosterUrl={this.props.localPosterUrl}
             localSrcMediaElement={this.state.localSrcMediaElement}
-            localVideoMuted={this.state.videoMuted}
+            localVideoMuted={this.state.videoMuted || !this.state.localVideoEnabled}
             matchMedia={this.state.matchMedia || window.matchMedia.bind(window)}
             remotePosterUrl={this.props.remotePosterUrl}
             remoteSrcMediaElement={this.state.remoteSrcMediaElement}

@@ -708,6 +708,8 @@ describe("loop.standaloneRoomViews", function() {
         view = mountTestComponent();
         view.setState({
           audioMuted: true,
+          localAudioEnabled: true,
+          localVideoEnabled: true,
           videoMuted: true
         });
       });
@@ -732,6 +734,41 @@ describe("loop.standaloneRoomViews", function() {
           type: "video",
           enabled: true
         }));
+      });
+
+      it("should mute local video stream", function() {
+        TestUtils.Simulate.click(
+          view.getDOMNode().querySelector(".btn-mute-video"));
+
+        sinon.assert.calledOnce(dispatch);
+        sinon.assert.calledWithExactly(dispatch, new sharedActions.SetMute({
+          type: "video",
+          enabled: true
+        }));
+      });
+
+      describe("disabled states", function() {
+        beforeEach(function() {
+          view = mountTestComponent();
+          view.setState({
+            localAudioEnabled: false,
+            localVideoEnabled: false
+          });
+        });
+
+        it("should not mute local video stream if camera is not available", function() {
+          TestUtils.Simulate.click(
+            view.getDOMNode().querySelector(".btn-mute-video"));
+
+          sinon.assert.notCalled(dispatch);
+        });
+
+        it("should not mute local audio stream if mic is not available", function() {
+          TestUtils.Simulate.click(
+            view.getDOMNode().querySelector(".btn-mute-video"));
+
+          sinon.assert.notCalled(dispatch);
+        });
       });
     });
 
@@ -1026,6 +1063,7 @@ describe("loop.standaloneRoomViews", function() {
           activeRoomStore.setStoreState({
             roomState: ROOM_STATES.HAS_PARTICIPANTS,
             localSrcMediaElement: videoElement,
+            localVideoEnabled: true,
             videoMuted: false
           });
 
@@ -1034,6 +1072,7 @@ describe("loop.standaloneRoomViews", function() {
 
         it("should not render a local avatar when video_muted is false", function() {
           activeRoomStore.setStoreState({
+            localVideoEnabled: true,
             roomState: ROOM_STATES.HAS_PARTICIPANTS,
             videoMuted: false
           });
@@ -1041,15 +1080,26 @@ describe("loop.standaloneRoomViews", function() {
           expect(view.getDOMNode().querySelector(".local .avatar")).eql(null);
         });
 
+        it("should render a local avatar when local video is not enabled", function() {
+          activeRoomStore.setStoreState({
+            localVideoEnabled: false,
+            roomState: ROOM_STATES.HAS_PARTICIPANTS,
+            videoMuted: false
+          });
+
+          expect(view.getDOMNode().querySelector(".local .avatar")).not.eql(null);
+        });
+
         it("should render local loading screen when no srcMediaElement",
            function() {
              activeRoomStore.setStoreState({
+               localVideoEnabled: true,
                roomState: ROOM_STATES.MEDIA_WAIT,
                remoteSrcMediaElement: null
              });
 
              expect(view.getDOMNode().querySelector(".local .loading-stream"))
-                 .not.eql(null);
+                  .not.eql(null);
         });
 
         it("should not render local loading screen when srcMediaElement is set",

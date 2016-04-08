@@ -54,7 +54,8 @@ module.exports = function(config) {
   // Preprocess matching files before serving them to the browser.
   // Available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor .
   baseConfig.preprocessors = {
-    "built/add-on/chrome/content/panels/js/*.js": ["coverage"]
+    "built/add-on/chrome/content/panels/js/*.js": ["coverage"],
+    "built/add-on/chrome/content/panels/vendor/l10n.js": ["coverage"]
   };
 
   baseConfig.coverageReporter.dir = "built/coverage/desktop";

@@ -468,7 +468,7 @@ describe("loop.standaloneRoomViews", function() {
           .instanceOf(HTMLParagraphElement);
       });
 
-      it("should display room context info", function() {
+      it("should display room welcome message", function() {
         view = mountTestComponent({
           room: {
             roomState: ROOM_STATES.JOINED,
@@ -480,16 +480,32 @@ describe("loop.standaloneRoomViews", function() {
           }
         });
 
+        expect(view.getDOMNode().querySelector(".standalone-info-bar-context p").textContent)
+          .eql("rooms_welcome_title");
+      });
+
+      it("should display room context info", function() {
+        view = mountTestComponent({
+          room: {
+            roomState: ROOM_STATES.HAS_PARTICIPANTS,
+            roomName: "FakeRoomName",
+            roomContextUrls: [{
+              location: "http://fakeurl.com",
+              thumbnail: "fakeFavicon.ico"
+            }]
+          }
+        });
+
         expect(view.getDOMNode().querySelector(".standalone-info-bar-context h2").textContent)
           .eql("FakeRoomName");
         expect(view.getDOMNode().querySelector(".standalone-info-bar-context img"))
-          .not.eql(null);
+          .not.eql("FakeRoomName");
       });
 
       it("should allow context link if context location is http", function() {
         view = mountTestComponent({
           room: {
-            roomState: ROOM_STATES.JOINED,
+            roomState: ROOM_STATES.HAS_PARTICIPANTS,
             roomName: "FakeRoomName",
             roomContextUrls: [{
               location: "http://fakeurl.com/",
@@ -505,7 +521,7 @@ describe("loop.standaloneRoomViews", function() {
       it("should not allow context link if context location is about url", function() {
         view = mountTestComponent({
           room: {
-            roomState: ROOM_STATES.JOINED,
+            roomState: ROOM_STATES.HAS_PARTICIPANTS,
             roomName: "aboutConfig",
             roomContextUrls: [{
               location: "about:config",
@@ -521,7 +537,7 @@ describe("loop.standaloneRoomViews", function() {
       it("should not allow context link if the context location protocol is not whitelisted", function() {
         view = mountTestComponent({
           room: {
-            roomState: ROOM_STATES.JOINED,
+            roomState: ROOM_STATES.HAS_PARTICIPANTS,
             roomName: "nonWhitelistUrl",
             roomContextUrls: [{
               location: "somethingelse://somethingOtherThanWhitelist.com",

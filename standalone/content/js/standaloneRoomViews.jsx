@@ -527,6 +527,17 @@ loop.standaloneRoomViews = (function(mozL10n) {
       );
     },
 
+    renderWelcomeMessage: function() {
+      var roomName = this.props.room.roomName ? this.props.room.roomName :
+            mozL10n.get("clientShortname2");
+
+      return (
+        <div className="standalone-info-bar-context">
+          <p>{mozL10n.get("rooms_welcome_title", { conversationName: roomName })}</p>
+        </div>
+      );
+    },
+
     render: function() {
       switch (this.props.room.roomState) {
         case ROOM_STATES.ENDED:
@@ -544,6 +555,10 @@ loop.standaloneRoomViews = (function(mozL10n) {
         case ROOM_STATES.JOINING:
         case ROOM_STATES.JOINED:
         case ROOM_STATES.SESSION_CONNECTED:
+          return (
+            this.renderWelcomeMessage()
+          );
+        case ROOM_STATES.HAS_PARTICIPANTS:
           return (
             this.renderContext()
           );

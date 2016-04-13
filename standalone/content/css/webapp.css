@@ -740,13 +740,18 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
   margin: 15px auto;
 }
 
-.room-notification-area > .room-notification-content > .promote-firefox > button {
+.room-notification-area > .room-notification-content > .promote-firefox > a {
   background: #ebebeb;
   border: solid 1px #a6a6a6;
   color: #4a4a4a;
   font-size: 12px;
   font-weight: bold;
   padding: 1rem;
+  display: block;
+}
+
+.room-notification-area > .room-notification-content > .promote-firefox > a:hover {
+  background: #dbdbdb;
 }
 
 @media screen and (max-width:640px) {

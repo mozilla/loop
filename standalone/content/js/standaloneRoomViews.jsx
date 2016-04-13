@@ -288,12 +288,12 @@ loop.standaloneRoomViews = (function(mozL10n) {
       return (
         <div className="promote-firefox">
           <h2>{mozL10n.get("rooms_promote_firefox_label")}</h2>
-          <button className="btn btn-info"
-                  onClick={this.props.joinRoom}>
+          <a className="btn btn-info" href={loop.config.downloadFirefoxUrl}
+            rel="noreferrer" target="_blank">
             {mozL10n.get("rooms_promote_firefox_button", {
               brandShortname: mozL10n.get("brandShortname")
             })}
-          </button>
+          </a>
         </div>
       );
     },

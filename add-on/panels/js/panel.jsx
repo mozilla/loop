@@ -474,17 +474,13 @@ loop.panel = (function(_, mozL10n) {
         return;
       }
 
-      this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
-        roomToken: this.props.room.roomToken
-      }));
-
       // Open url if needed.
       loop.requestMulti(
         ["getSelectedTabMetadata"],
         ["GettingStartedURL", null, {}]
       ).then(function(results) {
         var contextURL = this.props.room.decryptedContext.urls &&
-          this.props.room.decryptedContext.urls[0].location;
+                         this.props.room.decryptedContext.urls[0].location;
 
         contextURL = contextURL || (results[1] + "?noopenpanel=1");
 
@@ -492,6 +488,12 @@ loop.panel = (function(_, mozL10n) {
           loop.request("OpenURL", contextURL);
         }
         this.closeWindow();
+
+        // open the room after the (possible) tab change to be able to
+        // share when opening from non-remote tab.
+        this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
+          roomToken: this.props.room.roomToken
+        }));
       }.bind(this));
     },
 
@@ -946,8 +948,14 @@ loop.panel = (function(_, mozL10n) {
     },
 
     handleCreateButtonClick: function() {
-      var createRoomAction = new sharedActions.CreateRoom();
+      // check that tab is remote, open about:home if not
+      loop.request("IsTabShareable").then(shareable => {
+        if (!shareable) {
+          loop.request("OpenURL", "about:home");
+        }
+      });
 
+      var createRoomAction = new sharedActions.CreateRoom();
       createRoomAction.urls = [{
         location: this.state.url,
         description: this.state.description,

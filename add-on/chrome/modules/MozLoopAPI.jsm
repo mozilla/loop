@@ -124,6 +124,16 @@ const updateSocialProvidersCache = function() {
   return gSocialProviders;
 };
 
+/**
+ *  Checks that [browser.js]'s global variable `gMultiProcessBrowser` is active,
+ *  instead of checking on first available browser element.
+ *  :see bug 1257243 comment 5:
+ */
+const isMultiProcessActive = function() {
+  let win = Services.wm.getMostRecentWindow("navigator:browser");
+  return !!win.gMultiProcessBrowser;
+};
+
 var gAppVersionInfo = null;
 var gBrowserSharingListeners = new Set();
 var gBrowserSharingWindows = new Set();
@@ -639,8 +649,23 @@ const kMessageHandlers = {
    */
   GetSelectedTabMetadata: function(message, reply) {
     let win = Services.wm.getMostRecentWindow("navigator:browser");
-    win.messageManager.addMessageListener("PageMetadata:PageDataResult", function onPageDataResult(msg) {
-      win.messageManager.removeMessageListener("PageMetadata:PageDataResult", onPageDataResult);
+    let browser = win && win.gBrowser.selectedBrowser;
+    if (!win || !browser) {
+      MozLoopService.log.error("Error occurred whilst fetching page metadata");
+      reply();
+      return;
+    }
+
+    // non-remote pages have no metadata
+    if (!browser.getAttribute("remote") === "true") {
+      reply(null);
+    }
+
+    win.messageManager.addMessageListener("PageMetadata:PageDataResult",
+                                          function onPageDataResult(msg) {
+
+      win.messageManager.removeMessageListener("PageMetadata:PageDataResult",
+                                               onPageDataResult);
       let pageData = msg.json;
       win.LoopUI.getFavicon(function(err, favicon) {
         if (err && err !== "favicon not found for uri") {
@@ -755,9 +780,31 @@ const kMessageHandlers = {
    *                           the senders' channel.
    */
   IsMultiProcessActive: function(message, reply) {
+    reply(isMultiProcessActive());
+  },
+
+  /**
+   *  Checks that the current tab can be shared.
+   *  Non-shareable tabs are the non-remote ones when e10s is enabled.
+   *
+   *  @param {Object}   message Message meant for the handler function,
+   *                            with no data attached.
+   *  @param {Function} reply   Callback function, invoked with the result of
+   *                            the check. The result will be sent back to
+   *                            the senders' channel.
+   */
+  IsTabShareable: function(message, reply) {
     let win = Services.wm.getMostRecentWindow("navigator:browser");
     let browser = win && win.gBrowser.selectedBrowser;
-    reply(!!(browser && browser.getAttribute("remote") == "true"));
+    if (!win || !browser) {
+      reply(false);
+      return;
+    }
+
+    let e10sActive = isMultiProcessActive();
+    let tabRemote = browser.getAttribute("remote") === "true";
+
+    reply(!e10sActive || (e10sActive && tabRemote));
   },
 
   /**

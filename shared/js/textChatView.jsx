@@ -57,13 +57,6 @@ loop.shared.views.chat = (function(mozL10n) {
         "text-chat-notif": this.props.contentType === CHAT_CONTENT_TYPES.NOTIFICATION
       });
 
-      var optionalProps = {};
-      if (loop.shared.utils.isDesktop()) {
-        optionalProps.linkClickHandler = function(url) {
-          loop.request("OpenURL", url);
-        };
-      }
-
       if (this.props.contentType === CHAT_CONTENT_TYPES.CONTEXT_TILE) {
         return (
           <div className={classes}>
@@ -90,9 +83,17 @@ loop.shared.views.chat = (function(mozL10n) {
         );
       }
 
+      var linkClickHandler;
+      if (loop.shared.utils.isDesktop()) {
+        linkClickHandler = function(url) {
+          loop.request("OpenURL", url);
+        };
+      }
+
       return (
         <div className={classes}>
-          <sharedViews.LinkifiedTextView {...optionalProps}
+          <sharedViews.LinkifiedTextView
+            linkClickHandler={linkClickHandler}
             rawText={this.props.message} />
           <span className="text-chat-arrow" />
           {this.props.showTimestamp ? this._renderTimestamp() : null}
@@ -201,12 +202,6 @@ loop.shared.views.chat = (function(mozL10n) {
       return (
         <div className={entriesClasses}>
           <div className="text-chat-scroller">
-            {loop.shared.utils.isDesktop() ? null :
-              <p className="welcome-message">
-                {mozL10n.get("rooms_welcome_text_chat_label",
-                  { clientShortname: mozL10n.get("clientShortname2") })}
-              </p>
-            }
             {
               this.props.messageList.map(function(entry, i) {
                 if (entry.type === CHAT_MESSAGE_TYPES.SPECIAL) {

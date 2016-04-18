@@ -33,3 +33,4 @@ Other Documentation
 ===================
 
 * [Release instructions](docs/Releases.md)
+* [Localization](docs/Localization.md)

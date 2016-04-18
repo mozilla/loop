@@ -244,33 +244,33 @@ html[dir="rtl"] .standalone-info-bar-spacer {
   margin-right: 15px;
 }
 
-.standalone-info-bar-spacer > .context-info {
+.standalone-info-bar-spacer > .standalone-info-bar-context {
   align-items: center;
   color: #666;
   display: flex;
   font-size: 12px;
 }
 
-.standalone-info-bar-spacer > .context-info > .terms-service {
+.standalone-info-bar-spacer > .standalone-info-bar-context > .terms-service {
   margin: 0;
 }
 
-.standalone-info-bar-spacer > .context-info > .terms-service > a {
+.standalone-info-bar-spacer > .standalone-info-bar-context > .terms-service > a {
   color: #666;
 }
 
-.standalone-info-bar-spacer > .context-info > a {
+.standalone-info-bar-spacer > .standalone-info-bar-context > a {
   align-items: center;
   display: flex;
   text-decoration: none;
 }
 
-.standalone-info-bar-spacer > .context-info > a > .context-favicon {
+.standalone-info-bar-spacer > .standalone-info-bar-context > a > .context-favicon {
   margin-right: 5px;
   width: 16px;
 }
 
-html[dir="rtl"] .standalone-info-bar-spacer > .context-info > a > .context-favicon {
+html[dir="rtl"] .standalone-info-bar-spacer > .standalone-info-bar-context > a > .context-favicon {
   margin-left: 5px;
   margin-right: 0;
   vertical-align: middle;
@@ -312,6 +312,11 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
 
 .standalone-info-bar > .media-control-buttons > .btn-hangup:hover {
   background-color: #AF352C;
+}
+
+.standalone-info-bar > .media-control-buttons > .btn-mute-audio.disabled,
+.standalone-info-bar > .media-control-buttons > .btn-mute-video.disabled {
+  opacity: .3;
 }
 
 .standalone-info-bar > .media-control-buttons > .btn-mute-audio,
@@ -735,13 +740,18 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
   margin: 15px auto;
 }
 
-.room-notification-area > .room-notification-content > .promote-firefox > button {
+.room-notification-area > .room-notification-content > .promote-firefox > a {
   background: #ebebeb;
   border: solid 1px #a6a6a6;
   color: #4a4a4a;
   font-size: 12px;
   font-weight: bold;
   padding: 1rem;
+  display: block;
+}
+
+.room-notification-area > .room-notification-content > .promote-firefox > a:hover {
+  background: #dbdbdb;
 }
 
 @media screen and (max-width:640px) {

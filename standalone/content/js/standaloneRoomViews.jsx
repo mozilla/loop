@@ -288,12 +288,12 @@ loop.standaloneRoomViews = (function(mozL10n) {
       return (
         <div className="promote-firefox">
           <h2>{mozL10n.get("rooms_promote_firefox_label")}</h2>
-          <button className="btn btn-info"
-                  onClick={this.props.joinRoom}>
+          <a className="btn btn-info" href={loop.config.downloadFirefoxUrl}
+            rel="noreferrer" target="_blank">
             {mozL10n.get("rooms_promote_firefox_button", {
               brandShortname: mozL10n.get("brandShortname")
             })}
-          </button>
+          </a>
         </div>
       );
     },
@@ -316,12 +316,12 @@ loop.standaloneRoomViews = (function(mozL10n) {
           return (
             <div className="room-notification-area">
               <div className="room-notification-header">
-                <h2>You have disconnected.</h2>
+                <h2>{mozL10n.get("room_user_left_label")}</h2>
               </div>
               <div className="room-notification-content">
                 <button className="btn btn-join btn-info"
                         onClick={this.props.joinRoom}>
-                  Rejoin
+                  {mozL10n.get("rooms_rejoin_button")}
                 </button>
                 {!this.props.isFirefox ? this._renderPromoteFirefoxView() : null}
               </div>
@@ -362,21 +362,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
             context = [];
           }
 
-          // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
-          // Try catch to not produce output if invalid url
-          try {
-            var sanitizeURL = loop.shared.utils.formatURL(context.location, true);
-          } catch (ex) {
-            sanitizeURL = null;
-          }
-
-          if (!sanitizeURL ||
-            (sanitizeURL.protocol !== "http:" &&
-            sanitizeURL.protocol !== "https:" &&
-            sanitizeURL.protocol !== "ftp:")) {
-            sanitizeURL = null;
-          }
-
           var thumbnail = context.thumbnail;
 
           if (!thumbnail) {
@@ -385,8 +370,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
           var title = mozL10n.get(this.props.activeRoomStore.getStoreState("remotePeerDisconnected") ?
             "room_owner_left_label" : "rooms_only_occupant_label2");
-
-          // XXX why aren't we using ContextUrlView here?
 
           return (
             <div className="room-notification-area">
@@ -397,20 +380,13 @@ loop.standaloneRoomViews = (function(mozL10n) {
                 <p>
                   {mozL10n.get("rooms_wait_message")}
                 </p>
-
                 <div className="room-notification-context">
-                  <a className="context-wrapper"
-                     href={sanitizeURL ? context.location : null}
-                     rel="noreferrer"
-                     target="_blank">
-                    <img className="context-preview" src={thumbnail} />
-                    <span className="context-info">
-                      {context.description}
-                      <span className="context-url">
-                        {sanitizeURL ? sanitizeURL.hostname : null}
-                      </span>
-                    </span>
-                  </a>
+                  <sharedViews.ContextUrlView
+                    allowClick={true}
+                    description={context.description}
+                    dispatcher={this.props.dispatcher}
+                    thumbnail={thumbnail}
+                    url={context.location} />
                 </div>
               </div>
             </div>
@@ -451,6 +427,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
     propTypes: {
       audio: React.PropTypes.object.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      forceAudioDisabled: React.PropTypes.bool,
+      forceVideoDisabled: React.PropTypes.bool,
       leaveRoom: React.PropTypes.func.isRequired,
       room: React.PropTypes.object.isRequired,
       video: React.PropTypes.object.isRequired
@@ -459,7 +437,9 @@ loop.standaloneRoomViews = (function(mozL10n) {
     getDefaultProps: function() {
       return {
         video: { enabled: true, visible: true },
-        audio: { enabled: true, visible: true }
+        audio: { enabled: true, visible: true },
+        forceVideoDisabled: false,
+        forceAudioDisabled: false
       };
     },
 
@@ -484,15 +464,17 @@ loop.standaloneRoomViews = (function(mozL10n) {
       return (
         <div className="media-control-buttons">
           <sharedViews.VideoMuteButton
+            disabled={this.props.forceVideoDisabled}
             dispatcher={this.props.dispatcher}
-            muted={!this.props.video.enabled}/>
+            muted={!this.props.video.enabled} />
           <sharedViews.AudioMuteButton
+            disabled={this.props.forceAudioDisabled}
             dispatcher={this.props.dispatcher}
-            muted={!this.props.audio.enabled}/>
+            muted={!this.props.audio.enabled} />
           <GeneralSupportURL dispatcher={this.props.dispatcher} />
           <sharedViews.HangUpControlButton
             action={this.props.leaveRoom}
-            title={mozL10n.get("rooms_leave_button_label")}/>
+            title={mozL10n.get("rooms_leave_button_label")} />
         </div>
       );
     },
@@ -504,7 +486,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
           <div className="standalone-info-bar-spacer">
             <StandaloneInfoView
               dispatcher={this.props.dispatcher}
-              room={this.props.room}/>
+              room={this.props.room} />
           </div>
           {this.renderButtons()}
         </div>
@@ -518,51 +500,40 @@ loop.standaloneRoomViews = (function(mozL10n) {
       room: React.PropTypes.object.isRequired
     },
 
-    renderIcon: function() {
-      var urlData = (this.props.room.roomContextUrls || [])[0] || {};
-      if (urlData.location) {
-        return (
-          <img className="context-favicon" src={urlData.thumbnail || "shared/img/icons-16x16.svg#globe"} />
-        );
-      }
-
-      return (
-        <img className="context-favicon" src="shared/img/icons-16x16.svg#globe" />
-      );
-    },
-
     renderContext: function() {
-      // XXX please make this code more human readable
-      var urlData = (this.props.room.roomContextUrls || [])[0] || {};
-      var contextUrl;
-      try {
-        var sanitizedURL = loop.shared.utils.formatURL(urlData.location, true);
-      } catch (ex) {
-        contextUrl = null;
+      var urlData = {};
+      var roomContextUrls = this.props.room.roomContextUrls || [];
+      if (roomContextUrls.length > 0) {
+        urlData = roomContextUrls[0];
+      }
+      var thumbnail = "shared/img/icons-16x16.svg#globe";
+      if (urlData.location && urlData.thumbnail) {
+        thumbnail = urlData.thumbnail;
       }
       var roomTitle = this.props.room.roomName ||
         urlData.description || urlData.location ||
         mozL10n.get("room_name_untitled_page");
 
-      // Only allow specific types of URLs.
-      if (!sanitizedURL ||
-        (sanitizedURL.protocol !== "http:" &&
-        sanitizedURL.protocol !== "https:" &&
-        sanitizedURL.protocol !== "ftp:")) {
-        contextUrl = null;
-      } else {
-        contextUrl = urlData.location;
-      }
+      return (
+        <div className="standalone-info-bar-context">
+          <sharedViews.ContextUrlLink
+            allowClick={true}
+            title={urlData.description}
+            url={urlData.location}>
+            <img className="context-favicon" src={thumbnail} />
+            <h2>{roomTitle}</h2>
+          </sharedViews.ContextUrlLink>
+        </div>
+      );
+    },
+
+    renderWelcomeMessage: function() {
+      var roomName = this.props.room.roomName ? this.props.room.roomName :
+            mozL10n.get("clientShortname2");
 
       return (
-        <div className="context-info">
-            <a href={contextUrl ? contextUrl : null}
-              rel="noreferrer"
-              target="_blank"
-              title={urlData.description}>
-              {this.renderIcon()}
-              <h2>{roomTitle}</h2>
-            </a>
+        <div className="standalone-info-bar-context">
+          <p>{mozL10n.get("rooms_welcome_title", { conversationName: roomName })}</p>
         </div>
       );
     },
@@ -576,7 +547,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
         case ROOM_STATES.INIT:
         case ROOM_STATES.GATHER:
           return (
-            <div className="context-info">
+            <div className="standalone-info-bar-context">
               <ToSView dispatcher={this.props.dispatcher} />
             </div>
           );
@@ -584,6 +555,10 @@ loop.standaloneRoomViews = (function(mozL10n) {
         case ROOM_STATES.JOINING:
         case ROOM_STATES.JOINED:
         case ROOM_STATES.SESSION_CONNECTED:
+          return (
+            this.renderWelcomeMessage()
+          );
+        case ROOM_STATES.HAS_PARTICIPANTS:
           return (
             this.renderContext()
           );
@@ -835,6 +810,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
             audio={{ enabled: !this.state.audioMuted,
                      visible: this._roomIsActive() }}
             dispatcher={this.props.dispatcher}
+            forceAudioDisabled={!this.state.localAudioEnabled}
+            forceVideoDisabled={!this.state.localVideoEnabled}
             leaveRoom={this.leaveRoom}
             room={this.props.activeRoomStore.getStoreState()}
             video={{ enabled: !this.state.videoMuted,
@@ -848,7 +825,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
             isScreenShareLoading={this._isScreenShareLoading()}
             localPosterUrl={this.props.localPosterUrl}
             localSrcMediaElement={this.state.localSrcMediaElement}
-            localVideoMuted={this.state.videoMuted}
+            localVideoMuted={this.state.videoMuted || !this.state.localVideoEnabled}
             matchMedia={this.state.matchMedia || window.matchMedia.bind(window)}
             remotePosterUrl={this.props.remotePosterUrl}
             remoteSrcMediaElement={this.state.remoteSrcMediaElement}

@@ -10,6 +10,7 @@
   // Stop the default init functions running to avoid conflicts.
   document.removeEventListener("DOMContentLoaded", loop.panel.init);
   document.removeEventListener("DOMContentLoaded", loop.conversation.init);
+  document.removeEventListener("DOMContentLoaded", loop.copy.init);
 
   var sharedActions = loop.shared.actions;
 
@@ -18,9 +19,12 @@
   var PanelView = loop.panel.PanelView;
   var SharePanelView = loop.panel.SharePanelView;
   var SignInRequestView = loop.panel.SignInRequestView;
+  var RenameRoomView = loop.panel.RenameRoomView;
   // 1.2. Conversation Window
   var RoomFailureView = loop.roomViews.RoomFailureView;
   var DesktopRoomConversationView = loop.roomViews.DesktopRoomConversationView;
+  // 1.3. Copy Panel
+  var CopyView = loop.copy.CopyView;
 
   // 2. Standalone webapp
   var UnsupportedBrowserView = loop.webapp.UnsupportedBrowserView;
@@ -440,6 +444,16 @@
 
   roomStoreNoRoomsPending.getAllRooms = function() {};
 
+  var roomStoreCloseNewRoom = new loop.store.RoomStore(new loop.Dispatcher(), {
+    constants: {},
+    activeRoomStore: new loop.store.ActiveRoomStore(new loop.Dispatcher(), {
+      sdkDriver: mockSDK
+    })
+  });
+  roomStoreCloseNewRoom.setStoreState({
+    renameRoom: "true"
+  });
+
   var mockUserProfileLoggedIn = {
     email: "text@example.com",
     uid: "0354b278a381d3cb408bb46ffc01266"
@@ -781,6 +795,18 @@
 
             <FramedExample cssClass="fx-embedded-panel"
                            dashed={true}
+                           height={250}
+                           summary="Rename closed room"
+                           width={330}>
+              <div className="panel">
+                <RenameRoomView dispatcher={dispatcher}
+                                roomName={"Fake name"}
+                                roomToken={"fakeToken"} />
+              </div>
+            </FramedExample>
+
+            <FramedExample cssClass="fx-embedded-panel"
+                           dashed={true}
                            summary="Error Notification"
                            width={330}>
               <div className="panel">
@@ -798,6 +824,17 @@
                            notifications={errNotifications}
                            roomStore={roomStore}
                            userProfile={mockUserProfileLoggedIn} />
+              </div>
+            </FramedExample>
+          </Section>
+
+          <Section name="CopyView">
+            <FramedExample cssClass="fx-embedded-panel"
+                           dashed={true}
+                           summary="Copy panel"
+                           width={330}>
+              <div className="panel" height="100">
+                <CopyView />
               </div>
             </FramedExample>
           </Section>
@@ -892,7 +929,7 @@
                            summary="Standalone Unsupported Browser"
                            width={480}>
               <div className="standalone">
-                <UnsupportedBrowserView isFirefox={false}/>
+                <UnsupportedBrowserView isFirefox={false} />
               </div>
             </FramedExample>
           </Section>
@@ -904,7 +941,7 @@
                            summary="Standalone Unsupported Device"
                            width={480}>
               <div className="standalone">
-                <UnsupportedDeviceView platform="ios"/>
+                <UnsupportedDeviceView platform="ios" />
               </div>
             </FramedExample>
           </Section>
@@ -1366,7 +1403,7 @@
             <FramedExample height={308}
                            summary="10x10"
                            width={730}>
-              <SVGIcons size="10x10"/>
+              <SVGIcons size="10x10" />
             </FramedExample>
             <FramedExample height={768}
                            summary="14x14"
@@ -1376,7 +1413,7 @@
             <FramedExample height={550}
                            summary="16x16"
                             width={730}>
-              <SVGIcons size="16x16"/>
+              <SVGIcons size="16x16" />
             </FramedExample>
           </Section>
 
@@ -1396,7 +1433,7 @@
     render: function() {
       // if no errors, return blank
       return !this.props.errorDetected ? null :
-      (<li className = "test fail">
+      (<li className="test fail">
           <h2>
             {this.props.summary}
           </h2>
@@ -1420,8 +1457,8 @@
       var totalFailures = warningsDetected + !!this.props.error;
 
       return (
-        <div className = "error-summary">
-          <div className = "failures">
+        <div className="error-summary">
+          <div className="failures">
             <a>failures: </a>
             <em>{totalFailures}</em>
           </div>
@@ -1445,7 +1482,7 @@
     var consoleWarn = console.warn;
     var caughtWarnings = [];
     console.warn = function() {
-      var args = Array.slice(arguments);
+      var args = Array.prototype.slice.call(arguments);
       caughtWarnings.push(args);
       consoleWarn.apply(console, args);
     };

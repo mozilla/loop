@@ -34,16 +34,18 @@ loop.panel = (function(_, mozL10n) {
     },
 
     renderGettingStartedButton: function() {
-      if (!this.props.displayRoomListContent) {
-        return (
-          <div className="fte-button-container">
-            <Button additionalClass="fte-get-started-button"
-                    caption={mozL10n.get("first_time_experience_button_label2")}
-                    htmlId="fte-button"
-                    onClick={this.handleButtonClick} />
-          </div>
-        );
+      if (this.props.displayRoomListContent) {
+        return null;
       }
+
+      return (
+        <div className="fte-button-container">
+          <Button additionalClass="fte-get-started-button"
+                  caption={mozL10n.get("first_time_experience_button_label2")}
+                  htmlId="fte-button"
+                  onClick={this.handleButtonClick} />
+        </div>
+      );
     },
 
     render: function() {
@@ -62,7 +64,7 @@ loop.panel = (function(_, mozL10n) {
                   mozL10n.get("first_time_experience_subheading2")}
             </div>
             {this.props.displayRoomListContent ?
-              null : <hr className="fte-separator"/>}
+              null : <hr className="fte-separator" />}
             <div className="fte-content">
               {this.props.displayRoomListContent ?
                 mozL10n.get("first_time_experience_content2") :
@@ -162,7 +164,7 @@ loop.panel = (function(_, mozL10n) {
         <div className="powered-by-wrapper" id="powered-by-wrapper">
           <p className="powered-by" id="powered-by">
             {mozL10n.get("powered_by_beforeLogo")}
-            <span className={locale} id="powered-by-logo"/>
+            <span className={locale} id="powered-by-logo" />
             {mozL10n.get("powered_by_afterLogo")}
           </p>
           <p className="terms-service"
@@ -415,6 +417,21 @@ loop.panel = (function(_, mozL10n) {
   });
 
   /**
+   *  Aux function to retrieve the name of a room
+   */
+  function _getRoomTitle(room) {
+    if (!room) {
+      return mozL10n.get("room_name_untitled_page");
+    }
+
+    var urlData = (room.decryptedContext.urls || [])[0] || {};
+    return room.decryptedContext.roomName ||
+           urlData.description ||
+           urlData.location ||
+           mozL10n.get("room_name_untitled_page");
+  }
+
+  /**
    * Room list entry.
    *
    * Active Room means there are participants in the room.
@@ -436,15 +453,8 @@ loop.panel = (function(_, mozL10n) {
       return {
         editMode: false,
         eventPosY: 0,
-        newRoomName: this._getRoomTitle()
+        newRoomName: _getRoomTitle(this.props.room)
       };
-    },
-
-    _getRoomTitle: function() {
-      var urlData = (this.props.room.decryptedContext.urls || [])[0] || {};
-      return this.props.room.decryptedContext.roomName ||
-        urlData.description || urlData.location ||
-        mozL10n.get("room_name_untitled_page");
     },
 
     _isActive: function() {
@@ -464,17 +474,13 @@ loop.panel = (function(_, mozL10n) {
         return;
       }
 
-      this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
-        roomToken: this.props.room.roomToken
-      }));
-
       // Open url if needed.
       loop.requestMulti(
         ["getSelectedTabMetadata"],
         ["GettingStartedURL", null, {}]
       ).then(function(results) {
         var contextURL = this.props.room.decryptedContext.urls &&
-          this.props.room.decryptedContext.urls[0].location;
+                         this.props.room.decryptedContext.urls[0].location;
 
         contextURL = contextURL || (results[1] + "?noopenpanel=1");
 
@@ -482,6 +488,12 @@ loop.panel = (function(_, mozL10n) {
           loop.request("OpenURL", contextURL);
         }
         this.closeWindow();
+
+        // open the room after the (possible) tab change to be able to
+        // share when opening from non-remote tab.
+        this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
+          roomToken: this.props.room.roomToken
+        }));
       }.bind(this));
     },
 
@@ -545,7 +557,7 @@ loop.panel = (function(_, mozL10n) {
         "room-active": this._isActive(),
         "room-opened": this.props.isOpenedRoom
       });
-      var roomTitle = this._getRoomTitle();
+      var roomTitle = _getRoomTitle(this.props.room);
 
       return (
         <div className={roomClasses}
@@ -562,7 +574,7 @@ loop.panel = (function(_, mozL10n) {
               onChange={this.handleEditInputChange}
               onKeyDown={this.handleKeyDown}
               type="text"
-              value={this.state.newRoomName}/>}
+              value={this.state.newRoomName} />}
           {this.props.isOpenedRoom || this.state.editMode ? null :
             <RoomEntryContextButtons
               dispatcher={this.props.dispatcher}
@@ -764,6 +776,7 @@ loop.panel = (function(_, mozL10n) {
       return new Error("Required prop `" + propName +
         "` was not correctly specified in `" + componentName + "`.");
     }
+    return null;
   }
 
   /**
@@ -830,6 +843,8 @@ loop.panel = (function(_, mozL10n) {
       if (this.state.rooms.length > 5) {
         return (<div className="room-list-blur" />);
       }
+
+      return null;
     },
 
     render: function() {
@@ -933,8 +948,14 @@ loop.panel = (function(_, mozL10n) {
     },
 
     handleCreateButtonClick: function() {
-      var createRoomAction = new sharedActions.CreateRoom();
+      // check that tab is remote, open about:home if not
+      loop.request("IsTabShareable").then(shareable => {
+        if (!shareable) {
+          loop.request("OpenURL", "about:home");
+        }
+      });
 
+      var createRoomAction = new sharedActions.CreateRoom();
       createRoomAction.urls = [{
         location: this.state.url,
         description: this.state.description,
@@ -1111,17 +1132,105 @@ loop.panel = (function(_, mozL10n) {
     }
   });
 
+  var RenameRoomView = React.createClass({
+    mixins: [sharedMixins.WindowCloseMixin],
+
+    propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      roomName: React.PropTypes.string.isRequired,
+      roomToken: React.PropTypes.string.isRequired
+    },
+
+    getInitialState: function() {
+      return { focused: false };
+    },
+
+    componentDidMount: function() {
+      this.getDOMNode().querySelector("input").focus();
+    },
+
+    handleBlur: function() {
+      this.setState({ focused: false });
+    },
+
+    handleFocus: function() {
+      this.setState({ focused: true });
+      this.getDOMNode().querySelector("input").select();
+    },
+
+    handleKeyDown: function(event) {
+      if (event.which === 13) {
+        this.handleNameChange();
+      }
+    },
+
+    handleNameChange: function() {
+      let token = this.props.roomToken,
+          name = this.getDOMNode().querySelector("input").value || "";
+
+      if (name !== this.props.roomName) {
+        this.props.dispatcher.dispatch(
+          new sharedActions.UpdateRoomContext({
+            roomToken: token,
+            newRoomName: name
+          })
+        );
+      }
+
+      this.closeWindow();
+    },
+
+    render: function() {
+      let inputClass = classNames({
+        "input-group": true,
+        "focused": this.state.focused
+      });
+
+      return (
+        <div className="rename-newRoom">
+          <img src="shared/img/helloicon.svg" />
+          <div className="rename-container">
+            <h2 className="rename-header">
+              {mozL10n.get("door_hanger_bye")}
+            </h2>
+            <p className="rename-subheader">
+              {mozL10n.get("door_hanger_return2")}
+            </p>
+            <p className="rename-prompt">
+              {mozL10n.get("door_hanger_current")}
+            </p>
+            <div className={inputClass}>
+              <input className="rename-input"
+                     defaultValue={this.props.roomName}
+                     onBlur={this.handleBlur}
+                     onFocus={this.handleFocus}
+                     onKeyDown={this.handleKeyDown}
+                     type="text" />
+            </div>
+          </div>
+          <Button additionalClass="rename-button"
+                  caption={mozL10n.get("door_hanger_button2")}
+                  onClick={this.handleNameChange} />
+        </div>
+      );
+    }
+  });
+
   /**
    * Panel view.
    */
   var PanelView = React.createClass({
+    mixins: [
+     Backbone.Events,
+     sharedMixins.DocumentVisibilityMixin
+    ],
+
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       // Only used for the ui-showcase:
       gettingStartedSeen: React.PropTypes.bool,
       notifications: React.PropTypes.object.isRequired,
-      roomStore:
-        React.PropTypes.instanceOf(loop.store.RoomStore).isRequired,
+      roomStore: React.PropTypes.instanceOf(loop.store.RoomStore).isRequired,
       // Only used for the ui-showcase:
       userProfile: React.PropTypes.object
     },
@@ -1139,6 +1248,7 @@ loop.panel = (function(_, mozL10n) {
         gettingStartedSeen: loop.getStoredRequest(["GetLoopPref", "gettingStarted.latestFTUVersion"]) >= FTU_VERSION,
         multiProcessActive: loop.getStoredRequest(["IsMultiProcessActive"]),
         remoteAutoStart: loop.getStoredRequest(["GetLoopPref", "remote.autostart"]),
+        renameRoom: null,
         sharePanelOpened: false
       };
     },
@@ -1211,8 +1321,37 @@ loop.panel = (function(_, mozL10n) {
       }.bind(this));
     },
 
+    _onClosingNewRoom: function() {
+      // If we close a recently created room, we offer the chance of renaming it
+      let storeState = this.props.roomStore.getStoreState();
+      if (!storeState.closingNewRoom || !storeState.openedRoom) {
+        return;
+      }
+
+      let closedRoom = storeState.rooms.filter(function(room) {
+        // closing room is the last that was opened.
+        return storeState.openedRoom === room.roomToken;
+      })[0];
+
+      this.setState({
+        renameRoom: storeState.closingNewRoom &&
+          {
+            token: storeState.openedRoom,
+            name: _getRoomTitle(closedRoom)
+          }
+      });
+    },
+
+    onDocumentHidden: function() {
+      // consider closing panel any other way than click OK button
+      // or Enter key the same as cancel renaming the room
+      this.setState({ renameRoom: null });
+    },
+
     componentWillMount: function() {
       this.updateServiceErrors();
+      this.listenTo(this.props.roomStore, "change:closingNewRoom",
+                    this._onClosingNewRoom);
     },
 
     componentDidMount: function() {
@@ -1221,6 +1360,7 @@ loop.panel = (function(_, mozL10n) {
 
     componentWillUnmount: function() {
       loop.unsubscribe("LoopStatusChanged", this._onStatusChanged);
+      this.stopListening(this.props.roomStore);
     },
 
     handleContextMenu: function(e) {
@@ -1260,8 +1400,18 @@ loop.panel = (function(_, mozL10n) {
           </div>
         );
       }
+
       if (!this.state.hasEncryptionKey) {
         return <SignInRequestView />;
+      }
+
+      if (this.state.renameRoom) {
+        return (
+          <RenameRoomView
+            dispatcher={this.props.dispatcher}
+            roomName={this.state.renameRoom.name}
+            roomToken={this.state.renameRoom.token} />
+        );
       }
 
       var cssClasses = classNames({
@@ -1280,7 +1430,7 @@ loop.panel = (function(_, mozL10n) {
             <RoomList dispatcher={this.props.dispatcher}
               store={this.props.roomStore} />
             <div className="footer">
-                <AccountLink userProfile={this.props.userProfile || this.state.userProfile}/>
+                <AccountLink userProfile={this.props.userProfile || this.state.userProfile} />
               <div className="signin-details">
                 <SettingsDropdown />
               </div>
@@ -1316,7 +1466,8 @@ loop.panel = (function(_, mozL10n) {
       ["IsMultiProcessActive"]
     ];
 
-    return loop.requestMulti.apply(null, requests.concat(prefetch)).then(function(results) {
+    return loop.requestMulti.apply(null, requests.concat(prefetch))
+      .then(function(results) {
       // `requestIdx` is keyed off the order of the `requests` and `prefetch`
       // arrays. Be careful to update both when making changes.
       var requestIdx = 0;
@@ -1376,6 +1527,7 @@ loop.panel = (function(_, mozL10n) {
     init: init,
     NewRoomView: NewRoomView,
     PanelView: PanelView,
+    RenameRoomView: RenameRoomView,
     RoomEntry: RoomEntry,
     RoomEntryContextButtons: RoomEntryContextButtons,
     RoomList: RoomList,

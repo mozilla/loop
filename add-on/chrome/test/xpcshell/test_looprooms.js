@@ -403,7 +403,7 @@ add_task(function* test_createRoom() {
 
   // We can't check the value of the key, but check we've got a # which indicates
   // there should be one.
-  Assert.ok(room.roomUrl.contains("#"), "Created room url should have a key");
+  Assert.ok(room.roomUrl.includes("#"), "Created room url should have a key");
   var key = room.roomUrl.split("#")[1];
   Assert.ok(key.length, "Created room url should have non-zero length key");
 
@@ -427,6 +427,7 @@ add_task(function* test_openRoom() {
 
   Assert.equal(windowData.type, "room", "window data should contain room as the type");
   Assert.equal(windowData.roomToken, "fakeToken", "window data should have the roomToken");
+  Assert.equal(LoopRooms.getNumParticipants("fakeToken"), 0, "LoopRooms getNumParticipants should contain no participants before join");
 });
 
 // Test if the rooms cache is refreshed after FxA signin or signout.
@@ -524,6 +525,8 @@ add_task(function* test_joinRoomGuest() {
   let roomToken = "_nxD4V4FflQ";
   let joinedData = yield LoopRooms.promise("join", roomToken, "guest");
   Assert.equal(joinedData.action, "join");
+  Assert.equal(LoopRooms.getNumParticipants("_nxD4V4FflQ"), 1, "LoopRooms getNumParticipants should have participant after join");
+  Assert.equal(LoopRoomsInternal.getNumParticipants("_nxD4V4FflQ"), 1, "LoopRoomsInternal getNumParticipants should have participant after join");
 });
 
 // Test if refreshing a room works as expected.
@@ -533,6 +536,7 @@ add_task(function* test_refreshMembership() {
     "fakeSessionToken");
   Assert.equal(refreshedData.action, "refresh");
   Assert.equal(refreshedData.sessionToken, "fakeSessionToken");
+  Assert.equal(LoopRooms.getNumParticipants("_nxD4V4FflQ"), 1, "LoopRooms getNumParticipants should still have participant after refresh");
 });
 
 // Test if leaving a room works as expected.

@@ -163,7 +163,10 @@ $(BUILT)/test/vendor:
 $(BUILT)/test/vendor/sinon.js: node_modules/sinon/pkg/sinon.js
 	$(RSYNC) $< $(BUILT)/test/vendor
 
-$(BUILT)/test/vendor/mocha.%: node_modules/mocha/mocha.%
+$(BUILT)/test/vendor/mocha.js: node_modules/mocha/mocha.js
+	$(RSYNC) $< $(BUILT)/test/vendor
+
+$(BUILT)/test/vendor/mocha.css: node_modules/mocha/mocha.css
 	$(RSYNC) $< $(BUILT)/test/vendor
 
 $(BUILT)/test/vendor/chai.js: node_modules/chai/chai.js

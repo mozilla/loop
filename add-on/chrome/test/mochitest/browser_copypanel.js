@@ -13,6 +13,23 @@ registerCleanupFunction(() => {
   LoopUI.removeCopyPanel();
 });
 
+/**
+ * Cleanup function to allow the loop panel to finish opening then close it.
+ */
+function waitForLoopPanelShowHide() {
+  return new Promise(resolve => {
+    let panel = document.getElementById("loop-notification-panel");
+    panel.addEventListener("popupshown", function onShow() {
+      panel.removeEventListener("popupshown", onShow);
+      panel.hidePopup();
+    });
+    panel.addEventListener("popuphidden", function onHidden() {
+      panel.removeEventListener("popuphidden", onHidden);
+      resolve();
+    });
+  });
+}
+
 // Even with max threshold, no panel if already shown.
 add_task(function* test_init_copy_panel_already_shown() {
   LoopUI.removeCopyPanel();
@@ -51,55 +68,69 @@ function testClick(domain, onIframe) {
   LoopUI.removeCopyPanel();
   gURLBar.value = "http://" + domain + "/";
 
-  LoopUI.addCopyPanel();
-  gURLBar.focus();
-  gURLBar.select();
-  goDoCommand("cmd_copy");
-
-  let iframe = document.getElementById("loop-copy-panel-iframe");
   return new Promise(resolve => {
-    iframe.addEventListener("DOMContentLoaded", () => {
-      iframe.parentNode.addEventListener("popuphidden", () => resolve(histogram));
+    // Continue testing when the click has been handled.
+    LoopUI.addCopyPanel(detail => resolve([histogram, detail]));
+    gURLBar.focus();
+    gURLBar.select();
+    goDoCommand("cmd_copy");
+
+    // Wait for the panel to completely finish opening.
+    let iframe = document.getElementById("loop-copy-panel-iframe");
+    iframe.parentNode.addEventListener("popupshown", () => {
+      // Continue immediately if the page loaded before the panel opened.
+      if (iframe.contentDocument.readyState === "complete") {
+        onIframe(iframe);
+      }
       // Allow synchronous on-load code to run before we continue.
-      setTimeout(() => onIframe(iframe));
+      else {
+        iframe.addEventListener("DOMContentLoaded", () => {
+          setTimeout(() => onIframe(iframe));
+        });
+      }
     });
   });
 }
 
 // Show the copy panel on location bar copy.
 add_task(function* test_copy_panel_shown() {
-  let histogram = yield testClick("some.site", iframe => {
-    iframe.parentNode.hidePopup();
+  let [histogram, detail] = yield testClick("some.site", iframe => {
+    iframe.contentWindow.dispatchEvent(new CustomEvent("CopyPanelClick", {
+      detail: { test: true }
+    }));
   });
 
   Assert.notEqual(document.getElementById("loop-copy-notification-panel"), null, "copy panel exists on copy");
   Assert.strictEqual(histogram.snapshot().counts[gConstants.COPY_PANEL.SHOWN], 1, "triggered telemetry count for showing");
+  Assert.ok(detail.test, "got the special event for testing");
 });
 
 // Click the accept button without checkbox.
 add_task(function* test_click_yes_again() {
-  let histogram = yield testClick("yes.again", iframe => {
+  let [histogram] = yield testClick("yes.again", iframe => {
     iframe.contentDocument.querySelector(".copy-button:last-child").click();
   });
 
   Assert.notEqual(document.getElementById("loop-copy-notification-panel"), null, "copy panel still exists");
   Assert.strictEqual(histogram.snapshot().counts[gConstants.COPY_PANEL.YES_AGAIN], 1, "triggered telemetry count for yes again");
+  yield waitForLoopPanelShowHide();
 });
 
 // Click the accept button with checkbox.
 add_task(function* test_click_yes_never() {
-  let histogram = yield testClick("yes.never", iframe => {
+  let [histogram] = yield testClick("yes.never", iframe => {
     iframe.contentDocument.querySelector(".copy-toggle-label").click();
     iframe.contentDocument.querySelector(".copy-button:last-child").click();
   });
 
   Assert.equal(document.getElementById("loop-copy-notification-panel"), null, "copy panel removed");
   Assert.strictEqual(histogram.snapshot().counts[gConstants.COPY_PANEL.YES_NEVER], 1, "triggered telemetry count for yes never");
+  yield waitForLoopPanelShowHide();
 });
 
 // Click the cancel button without checkbox.
 add_task(function* test_click_no_again() {
-  let histogram = yield testClick("no.again", iframe => {
+  let [histogram] = yield testClick("no.again", iframe => {
     iframe.contentDocument.querySelector(".copy-button").click();
   });
 
@@ -109,7 +140,7 @@ add_task(function* test_click_no_again() {
 
 // Click the cancel button with checkbox.
 add_task(function* test_click_no_never() {
-  let histogram = yield testClick("no.never", iframe => {
+  let [histogram] = yield testClick("no.never", iframe => {
     iframe.contentDocument.querySelector(".copy-toggle-label").click();
     iframe.contentDocument.querySelector(".copy-button").click();
   });

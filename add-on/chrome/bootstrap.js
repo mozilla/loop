@@ -391,8 +391,9 @@ var WindowListener = {
 
       /**
        * Hook into the location bar copy command to open up the copy panel.
+       * @param {Function} onClickHandled Optional callback for finished clicks.
        */
-      addCopyPanel() {
+      addCopyPanel(onClickHandled) {
         // Make a copy of the loop panel as a starting point for the copy panel.
         let copy = this.panel.cloneNode(false);
         copy.id = "loop-copy-notification-panel";
@@ -439,6 +440,13 @@ var WindowListener = {
               // YES_NEVER probe based on the user's action.
               let probe = (accept ? "YES" : "NO") + "_" + (stop ? "NEVER" : "AGAIN");
               addTelemetry(probe);
+
+              // For testing, indicate that handling the click has finished.
+              try {
+                onClickHandled(event.detail);
+              } catch (ex) {
+                // Do nothing.
+              }
             });
           });
         };

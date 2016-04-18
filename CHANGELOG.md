@@ -1,6 +1,117 @@
 # Changelog
 
-## 1.2.6
+## 1.3.0
+
+### New
+
+* Bug 1265430 - Fix gUM Metrics reporting. r=Mardak. [Mark Banner]
+
+* Bug 1239972 - Adapt infobar message depending on if the link clicker is in the room or not. r=dmose. [Chris Rafuse]
+
+* Bug 1257243 - Handle sessions starting tab sharing on non-remote tabs [r=Standard8] [Fernando Campo]
+
+* Bug 1263954 - Fix various copy panel test failures when exported to mozilla-central. r=Standard8. [Ed Lee]
+
+* Bug 1104733 - Use the existing pref for determining the push server, rather than a roundtrip to loop-server r=Standard8. [Donovan Preston]
+
+* No bug. Add some documents for Localization outlining the developer channel and how it is performed. r=dmose. [Mark Banner]
+
+* No Bug. Switch to using Ubuntu Trusty for travis as Chrome has dropped support for Ubuntu Precise. r=fzzzy. [Mark Banner]
+
+* Bug 1262441 - Remove Welcome To Firefox Hello message. r=standard8. [David Critchley]
+
+* Bug 1262455 - Web page title / content information isn't shown in the standalone infobar when two people are in the room. r=fcampo (#348) [Manuel Casas]
+
+* Bug 1262821 - After exiting a conversation, selecting to &quot;Download Firefox&quot; actually rejoins the conversation (#347) r=fcampo. [Manuel Casas]
+
+* Bug 1103588 - Part 1: Replace deprecated String#contains with String#includes in browser tests and extensions. r=dolske. [Chris Peterson]
+
+* Bug 1259986 - Make l10n.js handle invalid plural rule values. r=dcritch. [Mark Banner]
+
+* Bug 1262819 - Upgrade OpenTok library to 2.7.5 (Chrome fixes). r=Mardak. [Mark Banner]
+
+* Bug 1253013 - Allow Context url clicks for whitelist protocols Unit Tests. r=dmose. [David Critchley]
+
+* Bug 1253013 - Allow Context url clicks for whitelist protocols. r=dmose. [David Critchley]
+
+* Bug 1257154 - Switch to getting DOM title updates via a frame script to work better with e10s. r=mikedeboer. [Mark Banner]
+
+* Bug 1258923 - Standalone empty video frame shows if no camera is available. r=dcritchley. [Manuel Casas Barrado]
+
+* Bug 1262568 - 'You have disconnected' and 'Rejoin' are hard-coded on the standalone UI. r=dcritch. [Mark Banner]
+
+* Bug 1138638 - Actually land the follow-up fixes. r=mikedeboer. [Mark Banner]
+
+* Bug 1262240 - Remove 'Beta' from Hello system add-on extension name when exported to be built into Firefox. r=mancas. [Mark Banner]
+
+* Bug 1261118 - Fix regression where the Turn notifications on/off button doesn't update its state. r=mancas. [Mark Banner]
+
+* Bug 1254520 - Opening your own room link should have a functional test. r=Standard8. [Manuel Casas Barrado]
+
+* Bug 1261843 - Two conversation can be opened while the new Sharing panel is shown. r=dcritch. [Ed Lee]
+
+* Bug 1239965 - Door hanger prompts the user to share on Hello as he copies the URL content. r=dmose. [Ed Lee]
+
+* Bug 1261332 - Add Autodeploy scripts for the standalone dev server and dev xpis. r=dmose. [Mark Banner]
+
+* Bug 1259859 - Add a test that looks for misused characters in user-facing strings. r=dolske,jryans. [Jared Wein]
+
+* Bug 1138638 - Make Loop's browser sharing work properly in e10s mode and enable the mochitest. r=mikedeboer. [Mark Banner]
+
+* Bug 1249577 - Remove incorrect width CSS rule on Hello panel, r=dcritch. [Dan Mosedale]
+
+* No bug. Attempt to fix build issues with mocha.* not always being found. r=dmose. [Mark Banner]
+
+* Bug 1257672 - Resized Hello toolbar icons. r=standard8. [David Critchley]
+
+* Bug 1248568 - Terminate session on new room prompts user to rename (r=Standar8, ui-r=sevaan) [Fernando Campo]
+
+### Chores
+
+* Update L10n from changeset 375c787fce997cb299d7d22bdf039d4af60f5416. [Mark Banner]
+
+* Update eslint-plugin-react to version 5.0.1. r=standard8. [greenkeeperio-bot]
+
+* Update webpack to version 1.13.0. r=standard8. [greenkeeperio-bot]
+
+* Update eslint-plugin-react to version 5.0.0. r=standard8. [greenkeeperio-bot]
+
+* Update master version following 1.2.x releases. [Mark Banner]
+
+* Update webpack to version 1.12.15. r=standard8. [greenkeeperio-bot]
+
+* Update babel-plugin-transform-react-jsx to version 6.7.5. r=standard8. [greenkeeperio-bot]
+
+* Update babel-cli to version 6.7.5. r=standard8. [greenkeeperio-bot]
+
+* Update eslint-plugin-react to version 4.3.0. r=standard8. [greenkeeperio-bot]
+
+* Update backbone to version 1.3.3. r=standard8. [greenkeeperio-bot]
+
+* Update L10n from changeset 83bceac013cce01ab6024e8d026dccd8bd5500b7. [Mark Banner]
+
+* Update eslint to version 2.7.0. r=Mardak. [greenkeeperio-bot]
+
+* Update L10n from changeset f04c0f7666d6a40756dff8fc36dcb288fad22cfa. [Mark Banner]
+
+* Update jpm to version 1.0.7. r=standard8. [greenkeeperio-bot]
+
+### Other
+
+* Bug 1257154 - Switch to getting DOM title updates via a frame script to work better with e10s - add the script to the repo. r=mikedeboer. [Mark Banner]
+
+* Add es6 and react rules that are already passing or have a few errors that are auto-fixable. r=Standard8. [Ed Lee]
+
+* Simplify some .eslintrc files. [Ed Lee]
+
+* Follow-up to bug 1261332 - Fix a typo in the script that causes the rsync to fail. [Mark Banner]
+
+* Clarify releases+audiences, paired with Std8.  r=Standard8. [Dan Mosedale]
+
+* Update DataCollection.md to describe domain name collection in more depth. [Ian Bicking]
+
+
+## v1.2.6 (2016-04-06)
 
 ### New
 
@@ -19,6 +130,10 @@
 ### Chores
 
 * Update L10n from changeset 83bceac013cce01ab6024e8d026dccd8bd5500b7. [Mark Banner]
+
+### Other
+
+* 1.2.6. [Mark Banner]
 
 
 ## v1.1.16 (2016-04-06)

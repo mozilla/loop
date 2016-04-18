@@ -170,7 +170,7 @@ const kMessageHandlers = {
    * @param {Object}   message Message meant for the handler function, containing
    *                           the following parameters in its `data` property:
    *                           [
-   *                             {Number} windowId The window ID of the chat window
+   *                             {String} roomToken The room ID to start browser sharing and listeners.
    *                           ]
    * @param {Function} reply   Callback function, invoked with the result of this
    *                           message handler. The result will be sent back to
@@ -197,9 +197,11 @@ const kMessageHandlers = {
       return;
     }
 
+    // get room token from message
     let [windowId] = message.data;
-
-    win.LoopUI.startBrowserSharing();
+    // For rooms, the windowId === roomToken. If we change the type of place we're
+    // sharing from in the future, we may need to change this.
+    win.LoopUI.startBrowserSharing(windowId);
 
     // Point new tab to load about:home to avoid accidentally sharing top sites.
     NewTabURL.override("about:home");

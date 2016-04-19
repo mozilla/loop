@@ -2,6 +2,7 @@
 *~
 .DS_Store*
 *.pyc
+.venv
 built
 dist
 node_modules

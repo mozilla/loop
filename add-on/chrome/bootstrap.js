@@ -193,6 +193,10 @@ var WindowListener = {
        * @return {Promise}
        */
       openPanel: function(event) {
+        if (PrivateBrowsingUtils.isWindowPrivate(window)) {
+          return Promise.reject();
+        }
+
         return new Promise((resolve) => {
           let callback = iframe => {
             let mm = iframe.QueryInterface(Ci.nsIFrameLoaderOwner).frameLoader.messageManager;

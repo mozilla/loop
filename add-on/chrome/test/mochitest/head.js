@@ -6,7 +6,8 @@
 /* exported HAWK_TOKEN_LENGTH, LoopRooms, promiseWaitForCondition,
             loadLoopPanel, promiseOAuthParamsSetup, resetFxA, checkLoggedOutState,
             promiseDeletedOAuthParams, promiseOAuthGetRegistration,
-            getLoopString, mockPushHandler, channelID, mockDb, LoopAPI */
+            getLoopString, mockPushHandler, channelID, mockDb, LoopAPI,
+            cleanupPanel */
 
 const HAWK_TOKEN_LENGTH = 64;
 const {
@@ -21,6 +22,17 @@ const { LoopRooms } = Cu.import("chrome://loop/content/modules/LoopRooms.jsm", {
 // test run, so that it doesn't pick up the offline=true
 // if offline mode is requested multiple times in a test run.
 const WAS_OFFLINE = Services.io.offline;
+
+function cleanupPanel() {
+  let loopPanel = document.getElementById("loop-notification-panel");
+  loopPanel.hidePopup();
+  let btn = document.getElementById("loop-button");
+  let frameId = btn.getAttribute("notificationFrameId");
+  let frame = document.getElementById(frameId);
+  if (frame) {
+    frame.remove();
+  }
+}
 
 function promisePanelLoaded() {
   return new Promise((resolve) => {
@@ -61,12 +73,7 @@ function promisePanelLoaded() {
     // about leaks on shutdown as we intentionally hold the iframe open for the
     // life of the application.
     registerCleanupFunction(function() {
-      loopPanel.hidePopup();
-      let frameId = btn.getAttribute("notificationFrameId");
-      let frame = document.getElementById(frameId);
-      if (frame) {
-        frame.remove();
-      }
+      cleanupPanel();
     });
   });
 }

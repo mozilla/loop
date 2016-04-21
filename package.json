@@ -20,7 +20,7 @@
     "react": "0.13.3"
   },
   "devDependencies": {
-    "babel-cli": "6.7.5",
+    "babel-cli": "6.7.7",
     "babel-plugin-transform-react-display-name": "6.5.0",
     "babel-plugin-transform-react-jsx": "6.7.5",
     "chai": "3.5.0",

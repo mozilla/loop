@@ -74,7 +74,7 @@ loop.shared.toc = (function(mozL10n) {
           <RoomInfoBarView
             addUrlTile={this.addTile}
             dispatcher={this.props.dispatcher}
-            roomName={this.state.roomName}
+            roomName={this.state.roomName ? this.state.roomName : "BUG: NO NAME SPECIFIED" }
             roomToken={this.state.roomToken} />
           <RoomContentView
             tiles={this.state.tiles} />

@@ -11,7 +11,8 @@ loop.shared.toc = (function() {
   var TableOfContentView = React.createClass({
     propTypes: {
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
-      isDesktop: React.PropTypes.bool.isRequired
+      isDesktop: React.PropTypes.bool.isRequired,
+      isScreenShareActive: React.PropTypes.bool.isRequired
     },
 
     getInitialState: function() {
@@ -20,6 +21,8 @@ loop.shared.toc = (function() {
 
     componentWillMount: function() {
       this.props.activeRoomStore.on("change", this.onStoreChange);
+      // Force onStoreChange
+      this.onStoreChange();
     },
 
     componentWillUnmount: function() {
@@ -52,8 +55,13 @@ loop.shared.toc = (function() {
     },
 
     render: function() {
+      var cssClasses = classNames({
+        "toc-wrapper": true,
+        "receiving-screen-share": this.props.isScreenShareActive
+      });
+
       return (
-        <div className="toc-wrapper">
+        <div className={cssClasses}>
           <RoomInfoBarView
             addUrlTile={this.addTile}
             isDesktop={this.props.isDesktop} />
@@ -297,7 +305,217 @@ loop.shared.toc = (function() {
     }
   });
 
+  var SidebarView = React.createClass({
+    mixins: [
+      Backbone.Events,
+      sharedMixins.MediaSetupMixin,
+      sharedMixins.RoomsAudioMixin,
+      sharedMixins.DocumentTitleMixin
+    ],
+
+    propTypes: {
+      // We pass conversationStore here rather than use the mixin, to allow
+      // easy configurability for the ui-showcase.
+      activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      introSeen: React.PropTypes.bool,
+      isFirefox: React.PropTypes.bool.isRequired,
+      // The poster URLs are for UI-showcase testing and development
+      localPosterUrl: React.PropTypes.string,
+      remotePosterUrl: React.PropTypes.string,
+      roomState: React.PropTypes.string
+    },
+
+    getInitialState: function() {
+      // Uncomment this line to see the slideshow every time while developing:
+      // localStorage.removeItem("introSeen");
+
+      // Used by the UI showcase to override localStorage value to hide or show FTU slideshow.
+      // localStorage sourced data is always string or null
+      var introSeen = false;
+      if (this.props.introSeen !== undefined) {
+        if (this.props.introSeen) {
+          introSeen = true;
+        }
+      } else {
+        if (localStorage.getItem("introSeen") !== null) {
+          introSeen = true;
+        }
+      }
+      var storeState = this.props.activeRoomStore.getStoreState();
+      return _.extend({}, storeState, {
+        // Used by the UI showcase.
+        roomState: this.props.roomState || storeState.roomState,
+        introSeen: introSeen
+      });
+    },
+
+    componentWillMount: function() {
+      this.props.activeRoomStore.on("change", function() {
+        this.setState(this.props.activeRoomStore.getStoreState());
+      }, this);
+    },
+
+    componentWillUnmount: function() {
+      this.props.activeRoomStore.off("change", null, this);
+    },
+
+    /**
+     * Watches for when we transition to MEDIA_WAIT room state, so we can request
+     * user media access.
+     *
+     * @param  {Object} nextProps (Unused)
+     * @param  {Object} nextState Next state object.
+     */
+    componentWillUpdate: function(nextProps, nextState) {
+      if (this.state.roomState !== ROOM_STATES.READY &&
+          nextState.roomState === ROOM_STATES.READY) {
+        var roomName = nextState.roomName;
+        if (!roomName && nextState.roomContextUrls) {
+          roomName = nextState.roomContextUrls[0].description ||
+              nextState.roomContextUrls[0].location;
+        }
+        if (!roomName) {
+          this.setTitle(mozL10n.get("clientShortname2"));
+        } else {
+          this.setTitle(mozL10n.get("standalone_title_with_room_name", {
+            roomName: roomName,
+            clientShortname: mozL10n.get("clientShortname2")
+          }));
+        }
+      }
+
+      if (this.state.roomState !== ROOM_STATES.MEDIA_WAIT &&
+          nextState.roomState === ROOM_STATES.MEDIA_WAIT) {
+        this.props.dispatcher.dispatch(new sharedActions.SetupStreamElements({
+          publisherConfig: this.getDefaultPublisherConfig({ publishVideo: true })
+        }));
+      }
+
+      // UX don't want to surface these errors (as they would imply the user
+      // needs to do something to fix them, when if they're having a conversation
+      // they just need to connect). However, we do want there to be somewhere to
+      // find reasonably easily, in case there's issues raised.
+      if (!this.state.roomInfoFailure && nextState.roomInfoFailure) {
+        if (nextState.roomInfoFailure === ROOM_INFO_FAILURES.WEB_CRYPTO_UNSUPPORTED) {
+          console.error(mozL10n.get("room_information_failure_unsupported_browser"));
+        } else {
+          console.error(mozL10n.get("room_information_failure_not_available"));
+        }
+      }
+    },
+
+    /**
+     * Checks if current room is active.
+     *
+     * @return {Boolean}
+     */
+    _roomIsActive: function() {
+      return this.state.roomState === ROOM_STATES.JOINED ||
+             this.state.roomState === ROOM_STATES.SESSION_CONNECTED ||
+             this.state.roomState === ROOM_STATES.HAS_PARTICIPANTS;
+    },
+
+    /**
+     * Works out if remote video should be rended or not, depending on the
+     * room state and other flags.
+     *
+     * @return {Boolean} True if remote video should be rended.
+     *
+     * XXX Refactor shouldRenderRemoteVideo & shouldRenderLoading to remove
+     *     overlapping cases.
+     */
+    shouldRenderRemoteVideo: function() {
+      switch (this.state.roomState) {
+        case ROOM_STATES.HAS_PARTICIPANTS:
+          if (this.state.remoteVideoEnabled) {
+            return true;
+          }
+
+          if (this.state.mediaConnected) {
+            // since the remoteVideo hasn't yet been enabled, if the
+            // media is connected, then we should be displaying an avatar.
+            return false;
+          }
+
+          return true;
+
+        case ROOM_STATES.READY:
+        case ROOM_STATES.GATHER:
+        case ROOM_STATES.INIT:
+        case ROOM_STATES.JOINING:
+        case ROOM_STATES.SESSION_CONNECTED:
+        case ROOM_STATES.JOINED:
+        case ROOM_STATES.MEDIA_WAIT:
+          // this case is so that we don't show an avatar while waiting for
+          // the other party to connect
+          return true;
+
+        case ROOM_STATES.FAILED:
+        case ROOM_STATES.CLOSING:
+        case ROOM_STATES.FULL:
+        case ROOM_STATES.ENDED:
+          // the other person has shown up, so we don't want to show an avatar
+          return true;
+
+        default:
+          console.warn("StandaloneRoomView.shouldRenderRemoteVideo:" +
+            " unexpected roomState: ", this.state.roomState);
+          return true;
+
+      }
+    },
+
+    /**
+     * Should we render a visual cue to the user (e.g. a spinner) that a local
+     * stream is on its way from the camera?
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _isLocalLoading: function() {
+      return this.state.roomState === ROOM_STATES.MEDIA_WAIT &&
+             !this.state.localSrcMediaElement;
+    },
+
+    /**
+     * Should we render a visual cue to the user (e.g. a spinner) that a remote
+     * stream is on its way from the other user?
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _isRemoteLoading: function() {
+      return !!(this.state.roomState === ROOM_STATES.HAS_PARTICIPANTS &&
+                !this.state.remoteSrcMediaElement &&
+                !this.state.mediaConnected);
+    },
+
+    render: function() {
+      return (
+        <div className="sidebar">
+          <sharedViews.MediaLayoutView
+            dispatcher={this.props.dispatcher}
+            isLocalLoading={this._isLocalLoading()}
+            isRemoteLoading={this._isRemoteLoading()}
+            localPosterUrl={this.props.localPosterUrl}
+            localSrcMediaElement={this.state.localSrcMediaElement}
+            localVideoMuted={this.state.videoMuted}
+            matchMedia={this.state.matchMedia || window.matchMedia.bind(window)}
+            remotePosterUrl={this.props.remotePosterUrl}
+            remoteSrcMediaElement={this.state.remoteSrcMediaElement}
+            renderRemoteVideo={this.shouldRenderRemoteVideo()}
+            showInitialContext={true}
+            showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
+            showTile={false} />
+        </div>
+      );
+    }
+  });
+
+
   return {
+    SidebarView: SidebarView,
     TableOfContentView: TableOfContentView
   };
 })();

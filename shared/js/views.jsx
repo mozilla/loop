@@ -898,15 +898,13 @@ loop.shared.views = (function(_, mozL10n) {
     }
   });
 
+  // XXX akita-sidebar
   var MediaLayoutView = React.createClass({
     propTypes: {
       children: React.PropTypes.node,
-      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      displayScreenShare: React.PropTypes.bool.isRequired,
       isLocalLoading: React.PropTypes.bool.isRequired,
       isRemoteLoading: React.PropTypes.bool.isRequired,
-      isScreenShareLoading: React.PropTypes.bool.isRequired,
       // The poster URLs are for UI-showcase testing and development.
       localPosterUrl: React.PropTypes.string,
       localSrcMediaElement: React.PropTypes.object,
@@ -917,9 +915,6 @@ loop.shared.views = (function(_, mozL10n) {
       remotePosterUrl: React.PropTypes.string,
       remoteSrcMediaElement: React.PropTypes.object,
       renderRemoteVideo: React.PropTypes.bool.isRequired,
-      screenShareMediaElement: React.PropTypes.object,
-      screenSharePosterUrl: React.PropTypes.string,
-      screenSharingPaused: React.PropTypes.bool,
       showInitialContext: React.PropTypes.bool.isRequired,
       showMediaWait: React.PropTypes.bool.isRequired,
       showTile: React.PropTypes.bool.isRequired
@@ -931,8 +926,7 @@ loop.shared.views = (function(_, mozL10n) {
       }
       return matchMedia &&
         // The screen width is less than 640px and we are not screen sharing.
-        ((matchMedia("screen and (max-width:640px)").matches &&
-         !this.props.displayScreenShare) ||
+        (matchMedia("screen and (max-width:640px)").matches ||
          // or the screen width is less than 300px.
          (matchMedia("screen and (max-width:300px)").matches));
     },
@@ -1006,18 +1000,16 @@ loop.shared.views = (function(_, mozL10n) {
     render: function() {
       var remoteStreamClasses = classNames({
         "remote": true,
-        "focus-stream": !this.props.displayScreenShare
-      });
-
-      var screenShareStreamClasses = classNames({
-        "screen": true,
-        "focus-stream": this.props.displayScreenShare,
-        "screen-sharing-paused": this.props.screenSharingPaused
+        // XXX akita-sidebar
+        // "focus-stream": !this.props.displayScreenShare
+        "focus-stream": false
       });
 
       var mediaWrapperClasses = classNames({
         "media-wrapper": true,
-        "receiving-screen-share": this.props.displayScreenShare,
+        // XXX akita-sidebar
+        // "receiving-screen-share": this.props.displayScreenShare,
+        "receiving-screen-share": false,
         "showing-local-streams": this.props.localSrcMediaElement ||
           this.props.localPosterUrl,
         "showing-media-wait": this.props.showMediaWait,
@@ -1040,20 +1032,7 @@ loop.shared.views = (function(_, mozL10n) {
                 srcMediaElement={this.props.remoteSrcMediaElement} />
               {this.state.localMediaAboslutelyPositioned ?
                 this.renderLocalVideo() : null}
-              {this.props.displayScreenShare ? null : this.props.children}
-            </div>
-            <div className={screenShareStreamClasses}>
-              <MediaView
-                cursorStore={this.props.cursorStore}
-                dispatcher={this.props.dispatcher}
-                displayAvatar={false}
-                isLoading={this.props.isScreenShareLoading}
-                mediaType="screen-share"
-                posterUrl={this.props.screenSharePosterUrl}
-                screenSharingPaused={this.props.screenSharingPaused}
-                shareCursor={true}
-                srcMediaElement={this.props.screenShareMediaElement} />
-              {this.props.displayScreenShare ? this.props.children : null}
+              {this.props.children}
             </div>
             <loop.shared.views.chat.TextChatView
               dispatcher={this.props.dispatcher}
@@ -1251,6 +1230,45 @@ loop.shared.views = (function(_, mozL10n) {
     }
   });
 
+  // XXX akita-sidebar
+  var ScreenShareView = React.createClass({
+    propTypes: {
+      children: React.PropTypes.node,
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      displayScreenShare: React.PropTypes.bool.isRequired,
+      isScreenShareLoading: React.PropTypes.bool.isRequired,
+      localSrcMediaElement: React.PropTypes.object,
+      screenShareMediaElement: React.PropTypes.object,
+      screenSharePosterUrl: React.PropTypes.string,
+      screenSharingPaused: React.PropTypes.bool
+    },
+
+    render: function() {
+      var screenShareStreamClasses = classNames({
+        "screen": true,
+        "focus-stream": this.props.displayScreenShare,
+        "screen-sharing-paused": this.props.screenSharingPaused
+      });
+
+      return (
+        <div className={screenShareStreamClasses}>
+          <loop.shared.views.MediaView
+            cursorStore={this.props.cursorStore}
+            dispatcher={this.props.dispatcher}
+            displayAvatar={false}
+            isLoading={this.props.isScreenShareLoading}
+            mediaType="screen-share"
+            posterUrl={this.props.screenSharePosterUrl}
+            screenSharingPaused={this.props.screenSharingPaused}
+            shareCursor={true}
+            srcMediaElement={this.props.screenShareMediaElement} />
+          {this.props.displayScreenShare ? this.props.children : null}
+        </div>
+      );
+    }
+  });
+
   return {
     AdsTileView: AdsTileView,
     AudioMuteButton: AudioMuteButton,
@@ -1268,6 +1286,7 @@ loop.shared.views = (function(_, mozL10n) {
     LoadingView: LoadingView,
     NotificationListView: NotificationListView,
     RemoteCursorView: RemoteCursorView,
+    ScreenShareView: ScreenShareView,
     VideoMuteButton: VideoMuteButton
   };
 })(_, navigator.mozL10n || document.mozL10n);

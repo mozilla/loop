@@ -18,13 +18,6 @@ body,
   font-family: Open Sans,sans-serif;
 }
 
-/**
- * Note: the is-standalone-room class is dynamically set by the StandaloneRoomView.
- */
-.standalone.is-standalone-room {
-  background: #000;
-}
-
 .intro-overlay {
   position: absolute;
   top: 0;
@@ -526,7 +519,7 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
 .room-conversation-wrapper {
   position: relative;
   height: 100%;
-  background: #000;
+  display: flex;
 }
 
 /* gUM prompts */

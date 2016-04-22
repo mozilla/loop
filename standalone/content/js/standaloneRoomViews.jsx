@@ -628,6 +628,9 @@ loop.standaloneRoomViews = (function(mozL10n) {
     componentDidMount: function() {
       // Adding a class to the document body element from here to ease styling it.
       document.body.classList.add("is-standalone-room");
+      // XXX akita there is no need to have a Join button so let's join
+      // the room once the component is fully loaded.
+      this.joinRoom();
     },
 
     /**
@@ -655,12 +658,13 @@ loop.standaloneRoomViews = (function(mozL10n) {
         }
       }
 
-      if (this.state.roomState !== ROOM_STATES.MEDIA_WAIT &&
-          nextState.roomState === ROOM_STATES.MEDIA_WAIT) {
-        this.props.dispatcher.dispatch(new sharedActions.SetupStreamElements({
-          publisherConfig: this.getDefaultPublisherConfig({ publishVideo: true })
-        }));
-      }
+      // XXX akita
+      // if (this.state.roomState !== ROOM_STATES.MEDIA_WAIT &&
+      //  nextState.roomState === ROOM_STATES.MEDIA_WAIT) {
+      //  this.props.dispatcher.dispatch(new sharedActions.SetupStreamElements({
+      //    publisherConfig: this.getDefaultPublisherConfig({ publishVideo: true })
+      //  }));
+      // }
 
       // UX don't want to surface these errors (as they would imply the user
       // needs to do something to fix them, when if they're having a conversation
@@ -815,33 +819,26 @@ loop.standaloneRoomViews = (function(mozL10n) {
         // we have problems, try putting that back.  Otherwise, we should
         // remove this comment before akita release.
 
+        // XXX akita we should consider not using the activeRoomStore for the
+        // ToC view because we should make activeRoomStore just handle
+        // the A/V connections.
         <div className="room-conversation-wrapper standalone-room-wrapper">
           <sharedToc.TableOfContentView
             activeRoomStore={this.props.activeRoomStore}
-            isDesktop={true} />
-
-          <sharedViews.MediaLayoutView
+            isDesktop={true}
+            isScreenShareActive={displayScreenShare} />
+          <sharedViews.ScreenShareView
             cursorStore={this.props.cursorStore}
             dispatcher={this.props.dispatcher}
             displayScreenShare={displayScreenShare}
-            isLocalLoading={this._isLocalLoading()}
-            isRemoteLoading={this._isRemoteLoading()}
             isScreenShareLoading={this._isScreenShareLoading()}
-            localPosterUrl={this.props.localPosterUrl}
-            localSrcMediaElement={this.state.localSrcMediaElement}
-            localVideoMuted={this.state.videoMuted || !this.state.localVideoEnabled}
-            matchMedia={this.state.matchMedia || window.matchMedia.bind(window)}
-            remotePosterUrl={this.props.remotePosterUrl}
-            remoteSrcMediaElement={this.state.remoteSrcMediaElement}
-            renderRemoteVideo={this.shouldRenderRemoteVideo()}
             screenShareMediaElement={this.state.screenShareMediaElement}
             screenSharePosterUrl={this.props.screenSharePosterUrl}
-            screenSharingPaused={this.state.streamPaused}
-            showInitialContext={true}
-            showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
-            showTile={this._shouldRenderTile()}>
-          </sharedViews.MediaLayoutView>
-          {(this.state.introSeen) ? null : <IntroOverlayView closeCallback={this.closeIntroOverlay} joinRoom={this.joinRoom} />}
+            screenSharingPaused={this.state.streamPaused} />
+          <sharedToc.SidebarView
+            activeRoomStore={this.props.activeRoomStore}
+            dispatcher={this.props.dispatcher}
+            isFirefox={this.props.isFirefox} />
         </div>
       );
     }
@@ -968,6 +965,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
         return null;
       }
 
+      // XXX akita
       // if (this.state.userAgentHandlesRoom) {
       //   return (
       //     <StandaloneHandleUserAgentView

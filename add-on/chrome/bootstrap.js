@@ -27,6 +27,8 @@ XPCOMUtils.defineLazyModuleGetter(this, "CustomizableUI",
   "resource:///modules/CustomizableUI.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "Task",
   "resource://gre/modules/Task.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "AboutLoop",
+  "chrome://loop/content/modules/AboutLoop.jsm");
 
 // See LOG_LEVELS in Console.jsm. Common examples: "All", "Info", "Warn", & "Error".
 const PREF_LOG_LEVEL = "loop.debug.loglevel";
@@ -1382,6 +1384,10 @@ function startup(data) {
     return;
   }
 
+  // register about: handlers
+  AboutLoop.conversation.register(); // eslint-disable-line no-undef
+  AboutLoop.panel.register(); // eslint-disable-line no-undef
+
   createLoopButton();
 
   // Attach to hidden window (for OS X).
@@ -1452,6 +1458,10 @@ function shutdown(data, reason) {
 
   // Stop waiting for browser windows to open.
   wm.removeListener(WindowListener);
+
+  // unregister about: handlers
+  AboutLoop.conversation.unregister(); // eslint-disable-line no-undef
+  AboutLoop.panel.unregister(); // eslint-disable-line no-undef
 
   // If the app is shutting down, don't worry about cleaning up, just let
   // it fade away...

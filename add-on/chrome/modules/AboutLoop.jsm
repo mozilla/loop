@@ -104,7 +104,11 @@ XPCOMUtils.defineLazyGetter(AboutLoop, "toc", () => {
   return new AboutPage("chrome://loop/content/panels/toc.html",
                        "looptoc",
                        "A1220CE0-E5D1-45B6-BEBA-3706166A2AA4",
-                       "About Loop ToC");
+                       "About Loop ToC",
+                       Ci.nsIAboutModule.ALLOW_SCRIPT |
+                        Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
+                        Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT |
+                        Ci.nsIAboutModule.MAKE_UNLINKABLE); // XXX akita-sidebar load in child?
 });
 
 this.EXPORTED_SYMBOLS = ["AboutLoop"];

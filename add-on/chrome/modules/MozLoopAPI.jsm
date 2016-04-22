@@ -1171,6 +1171,7 @@ const LoopAPIInternal = {
 
     gPageListeners = [new RemotePages("about:looppanel"),
       new RemotePages("about:loopconversation"),
+      new RemotePages("about:looptoc"),
       // Slideshow added here to expose the loop api to make L10n work.
       // XXX Can remove once slideshow is made remote.
       new RemotePages("chrome://loop/content/panels/slideshow.html")];

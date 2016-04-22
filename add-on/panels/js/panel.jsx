@@ -474,7 +474,7 @@ loop.panel = (function(_, mozL10n) {
         return;
       }
 
-      // Open url if needed.
+      /* // Open url if needed.
       loop.requestMulti(
         ["getSelectedTabMetadata"],
         ["GettingStartedURL", null, {}]
@@ -494,7 +494,9 @@ loop.panel = (function(_, mozL10n) {
         this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
           roomToken: this.props.room.roomToken
         }));
-      }.bind(this));
+      }.bind(this)); */
+      loop.request("OpenURL", "about:looptoc#" + this.props.room.roomToken);
+      this.closeWindow();
     },
 
     handleClick: function(e) {

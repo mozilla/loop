@@ -5,6 +5,7 @@
 var loop = loop || {};
 loop.shared = loop.shared || {};
 
+// XXX akita: fix hard-code string
 loop.shared.toc = (function(mozL10n) {
   "use strict";
 
@@ -14,10 +15,12 @@ loop.shared.toc = (function(mozL10n) {
   var sharedMixins = loop.shared.mixins;
   var sharedViews = loop.shared.views;
 
+  // XXX akita: to store mixin
+  // XXX akita: make activeRoomStore just handle the A/V connections.
   var TableOfContentView = React.createClass({
     propTypes: {
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
-      isDesktop: React.PropTypes.bool.isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isScreenShareActive: React.PropTypes.bool.isRequired
     },
 
@@ -35,19 +38,19 @@ loop.shared.toc = (function(mozL10n) {
       this.props.activeRoomStore.off("change", this.onStoreChange);
     },
 
-    componentDidMount: function() {
-      if (this.props.isDesktop) {
-        document.body.classList.add("desktop-toc");
-      }
-    },
-
     onStoreChange: function() {
       var newState = this.props.activeRoomStore.getStoreState();
-      var tiles = newState.roomContextUrls ? [newState.roomContextUrls[0]] : [];
+      // We haven't decrypted data yet
+      if (!newState.roomContextUrls) {
+        return;
+      }
+
+      var tiles = [newState.roomContextUrls[0]];
       newState.tiles = tiles;
       this.setState(newState);
     },
 
+    // XXX akita: add jsdoc
     addTile: function(url) {
       var tiles = this.state.tiles;
       tiles.push({
@@ -70,7 +73,9 @@ loop.shared.toc = (function(mozL10n) {
         <div className={cssClasses}>
           <RoomInfoBarView
             addUrlTile={this.addTile}
-            isDesktop={this.props.isDesktop} />
+            dispatcher={this.props.dispatcher}
+            roomName={this.state.roomName}
+            roomToken={this.state.roomToken} />
           <RoomContentView
             tiles={this.state.tiles} />
         </div>
@@ -81,16 +86,31 @@ loop.shared.toc = (function(mozL10n) {
   var RoomInfoBarView = React.createClass({
     propTypes: {
       addUrlTile: React.PropTypes.func.isRequired,
-      isDesktop: React.PropTypes.bool.isRequired
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      roomName: React.PropTypes.string.isRequired,
+      roomToken: React.PropTypes.string.isRequired
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+      this.setState({
+        roomName: nextProps.roomName || "#ROOM NAME"
+      });
+    },
+
+    componentDidUpdate: function() {
+      if (this.state.editMode) {
+        this.getDOMNode().querySelector(".edit-room-name").focus();
+      }
     },
 
     getInitialState: function() {
       return {
         editMode: false,
-        roomName: "#ROOM NAME"
+        roomName: this.props.roomName || "#ROOM NAME"
       };
     },
 
+    // XXX akita: add jsdoc
     toggleEditMode: function() {
       this.setState({
         editMode: true
@@ -107,10 +127,18 @@ loop.shared.toc = (function(mozL10n) {
       }
     },
 
+    // XXX akita: add jsdoc
     exitEditMode: function() {
+      this.props.dispatcher.dispatch(
+        new sharedActions.UpdateRoomContext({
+          roomToken: this.props.roomToken,
+          newRoomName: this.state.roomName
+        })
+      );
       this.setState({ editMode: false });
     },
 
+    // XXX akita: add jsdoc
     handleEditInputChange: function(event) {
       this.setState({ roomName: event.target.value });
     },
@@ -133,13 +161,13 @@ loop.shared.toc = (function(mozL10n) {
           </div>
           <RoomPresenceView />
           <RoomActionsView
-            addUrlTile={this.props.addUrlTile}
-            isDesktop={this.props.isDesktop} />
+            addUrlTile={this.props.addUrlTile} />
         </div>
       );
     }
   });
 
+  // XXX akita: Make this work
   var RoomPresenceView = React.createClass({
     propTypes: {},
 
@@ -159,8 +187,7 @@ loop.shared.toc = (function(mozL10n) {
 
   var RoomActionsView = React.createClass({
     propTypes: {
-      addUrlTile: React.PropTypes.func.isRequired,
-      isDesktop: React.PropTypes.bool.isRequired
+      addUrlTile: React.PropTypes.func.isRequired
     },
 
     getInitialState: function() {
@@ -169,6 +196,7 @@ loop.shared.toc = (function(mozL10n) {
       };
     },
 
+    // XXX akita: add jsdoc
     toggleAddUrlPanel: function() {
       this.setState({
         showAddUrlPanel: !this.state.showAddUrlPanel
@@ -250,53 +278,19 @@ loop.shared.toc = (function(mozL10n) {
   });
 
   var TileView = React.createClass({
-    statics: {
-      GOOGLE_SCREENSHOT: "https://www.googleapis.com/pagespeedonline/v1/runPagespeed?screenshot=true&strategy=desktop&url="
-    },
-
     propTypes: {
       tile: React.PropTypes.object.isRequired
     },
 
-    getInitialState: function() {
-      return {
-        screenshot: null
-      };
-    },
-
-    componentWillMount: function() {
-      var xhr = new XMLHttpRequest();
-      var url = this.constructor.GOOGLE_SCREENSHOT + this.props.tile.location;
-
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          var response = JSON.parse(xhr.response).screenshot;
-          console.info(JSON.parse(xhr.response).screenshot);
-          var src = "data:" + response.mime_type + ";base64,";
-          var base64 = response.data;
-          base64 = base64.replace(/\_/g, "/");
-          base64 = base64.replace(/\-/g, "+");
-          src += base64;
-          this.setState({
-            screenshot: src
-          });
-        }
-      }.bind(this);
-      xhr.open("GET", url, true);
-      xhr.send();
-    },
-
-    shouldComponentUpdate: function(nextProps, nextState) {
-      return nextState.screenshot !== this.state.screenshot;
-    },
-
+    // XXX akita: add tile screenshot
+    // XXX akita: follow-up -> how presence is handled on the UI
     render: function() {
       return (
         <div className="toc-tile">
           <div className="room-user" data-name="Pau Masiá">
             <span>P</span>
           </div>
-          <img className="tile-screenshot" src={this.state.screenshot} />
+          <img className="tile-screenshot" src="" />
           <div className="tile-info">
             <a
               className="tile-name"

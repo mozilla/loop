@@ -1,6 +1,15 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* XXX akita: Tidy up css */
+.standalone-room-wrapper .toc-wrapper {
+  width: calc(100% - 272px);
+}
+
 .toc-wrapper {
   display: flex;
-  width: calc(100% - 272px);
+  width: 100%;
   height: 100%;
   flex-direction: column;
   padding: 20px;

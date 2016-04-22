@@ -1387,6 +1387,7 @@ function startup(data) {
   // register about: handlers
   AboutLoop.conversation.register(); // eslint-disable-line no-undef
   AboutLoop.panel.register(); // eslint-disable-line no-undef
+  AboutLoop.toc.register(); // eslint-disable-line no-undef
 
   createLoopButton();
 
@@ -1462,6 +1463,7 @@ function shutdown(data, reason) {
   // unregister about: handlers
   AboutLoop.conversation.unregister(); // eslint-disable-line no-undef
   AboutLoop.panel.unregister(); // eslint-disable-line no-undef
+  AboutLoop.toc.unregister(); // eslint-disable-line no-undef
 
   // If the app is shutting down, don't worry about cleaning up, just let
   // it fade away...

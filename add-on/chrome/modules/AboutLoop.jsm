@@ -90,4 +90,11 @@ XPCOMUtils.defineLazyGetter(AboutLoop, "panel", () => {
                        "About Loop Panel");
 });
 
+XPCOMUtils.defineLazyGetter(AboutLoop, "toc", () => {
+  return new AboutPage("chrome://loop/content/panels/toc.html",
+                       "looptoc",
+                       "A1220CE0-E5D1-45B6-BEBA-3706166A2AA4",
+                       "About Loop ToC");
+});
+
 this.EXPORTED_SYMBOLS = ["AboutLoop"];

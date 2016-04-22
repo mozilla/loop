@@ -357,8 +357,7 @@ var WindowListener = {
       addSidebar: function() {
 
         let ownerDocument = gBrowser.ownerDocument;
-        // XXX akita note that we're only doing the first tab selected when the window opens
-        this._sidebar = gBrowser.getSidebarContainer(gBrowser.selectedTab.linkedBrowser);
+        var browser = ownerDocument.getElementById("browser");
 
         // this._splitter = ownerDocument.createElement("splitter");
         // this._splitter.setAttribute("class", "loop-side-splitter");
@@ -368,9 +367,9 @@ var WindowListener = {
         this.frame.width = 250;
 
         // this._sidebar.appendChild(this._splitter);
-        this._sidebar.appendChild(this.frame);
+        browser.appendChild(this.frame);
 
-        this.frame.setAttribute("src", "chrome://loop/content/panels/sidebar.html");
+        this.frame.setAttribute("src", "about:loopconversation");
       },
 
       /**

@@ -141,9 +141,11 @@ loop.webapp = (function(_, OT, mozL10n) {
         }
         case "room": {
           return (
-            <loop.shared.toc.TableOfContentView
+            <loop.standaloneRoomViews.StandaloneRoomControllerView
               activeRoomStore={this.props.activeRoomStore}
-              isDesktop={false} />
+              cursorStore={this.props.cursorStore}
+              dispatcher={this.props.dispatcher}
+              isFirefox={this.state.isFirefox} />
           );
         }
         case "home": {

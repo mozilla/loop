@@ -12,6 +12,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
   var sharedActions = loop.shared.actions;
   var sharedMixins = loop.shared.mixins;
   var sharedViews = loop.shared.views;
+  var sharedToc = loop.shared.toc;
 
   var ToSView = React.createClass({
     propTypes: {
@@ -805,17 +806,20 @@ loop.standaloneRoomViews = (function(mozL10n) {
         this.props.screenSharePosterUrl);
 
       return (
+        // XXX akita if we're not using / going to use StandaloneInfoBar,
+        // StandaloneRoomInfoArea, and IntroOverlayView we should remove them
+        // and their tests.
+
+        // XXX akita localVideoMuted in the original prototype was
+        // {this.state.videoMuted || !this.state.localVideoEnabled}, so if
+        // we have problems, try putting that back.  Otherwise, we should
+        // remove this comment before akita release.
+
         <div className="room-conversation-wrapper standalone-room-wrapper">
-          <StandaloneInfoBar
-            audio={{ enabled: !this.state.audioMuted,
-                     visible: this._roomIsActive() }}
-            dispatcher={this.props.dispatcher}
-            forceAudioDisabled={!this.state.localAudioEnabled}
-            forceVideoDisabled={!this.state.localVideoEnabled}
-            leaveRoom={this.leaveRoom}
-            room={this.props.activeRoomStore.getStoreState()}
-            video={{ enabled: !this.state.videoMuted,
-                     visible: this._roomIsActive() }} />
+          <sharedToc.TableOfContentView
+            activeRoomStore={this.props.activeRoomStore}
+            isDesktop={true} />
+
           <sharedViews.MediaLayoutView
             cursorStore={this.props.cursorStore}
             dispatcher={this.props.dispatcher}
@@ -836,14 +840,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
             showInitialContext={true}
             showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
             showTile={this._shouldRenderTile()}>
-            <StandaloneRoomInfoArea activeRoomStore={this.props.activeRoomStore}
-              dispatcher={this.props.dispatcher}
-              failureReason={this.state.failureReason}
-              isFirefox={this.props.isFirefox}
-              joinRoom={this.joinRoom}
-              roomState={this.state.roomState}
-              roomUsed={this.state.used}
-              screenSharingPaused={this.state.streamPaused} />
           </sharedViews.MediaLayoutView>
           {(this.state.introSeen) ? null : <IntroOverlayView closeCallback={this.closeIntroOverlay} joinRoom={this.joinRoom} />}
         </div>
@@ -972,12 +968,12 @@ loop.standaloneRoomViews = (function(mozL10n) {
         return null;
       }
 
-      if (this.state.userAgentHandlesRoom) {
-        return (
-          <StandaloneHandleUserAgentView
-            dispatcher={this.props.dispatcher} />
-        );
-      }
+      // if (this.state.userAgentHandlesRoom) {
+      //   return (
+      //     <StandaloneHandleUserAgentView
+      //       dispatcher={this.props.dispatcher} />
+      //   );
+      // }
 
       return (
         <StandaloneRoomView

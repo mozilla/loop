@@ -74,7 +74,8 @@ loop.shared.toc = (function(mozL10n) {
           <RoomInfoBarView
             addUrlTile={this.addTile}
             dispatcher={this.props.dispatcher}
-            roomName={this.state.roomName ? this.state.roomName : "BUG: NO NAME SPECIFIED" }
+            roomName={this.state.roomName ? this.state.roomName
+              : "BUG: NO NAME SPECIFIED"}
             roomToken={this.state.roomToken} />
           <RoomContentView
             tiles={this.state.tiles} />
@@ -175,10 +176,10 @@ loop.shared.toc = (function(mozL10n) {
       return (
         <div className="room-active-users">
           <div className="room-user" data-name="Pau Masiá">
-            <span>P</span>
+            <span>{'P'}</span>
           </div>
           <div className="room-user" data-name="Manu">
-            <span>M</span>
+            <span>{'M'}</span>
           </div>
         </div>
       );
@@ -241,9 +242,9 @@ loop.shared.toc = (function(mozL10n) {
     render: function() {
       return (
         <div className="room-panel-add-url">
-          <h2>Add a site to the room</h2>
+          <h2>{'Add a site to the room'}</h2>
           <input placeholder="http://..." ref="siteUrl" type="text" />
-          <button onClick={this.handleClick}>Add site</button>
+          <button onClick={this.handleClick}>{'Add site'}</button>
         </div>
       );
     }
@@ -288,7 +289,7 @@ loop.shared.toc = (function(mozL10n) {
       return (
         <div className="toc-tile">
           <div className="room-user" data-name="Pau Masiá">
-            <span>P</span>
+            <span>{'P'}</span>
           </div>
           <img className="tile-screenshot" src="" />
           <div className="tile-info">

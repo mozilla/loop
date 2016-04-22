@@ -607,6 +607,7 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
       // for the UX for that. See bug 1166824. In the meantime this gives us
       // additional information for analysis.
       loop.shared.utils.hasAudioOrVideoDevices(function(hasDevices) {
+
         if (hasDevices) {
           // MEDIA_WAIT causes the views to dispatch sharedActions.SetupStreamElements,
           // which in turn starts the sdk obtaining the device permission.

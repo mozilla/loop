@@ -37,7 +37,7 @@ loop.sidebar = (function(mozL10n) {
       if (this.state.roomState === ROOM_STATES.ROOM_GATHER) {
         return (
           <div>
-            <p>I'm a sidebar</p>
+            <p>{"If you see this, please file a bug"}</p>
           </div>
         );
       }

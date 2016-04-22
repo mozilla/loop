@@ -474,9 +474,7 @@ loop.panel = (function(_, mozL10n) {
         return;
       }
 
-      loop.request("loadSidebar", this.props.room.roomToken);
-
-      /* // Open url if needed.
+      // Open url if needed.
       loop.requestMulti(
         ["getSelectedTabMetadata"],
         ["GettingStartedURL", null, {}]
@@ -484,22 +482,27 @@ loop.panel = (function(_, mozL10n) {
         var contextURL = this.props.room.decryptedContext.urls &&
                          this.props.room.decryptedContext.urls[0].location;
 
-        contextURL = contextURL || (results[1] + "?noopenpanel=1");
+        // XXX akita-sidebar
+        /* contextURL = contextURL || (results[1] + "?noopenpanel=1");
 
         if (results[0].url !== contextURL) {
           loop.request("OpenURL", contextURL);
+        } */
+        if (!contextURL) {
+          loop.request("OpenURL", results[1] + "?noopenpanel=1");
+        } else {
+          loop.requestMulti(["OpenURL", "about:looptoc#" + this.props.room.roomToken],
+            ["LoadSidebar", this.props.room.roomToken]);
         }
         this.closeWindow();
 
+        // XXX akita-sidebar
         // open the room after the (possible) tab change to be able to
         // share when opening from non-remote tab.
-        this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
+        /* this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
           roomToken: this.props.room.roomToken
-        }));
-      }.bind(this)); */
-
-      loop.request("OpenURL", "about:looptoc#" + this.props.room.roomToken);
-      this.closeWindow();
+        })); */
+      }.bind(this));
     },
 
     handleClick: function(e) {

@@ -474,6 +474,8 @@ loop.panel = (function(_, mozL10n) {
         return;
       }
 
+      loop.request("loadSidebar", this.props.room.roomToken);
+
       /* // Open url if needed.
       loop.requestMulti(
         ["getSelectedTabMetadata"],
@@ -495,6 +497,7 @@ loop.panel = (function(_, mozL10n) {
           roomToken: this.props.room.roomToken
         }));
       }.bind(this)); */
+
       loop.request("OpenURL", "about:looptoc#" + this.props.room.roomToken);
       this.closeWindow();
     },

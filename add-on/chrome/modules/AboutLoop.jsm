@@ -78,7 +78,7 @@ var AboutLoop = {};
 // make changes to the URL names themselves, we'll need to change them
 // there too...
 XPCOMUtils.defineLazyGetter(AboutLoop, "conversation", () => {
-  return new AboutPage("chrome://loop/content/panels/conversation.html",
+  return new AboutPage("chrome://loop/content/panels/sidebar.html",
                        "loopconversation",
                        "E79DB45D-2D6D-48BE-B179-6A16C95E97BA",
                        "About Loop Conversation",

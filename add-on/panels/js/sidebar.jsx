@@ -6,14 +6,11 @@ var loop = loop || {};
 
 loop.sidebar = (function() {
   "use strict";
-console.info(loop);
+
   var ROOM_STATES = loop.store.ROOM_STATES;
   var sharedActions = loop.shared.actions;
   var sharedUtils = loop.shared.utils;
   var sharedMixins = loop.shared.mixins;
-
-  loop.config = loop.config || {};
-  loop.config.serverUrl = loop.config.serverUrl || "http://localhost:5000";
 
   var SidebarControllerView = React.createClass({
     mixins: [sharedMixins.UrlHashChangeMixin,
@@ -22,27 +19,7 @@ console.info(loop);
 
     propTypes: {
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
-      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      standaloneAppStore: React.PropTypes.instanceOf(
-        loop.store.StandaloneAppStore).isRequired
-    },
-
-    getInitialState: function() {
-      return this.props.standaloneAppStore.getStoreState();
-    },
-
-    componentWillMount: function() {
-      this.listenTo(this.props.standaloneAppStore, "change", function() {
-        this.setState(this.props.standaloneAppStore.getStoreState());
-      }, this);
-    },
-
-    componentWillUnmount: function() {
-      this.stopListening(this.props.standaloneAppStore);
-    },
-
-    onUrlHashChange: function() {
-      this.locationReload();
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
     },
 
     render: function() {
@@ -74,8 +51,7 @@ console.info(loop);
     },
 
     getInitialState: function() {
-      var storeState = this.props.activeRoomStore.getStoreState();
-      return storeState;
+      return this.props.activeRoomStore.getStoreState();
     },
 
     leaveRoom: function() {
@@ -109,10 +85,6 @@ console.info(loop);
   });
 
   function init() {
-    loop.StandaloneMozLoop({
-      baseServerUrl: loop.config.serverUrl
-    });
-
     var dispatcher = new loop.Dispatcher();
     var sdkDriver = new loop.OTSdkDriver({
       // For the standalone, always request data channels. If they aren't
@@ -120,12 +92,6 @@ console.info(loop);
       // we won't display the UI.
       constants: {},
       useDataChannels: true,
-      dispatcher: dispatcher,
-      sdk: OT
-    });
-
-    // Stores
-    var standaloneAppStore = new loop.store.StandaloneAppStore({
       dispatcher: dispatcher,
       sdk: OT
     });
@@ -147,17 +113,18 @@ console.info(loop);
       dispatcher.dispatch(new sharedActions.WindowUnload());
     });
 
-    var locationData = sharedUtils.locationData();
-
-    dispatcher.dispatch(new sharedActions.ExtractTokenInfo({
-      windowPath: locationData.pathname,
-      windowHash: locationData.hash
-    }));
-
     React.render(<SidebarControllerView
                     activeRoomStore={activeRoomStore}
-                    dispatcher={dispatcher}
-                    standaloneAppStore={standaloneAppStore} />, document.querySelector("#main"));
+                    dispatcher={dispatcher} />, document.querySelector("#main"));
+
+    var locationData = sharedUtils.locationData();
+    var hash = locationData.hash.match(/#(.*)/);
+
+    dispatcher.dispatch(new sharedActions.SetupWindowData({
+      windowId: "id-test",
+      roomToken: hash[1],
+      type: "room"
+    }));
   }
 
   return {

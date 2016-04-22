@@ -380,7 +380,10 @@ var WindowListener = {
 
       loadSidebar: function(token) {
         log.info("loadSidebar called:", token, this.sidebar);
-        this.sidebar.setAttribute("src", "about:loopconversation#" + token);
+        let url = "about:loopconversation#" + token;
+        Services.perms.add(Services.io.newURI(url, null, null), "camera",
+                         Services.perms.ALLOW_ACTION, Services.perms.EXPIRE_SESSION);
+        this.sidebar.setAttribute("src", url);
       },
 
       /**

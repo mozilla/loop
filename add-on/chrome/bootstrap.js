@@ -355,26 +355,32 @@ var WindowListener = {
 
       /* XXX akita make this into it's own object. */
       addSidebar: function() {
-
         let ownerDocument = gBrowser.ownerDocument;
         var browser = ownerDocument.getElementById("browser");
 
-        // this._splitter = ownerDocument.createElement("splitter");
-        // this._splitter.setAttribute("class", "loop-side-splitter");
+        let sidebarBrowser = document.createElementNS(kNSXUL, "browser");
+        sidebarBrowser.setAttribute("id", "loop-side-browser");
+        sidebarBrowser.setAttribute("disable-history", "true");
+        sidebarBrowser.setAttribute("disable-global-history", "true");
 
-        this.frame = ownerDocument.createElement("iframe");
-        this.frame.className = "loop-side-iframe";
-        this.frame.width = 250;
+        // XXX akita something like these seem likely to be required once we
+        // electrolyze this along with a URI_MUST_LOAD_IN_CHILD in
+        // AboutLoop.jsm
+        // sidebarBrowser.setAttribute("message-manager-group", "social");
+        // sidebarBrowser.setAttribute("message", "true");
+        // sidebarBrowser.setAttribute("remote", "true");
 
-        // this._sidebar.appendChild(this._splitter);
-        browser.appendChild(this.frame);
+        sidebarBrowser.setAttribute("type", "content");
 
-        this.frame.setAttribute("src", "about:loopconversation");
+        this.sidebar = sidebarBrowser;
+        this.sidebar.width = 250;
+
+        browser.appendChild(sidebarBrowser);
       },
 
       loadSidebar: function(token) {
-        log.info("LOADSIDEBAR", token, this.frame);
-        this.frame.setAttribute("src", "about:loopconversation#" + token);
+        log.info("loadSidebar called:", token, this.sidebar);
+        this.sidebar.setAttribute("src", "about:loopconversation#" + token);
       },
 
       /**

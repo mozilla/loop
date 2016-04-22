@@ -152,8 +152,9 @@ loop.standaloneRoomViews = (function(mozL10n) {
     getFailureString: function() {
       switch (this.props.failureReason) {
         case FAILURE_DETAILS.MEDIA_DENIED:
-        // XXX Bug 1166824 should provide a better string for this.
+        // Falls through - we use the same message.
         case FAILURE_DETAILS.NO_MEDIA:
+          // XXX Bug 1166824 should provide a better string for this.
           return mozL10n.get("rooms_media_denied_message");
         case FAILURE_DETAILS.EXPIRED_OR_INVALID:
           return mozL10n.get("rooms_unavailable_notification_message");

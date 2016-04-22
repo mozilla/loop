@@ -269,12 +269,18 @@ html[dir="rtl"] .standalone-info-bar-spacer > .standalone-info-bar-context > a >
   vertical-align: middle;
 }
 
-.standalone-info-bar > .media-control-buttons {
-  display: flex;
+.media-wrapper:not(.showing-local-streams) > .media-control-buttons {
+  display: none;
 }
 
-.standalone-info-bar > .media-control-buttons > .btn,
-.standalone-info-bar > .media-control-buttons > .general-support-url {
+.media-wrapper.showing-local-streams > .media-control-buttons {
+  display: flex;
+  justify-content: space-around;
+  order: 2;
+}
+
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn,
+.media-wrapper.showing-local-streams > .media-control-buttons > .general-support-url {
   height: 40px;
   margin-left: 1px;
   width: 42px;
@@ -286,11 +292,11 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .general-support
   margin-right: 1px;
 }
 
-.standalone-info-bar > .media-control-buttons > .btn-hangup {
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-hangup {
   background-color: #c33c32;
 }
 
-.standalone-info-bar > .media-control-buttons > .btn-hangup:after {
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-hangup:after {
   content: url("/shared/img/leave.svg");
   margin-right: -2px;
 }
@@ -303,51 +309,52 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
 }
 
 
-.standalone-info-bar > .media-control-buttons > .btn-hangup:hover {
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-hangup:hover {
   background-color: #AF352C;
 }
 
-.standalone-info-bar > .media-control-buttons > .btn-mute-audio.disabled,
-.standalone-info-bar > .media-control-buttons > .btn-mute-video.disabled {
+
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-audio.disabled,
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-video.disabled {
   opacity: .3;
 }
 
-.standalone-info-bar > .media-control-buttons > .btn-mute-audio,
-.standalone-info-bar > .media-control-buttons > .btn-mute-video {
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-audio,
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-video {
   background-color: inherit;
 }
 
-.standalone-info-bar > .media-control-buttons > .btn-mute-audio:hover:after,
-.standalone-info-bar > .media-control-buttons > .btn-mute-audio:active:after {
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-audio:hover:after,
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-audio:active:after {
   content: url("/shared/img/audio.svg");
 }
 
-.standalone-info-bar > .media-control-buttons > .btn-mute-audio.muted:after {
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-audio.muted:after {
   content: url("/shared/img/audio-muted-darkgrey.svg");
 }
 
-.standalone-info-bar > .media-control-buttons > .btn-mute-video:after {
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-video:after {
   margin-left: -4px;
 }
 
-.standalone-info-bar > .media-control-buttons > .btn-mute-video:hover:after,
-.standalone-info-bar > .media-control-buttons > .btn-mute-video:active:after {
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-video:hover:after,
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-video:active:after {
   content: url("/shared/img/video.svg");
 }
 
-.standalone-info-bar > .media-control-buttons > .btn-mute-video.muted:after {
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-video.muted:after {
   content: url("/shared/img/video-muted-darkgrey.svg");
 }
 
-.standalone-info-bar > .media-control-buttons > .general-support-url {
+.media-wrapper.showing-local-streams > .media-control-buttons > .general-support-url {
   align-items: center;
   display: flex;
   justify-content: center;
 }
 
 /* Highlight on hover. */
-.standalone-info-bar > .media-control-buttons > .general-support-url:hover,
-.standalone-info-bar > .media-control-buttons > .btn:not(.btn-hangup):hover {
+.media-wrapper.showing-local-streams > .media-control-buttons > .general-support-url:hover,
+.media-wrapper.showing-local-streams > .media-control-buttons > .btn:not(.btn-hangup):hover {
   background-color: rgba(51, 51, 51, 0.1);
 }
 

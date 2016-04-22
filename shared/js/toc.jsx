@@ -5,8 +5,14 @@
 var loop = loop || {};
 loop.shared = loop.shared || {};
 
-loop.shared.toc = (function() {
+loop.shared.toc = (function(mozL10n) {
   "use strict";
+
+  var ROOM_INFO_FAILURES = loop.shared.utils.ROOM_INFO_FAILURES;
+  var ROOM_STATES = loop.store.ROOM_STATES;
+  var sharedActions = loop.shared.actions;
+  var sharedMixins = loop.shared.mixins;
+  var sharedViews = loop.shared.views;
 
   var TableOfContentView = React.createClass({
     propTypes: {
@@ -317,13 +323,16 @@ loop.shared.toc = (function() {
       // We pass conversationStore here rather than use the mixin, to allow
       // easy configurability for the ui-showcase.
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
+      audio: React.PropTypes.object.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       introSeen: React.PropTypes.bool,
       isFirefox: React.PropTypes.bool.isRequired,
+      leaveRoom: React.PropTypes.func.isRequired,
       // The poster URLs are for UI-showcase testing and development
       localPosterUrl: React.PropTypes.string,
       remotePosterUrl: React.PropTypes.string,
-      roomState: React.PropTypes.string
+      roomState: React.PropTypes.string,
+      video: React.PropTypes.object.isRequired
     },
 
     getInitialState: function() {
@@ -495,9 +504,11 @@ loop.shared.toc = (function() {
       return (
         <div className="sidebar">
           <sharedViews.MediaLayoutView
+            audio={this.props.audio}
             dispatcher={this.props.dispatcher}
             isLocalLoading={this._isLocalLoading()}
             isRemoteLoading={this._isRemoteLoading()}
+            leaveRoom={this.props.leaveRoom}
             localPosterUrl={this.props.localPosterUrl}
             localSrcMediaElement={this.state.localSrcMediaElement}
             localVideoMuted={this.state.videoMuted}
@@ -507,7 +518,8 @@ loop.shared.toc = (function() {
             renderRemoteVideo={this.shouldRenderRemoteVideo()}
             showInitialContext={true}
             showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
-            showTile={false} />
+            showTile={false}
+            video={this.props.video} />
         </div>
       );
     }
@@ -518,4 +530,4 @@ loop.shared.toc = (function() {
     SidebarView: SidebarView,
     TableOfContentView: TableOfContentView
   };
-})();
+})(navigator.mozL10n || document.mozL10n);

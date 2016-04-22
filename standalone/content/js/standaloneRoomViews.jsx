@@ -837,8 +837,13 @@ loop.standaloneRoomViews = (function(mozL10n) {
             screenSharingPaused={this.state.streamPaused} />
           <sharedToc.SidebarView
             activeRoomStore={this.props.activeRoomStore}
+            audio={{ enabled: !this.state.audioMuted,
+                     visible: this._roomIsActive() }}
             dispatcher={this.props.dispatcher}
-            isFirefox={this.props.isFirefox} />
+            isFirefox={this.props.isFirefox}
+            leaveRoom={this.leaveRoom}
+            video={{ enabled: !this.state.videoMuted,
+                     visible: this._roomIsActive() }} />
         </div>
       );
     }

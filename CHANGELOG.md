@@ -1,6 +1,31 @@
 # Changelog
 
-## 1.3.0
+## 1.3.1
+
+### New
+
+* Bug 1145733 - Intermittent browser_fxa_login.js | Uncaught exception - 400: Bad Request. r=Standard8 Bug 1266040 - Intermittent browser_fxa_login.js | Uncaught exception - null: null Bug 1266986 - Intermittent /loop/chrome/test/mochitest/browser_fxa_login.js | Check registered push URL - Got https://localhost/pushUrl/guest-rooms, expected https://localhost/pushUrl/fxa-rooms | Uncaught exception - 400: Bad Request. [Ed Lee]
+
+* Bug 1250849 - Remove listeners and hooks. r=Standard8. [David Critchley]
+
+* No Bug. Add Node 4 to the list of platforms to test on travis. rs=Mardak. [Mark Banner]
+
+* Bug 1261849 - Hello conversation opens while Firefox is in never remember history mode. r=Mardak. [Manuel Casas Barrado]
+
+### Chores
+
+* Update classnames to version 2.2.4, r=Standard8. [Greenkeeper]
+
+* Update firefox-profile to version 0.3.13. r=Standard8. [Greenkeeper]
+
+* Update eslint to version 2.8.0 r=dcritch. [Greenkeeper]
+
+* Update script-loader to version 0.7.0. r=Standard8. [Greenkeeper]
+
+* Update babel-cli to version 6.7.7. r=standard8. [greenkeeperio-bot]
+
+
+## v1.3.0 (2016-04-18)
 
 ### New
 
@@ -97,6 +122,8 @@
 * Update jpm to version 1.0.7. r=standard8. [greenkeeperio-bot]
 
 ### Other
+
+* 1.3.0. [Mark Banner]
 
 * Bug 1257154 - Switch to getting DOM title updates via a frame script to work better with e10s - add the script to the repo. r=mikedeboer. [Mark Banner]
 

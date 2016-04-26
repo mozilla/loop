@@ -567,7 +567,7 @@
         return;
       }
 
-      var frameDOMNode = React.findDOMNode(this.refs.frameNode);
+      var frameDOMNode = ReactDOM.findDOMNode(this.refs.frameNode);
       // For multi-browser compatibility allow for both contentDoc and contentWin
       var contentDoc = frameDOMNode.contentDocument || frameDOMNode.contentWindow.document;
 
@@ -588,7 +588,7 @@
       /* setTimeout added to allow for objects to adjust within the iframe,
       after being rendered, before grabbing height */
       setTimeout(function() {
-        var frameDOMNode = React.findDOMNode(this.refs.frameNode);
+        var frameDOMNode = ReactDOM.findDOMNode(this.refs.frameNode);
         // For multi-browser compatibility allow for both contentDoc and contentWin
         var contentDoc = frameDOMNode.contentDocument || frameDOMNode.contentWindow.document;
         // + 2 pixels for the 1 pixel border on top and bottom
@@ -1488,7 +1488,7 @@
     };
 
     try {
-      React.render(<App />, document.getElementById("main"));
+      ReactDOM.render(<App />, document.getElementById("main"));
 
       for (var listener of visibilityListeners) {
         listener({ target: { hidden: false } });
@@ -1507,7 +1507,7 @@
       // Put the title back, in case views changed it.
       document.title = "Loop UI Components Showcase";
 
-      React.render(<Result error={uncaughtError}
+      ReactDOM.render(<Result error={uncaughtError}
                            warnings={caughtWarnings} />,
                    document.querySelector("#results"));
     }, 1000);

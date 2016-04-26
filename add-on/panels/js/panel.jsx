@@ -145,19 +145,21 @@ loop.panel = (function(_, mozL10n) {
     },
 
     render: function() {
+      var tosString =
+        '<a href="' + this.state.terms_of_use_url + '" target="_blank">' +
+        mozL10n.get("legal_text_tos") +
+        "</a>";
+
+      var privacyString =
+        '<a href="' + this.state.privacy_notice_url + '" target="_blank">' +
+        mozL10n.get("legal_text_privacy") +
+        "</a>";
+
       var locale = mozL10n.language.code;
       var tosHTML = mozL10n.get("legal_text_and_links3", {
         "clientShortname": mozL10n.get("clientShortname2"),
-        "terms_of_use": React.renderToStaticMarkup(
-          <a href={this.state.terms_of_use_url} target="_blank">
-            {mozL10n.get("legal_text_tos")}
-          </a>
-        ),
-        "privacy_notice": React.renderToStaticMarkup(
-          <a href={this.state.privacy_notice_url} target="_blank">
-            {mozL10n.get("legal_text_privacy")}
-          </a>
-        )
+        "terms_of_use": tosString,
+        "privacy_notice": privacyString
       });
 
       return (
@@ -169,7 +171,7 @@ loop.panel = (function(_, mozL10n) {
           </p>
           <p className="terms-service"
              dangerouslySetInnerHTML={{ __html: tosHTML }}
-             onClick={this.handleLinkClick}></p>
+             onClick={this.handleLinkClick} />
          </div>
       );
     }
@@ -463,7 +465,7 @@ loop.panel = (function(_, mozL10n) {
 
     componentDidUpdate: function() {
       if (this.state.editMode) {
-        this.getDOMNode().querySelector(".edit-room-input").focus();
+        ReactDOM.findDOMNode(this).querySelector(".edit-room-input").focus();
       }
     },
 
@@ -713,12 +715,13 @@ loop.panel = (function(_, mozL10n) {
     },
 
     componentDidMount: function() {
-      var menuNode = this.getDOMNode();
+      var menuNode = ReactDOM.findDOMNode(this);
+
       var menuNodeRect = menuNode.getBoundingClientRect();
 
       // Get the parent element and make sure the menu does not overlow its
       // container.
-      var listNode = loop.shared.utils.findParentNode(this.getDOMNode(),
+      var listNode = loop.shared.utils.findParentNode(ReactDOM.findDOMNode(this),
                                                       "rooms");
       var listNodeRect = listNode.getBoundingClientRect();
 
@@ -1055,7 +1058,7 @@ loop.panel = (function(_, mozL10n) {
     componentDidUpdate: function() {
       if (this.state.showPanel) {
         setTimeout(() => {
-          this.getDOMNode().classList.add("share-panel-open");
+          ReactDOM.findDOMNode(this).classList.add("share-panel-open");
         }, this.constructor.SHOW_PANEL_DELAY);
       }
     },
@@ -1146,7 +1149,7 @@ loop.panel = (function(_, mozL10n) {
     },
 
     componentDidMount: function() {
-      this.getDOMNode().querySelector("input").focus();
+      ReactDOM.findDOMNode(this).querySelector("input").focus();
     },
 
     handleBlur: function() {
@@ -1155,7 +1158,7 @@ loop.panel = (function(_, mozL10n) {
 
     handleFocus: function() {
       this.setState({ focused: true });
-      this.getDOMNode().querySelector("input").select();
+      ReactDOM.findDOMNode(this).querySelector("input").select();
     },
 
     handleKeyDown: function(event) {
@@ -1166,7 +1169,7 @@ loop.panel = (function(_, mozL10n) {
 
     handleNameChange: function() {
       let token = this.props.roomToken,
-          name = this.getDOMNode().querySelector("input").value || "";
+          name = ReactDOM.findDOMNode(this).querySelector("input").value || "";
 
       if (name !== this.props.roomName) {
         this.props.dispatcher.dispatch(
@@ -1502,7 +1505,7 @@ loop.panel = (function(_, mozL10n) {
         constants: constants
       });
 
-      React.render(<PanelView
+      ReactDOM.render(<PanelView
         dispatcher={dispatcher}
         notifications={notifications}
         roomStore={roomStore} />, document.querySelector("#main"));

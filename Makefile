@@ -148,6 +148,14 @@ $(REACT_OBJS): node_modules/react/dist/react-with-addons.js
 	@mkdir -p $(@D)
 	$(RSYNC) $< $@
 
+REACT_DOM_OBJS = \
+	$(BUILT)/add-on/chrome/content/shared/vendor/react-dom.js \
+  $(BUILT)/standalone/content/shared/vendor/react-dom.js \
+	$(BUILT)/ui/shared/vendor/react-dom.js
+
+$(REACT_DOM_OBJS): node_modules/react-dom/dist/react-dom.js
+	$(RSYNC) $< $@
+
 REACT_PROD_OBJECTS = \
 	$(BUILT)/add-on/chrome/content/shared/vendor/react-prod.js \
 	$(BUILT)/standalone/content/shared/vendor/react-prod.js \
@@ -155,6 +163,14 @@ REACT_PROD_OBJECTS = \
 
 $(REACT_PROD_OBJECTS): node_modules/react/dist/react-with-addons.min.js
 	@mkdir -p $(@D)
+	$(RSYNC) $< $@
+
+REACT_DOM_PROD_OBJECTS = \
+	$(BUILT)/add-on/chrome/content/shared/vendor/react-dom-prod.js \
+	$(BUILT)/standalone/content/shared/vendor/react-dom-prod.js \
+	$(BUILT)/ui/shared/vendor/react-dom-prod.js
+
+$(REACT_DOM_PROD_OBJECTS): node_modules/react-dom/dist/react-dom.min.js
 	$(RSYNC) $< $@
 
 $(BUILT)/test/vendor:
@@ -175,12 +191,18 @@ $(BUILT)/test/vendor/chai.js: node_modules/chai/chai.js
 $(BUILT)/test/vendor/chai-as-promised.js: node_modules/chai-as-promised/lib/chai-as-promised.js
 	$(RSYNC) $< $(BUILT)/test/vendor
 
+$(BUILT)/test/vendor/react-dom-server.js: node_modules/react-dom/dist/react-dom-server.js
+	$(RSYNC) $< $(@D)
+
 .PHONY: vendor_libs
 vendor_libs: $(BACKBONE_OBJS) $(CLASSNAME_OBJS) $(LODASH_OBJS) $(REACT_OBJS) \
+             $(REACT_DOM_OBJS) \
              $(REACT_PROD_OBJECTS) \
+             $(REACT_DOM_PROD_OBJECTS) \
              $(BUILT)/test/vendor $(BUILT)/test/vendor/sinon.js \
              $(BUILT)/test/vendor/mocha.js $(BUILT)/test/vendor/mocha.css \
-             $(BUILT)/test/vendor/chai.js $(BUILT)/test/vendor/chai-as-promised.js
+             $(BUILT)/test/vendor/chai.js $(BUILT)/test/vendor/chai-as-promised.js \
+             $(BUILT)/test/vendor/react-dom-server.js
 
 $(BUILT)/add-on/chrome/content/preferences/prefs.js: add-on/preferences/prefs.js \
                                                      $(VENV) \

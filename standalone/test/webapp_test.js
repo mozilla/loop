@@ -37,7 +37,7 @@ describe("loop.webapp", function() {
     var loopConfigRestore;
 
     beforeEach(function() {
-      sandbox.stub(React, "render");
+      sandbox.stub(ReactDOM, "render");
       loopConfigRestore = loop.config;
       loop.config = {
         serverUrl: "http://fake.invalid"
@@ -52,8 +52,8 @@ describe("loop.webapp", function() {
     it("should create the WebappRootView", function() {
       loop.webapp.init();
 
-      sinon.assert.calledOnce(React.render);
-      sinon.assert.calledWith(React.render,
+      sinon.assert.calledOnce(ReactDOM.render);
+      sinon.assert.calledWith(ReactDOM.render,
         sinon.match(function(value) {
           return TestUtils.isCompositeComponentElement(value,
             loop.webapp.WebappRootView);
@@ -155,7 +155,7 @@ describe("loop.webapp", function() {
       var homeView = TestUtils.renderIntoDocument(
         React.createElement(loop.webapp.HomeView));
 
-      expect(homeView.getDOMNode().textContent.includes("welcome")).eql(true);
+      expect(ReactDOM.findDOMNode(homeView).textContent.includes("welcome")).eql(true);
     });
   });
 
@@ -167,7 +167,7 @@ describe("loop.webapp", function() {
             isFirefox: true
         }));
 
-        expect(comp.getDOMNode()).eql(null);
+        expect(ReactDOM.findDOMNode(comp)).eql(null);
       });
 
       it("should render when not using Firefox", function() {

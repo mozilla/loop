@@ -22,18 +22,20 @@ loop.standaloneRoomViews = (function(mozL10n) {
       // We use this technique of static markup as it means we get
       // just one overall string for L10n to define the structure of
       // the whole item.
+      var tosString =
+        '<a href="' + loop.config.legalWebsiteUrl + '" rel="noreferrer" target="_blank">' +
+        mozL10n.get("terms_of_use_link_text") +
+        "</a>";
+
+      var privacyString =
+        '<a href="' + loop.config.privacyWebsiteUrl + '" rel="noreferrer" target="_blank">' +
+        mozL10n.get("privacy_notice_link_text") +
+        "</a>";
+
       return mozL10n.get("legal_text_and_links", {
         "clientShortname": mozL10n.get("clientShortname2"),
-        "terms_of_use_url": React.renderToStaticMarkup(
-          <a href={loop.config.legalWebsiteUrl} rel="noreferrer" target="_blank">
-            {mozL10n.get("terms_of_use_link_text")}
-          </a>
-        ),
-        "privacy_notice_url": React.renderToStaticMarkup(
-          <a href={loop.config.privacyWebsiteUrl} rel="noreferrer" target="_blank">
-            {mozL10n.get("privacy_notice_link_text")}
-          </a>
-        )
+        "terms_of_use_url": tosString,
+        "privacy_notice_url": privacyString
       });
     },
 

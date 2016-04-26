@@ -91,7 +91,7 @@ loop.copy = (mozL10n => {
         pluralRule
       });
 
-      React.render(<CopyView />, document.querySelector("#main"));
+      ReactDOM.render(<CopyView />, document.querySelector("#main"));
 
       document.documentElement.setAttribute("dir", mozL10n.language.direction);
       document.documentElement.setAttribute("lang", mozL10n.language.code);

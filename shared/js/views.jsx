@@ -726,7 +726,7 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     componentWillUnmount: function() {
-      var videoElement = this.getDOMNode().querySelector("video");
+      var videoElement = ReactDOM.findDOMNode(this).querySelector("video");
       if (!this.props.shareCursor || !videoElement) {
         return;
       }
@@ -744,7 +744,7 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     handleVideoDimensions: function() {
-      var videoElement = this.getDOMNode().querySelector("video");
+      var videoElement = ReactDOM.findDOMNode(this).querySelector("video");
       if (!videoElement) {
         return;
       }
@@ -774,7 +774,7 @@ loop.shared.views = (function(_, mozL10n) {
       var storeState = this.props.cursorStore.getStoreState();
 
       // video is not at the top, so we need to calculate the offset
-      var video = this.getDOMNode().querySelector("video");
+      var video = ReactDOM.findDOMNode(this).querySelector("video");
       var offset = video.getBoundingClientRect();
 
       var deltaX = event.clientX
@@ -825,7 +825,7 @@ loop.shared.views = (function(_, mozL10n) {
         return;
       }
 
-      var videoElement = this.getDOMNode().querySelector("video");
+      var videoElement = ReactDOM.findDOMNode(this).querySelector("video");
       if (!videoElement || videoElement.tagName.toLowerCase() !== "video") {
         // Must be displaying the avatar view, so don't try and attach video.
         return;

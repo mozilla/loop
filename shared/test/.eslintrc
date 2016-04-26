@@ -1,4 +1,7 @@
 {
+  "globals": {
+    "ReactDOMServer": false,
+  },
   "rules": {
     // This is useful for some of the tests, e.g.
     // expect(new Foo()).to.Throw(/error/)

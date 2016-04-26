@@ -211,7 +211,7 @@ loop.webapp = (function(_, OT, mozL10n) {
       dispatcher.dispatch(new sharedActions.WindowUnload());
     });
 
-    React.render(<WebappRootView
+    ReactDOM.render(<WebappRootView
       activeRoomStore={activeRoomStore}
       cursorStore={remoteCursorStore}
       dispatcher={dispatcher}

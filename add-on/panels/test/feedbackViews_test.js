@@ -72,7 +72,7 @@ describe("loop.feedbackViews", function() {
       getLoopPrefStub.withArgs("feedback.formURL").returns(fakeURL);
       view = mountTestComponent();
 
-      TestUtils.Simulate.click(view.refs.feedbackFormBtn.getDOMNode());
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(view.refs.feedbackFormBtn));
 
       sinon.assert.calledOnce(openURLStub);
       sinon.assert.calledWithExactly(openURLStub, fakeURL);
@@ -82,7 +82,7 @@ describe("loop.feedbackViews", function() {
       getLoopPrefStub.withArgs("feedback.formURL").returns(fakeURL);
       view = mountTestComponent();
 
-      TestUtils.Simulate.click(view.refs.feedbackFormBtn.getDOMNode());
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(view.refs.feedbackFormBtn));
 
       sinon.assert.calledOnce(getLoopPrefStub);
       sinon.assert.calledWithExactly(getLoopPrefStub, "feedback.formURL");
@@ -91,7 +91,7 @@ describe("loop.feedbackViews", function() {
     it("should close the window after opening the form", function() {
       view = mountTestComponent();
 
-      TestUtils.Simulate.click(view.refs.feedbackFormBtn.getDOMNode());
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(view.refs.feedbackFormBtn));
 
       sinon.assert.calledOnce(feedbackReceivedStub);
     });

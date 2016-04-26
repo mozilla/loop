@@ -38,10 +38,12 @@ if (typeof __PROD__ !== "undefined") {
   // pull in the unbuilt version from node_modules
   require("expose?React!react");
   require("expose?React!react/addons");
+  require("expose?ReactDOM!react-dom");
   require("expose?classNames!classnames");
 } else {
   // our development server setup doesn't yet handle real modules, so for now...
   require("shared/vendor/react.js");
+  require("shared/vendor/react-dom.js");
   require("shared/vendor/classnames.js");
 }
 

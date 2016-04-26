@@ -217,7 +217,7 @@ loop.conversation = (function(mozL10n) {
         textChatStore: textChatStore
       });
 
-      React.render(
+      ReactDOM.render(
         <AppControllerView
           cursorStore={remoteCursorStore}
           dispatcher={dispatcher}

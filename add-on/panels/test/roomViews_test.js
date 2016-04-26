@@ -164,7 +164,7 @@ describe("loop.roomViews", function() {
     it("should dispatch a JoinRoom action when the rejoin call button is pressed", function() {
       view = mountTestComponent();
 
-      var rejoinBtn = view.getDOMNode().querySelector(".btn-rejoin");
+      var rejoinBtn = ReactDOM.findDOMNode(view).querySelector(".btn-rejoin");
 
       React.addons.TestUtils.Simulate.click(rejoinBtn);
 
@@ -178,7 +178,7 @@ describe("loop.roomViews", function() {
         failureReason: FAILURE_DETAILS.ICE_FAILED
       });
 
-      var retryBtn = view.getDOMNode().querySelector(".btn-rejoin");
+      var retryBtn = ReactDOM.findDOMNode(view).querySelector(".btn-rejoin");
 
       expect(retryBtn.textContent).eql("retry_call_button");
     });
@@ -232,7 +232,7 @@ describe("loop.roomViews", function() {
       var prevent = sandbox.stub();
       view = mountTestComponent();
       TestUtils.Simulate.contextMenu(
-        view.getDOMNode(),
+        ReactDOM.findDOMNode(view),
         { preventDefault: prevent }
       );
       sinon.assert.calledOnce(prevent);
@@ -244,7 +244,7 @@ describe("loop.roomViews", function() {
 
         view.setState({ audioMuted: true });
 
-        var muteBtn = view.getDOMNode().querySelector(".btn-mute-audio");
+        var muteBtn = ReactDOM.findDOMNode(view).querySelector(".btn-mute-audio");
 
         React.addons.TestUtils.Simulate.click(muteBtn);
 
@@ -262,7 +262,7 @@ describe("loop.roomViews", function() {
 
         view.setState({ videoMuted: false });
 
-        var muteBtn = view.getDOMNode().querySelector(".btn-mute-video");
+        var muteBtn = ReactDOM.findDOMNode(view).querySelector(".btn-mute-video");
 
         React.addons.TestUtils.Simulate.click(muteBtn);
 
@@ -279,7 +279,7 @@ describe("loop.roomViews", function() {
 
       view.setState({ videoMuted: false });
 
-      var muteBtn = view.getDOMNode().querySelector(".btn-mute-video");
+      var muteBtn = ReactDOM.findDOMNode(view).querySelector(".btn-mute-video");
 
       expect(muteBtn.classList.contains("muted")).eql(false);
     });
@@ -289,7 +289,7 @@ describe("loop.roomViews", function() {
 
       view.setState({ audioMuted: true });
 
-      var muteBtn = view.getDOMNode().querySelector(".btn-mute-audio");
+      var muteBtn = ReactDOM.findDOMNode(view).querySelector(".btn-mute-audio");
 
       expect(muteBtn.classList.contains("muted")).eql(true);
     });
@@ -297,7 +297,7 @@ describe("loop.roomViews", function() {
     it("should dispatch a `SetMute` action when the mute button is pressed", function() {
       view = mountTestComponent();
 
-      var muteBtn = view.getDOMNode().querySelector(".btn-mute-video");
+      var muteBtn = ReactDOM.findDOMNode(view).querySelector(".btn-mute-video");
 
       React.addons.TestUtils.Simulate.click(muteBtn);
 
@@ -450,8 +450,8 @@ describe("loop.roomViews", function() {
 
           view = mountTestComponent();
 
-          expect(TestUtils.findRenderedComponentWithType(view,
-            loop.shared.desktopViews.SharePanelView).getDOMNode()).to.not.eql(null);
+          expect(ReactDOM.findDOMNode(TestUtils.findRenderedComponentWithType(view,
+            loop.shared.desktopViews.SharePanelView))).to.not.eql(null);
         });
 
       it("should render the DesktopRoomInvitationView if roomState is `JOINED` with just owner",
@@ -463,8 +463,8 @@ describe("loop.roomViews", function() {
 
           view = mountTestComponent();
 
-          expect(TestUtils.findRenderedComponentWithType(view,
-            loop.shared.desktopViews.SharePanelView).getDOMNode()).to.not.eql(null);
+          expect(ReactDOM.findDOMNode(TestUtils.findRenderedComponentWithType(view,
+            loop.shared.desktopViews.SharePanelView))).to.not.eql(null);
         });
 
       it("should render the DesktopRoomConversationView if roomState is `JOINED` with remote participant",
@@ -478,8 +478,8 @@ describe("loop.roomViews", function() {
 
           TestUtils.findRenderedComponentWithType(view,
             loop.roomViews.DesktopRoomConversationView);
-          expect(TestUtils.findRenderedComponentWithType(view,
-            loop.shared.desktopViews.SharePanelView).getDOMNode()).to.eql(null);
+          expect(ReactDOM.findDOMNode(TestUtils.findRenderedComponentWithType(view,
+            loop.shared.desktopViews.SharePanelView))).to.eql(null);
         });
 
       it("should render the DesktopRoomConversationView if roomState is `JOINED` with participants",
@@ -493,8 +493,8 @@ describe("loop.roomViews", function() {
 
           TestUtils.findRenderedComponentWithType(view,
             loop.roomViews.DesktopRoomConversationView);
-          expect(TestUtils.findRenderedComponentWithType(view,
-            loop.shared.desktopViews.SharePanelView).getDOMNode()).to.eql(null);
+          expect(ReactDOM.findDOMNode(TestUtils.findRenderedComponentWithType(view,
+            loop.shared.desktopViews.SharePanelView))).to.eql(null);
         });
 
       it("should render the DesktopRoomConversationView if roomState is `HAS_PARTICIPANTS`",
@@ -505,8 +505,8 @@ describe("loop.roomViews", function() {
 
           TestUtils.findRenderedComponentWithType(view,
             loop.roomViews.DesktopRoomConversationView);
-          expect(TestUtils.findRenderedComponentWithType(view,
-            loop.shared.desktopViews.SharePanelView).getDOMNode()).to.eql(null);
+          expect(ReactDOM.findDOMNode(TestUtils.findRenderedComponentWithType(view,
+            loop.shared.desktopViews.SharePanelView))).to.eql(null);
         });
 
       it("should display loading spinner when localSrcMediaElement is null",
@@ -518,7 +518,7 @@ describe("loop.roomViews", function() {
 
            view = mountTestComponent();
 
-           expect(view.getDOMNode().querySelector(".local .loading-stream"))
+           expect(ReactDOM.findDOMNode(view).querySelector(".local .loading-stream"))
                .not.eql(null);
          });
 
@@ -531,7 +531,7 @@ describe("loop.roomViews", function() {
 
            view = mountTestComponent();
 
-           expect(view.getDOMNode().querySelector(".local .loading-stream"))
+           expect(ReactDOM.findDOMNode(view).querySelector(".local .loading-stream"))
                .eql(null);
          });
 
@@ -544,7 +544,7 @@ describe("loop.roomViews", function() {
 
            view = mountTestComponent();
 
-           expect(view.getDOMNode().querySelector(".remote .loading-stream"))
+           expect(ReactDOM.findDOMNode(view).querySelector(".remote .loading-stream"))
                .not.eql(null);
          });
 
@@ -557,7 +557,7 @@ describe("loop.roomViews", function() {
 
            view = mountTestComponent();
 
-           expect(view.getDOMNode().querySelector(".remote .loading-stream"))
+           expect(ReactDOM.findDOMNode(view).querySelector(".remote .loading-stream"))
                .eql(null);
          });
 
@@ -584,7 +584,7 @@ describe("loop.roomViews", function() {
 
         view = mountTestComponent();
 
-        expect(view.getDOMNode().querySelector(".remote video")).not.eql(null);
+        expect(ReactDOM.findDOMNode(view).querySelector(".remote video")).not.eql(null);
       });
 
       it("should display an avatar for local video when the stream is muted", function() {
@@ -605,7 +605,7 @@ describe("loop.roomViews", function() {
 
         view = mountTestComponent();
 
-        expect(view.getDOMNode().querySelector(".local video")).not.eql(null);
+        expect(ReactDOM.findDOMNode(view).querySelector(".local video")).not.eql(null);
       });
 
       describe("Room name priority", function() {

@@ -29,6 +29,7 @@
     "OT": false,
     "performance": false,
     "Promise": false,
+    "ReactDOM": false,
     "React": false,
     "sinon": false,
     // Items we specifically want to allow to be used, but eslint dumps

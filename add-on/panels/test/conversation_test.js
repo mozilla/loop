@@ -105,7 +105,7 @@ describe("loop.conversation", function() {
   describe("#init", function() {
     var OTRestore;
     beforeEach(function() {
-      sandbox.stub(React, "render");
+      sandbox.stub(ReactDOM, "render");
       sandbox.stub(document.mozL10n, "initialize");
 
       sandbox.stub(loop.Dispatcher.prototype, "dispatch");
@@ -136,8 +136,8 @@ describe("loop.conversation", function() {
     it("should create the AppControllerView", function() {
       loop.conversation.init();
 
-      sinon.assert.calledOnce(React.render);
-      sinon.assert.calledWith(React.render,
+      sinon.assert.calledOnce(ReactDOM.render);
+      sinon.assert.calledWith(ReactDOM.render,
         sinon.match(function(value) {
           return TestUtils.isCompositeComponentElement(value,
             loop.conversation.AppControllerView);

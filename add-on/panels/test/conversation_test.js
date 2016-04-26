@@ -194,9 +194,8 @@ describe("loop.conversation", function() {
       remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
         sdkDriver: {}
       });
-      conversationAppStore = new loop.store.ConversationAppStore({
+      conversationAppStore = new loop.store.ConversationAppStore(dispatcher, {
         activeRoomStore: activeRoomStore,
-        dispatcher: dispatcher,
         feedbackPeriod: 42,
         feedbackTimestamp: 42,
         facebookEnabled: false

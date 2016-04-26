@@ -184,8 +184,7 @@ loop.webapp = (function(_, OT, mozL10n) {
     });
 
     // Stores
-    var standaloneAppStore = new loop.store.StandaloneAppStore({
-      dispatcher: dispatcher,
+    var standaloneAppStore = new loop.store.StandaloneAppStore(dispatcher, {
       sdk: OT
     });
     var standaloneMetricsStore = new loop.store.StandaloneMetricsStore(dispatcher, {

@@ -102,8 +102,7 @@ describe("loop.webapp", function() {
         mozLoop: {},
         sdkDriver: {}
       });
-      standaloneAppStore = new loop.store.StandaloneAppStore({
-        dispatcher: dispatcher,
+      standaloneAppStore = new loop.store.StandaloneAppStore(dispatcher, {
         sdk: sdk
       });
       remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {

@@ -20,7 +20,7 @@ describe("loop.store.StandaloneAppStore", function() {
   describe("#constructor", function() {
     it("should throw an error if the dispatcher is missing", function() {
       expect(function() {
-        new loop.store.StandaloneAppStore({
+        new loop.store.StandaloneAppStore(undefined, {
           helper: {},
           sdk: {}
         });
@@ -29,8 +29,7 @@ describe("loop.store.StandaloneAppStore", function() {
 
     it("should throw an error if sdk is missing", function() {
       expect(function() {
-        new loop.store.StandaloneAppStore({
-          dispatcher: dispatcher,
+        new loop.store.StandaloneAppStore(dispatcher, {
           helper: {}
         });
       }).to.Throw(/sdk/);
@@ -55,8 +54,7 @@ describe("loop.store.StandaloneAppStore", function() {
 
       sandbox.stub(dispatcher, "dispatch");
 
-      store = new loop.store.StandaloneAppStore({
-        dispatcher: dispatcher,
+      store = new loop.store.StandaloneAppStore(dispatcher, {
         helper: helper,
         sdk: fakeSdk
       });

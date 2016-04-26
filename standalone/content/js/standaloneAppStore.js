@@ -23,41 +23,17 @@ loop.store.StandaloneAppStore = (function() {
    * @param {Object} options Options for the store. Should contain the
    *                         dispatcher.
    */
-  var StandaloneAppStore = function(options) {
-    if (!options.dispatcher) {
-      throw new Error("Missing option dispatcher");
-    }
-    if (!options.sdk) {
-      throw new Error("Missing option sdk");
-    }
+  var StandaloneAppStore = loop.store.createStore({
+    initialize: function(options) {
+      if (!options.sdk) {
+        throw new Error("Missing option sdk");
+      }
+      this._storeState = {};
+      this._sdk = options.sdk;
 
-    this._dispatcher = options.dispatcher;
-    this._storeState = {};
-    this._sdk = options.sdk;
-
-    this._dispatcher.register(this, [
-      "extractTokenInfo"
-    ]);
-  };
-
-  StandaloneAppStore.prototype = _.extend({
-    /**
-     * Retrieves current store state.
-     *
-     * @return {Object}
-     */
-    getStoreState: function() {
-      return this._storeState;
-    },
-
-    /**
-     * Updates store states and trigger a "change" event.
-     *
-     * @param {Object} state The new store state.
-     */
-    setStoreState: function(state) {
-      this._storeState = state;
-      this.trigger("change");
+      this.dispatcher.register(this, [
+        "extractTokenInfo"
+      ]);
     },
 
     _extractWindowDataFromPath: function(windowPath) {
@@ -136,14 +112,14 @@ loop.store.StandaloneAppStore = (function() {
       // If we've not got a window ID, don't dispatch the action, as we don't
       // need it.
       if (token) {
-        this._dispatcher.dispatch(new loop.shared.actions.FetchServerData({
+        this.dispatcher.dispatch(new loop.shared.actions.FetchServerData({
           cryptoKey: this._extractCryptoKey(actionData.windowHash),
           token: token,
           windowType: windowType
         }));
       }
     }
-  }, Backbone.Events);
+  });
 
   return StandaloneAppStore;
 })();

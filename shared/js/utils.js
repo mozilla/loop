@@ -117,7 +117,6 @@ if (inChrome) {
   var CHAT_CONTENT_TYPES = {
     CONTEXT: "chat-context",
     TEXT: "chat-text",
-    ROOM_NAME: "room-name",
     CONTEXT_TILE: "context-tile",
     NOTIFICATION: "chat-notification"
   };

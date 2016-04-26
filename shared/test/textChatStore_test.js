@@ -183,22 +183,6 @@ describe("loop.store.TextChatStore", function() {
   });
 
   describe("#updateRoomInfo", function() {
-    it("should add the room name to the list", function() {
-      store.updateRoomInfo(new sharedActions.UpdateRoomInfo({
-        roomName: "Let's share!",
-        roomUrl: "fake"
-      }));
-
-      expect(store.getStoreState("messageList")).eql([{
-        type: CHAT_MESSAGE_TYPES.SPECIAL,
-        contentType: CHAT_CONTENT_TYPES.ROOM_NAME,
-        message: "Let's share!",
-        extraData: undefined,
-        sentTimestamp: undefined,
-        receivedTimestamp: undefined
-      }]);
-    });
-
     it("should add the context to the list", function() {
       store.updateRoomInfo(new sharedActions.UpdateRoomInfo({
         roomName: "Let's share!",
@@ -212,13 +196,6 @@ describe("loop.store.TextChatStore", function() {
 
       expect(store.getStoreState("messageList")).eql([
         {
-          type: CHAT_MESSAGE_TYPES.SPECIAL,
-          contentType: CHAT_CONTENT_TYPES.ROOM_NAME,
-          message: "Let's share!",
-          extraData: undefined,
-          sentTimestamp: undefined,
-          receivedTimestamp: undefined
-        }, {
           type: CHAT_MESSAGE_TYPES.SPECIAL,
           contentType: CHAT_CONTENT_TYPES.CONTEXT,
           message: "A wonderful event",

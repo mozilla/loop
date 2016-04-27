@@ -347,6 +347,28 @@ var WindowListener = {
 
         this.maybeAddCopyPanel();
         this.updateToolbarState();
+
+        this.addSidebar();
+      },
+
+      /* XXX akita make this into it's own object. */
+      addSidebar: function() {
+
+        let ownerDocument = gBrowser.ownerDocument;
+        // XXX akita note that we're only doing the first tab selected when the window opens
+        this._sidebar = gBrowser.getSidebarContainer(gBrowser.selectedTab.linkedBrowser);
+
+        // this._splitter = ownerDocument.createElement("splitter");
+        // this._splitter.setAttribute("class", "loop-side-splitter");
+
+        this.frame = ownerDocument.createElement("iframe");
+        this.frame.className = "loop-side-iframe";
+        this.frame.width = 250;
+
+        // this._sidebar.appendChild(this._splitter);
+        this._sidebar.appendChild(this.frame);
+
+        this.frame.setAttribute("src", "chrome://loop/content/panels/sidebar.html");
       },
 
       /**

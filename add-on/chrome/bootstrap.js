@@ -391,9 +391,10 @@ var WindowListener = {
        */
       maybeAddCopyPanel() {
         // Don't bother adding the copy panel if we're in private browsing or
-        // we've already shown it.
+        // the user wants to never see it again or we've shown it enough times.
         if (PrivateBrowsingUtils.isWindowPrivate(window) ||
-            Services.prefs.getBoolPref("loop.copy.shown")) {
+            Services.prefs.getBoolPref("loop.copy.shown") ||
+            Services.prefs.getIntPref("loop.copy.showLimit") <= 0) {
           return Promise.resolve();
         }
 
@@ -469,8 +470,23 @@ var WindowListener = {
           // Do the normal behavior first.
           controller._doCommand.apply(controller, arguments);
 
-          // Open up the copy panel at the loop button.
+          // Remove the panel if the user has seen it enough times.
+          let showLimit = Services.prefs.getIntPref("loop.copy.showLimit");
+          if (showLimit <= 0) {
+            LoopUI.removeCopyPanel();
+            return;
+          }
+
+          // Don't bother prompting the user if already sharing.
+          if (this.MozLoopService.screenShareActive) {
+            return;
+          }
+
+          // Update various counters.
+          Services.prefs.setIntPref("loop.copy.showLimit", showLimit - 1);
           addTelemetry("SHOWN");
+
+          // Open up the copy panel at the loop button.
           LoopUI.PanelFrame.showPopup(window, LoopUI.toolbarButton.anchor, "loop-copy",
             null, "chrome://loop/content/panels/copy.html", null, onIframe);
         };

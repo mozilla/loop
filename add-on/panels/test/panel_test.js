@@ -884,48 +884,37 @@ describe("loop.panel", function() {
       });
 
       describe("OpenRoom", function() {
-        // XXX akita-sidebar
-        it.skip("should dispatch an OpenRoom action when button is clicked", function() {
-          TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry.refs.roomEntry));
-
-          sinon.assert.calledOnce(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.OpenRoom({ roomToken: roomData.roomToken }));
-        });
-
-        // XXX akita-sidebar
-        it.skip("should dispatch an OpenRoom action when callback is called", function() {
-          roomEntry.handleClickEntry(fakeEvent);
-
-          sinon.assert.calledOnce(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.OpenRoom({ roomToken: roomData.roomToken }));
-        });
-
         it("should call window.close", function() {
           roomEntry.handleClickEntry(fakeEvent);
 
           sinon.assert.calledOnce(fakeWindow.close);
         });
 
-        // XXX akita-sidebar
-        it.skip("should not dispatch an OpenRoom action when button is clicked if room is already opened", function() {
+        it("should open the ToC if the room context is not blank", function() {
           roomEntry = mountRoomEntry({
             deleteRoom: sandbox.stub(),
-            isOpenedRoom: true,
+            isOpenedRoom: false,
             room: new loop.store.Room(roomData)
           });
 
           TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry.refs.roomEntry));
 
-          sinon.assert.notCalled(dispatcher.dispatch);
+          var tocURL = "about:looptoc#" + roomData.roomToken;
+          sinon.assert.calledOnce(openURLStub);
+          sinon.assert.calledWithExactly(openURLStub, tocURL);
         });
 
-        // XXX akita-sidebar
-        it.skip("should open a new tab with the room context if it is not the same as the currently open tab", function() {
-          TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry.refs.roomEntry));
-          sinon.assert.calledOnce(openURLStub);
-          sinon.assert.calledWithExactly(openURLStub, "http://testurl.com");
+        it("should load the sidebar if the room context is not blank", function() {
+          roomEntry = mountRoomEntry({
+            deleteRoom: sandbox.stub(),
+            isOpenedRoom: false,
+            room: new loop.store.Room(roomData)
+          });
+
+          TestUtils.Simulate.click(roomEntry.refs.roomEntry);
+
+          sinon.assert.calledOnce(requestStubs.LoadSidebar);
+          sinon.assert.calledWithExactly(requestStubs.LoadSidebar, roomData.roomToken);
         });
 
         it("should open a new tab with the FTU Getting Started URL if the room context is blank", function() {
@@ -960,27 +949,6 @@ describe("loop.panel", function() {
 
           sinon.assert.calledOnce(openURLStub);
           sinon.assert.calledWithExactly(openURLStub, ftuURL);
-        });
-
-        // XXX akita-sidebar
-        it.skip("should not open a new tab if the context is the same as the currently open tab", function() {
-          LoopMochaUtils.stubLoopRequest({
-            GetSelectedTabMetadata: function() {
-              return {
-                url: "http://testurl.com",
-                description: "fakeSite"
-              };
-            }
-          });
-
-          roomEntry = mountRoomEntry({
-            deleteRoom: sandbox.stub(),
-            isOpenedRoom: false,
-            room: new loop.store.Room(roomData)
-          });
-
-          TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry.refs.roomEntry));
-          sinon.assert.notCalled(openURLStub);
         });
       });
     });
@@ -1198,7 +1166,7 @@ describe("loop.panel", function() {
         sinon.assert.calledOnce(roomEntry.closeWindow);
       });
 
-      // XXX akita-sidebar
+      // XXX akita-sidebar: will be fixed in Bug 1268397
       it.skip("should dispatch the OpenRoom action", function() {
         roomEntry = mountRoomEntry({
           isOpenedRoom: false,
@@ -1211,46 +1179,6 @@ describe("loop.panel", function() {
                                        new sharedActions.OpenRoom({
                                         roomToken: roomData.roomToken
                                        }));
-      });
-
-      // XXX akita-sidebar
-      // if current URL same as ROOM, dont open TAB
-      it.skip("should NOT open new tab if we already in same URL", function() {
-        requestStubs.GetSelectedTabMetadata.returns({
-          url: "fakeURL"
-        });
-        roomData.decryptedContext.urls = [{
-          location: "fakeURL"
-        }];
-
-        roomEntry = mountRoomEntry({
-          isOpenedRoom: false,
-          room: new loop.store.Room(roomData)
-        });
-
-        roomEntry.handleClickEntry(fakeEvent);
-        sinon.assert.calledOnce(requestStubs.GetSelectedTabMetadata);
-        sinon.assert.notCalled(requestStubs.OpenURL);
-      });
-
-      // XXX akita-sidebar
-      it.skip("should open new tab if different URL", function() {
-        requestStubs.GetSelectedTabMetadata.returns({
-          url: "notTheSameURL"
-        });
-        roomData.decryptedContext.urls = [{
-          location: "fakeURL"
-        }];
-
-        roomEntry = mountRoomEntry({
-          isOpenedRoom: false,
-          room: new loop.store.Room(roomData)
-        });
-
-        roomEntry.handleClickEntry(fakeEvent);
-        sinon.assert.calledOnce(requestStubs.GetSelectedTabMetadata);
-        sinon.assert.calledOnce(requestStubs.OpenURL);
-        sinon.assert.calledWithExactly(requestStubs.OpenURL, "fakeURL");
       });
     });
   });

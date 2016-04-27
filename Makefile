@@ -491,6 +491,11 @@ ifdef TEST_E10S
 E10S_ARGS = --e10s
 endif
 
+# Note: the path can be a file path or a url.
+ifdef SYMBOLS_PATH
+SYMBOLS_ARGS = --symbols-path=$(SYMBOLS_PATH)
+endif
+
 .PHONY: functional
 ifeq ($(SKIP_FUNCTIONAL),1)
 functional:
@@ -506,6 +511,7 @@ functional: build $(XPI_FILE)
 	                       --type=browser \
 	                       --gecko-log $(BUILT)/functional/gecko.log \
 	                       $(E10S_ARGS) \
+	                       $(SYMBOLS_ARGS) \
 	                       test/functional/manifest.ini
 endif
 

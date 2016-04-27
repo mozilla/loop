@@ -306,6 +306,10 @@ loop.shared.toc = (function(mozL10n) {
     }
   });
 
+  /* XXX akita-sidebar This is currently a fork of the standaloneRoomView.
+   * As per discussion comments in the PR, we need to decide what,
+   * if anything, to do about that.
+   */
   var SidebarView = React.createClass({
     mixins: [
       Backbone.Events,

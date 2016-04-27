@@ -32,9 +32,10 @@ describe("loop.store.RoomStore", function() {
           SHARING_ROOM_URL: {
             COPY_FROM_PANEL: 0,
             COPY_FROM_CONVERSATION: 1,
-            EMAIL_FROM_PANEL: 2,
+            EMAIL_FROM_CALLFAILED: 2,
             EMAIL_FROM_CONVERSATION: 3,
-            FACEBOOK_FROM_CONVERSATION: 4
+            FACEBOOK_FROM_CONVERSATION: 4,
+            EMAIL_FROM_PANEL: 5
           },
           ROOM_CREATE: {
             CREATE_SUCCESS: 0,

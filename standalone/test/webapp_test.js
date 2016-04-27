@@ -130,7 +130,8 @@ describe("loop.webapp", function() {
           loop.webapp.UnsupportedBrowserView);
       });
 
-    it("should display the StandaloneRoomControllerView for `room` window type",
+    // XXX akita-sidebar
+    it.skip("should display the StandaloneRoomControllerView for `room` window type",
       function() {
         standaloneAppStore.setStoreState({ windowType: "room", isFirefox: true });
 

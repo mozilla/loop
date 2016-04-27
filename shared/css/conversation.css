@@ -525,7 +525,7 @@ html, .fx-embedded, #main,
 }
 
 .media-wrapper.showing-media-wait > .text-chat-view {
-  order: 2;
+  order: 3;
 }
 
 .media-wrapper.showing-media-wait > .local {
@@ -533,38 +533,30 @@ html, .fx-embedded, #main,
   display: none;
 }
 
-.media-wrapper.showing-local-streams.receiving-screen-share {
+.media-wrapper.showing-local-streams {
   position: relative;
 }
 
-.media-wrapper.showing-local-streams.receiving-screen-share > .text-chat-view {
+.media-wrapper.showing-local-streams > .text-chat-view {
   /* When we're displaying the local streams, then we need to make the text
-     chat view a bit shorter to give room. 1 streams x 204px */
-  height: calc(100% - 204px);
+     chat view a bit shorter to give room. 1 streams x 204px + 40px media buttons */
+  height: calc(100% - 244px);
 }
 
-.media-wrapper.receiving-screen-share > .screen {
-  order: 1;
-}
-
-.media-wrapper.receiving-screen-share > .text-chat-view,
+.media-wrapper.showing-remote-streams > .text-chat-view,
 .media-wrapper.showing-local-streams > .text-chat-view  {
-  order: 4;
+  order: 3;
 }
 
-.media-wrapper.receiving-screen-share > .remote {
+.media-wrapper > .remote {
   flex: 0 1 auto;
-  order: 2;
+  order: 1;
   /* to keep the 4:3 ratio set both height and width */
   height: 204px;
   width: 272px;
 }
 
-.media-wrapper.receiving-screen-share > .local {
-  order: 3;
-}
-
-.media-wrapper.receiving-screen-share.showing-remote-streams > .local {
+.media-wrapper.showing-remote-streams > .local {
   position: absolute;
   z-index: 2;
   padding: 8px;
@@ -576,7 +568,11 @@ html, .fx-embedded, #main,
   height: calc(60px + 16px + 4px);
 }
 
-.media-wrapper.receiving-screen-share.showing-remote-streams > .local > .remote-video-box {
+.media-wrapper:not(.showing-remote-streams) > .remote {
+  order: 4;
+}
+
+.media-wrapper.showing-remote-streams > .local > .remote-video-box {
   border: solid 2px #fff;
 }
 

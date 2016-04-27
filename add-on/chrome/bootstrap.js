@@ -27,6 +27,8 @@ XPCOMUtils.defineLazyModuleGetter(this, "CustomizableUI",
   "resource:///modules/CustomizableUI.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "Task",
   "resource://gre/modules/Task.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "AboutLoop",
+  "chrome://loop/content/modules/AboutLoop.jsm");
 
 // See LOG_LEVELS in Console.jsm. Common examples: "All", "Info", "Warn", & "Error".
 const PREF_LOG_LEVEL = "loop.debug.loglevel";
@@ -354,6 +356,41 @@ var WindowListener = {
 
         this.maybeAddCopyPanel();
         this.updateToolbarState();
+
+        this.addSidebar();
+      },
+
+      /* XXX akita make this into it's own object. */
+      addSidebar: function() {
+        let ownerDocument = gBrowser.ownerDocument;
+        var browser = ownerDocument.getElementById("browser");
+
+        let sidebarBrowser = document.createElementNS(kNSXUL, "browser");
+        sidebarBrowser.setAttribute("id", "loop-side-browser");
+        sidebarBrowser.setAttribute("disable-history", "true");
+        sidebarBrowser.setAttribute("disable-global-history", "true");
+
+        // XXX akita something like these seem likely to be required once we
+        // electrolyze this along with a URI_MUST_LOAD_IN_CHILD in
+        // AboutLoop.jsm
+        // sidebarBrowser.setAttribute("message-manager-group", "social");
+        // sidebarBrowser.setAttribute("message", "true");
+        // sidebarBrowser.setAttribute("remote", "true");
+
+        sidebarBrowser.setAttribute("type", "content");
+
+        this.sidebar = sidebarBrowser;
+        this.sidebar.width = 250;
+
+        browser.appendChild(sidebarBrowser);
+      },
+
+      loadSidebar: function(token) {
+        log.info("loadSidebar called:", token, this.sidebar);
+        let url = "about:loopconversation#" + token;
+        Services.perms.add(Services.io.newURI(url, null, null), "camera",
+                         Services.perms.ALLOW_ACTION, Services.perms.EXPIRE_SESSION);
+        this.sidebar.setAttribute("src", url);
       },
 
       /**
@@ -1367,6 +1404,11 @@ function startup(data) {
     return;
   }
 
+  // register about: handlers
+  AboutLoop.conversation.register(); // eslint-disable-line no-undef
+  AboutLoop.panel.register(); // eslint-disable-line no-undef
+  AboutLoop.toc.register(); // eslint-disable-line no-undef
+
   createLoopButton();
 
   // Attach to hidden window (for OS X).
@@ -1437,6 +1479,11 @@ function shutdown(data, reason) {
 
   // Stop waiting for browser windows to open.
   wm.removeListener(WindowListener);
+
+  // unregister about: handlers
+  AboutLoop.conversation.unregister(); // eslint-disable-line no-undef
+  AboutLoop.panel.unregister(); // eslint-disable-line no-undef
+  AboutLoop.toc.unregister(); // eslint-disable-line no-undef
 
   // If the app is shutting down, don't worry about cleaning up, just let
   // it fade away...

@@ -14,7 +14,8 @@ var inChrome = typeof Components != "undefined" &&
 // it load remotely, this can go away.
 if (inChrome) {
   if (typeof window != "undefined" &&
-    window.location.href === "chrome://loop/content/panels/slideshow.html") {
+    (window.location.href === "chrome://loop/content/panels/slideshow.html" ||
+     window.location.href === "chrome://loop/content/panels/sidebar.html")) {
 
     inChrome = false;
   }

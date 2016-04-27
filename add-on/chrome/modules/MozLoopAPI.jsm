@@ -211,6 +211,13 @@ const kMessageHandlers = {
     reply();
   },
 
+  LoadSidebar: function(message, reply) {
+    let win = Services.wm.getMostRecentWindow("navigator:browser");
+    let [roomToken] = message.data;
+    win.LoopUI.loadSidebar(roomToken);
+    reply();
+  },
+
   /**
    * Creates a layout for the remote cursor on the browser chrome,
    * and positions it on the received coordinates.
@@ -1171,6 +1178,7 @@ const LoopAPIInternal = {
 
     gPageListeners = [new RemotePages("about:looppanel"),
       new RemotePages("about:loopconversation"),
+      new RemotePages("about:looptoc"),
       // Slideshow added here to expose the loop api to make L10n work.
       // XXX Can remove once slideshow is made remote.
       new RemotePages("chrome://loop/content/panels/slideshow.html")];

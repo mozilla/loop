@@ -342,12 +342,14 @@ loop.roomViews = (function(mozL10n) {
             <div className="room-conversation-wrapper desktop-room-wrapper"
               onContextMenu={this.handleContextMenu}>
               <sharedViews.MediaLayoutView
+                audio={{ enabled: !this.state.audioMuted, visible: true }}
                 cursorStore={this.props.cursorStore}
                 dispatcher={this.props.dispatcher}
                 displayScreenShare={false}
                 isLocalLoading={this._isLocalLoading()}
                 isRemoteLoading={this._isRemoteLoading()}
                 isScreenShareLoading={false}
+                leaveRoom={this.leaveRoom}
                 localPosterUrl={this.props.localPosterUrl}
                 localSrcMediaElement={this.state.localSrcMediaElement}
                 localVideoMuted={this.state.videoMuted}
@@ -359,7 +361,8 @@ loop.roomViews = (function(mozL10n) {
                 screenSharePosterUrl={null}
                 showInitialContext={false}
                 showMediaWait={false}
-                showTile={false}>
+                showTile={false}
+                video={{ enabled: !this.state.videoMuted, visible: true }}>
                 <sharedViews.ConversationToolbar
                   audio={{ enabled: !this.state.audioMuted, visible: true }}
                   dispatcher={this.props.dispatcher}

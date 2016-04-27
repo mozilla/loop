@@ -153,7 +153,7 @@ loop.shared.views.chat = (function(mozL10n) {
     },
 
     componentWillUpdate: function() {
-      var node = this.getDOMNode();
+      var node = ReactDOM.findDOMNode(this);
       if (!node) {
         return;
       }
@@ -182,7 +182,7 @@ loop.shared.views.chat = (function(mozL10n) {
         // This ensures the paint is complete.
         window.requestAnimationFrame(function() {
           try {
-            var node = this.getDOMNode();
+            var node = ReactDOM.findDOMNode(this);
             node.scrollTop = node.scrollHeight - node.clientHeight;
           } catch (ex) {
             console.error("TextChatEntriesView.componentDidUpdate exception", ex);

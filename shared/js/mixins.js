@@ -109,10 +109,10 @@ loop.shared.mixins = (function() {
        * clicks on something that is not a dropdown trigger button or menu item.
        */
       _onBodyClick: function(event) {
-        var menuButton = this.refs["menu-button"] && this.refs["menu-button"].getDOMNode();
+        var menuButton = this.refs["menu-button"];
 
         if (this.refs.anchor) {
-          menuButton = this.refs.anchor.getDOMNode();
+          menuButton = this.refs.anchor;
         }
 
         /*
@@ -134,7 +134,7 @@ loop.shared.mixins = (function() {
       },
 
       _correctMenuPosition: function() {
-        var menu = this.refs.menu && this.refs.menu.getDOMNode();
+        var menu = this.refs.menu;
         if (!menu) {
           return;
         }
@@ -176,7 +176,7 @@ loop.shared.mixins = (function() {
         y = menuNodeRect.top;
 
         // If there's an anchor present, position it relative to it first.
-        var anchor = this.refs.anchor && this.refs.anchor.getDOMNode();
+        var anchor = this.refs.anchor && ReactDOM.findDOMNode(this.refs.anchor);
         if (anchor) {
           // XXXmikedeboer: at the moment we only support positioning centered above
           //                anchor node. Please add more modes as necessary.
@@ -256,7 +256,7 @@ loop.shared.mixins = (function() {
 
       hideDropdownMenu: function() {
         this.setState({ showMenu: false }, function() {
-          var menu = this.refs.menu && this.refs.menu.getDOMNode();
+          var menu = this.refs.menu && ReactDOM.findDOMNode(this.refs.menu);
           if (menu) {
             menu.style.visibility = "hidden";
           }

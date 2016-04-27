@@ -60,12 +60,11 @@ function promisePanelLoaded() {
           iframe.contentDocument.readyState == "complete") {
         resolve();
       } else {
-        iframe.addEventListener("load", function panelOnLoad() {
-          iframe.removeEventListener("load", panelOnLoad, true);
-          // We do this in an execute soon to allow any other event listeners to
-          // be handled, just in case.
+        // Wait for the panel to completely load before continuing.
+        iframe.contentWindow.addEventListener("loopPanelInitialized", function onInit() {
+          iframe.contentWindow.removeEventListener("loopPanelInitialized", onInit);
           resolve();
-        }, true);
+        });
       }
     }
 

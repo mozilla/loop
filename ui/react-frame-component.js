@@ -63,7 +63,7 @@ window.queuedFrames = [];
           node.getAttribute("rel") === "stylesheet";
       }
 
-      var childDoc = this.getDOMNode().contentDocument;
+      var childDoc = ReactDOM.findDOMNode(this).contentDocument;
       if (childDoc && childDoc.readyState === "complete") {
         // Remove this from the queue.
         window.queuedFrames.splice(window.queuedFrames.indexOf(this), 1);
@@ -96,7 +96,10 @@ window.queuedFrames = [];
           this.props.children
         );
 
-        React.render(contents, childDoc.body, this.fireOnContentsRendered);
+        var renderNode = childDoc.createElement("div");
+        childDoc.body.appendChild(renderNode);
+
+        ReactDOM.render(contents, renderNode, this.fireOnContentsRendered);
 
         // Set the RTL mode. We assume for now that rtl is the only query parameter.
         //
@@ -149,7 +152,7 @@ window.queuedFrames = [];
 
       var contentWindow;
       try {
-        contentWindow = this.getDOMNode().contentWindow;
+        contentWindow = ReactDOM.findDOMNode(this).contentWindow;
         if (!contentWindow) {
           throw new Error("no content window returned");
         }

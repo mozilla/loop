@@ -53,7 +53,7 @@ describe("loop.shared.views.TextChatView", function() {
 
   afterEach(function() {
     sandbox.restore();
-    React.unmountComponentAtNode(fixtures);
+    ReactDOM.unmountComponentAtNode(fixtures);
     mozL10n.language = originalLanguage;
   });
 
@@ -73,15 +73,28 @@ describe("loop.shared.views.TextChatView", function() {
     }
 
     function mountAsRealComponent(extraProps, container) {
-      var basicProps = {
-        dispatcher: dispatcher,
-        messageList: [],
-        showInitialContext: true
-      };
+      return ReactDOM.render(createWithFakeParent(extraProps), container);
+    }
 
-      return React.render(
-        React.createElement(loop.shared.views.chat.TextChatEntriesView,
-          _.extend(basicProps, extraProps)), container);
+    function createWithFakeParent(extraProps) {
+      return React.createElement(React.createClass({
+        getInitialState: function() {
+          return _.extend({
+            dispatcher: dispatcher,
+            messageList: [],
+            showInitialContext: true
+          }, extraProps);
+        },
+
+        componentWillReceiveProps: function(nextProps) {
+          this.setState(nextProps);
+        },
+
+        render: function() {
+          return React.createElement(loop.shared.views.chat.TextChatEntriesView,
+            this.state);
+        }
+      }));
     }
 
     beforeEach(function() {
@@ -103,7 +116,7 @@ describe("loop.shared.views.TextChatView", function() {
         }]
       });
 
-      node = view.getDOMNode();
+      node = ReactDOM.findDOMNode(view);
       expect(node).to.not.eql(null);
 
       var entries = node.querySelectorAll(".text-chat-entry");
@@ -113,10 +126,12 @@ describe("loop.shared.views.TextChatView", function() {
     });
 
     it("should play a sound when a message is received", function() {
-      view = mountTestComponent();
-      sandbox.stub(view, "play");
+      view = TestUtils.renderIntoDocument(createWithFakeParent());
 
-      view.setProps({
+      var comp = TestUtils.findRenderedComponentWithType(view, loop.shared.views.chat.TextChatEntriesView);
+      sandbox.stub(comp, "play");
+
+      view.componentWillReceiveProps({
         messageList: [{
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
@@ -125,15 +140,16 @@ describe("loop.shared.views.TextChatView", function() {
         }]
       });
 
-      sinon.assert.calledOnce(view.play);
-      sinon.assert.calledWithExactly(view.play, "message");
+      sinon.assert.calledOnce(comp.play);
     });
 
     it("should not play a sound when a special message is displayed", function() {
-      view = mountTestComponent();
-      sandbox.stub(view, "play");
+      view = TestUtils.renderIntoDocument(createWithFakeParent());
 
-      view.setProps({
+      var comp = TestUtils.findRenderedComponentWithType(view, loop.shared.views.chat.TextChatEntriesView);
+      sandbox.stub(comp, "play");
+
+      view.componentWillReceiveProps({
         messageList: [{
           type: CHAT_MESSAGE_TYPES.SPECIAL,
           contentType: CHAT_CONTENT_TYPES.ROOM_NAME,
@@ -142,14 +158,16 @@ describe("loop.shared.views.TextChatView", function() {
         }]
       });
 
-      sinon.assert.notCalled(view.play);
+      sinon.assert.notCalled(comp.play);
     });
 
     it("should not play a sound when a message is sent", function() {
-      view = mountTestComponent();
-      sandbox.stub(view, "play");
+      view = TestUtils.renderIntoDocument(createWithFakeParent());
 
-      view.setProps({
+      var comp = TestUtils.findRenderedComponentWithType(view, loop.shared.views.chat.TextChatEntriesView);
+      sandbox.stub(comp, "play");
+
+      view.componentWillReceiveProps({
         messageList: [{
           type: CHAT_MESSAGE_TYPES.SENT,
           contentType: CHAT_CONTENT_TYPES.TEXT,
@@ -158,7 +176,7 @@ describe("loop.shared.views.TextChatView", function() {
         }]
       });
 
-      sinon.assert.notCalled(view.play);
+      sinon.assert.notCalled(comp.play);
     });
 
     it("should show timestamps if there are different senders", function() {
@@ -175,7 +193,7 @@ describe("loop.shared.views.TextChatView", function() {
           sentTimestamp: "2015-06-25T17:53:55.357Z"
         }]
       });
-      node = view.getDOMNode();
+      node = ReactDOM.findDOMNode(view);
 
       expect(node.querySelectorAll(".text-chat-entry-timestamp").length)
           .to.eql(2);
@@ -195,7 +213,7 @@ describe("loop.shared.views.TextChatView", function() {
           sentTimestamp: "2015-06-25T17:54:55.357Z"
         }]
       });
-      node = view.getDOMNode();
+      node = ReactDOM.findDOMNode(view);
 
       expect(node.querySelectorAll(".text-chat-entry-timestamp").length)
           .to.eql(2);
@@ -215,7 +233,7 @@ describe("loop.shared.views.TextChatView", function() {
           receivedTimestamp: "2015-06-25T17:54:55.357Z"
         }]
       });
-      node = view.getDOMNode();
+      node = ReactDOM.findDOMNode(view);
 
       expect(node.querySelectorAll(".text-chat-entry-timestamp").length)
           .to.eql(2);
@@ -235,7 +253,7 @@ describe("loop.shared.views.TextChatView", function() {
           receivedTimestamp: "2015-06-25T17:53:55.357Z"
         }]
       });
-      node = view.getDOMNode();
+      node = ReactDOM.findDOMNode(view);
 
       expect(node.querySelectorAll(".text-chat-entry-timestamp").length)
           .to.eql(1);
@@ -249,11 +267,12 @@ describe("loop.shared.views.TextChatView", function() {
 
         // We're using scrolling, so we need to mount as a real one.
         view = mountAsRealComponent({}, fixtures);
-        sandbox.stub(view, "play");
+        var comp = TestUtils.findRenderedComponentWithType(view, loop.shared.views.chat.TextChatEntriesView);
+        sandbox.stub(comp, "play");
 
         // We need some basic styling to ensure scrolling.
-        view.getDOMNode().style.overflow = "scroll";
-        view.getDOMNode().style["max-height"] = "4ch";
+        ReactDOM.findDOMNode(view).style.overflow = "scroll";
+        ReactDOM.findDOMNode(view).style["max-height"] = "4ch";
       });
 
       it("should scroll when a text message is added", function() {
@@ -264,9 +283,9 @@ describe("loop.shared.views.TextChatView", function() {
           receivedTimestamp: "2015-06-25T17:53:55.357Z"
         }];
 
-        view.setProps({ messageList: messageList });
+        view.componentWillReceiveProps({ messageList: messageList });
 
-        node = view.getDOMNode();
+        node = ReactDOM.findDOMNode(view);
 
         expect(node.scrollTop).eql(node.scrollHeight - node.clientHeight);
       });
@@ -279,9 +298,9 @@ describe("loop.shared.views.TextChatView", function() {
           receivedTimestamp: "2015-06-25T17:53:55.357Z"
         }];
 
-        view.setProps({ messageList: messageList });
+        view.componentWillReceiveProps({ messageList: messageList });
 
-        node = view.getDOMNode();
+        node = ReactDOM.findDOMNode(view);
 
         expect(node.scrollTop).eql(node.scrollHeight - node.clientHeight);
       });
@@ -298,9 +317,9 @@ describe("loop.shared.views.TextChatView", function() {
           receivedTimestamp: "2015-06-25T17:53:55.357Z"
         }];
 
-        view.setProps({ messageList: messageList });
+        view.componentWillReceiveProps({ messageList: messageList });
 
-        node = view.getDOMNode();
+        node = ReactDOM.findDOMNode(view);
 
         expect(node.scrollTop).eql(node.scrollHeight - node.clientHeight);
       });
@@ -315,9 +334,9 @@ describe("loop.shared.views.TextChatView", function() {
           }
         }];
 
-        view.setProps({ messageList: messageList });
+        view.componentWillReceiveProps({ messageList: messageList });
 
-        node = view.getDOMNode();
+        node = ReactDOM.findDOMNode(view);
 
         expect(node.scrollTop).eql(0);
       });
@@ -333,7 +352,7 @@ describe("loop.shared.views.TextChatView", function() {
           }
         }];
 
-        view.setProps({ messageList: messageList });
+        view.componentWillReceiveProps({ messageList: messageList });
 
         // Now add a message. Don't use the same list as this is a shared object,
         // that messes with React.
@@ -346,16 +365,16 @@ describe("loop.shared.views.TextChatView", function() {
           }
         ];
 
-        view.setProps({ messageList: messageList1 });
+        view.componentWillReceiveProps({ messageList: messageList1 });
 
-        node = view.getDOMNode();
+        node = ReactDOM.findDOMNode(view);
 
         expect(node.scrollTop).eql(node.scrollHeight - node.clientHeight);
 
       });
 
       it("should not scroll when receiving a message and the scroll is not at the bottom", function() {
-        node = view.getDOMNode();
+        node = ReactDOM.findDOMNode(view);
 
         var messageList = [{
           type: CHAT_MESSAGE_TYPES.RECEIVED,
@@ -364,7 +383,7 @@ describe("loop.shared.views.TextChatView", function() {
           receivedTimestamp: "2015-06-25T17:53:55.357Z"
         }];
 
-        view.setProps({ messageList: messageList });
+        view.componentWillReceiveProps({ messageList: messageList });
 
         node.scrollTop = 0;
 
@@ -378,7 +397,7 @@ describe("loop.shared.views.TextChatView", function() {
           }
         ];
 
-        view.setProps({ messageList: messageList1 });
+        view.componentWillReceiveProps({ messageList: messageList1 });
 
         expect(node.scrollTop).eql(0);
       });
@@ -408,7 +427,7 @@ describe("loop.shared.views.TextChatView", function() {
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "foo"
       });
-      var node = view.getDOMNode();
+      var node = ReactDOM.findDOMNode(view);
 
       expect(node.querySelector(".text-chat-entry-timestamp")).to.eql(null);
     });
@@ -421,7 +440,7 @@ describe("loop.shared.views.TextChatView", function() {
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "foo"
       });
-      var node = view.getDOMNode();
+      var node = ReactDOM.findDOMNode(view);
 
       expect(node.querySelector(".text-chat-entry-timestamp")).to.not.eql(null);
     });
@@ -436,7 +455,7 @@ describe("loop.shared.views.TextChatView", function() {
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "Check out http://example.com and see what you think..."
       });
-      var node = view.getDOMNode();
+      var node = ReactDOM.findDOMNode(view);
 
       expect(node.querySelector("a")).to.not.eql(null);
     });
@@ -471,7 +490,7 @@ describe("loop.shared.views.TextChatView", function() {
 
       store.setStoreState({ textChatEnabled: false });
 
-      expect(view.getDOMNode().classList.contains("text-chat-disabled")).eql(true);
+      expect(ReactDOM.findDOMNode(view).classList.contains("text-chat-disabled")).eql(true);
     });
 
     it("should not a disabled class when text chat is enabled", function() {
@@ -479,13 +498,13 @@ describe("loop.shared.views.TextChatView", function() {
 
       store.setStoreState({ textChatEnabled: true });
 
-      expect(view.getDOMNode().classList.contains("text-chat-disabled")).eql(false);
+      expect(ReactDOM.findDOMNode(view).classList.contains("text-chat-disabled")).eql(false);
     });
 
     it("should add an empty class when the entries list is empty", function() {
       view = mountTestComponent();
 
-      expect(view.getDOMNode().classList.contains("text-chat-entries-empty")).eql(true);
+      expect(ReactDOM.findDOMNode(view).classList.contains("text-chat-entries-empty")).eql(true);
     });
 
     it("should not add an empty class when the entries list is has items", function() {
@@ -498,7 +517,7 @@ describe("loop.shared.views.TextChatView", function() {
         receivedTimestamp: "1970-01-01T00:02:00.000Z"
       });
 
-      expect(view.getDOMNode().classList.contains("text-chat-entries-empty")).eql(false);
+      expect(ReactDOM.findDOMNode(view).classList.contains("text-chat-entries-empty")).eql(false);
     });
 
     it("should show timestamps from msgs sent more than 1 min apart", function() {
@@ -524,7 +543,7 @@ describe("loop.shared.views.TextChatView", function() {
         receivedTimestamp: "1970-01-01T00:02:00.000Z"
       });
 
-      var node = view.getDOMNode();
+      var node = ReactDOM.findDOMNode(view);
 
       expect(node.querySelectorAll(".text-chat-entry-timestamp").length)
           .to.eql(2);
@@ -546,7 +565,7 @@ describe("loop.shared.views.TextChatView", function() {
         receivedTimestamp: "1970-01-01T00:03:00.000Z"
       });
 
-      var node = view.getDOMNode();
+      var node = ReactDOM.findDOMNode(view);
       expect(node.querySelector(".text-chat-entries")).to.not.eql(null);
 
       var entries = node.querySelectorAll(".text-chat-entry");
@@ -556,7 +575,7 @@ describe("loop.shared.views.TextChatView", function() {
     });
 
     it("should add `sent` CSS class selector to msg of type SENT", function() {
-      var node = mountTestComponent().getDOMNode();
+      var node = ReactDOM.findDOMNode(mountTestComponent());
 
       store.sendTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
@@ -569,7 +588,7 @@ describe("loop.shared.views.TextChatView", function() {
 
     it("should add `received` CSS class selector to msg of type RECEIVED",
       function() {
-        var node = mountTestComponent().getDOMNode();
+        var node = ReactDOM.findDOMNode(mountTestComponent());
 
         store.receivedTextChatMessage({
           contentType: CHAT_CONTENT_TYPES.TEXT,
@@ -591,7 +610,7 @@ describe("loop.shared.views.TextChatView", function() {
         roomUrl: "Fake"
       }));
 
-      var node = view.getDOMNode();
+      var node = ReactDOM.findDOMNode(view);
       expect(node.querySelector(".text-chat-entries")).to.not.eql(null);
 
       var entries = node.querySelectorAll(".text-chat-header");
@@ -613,7 +632,7 @@ describe("loop.shared.views.TextChatView", function() {
         }]
       }));
 
-      var node = view.getDOMNode();
+      var node = ReactDOM.findDOMNode(view);
       expect(node.querySelector(".text-chat-entries")).to.not.eql(null);
 
       expect(node.querySelector(".context-url-view-wrapper")).to.not.eql(null);
@@ -649,7 +668,7 @@ describe("loop.shared.views.TextChatView", function() {
         }]
       }));
 
-      var node = view.getDOMNode();
+      var node = ReactDOM.findDOMNode(view);
 
       expect(node.querySelector(".showing-room-name")).to.eql(null);
       expect(node.querySelector(".context-url-view-wrapper")).to.eql(null);
@@ -658,7 +677,7 @@ describe("loop.shared.views.TextChatView", function() {
     it("should dispatch SendTextChatMessage action when enter is pressed", function() {
       view = mountTestComponent();
 
-      var entryNode = view.getDOMNode().querySelector(".text-chat-box > form > input");
+      var entryNode = ReactDOM.findDOMNode(view).querySelector(".text-chat-box > form > input");
 
       TestUtils.Simulate.change(entryNode, {
         target: {
@@ -682,7 +701,7 @@ describe("loop.shared.views.TextChatView", function() {
     it("should not dispatch SendTextChatMessage when the message is empty", function() {
       view = mountTestComponent();
 
-      var entryNode = view.getDOMNode().querySelector(".text-chat-box > form > input");
+      var entryNode = ReactDOM.findDOMNode(view).querySelector(".text-chat-box > form > input");
 
       TestUtils.Simulate.keyDown(entryNode, {
         key: "Enter",
@@ -702,7 +721,7 @@ describe("loop.shared.views.TextChatView", function() {
         receivedTimestamp: "1970-01-01T00:03:00.000Z"
       });
 
-      var textBox = view.getDOMNode().querySelector(".text-chat-box input");
+      var textBox = ReactDOM.findDOMNode(view).querySelector(".text-chat-box input");
 
       expect(textBox.placeholder).contain("placeholder");
     });
@@ -716,7 +735,7 @@ describe("loop.shared.views.TextChatView", function() {
         sentTimestamp: "2015-06-25T17:53:55.357Z"
       });
 
-      var textBox = view.getDOMNode().querySelector(".text-chat-box input");
+      var textBox = ReactDOM.findDOMNode(view).querySelector(".text-chat-box input");
 
       expect(textBox.placeholder).not.contain("placeholder");
     });
@@ -729,7 +748,7 @@ describe("loop.shared.views.TextChatView", function() {
           peerHungup: true
         }));
 
-        var node = view.getDOMNode();
+        var node = ReactDOM.findDOMNode(view);
         expect(node.querySelector(".text-chat-notif")).to.not.eql(null);
     });
 
@@ -741,7 +760,7 @@ describe("loop.shared.views.TextChatView", function() {
             peerHungup: true
           }));
 
-          var node = view.getDOMNode();
+          var node = ReactDOM.findDOMNode(view);
           expect(node.querySelectorAll(".notification-icon").length).to.eql(1);
         });
   });

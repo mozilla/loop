@@ -24,7 +24,7 @@ describe("loop.copy", function() {
 
   describe("#init", function() {
     beforeEach(function() {
-      sandbox.stub(React, "render");
+      sandbox.stub(ReactDOM, "render");
       sandbox.stub(document.mozL10n, "initialize");
     });
 
@@ -37,8 +37,8 @@ describe("loop.copy", function() {
     it("should render the copy view", function() {
       loop.copy.init();
 
-      sinon.assert.calledOnce(React.render);
-      sinon.assert.calledWith(React.render, sinon.match(function(value) {
+      sinon.assert.calledOnce(ReactDOM.render);
+      sinon.assert.calledWith(ReactDOM.render, sinon.match(function(value) {
         return value.type === CopyView;
       }));
     });
@@ -52,11 +52,11 @@ describe("loop.copy", function() {
     });
 
     it("should have an unchecked box", function() {
-      expect(view.getDOMNode().querySelector("input[type=checkbox]").checked).eql(false);
+      expect(ReactDOM.findDOMNode(view).querySelector("input[type=checkbox]").checked).eql(false);
     });
 
     it("should have two buttons", function() {
-      expect(view.getDOMNode().querySelectorAll("button").length).eql(2);
+      expect(ReactDOM.findDOMNode(view).querySelectorAll("button").length).eql(2);
     });
   });
 
@@ -71,7 +71,7 @@ describe("loop.copy", function() {
     });
 
     it("should have checked state after change", function() {
-      TestUtils.Simulate.change(view.getDOMNode().querySelector("input"), {
+      TestUtils.Simulate.change(ReactDOM.findDOMNode(view).querySelector("input"), {
         target: { checked: true }
       });
 
@@ -93,31 +93,31 @@ describe("loop.copy", function() {
     }
 
     it("should dispatch accept !stop on accept", function() {
-      TestUtils.Simulate.click(view.getDOMNode().querySelector("button:last-child"));
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(view).querySelector("button:last-child"));
 
       checkDispatched({ accept: true, stop: false });
     });
 
     it("should dispatch !accept !stop on cancel", function() {
-      TestUtils.Simulate.click(view.getDOMNode().querySelector("button"));
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(view).querySelector("button"));
 
       checkDispatched({ accept: false, stop: false });
     });
 
     it("should dispatch accept stop on checked accept", function() {
-      TestUtils.Simulate.change(view.getDOMNode().querySelector("input"), {
+      TestUtils.Simulate.change(ReactDOM.findDOMNode(view).querySelector("input"), {
         target: { checked: true }
       });
-      TestUtils.Simulate.click(view.getDOMNode().querySelector("button:last-child"));
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(view).querySelector("button:last-child"));
 
       checkDispatched({ accept: true, stop: true });
     });
 
     it("should dispatch !accept stop on checked cancel", function() {
-      TestUtils.Simulate.change(view.getDOMNode().querySelector("input"), {
+      TestUtils.Simulate.change(ReactDOM.findDOMNode(view).querySelector("input"), {
         target: { checked: true }
       });
-      TestUtils.Simulate.click(view.getDOMNode().querySelector("button"));
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(view).querySelector("button"));
 
       checkDispatched({ accept: false, stop: true });
     });

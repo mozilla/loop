@@ -15,6 +15,7 @@ module.exports = function(config) {
     "shared/test/loop_mocha_utils.js",
     "test/karma/head.js",
     "built/add-on/chrome/content/shared/vendor/react.js",
+    "built/add-on/chrome/content/shared/vendor/react-dom.js",
     "built/add-on/chrome/content/shared/vendor/classnames.js",
     "built/add-on/chrome/content/shared/vendor/backbone.js",
     "built/add-on/chrome/content/panels/vendor/simpleSlideshow.js",

@@ -41,10 +41,10 @@ loop.roomToc = (function() {
       dispatcher.dispatch(new sharedActions.WindowUnload());
     });
 
-    React.render(<tocViews.TableOfContentView
-                  activeRoomStore={activeRoomStore}
-                  dispatcher={dispatcher}
-                  isScreenShareActive={false} />, document.querySelector("#main"));
+    ReactDOM.render(<tocViews.TableOfContentView
+                      activeRoomStore={activeRoomStore}
+                      dispatcher={dispatcher}
+                      isScreenShareActive={false} />, document.querySelector("#main"));
 
     var locationData = sharedUtils.locationData();
     var hash = locationData.hash.match(/#(.*)/);

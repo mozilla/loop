@@ -147,9 +147,9 @@ loop.sidebar = (function(mozL10n) {
         dispatcher.dispatch(new sharedActions.WindowUnload());
       });
 
-      React.render(<SidebarControllerView
-                      activeRoomStore={activeRoomStore}
-                      dispatcher={dispatcher} />, document.querySelector("#main"));
+      ReactDOM.render(<SidebarControllerView
+                        activeRoomStore={activeRoomStore}
+                        dispatcher={dispatcher} />, document.querySelector("#main"));
 
       var locationData = sharedUtils.locationData();
       var hash = locationData.hash.match(/#(.*)/);

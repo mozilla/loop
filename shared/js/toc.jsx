@@ -100,7 +100,7 @@ loop.shared.toc = (function(mozL10n) {
 
     componentDidUpdate: function() {
       if (this.state.editMode) {
-        this.getDOMNode().querySelector(".edit-room-name").focus();
+        ReactDOM.findDOMNode(this).querySelector(".edit-room-name").focus();
       }
     },
 
@@ -235,7 +235,7 @@ loop.shared.toc = (function(mozL10n) {
 
     handleClick: function(event) {
       event.preventDefault();
-      var input = this.refs.siteUrl.getDOMNode();
+      var input = this.refs.siteUrl;
       input.value && this.props.handleAddUrlClick(input.value);
     },
 

@@ -81,7 +81,6 @@ describe("loop.panel", function() {
       HangupAllChatWindows: function() {},
       IsMultiProcessActive: sinon.stub(),
       IsTabShareable: sinon.stub(),
-      LoadSidebar: sinon.stub(),
       LoginToFxA: sinon.stub(),
       LogoutFromFxA: sinon.stub(),
       NotifyUITour: sinon.stub(),
@@ -890,7 +889,7 @@ describe("loop.panel", function() {
           sinon.assert.calledOnce(fakeWindow.close);
         });
 
-        it("should open the ToC if the room context is not blank", function() {
+        it("should open the room if the room context is not blank", function() {
           roomEntry = mountRoomEntry({
             deleteRoom: sandbox.stub(),
             isOpenedRoom: false,
@@ -899,22 +898,11 @@ describe("loop.panel", function() {
 
           TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry.refs.roomEntry));
 
-          var tocURL = "about:looptoc#" + roomData.roomToken;
-          sinon.assert.calledOnce(openURLStub);
-          sinon.assert.calledWithExactly(openURLStub, tocURL);
-        });
-
-        it("should load the sidebar if the room context is not blank", function() {
-          roomEntry = mountRoomEntry({
-            deleteRoom: sandbox.stub(),
-            isOpenedRoom: false,
-            room: new loop.store.Room(roomData)
-          });
-
-          TestUtils.Simulate.click(roomEntry.refs.roomEntry);
-
-          sinon.assert.calledOnce(requestStubs.LoadSidebar);
-          sinon.assert.calledWithExactly(requestStubs.LoadSidebar, roomData.roomToken);
+          sinon.assert.calledOnce(dispatcher.dispatch);
+          sinon.assert.calledWithExactly(dispatcher.dispatch,
+                                           new sharedActions.OpenRoom({
+                                            roomToken: roomData.roomToken
+                                           }));
         });
 
         it("should open a new tab with the FTU Getting Started URL if the room context is blank", function() {
@@ -1166,8 +1154,7 @@ describe("loop.panel", function() {
         sinon.assert.calledOnce(roomEntry.closeWindow);
       });
 
-      // XXX akita-sidebar: will be fixed in Bug 1268397
-      it.skip("should dispatch the OpenRoom action", function() {
+      it("should dispatch the OpenRoom action", function() {
         roomEntry = mountRoomEntry({
           isOpenedRoom: false,
           room: new loop.store.Room(roomData)

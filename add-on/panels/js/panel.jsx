@@ -487,8 +487,9 @@ loop.panel = (function(_, mozL10n) {
         if (!contextURL) {
           loop.request("OpenURL", results[1] + "?noopenpanel=1");
         } else {
-          loop.requestMulti(["OpenURL", "about:looptoc#" + this.props.room.roomToken],
-            ["LoadSidebar", this.props.room.roomToken]);
+          this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
+            roomToken: this.props.room.roomToken
+          }));
         }
         this.closeWindow();
       }.bind(this));

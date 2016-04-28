@@ -55,6 +55,9 @@ const roomsPushNotification = function(version, channelID) {
   return LoopRoomsInternal.onNotification(version, channelID);
 };
 
+// Table of Contents url
+const TOC_URL = "about:looptoc#";
+
 // Since the LoopRoomsInternal.rooms map as defined below is a local cache of
 // room objects that are retrieved from the server, this is list may become out
 // of date. The Push server may notify us of this event, which will set the global
@@ -730,8 +733,9 @@ var LoopRoomsInternal = {
     }
   },
 
+  // XXX akita Bug 1268826 tidy up chat window code
   open: function(roomToken) {
-    let windowData = {
+    /* let windowData = {
       roomToken: roomToken,
       type: "room"
     };
@@ -740,7 +744,11 @@ var LoopRoomsInternal = {
 
     return MozLoopService.openChatWindow(windowData, () => {
       eventEmitter.emit("close");
-    });
+    });*/
+
+    let win = Services.wm.getMostRecentWindow("navigator:browser");
+    win.LoopUI.loadSidebar(roomToken);
+    MozLoopService.openUrl(TOC_URL + roomToken);
   },
 
   /**

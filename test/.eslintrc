@@ -1,5 +1,7 @@
 {
   "rules": {
+    // We want nesting of describe/it callbacks.
+    "max-nested-callbacks": 0,
     // This is useful for some of the tests, e.g.
     // expect(new Foo()).to.Throw(/error/)
     "no-new": 0

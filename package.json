@@ -45,7 +45,7 @@
     "karma-mocha": "0.2.2",
     "mkdirp": "0.5.1",
     "mocha": "2.4.5",
-    "nodemon": "1.9.1",
+    "nodemon": "1.9.2",
     "script-loader": "0.7.0",
     "sinon": "1.17.3",
     "rimraf": "2.5.2",

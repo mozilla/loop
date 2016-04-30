@@ -22,8 +22,8 @@ describe("loop.feedbackViews", function() {
   });
 
   describe("FeedbackView", function() {
-    var openURLStub, getLoopPrefStub, feedbackReceivedStub;
-    var fakeURL = "fake.form", view;
+    var openURLStub, getLoopPrefStub, feedbackReceivedStub, view;
+    var fakeURL = "fake.form";
 
     function mountTestComponent(props) {
       props = _.extend({

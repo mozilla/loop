@@ -85,7 +85,7 @@ function isErrorString(line) {
 var GARBAGE = [
   /\[JavaScript Warning: "TypeError: "[\w\d]+" is read-only"\]/,
   /JavaScript strict warning: /,
-  /\#\#\#\!\!\! \[Child\]\[DispatchAsyncMessage\]/
+  /###!!! \[Child\]\[DispatchAsyncMessage\]/
 ];
 
 /**

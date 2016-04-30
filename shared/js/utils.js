@@ -249,13 +249,11 @@ if (inChrome) {
     platform = platform.toLowerCase().split(";");
     if (/macintosh/.test(platform[0]) || /x11/.test(platform[0])) {
       platform = platform[1];
+    } else if (platform[0].indexOf("win") > -1 && platform.length > 4) {
+      // Skip the security notation.
+      platform = platform[2];
     } else {
-      if (platform[0].indexOf("win") > -1 && platform.length > 4) {
-        // Skip the security notation.
-        platform = platform[2];
-      } else {
-        platform = platform[0];
-      }
+      platform = platform[0];
     }
 
     if (!withVersion) {
@@ -441,8 +439,9 @@ if (inChrome) {
     }
     // Bug 1196143 - formatURL sanitizes(decodes) the URL from IDN homographic attacks.
     // Try catch to not produce output if invalid url
+    var sanitizedURL;
     try {
-      var sanitizedURL = loop.shared.utils.formatURL(url, true);
+      sanitizedURL = loop.shared.utils.formatURL(url, true);
     } catch (ex) {
       return null;
     }

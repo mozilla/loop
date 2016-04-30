@@ -636,19 +636,17 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
           // XXX Firefox didn't handle this, even though it said it could
           // previously. We should add better user feedback here.
           console.error("Firefox didn't handle room it said it could.");
+        } else if (e.detail.message.alreadyOpen) {
+          this.dispatcher.dispatch(new sharedActions.ConnectionFailure({
+            reason: FAILURE_DETAILS.ROOM_ALREADY_OPEN
+          }));
         } else {
-          if (e.detail.message.alreadyOpen) {
-            this.dispatcher.dispatch(new sharedActions.ConnectionFailure({
-              reason: FAILURE_DETAILS.ROOM_ALREADY_OPEN
-            }));
-          } else {
-            this.dispatcher.dispatch(new sharedActions.JoinedRoom({
-              apiKey: "",
-              sessionToken: "",
-              sessionId: "",
-              expires: 0
-            }));
-          }
+          this.dispatcher.dispatch(new sharedActions.JoinedRoom({
+            apiKey: "",
+            sessionToken: "",
+            sessionId: "",
+            expires: 0
+          }));
         }
       }
 

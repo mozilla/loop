@@ -4,7 +4,7 @@
 "use strict";
 
 let gConstants;
-LoopAPI.inspect()[1].GetAllConstants({}, constants => { return (gConstants = constants); });
+LoopAPI.inspect()[1].GetAllConstants({}, constants => (gConstants = constants));
 
 let { goDoCommand, gURLBar } = window;
 

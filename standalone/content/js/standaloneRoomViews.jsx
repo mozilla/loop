@@ -604,10 +604,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
         if (this.props.introSeen) {
           introSeen = true;
         }
-      } else {
-        if (localStorage.getItem("introSeen") !== null) {
-          introSeen = true;
-        }
+      } else if (localStorage.getItem("introSeen") !== null) {
+        introSeen = true;
       }
       var storeState = this.props.activeRoomStore.getStoreState();
       return _.extend({}, storeState, {

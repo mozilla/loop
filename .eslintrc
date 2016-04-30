@@ -48,8 +48,10 @@
     "accessor-pairs": [2, {"setWithoutGet": true, "getWithoutSet": false}],
     "array-bracket-spacing": [2, "never"],
     "array-callback-return": 2,
+    "arrow-body-style": [2, "as-needed"],
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
+    "block-scoped-var": 2,
     "block-spacing": [2, "always"],
     "callback-return": 0,         // TBD
     "camelcase": 0,               // TODO: set to 2
@@ -63,6 +65,7 @@
     "eol-last": 2,
     "eqeqeq": [2, "smart"],
     "generator-star-spacing": [2, "after"],
+    "guard-for-in": 2,
     "handle-callback-err": 2,
     "id-blacklist": 2,            // TBD pattern
     "id-match": 2,                // TBD pattern
@@ -72,6 +75,7 @@
     "linebreak-style": [2, "unix"],
     "max-depth": [2, 3],
     "max-nested-callbacks": [2, 3],
+    "max-statements-per-line": [2, {"max": 1}],
     "new-cap": 0,                 // TODO: set to 2
     "new-parens": 2,
     "no-alert": 2,
@@ -79,6 +83,7 @@
     "no-caller": 2,
     "no-catch-shadow": 2,
     "no-class-assign": 2,
+    "no-confusing-arrow": [2, {"allowParens": true}],
     "no-console": 0,              // Leave as 0. We use console logging in content code.
     "no-const-assign": 2,
     "no-div-regex": 2,
@@ -100,6 +105,7 @@
     "no-label-var": 2,
     "no-labels": 2,
     "no-lone-blocks": 2,
+    "no-lonely-if": 2,
     "no-loop-func": 2,
     "no-mixed-requires": 2,
     "no-mixed-spaces-and-tabs": 2,
@@ -127,6 +133,7 @@
     "no-shadow-restricted-names": 2,
     "no-spaced-func": 2,
     "no-sync": 2,
+    "no-throw-literal": 2,
     "no-trailing-spaces": 2,
     "no-undef-init": 2,
     "no-underscore-dangle": 0,    // Leave as 0. Commonly used for private variables.
@@ -139,12 +146,17 @@
     "no-use-before-define": 0,    // TODO: Set to 2
     "no-useless-call": 2,
     "no-useless-computed-key": 2,
+    "no-useless-concat": 2,
     "no-useless-constructor": 2,
+    "no-useless-escape": 2,
+    "no-void": 2,
     "no-whitespace-before-property": 2,
     "no-with": 2,
     "object-curly-spacing": [2, "always"],
+    "one-var-declaration-per-line": [2, "initializations"],
     "operator-assignment": [2, "always"],
     "quotes": [2, "double", "avoid-escape"],
+    "radix": [2, "always"],
     "require-yield": 2,
     "semi": 2,
     "semi-spacing": [2, {"before": false, "after": true}],

@@ -33,7 +33,11 @@ LoopThrottler._dns = {
     gNumResolved++;
     Assert.strictEqual(host, THROTTLE_HOSTNAME, "should be using test host");
     Assert.strictEqual(flags, this.RESOLVE_DISABLE_IPV6, "should set disable ipv6 flag");
-    callback(null, { getNextAddrAsString() { return gTestIP; } }, 0);
+    callback(null, {
+      getNextAddrAsString() {
+        return gTestIP;
+      }
+    }, 0);
   }
 };
 

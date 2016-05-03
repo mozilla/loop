@@ -160,7 +160,7 @@ $ cd ../loop
 $ # Assuming nothing else is landed on the release branch. Could equally check
 $ # out the tag here.
 $ git checkout release
-$ make git-export
+$ make export_mc
 $ cd ../gecko-dev
 $ make build
 $ ./browser/extensions/loop/run-all-loop-tests.sh

@@ -522,8 +522,8 @@ endif
 .PHONY: build
 build: add-on standalone ui
 
-GIT_EXPORT_LOCATION := $(shell echo $${GIT_EXPORT_LOCATION-../gecko-dev})
-GIT_EXPORT_DIR := $(GIT_EXPORT_LOCATION)/browser/extensions/loop
+EXPORT_MC_LOCATION := $(shell echo $${EXPORT_MC_LOCATION-../gecko-dev})
+GIT_EXPORT_DIR := $(EXPORT_MC_LOCATION)/browser/extensions/loop
 
 ifeq ($(shell uname -s),Linux)
   FIND_COMMAND := find $(GIT_EXPORT_DIR) -regextype posix-extended
@@ -531,8 +531,8 @@ else
   FIND_COMMAND := find -E $(GIT_EXPORT_DIR)
 endif
 
-.PHONY: git-export
-git-export: build dist_export
+.PHONY: export_mc
+export_mc: build dist_export
 	$(FIND_COMMAND) -type f ! -regex \
 	  '.*/(moz.build|README.txt|.gitignore|run-all-loop-tests.sh|manifest.ini)' -delete
 	$(RSYNC) $(DIST_EXPORT_DIR)/* $(GIT_EXPORT_DIR)

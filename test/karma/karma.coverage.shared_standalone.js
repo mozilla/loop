@@ -27,7 +27,6 @@ module.exports = function(config) {
     "built/standalone/content/shared/js/loopapi-client.js",
     "built/standalone/content/shared/js/utils.js",
     "built/standalone/content/shared/js/store.js",
-    "built/standalone/content/shared/js/models.js",
     "built/standalone/content/shared/js/mixins.js",
     "built/standalone/content/shared/js/crypto.js",
     "built/standalone/content/shared/js/validate.js",

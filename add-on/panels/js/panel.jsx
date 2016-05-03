@@ -3,14 +3,14 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 var loop = loop || {};
-loop.panel = (function(_, mozL10n) {
+loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
   "use strict";
 
   var sharedActions = loop.shared.actions;
   var sharedMixins = loop.shared.mixins;
-  var sharedModels = loop.shared.models;
   var sharedDesktopViews = loop.shared.desktopViews;
   var sharedViews = loop.shared.views;
+  var panelModels = loop.panel.models;
   var Button = sharedViews.Button;
 
   // XXX This must be kept in sync with the number in MozLoopService.jsm.
@@ -1383,8 +1383,6 @@ loop.panel = (function(_, mozL10n) {
     },
 
     render: function() {
-      var NotificationListView = sharedViews.NotificationListView;
-
       if (this.state.multiProcessActive && !this.state.remoteAutoStart) {
         return (
           <E10sNotSupported onClick={this.launchNonE10sWindow} />
@@ -1449,6 +1447,89 @@ loop.panel = (function(_, mozL10n) {
   });
 
   /**
+   * Notification view.
+   */
+  var NotificationView = React.createClass({
+    mixins: [Backbone.Events],
+
+    propTypes: {
+      notification: React.PropTypes.object.isRequired
+    },
+
+    render: function() {
+      var notification = this.props.notification;
+      return (
+        <div className="notificationContainer">
+          <div className={"alert alert-" + notification.get("level")}>
+            <span className="message">{notification.get("message")}</span>
+          </div>
+          <div className={"detailsBar details-" + notification.get("level")}
+               hidden={!notification.get("details")}>
+            <button className="detailsButton btn-info"
+                    hidden={!notification.get("detailsButtonLabel") || !notification.get("detailsButtonCallback")}
+                    onClick={notification.get("detailsButtonCallback")}>
+              {notification.get("detailsButtonLabel")}
+            </button>
+            <span className="details">{notification.get("details")}</span>
+          </div>
+        </div>
+      );
+    }
+  });
+
+  /**
+   * Notification list view.
+   */
+  var NotificationListView = React.createClass({
+    mixins: [Backbone.Events, sharedMixins.DocumentVisibilityMixin],
+
+    propTypes: {
+      clearOnDocumentHidden: React.PropTypes.bool,
+      notifications: React.PropTypes.object.isRequired
+    },
+
+    getDefaultProps: function() {
+      return { clearOnDocumentHidden: false };
+    },
+
+    componentDidMount: function() {
+      this.listenTo(this.props.notifications, "reset add remove", function() {
+        this.forceUpdate();
+      });
+    },
+
+    componentWillUnmount: function() {
+      this.stopListening(this.props.notifications);
+    },
+
+    /**
+     * Provided by DocumentVisibilityMixin. Clears notifications stack when the
+     * current document is hidden if the clearOnDocumentHidden prop is set to
+     * true and the collection isn't empty.
+     */
+    onDocumentHidden: function() {
+      if (this.props.clearOnDocumentHidden &&
+          this.props.notifications.length > 0) {
+        // Note: The `silent` option prevents the `reset` event to be triggered
+        // here, preventing the UI to "jump" a little because of the event
+        // callback being processed in another tick (I think).
+        this.props.notifications.reset([], { silent: true });
+        this.forceUpdate();
+      }
+    },
+
+    render: function() {
+      return (
+        <div className="messages">
+          {this.props.notifications.map(function(notification, key) {
+            return <NotificationView key={key} notification={notification} />;
+          })}
+        </div>
+      );
+    }
+  });
+
+  /**
    * Panel initialisation.
    */
   function init() {
@@ -1498,7 +1579,7 @@ loop.panel = (function(_, mozL10n) {
         loop.storeRequest(req, results[++requestIdx]);
       });
 
-      var notifications = new sharedModels.NotificationCollection();
+      var notifications = new panelModels.NotificationCollection();
       var dispatcher = new loop.Dispatcher();
       var roomStore = new loop.store.RoomStore(dispatcher, {
         notifications: notifications,
@@ -1529,6 +1610,7 @@ loop.panel = (function(_, mozL10n) {
     GettingStartedView: GettingStartedView,
     init: init,
     NewRoomView: NewRoomView,
+    NotificationListView: NotificationListView,
     PanelView: PanelView,
     RenameRoomView: RenameRoomView,
     RoomEntry: RoomEntry,
@@ -1539,6 +1621,6 @@ loop.panel = (function(_, mozL10n) {
     SignInRequestView: SignInRequestView,
     ToSView: ToSView
   };
-})(_, document.mozL10n);
+})(_, document.mozL10n));
 
 document.addEventListener("DOMContentLoaded", loop.panel.init);

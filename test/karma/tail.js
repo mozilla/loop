@@ -9,8 +9,8 @@ if (loop) {
   if (loop.panel) {
     document.removeEventListener("DOMContentLoaded", loop.panel.init);
   }
-  if (loop.conversation) {
-    document.removeEventListener("DOMContentLoaded", loop.conversation.init);
+  if (loop.sidebar) {
+    document.removeEventListener("DOMContentLoaded", loop.sidebar.init);
   }
   if (loop.copy) {
     document.removeEventListener("DOMContentLoaded", loop.copy.init);

@@ -306,15 +306,9 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
      * @param {sharedActions.SetupWindowData} actionData
      */
     setupWindowData: function(actionData) {
-      if (actionData.type !== "room") {
-        // Nothing for us to do here, leave it to other stores.
-        return Promise.resolve();
-      }
-
       this.setStoreState({
         roomState: ROOM_STATES.GATHER,
-        roomToken: actionData.roomToken,
-        windowId: actionData.windowId
+        roomToken: actionData.roomToken
       });
 
       this._registerPostSetupActions();
@@ -345,7 +339,7 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
             socialShareProviders: socialShareProviders
           }));
 
-          // For the conversation window, we need to automatically join the room.
+          // For the sidebar, we need to automatically join the room.
           this.dispatchAction(new sharedActions.JoinRoom());
         }.bind(this));
     },

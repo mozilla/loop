@@ -2,15 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-describe("loop.conversation", function() {
+describe("loop.sidebar", function() {
   "use strict";
 
-  var FeedbackView = loop.feedbackViews.FeedbackView;
   var expect = chai.expect;
   var TestUtils = React.addons.TestUtils;
-  var sharedActions = loop.shared.actions;
-  var fakeWindow, sandbox, setLoopPrefStub, mozL10nGet,
-    remoteCursorStore, dispatcher, requestStubs;
+  var fakeWindow, sandbox, setLoopPrefStub, dispatcher, requestStubs,
+    activeRoomStore, textChatStore;
+  var ROOM_STATES = loop.store.ROOM_STATES;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
@@ -63,9 +62,6 @@ describe("loop.conversation", function() {
       GetSelectedTabMetadata: function() {
         return {};
       },
-      GetConversationWindowData: function() {
-        return {};
-      },
       TelemetryAddValue: sinon.stub()
     });
 
@@ -79,7 +75,7 @@ describe("loop.conversation", function() {
 
     // XXX These stubs should be hoisted in a common file
     // Bug 1040968
-    mozL10nGet = sandbox.stub(document.mozL10n, "get", function(x) {
+    sandbox.stub(document.mozL10n, "get", function(x) {
       return x;
     });
     document.mozL10n.initialize({
@@ -88,16 +84,12 @@ describe("loop.conversation", function() {
     });
 
     dispatcher = new loop.Dispatcher();
-
-    remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
-      sdkDriver: {}
-    });
-
-    loop.store.StoreMixin.register({ remoteCursorStore: remoteCursorStore });
+    sinon.stub(dispatcher, "dispatch");
   });
 
   afterEach(function() {
     loop.shared.mixins.setRootObject(window);
+    loop.store.StoreMixin.clearRegisteredStores();
     sandbox.restore();
     LoopMochaUtils.restore();
   });
@@ -126,41 +118,37 @@ describe("loop.conversation", function() {
       window.OT = OTRestore;
     });
 
-    // XXX akita-sidebar
-    it.skip("should initialize L10n", function() {
-      loop.conversation.init();
+    it("should initialize L10n", function() {
+      loop.sidebar.init();
 
       sinon.assert.calledOnce(document.mozL10n.initialize);
       sinon.assert.calledWith(document.mozL10n.initialize, sinon.match({ locale: "en-US" }));
     });
 
-    // XXX akita-sidebar
-    it.skip("should create the AppControllerView", function() {
-      loop.conversation.init();
+    it("should create the SidebarControllerView", function() {
+      loop.sidebar.init();
 
       sinon.assert.calledOnce(ReactDOM.render);
       sinon.assert.calledWith(ReactDOM.render,
         sinon.match(function(value) {
           return TestUtils.isCompositeComponentElement(value,
-            loop.conversation.AppControllerView);
+            loop.sidebar.SidebarControllerView);
       }));
     });
 
-    // XXX akita-sidebar
-    it.skip("should trigger a getWindowData action", function() {
-      loop.conversation.init();
+    it("should trigger a setupWindowData action", function() {
+      loop.sidebar.init();
 
       sinon.assert.calledOnce(loop.Dispatcher.prototype.dispatch);
       sinon.assert.calledWithExactly(loop.Dispatcher.prototype.dispatch,
-        new loop.shared.actions.GetWindowData({
-          windowId: "42"
+        new loop.shared.actions.SetupWindowData({
+          roomToken: "42"
         }));
     });
 
-    // XXX akita-sidebar
-    it.skip("should log a telemetry event when opening the conversation window", function() {
+    it("should log a telemetry event when opening the sidebar", function() {
       var constants = requestStubs.GetAllConstants();
-      loop.conversation.init();
+      loop.sidebar.init();
 
       sinon.assert.calledOnce(requestStubs["TelemetryAddValue"]);
       sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"],
@@ -168,21 +156,13 @@ describe("loop.conversation", function() {
     });
   });
 
-  describe("AppControllerView", function() {
-    var activeRoomStore,
-        ccView,
-        addRemoteCursorStub,
-        clickRemoteCursorStub;
-    var conversationAppStore,
-        roomStore;
-    var ROOM_STATES = loop.store.ROOM_STATES;
+  describe("SidebarControllerView", function() {
+    var ccView;
 
     function mountTestComponent() {
       return TestUtils.renderIntoDocument(
-        React.createElement(loop.conversation.AppControllerView, {
-          cursorStore: remoteCursorStore,
-          dispatcher: dispatcher,
-          roomStore: roomStore
+        React.createElement(loop.sidebar.SidebarControllerView, {
+          dispatcher: dispatcher
         }));
     }
 
@@ -191,165 +171,85 @@ describe("loop.conversation", function() {
         mozLoop: {},
         sdkDriver: {}
       });
-      roomStore = new loop.store.RoomStore(dispatcher, {
-        activeRoomStore: activeRoomStore,
-        constants: {}
-      });
-      remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+
+      textChatStore = new loop.store.TextChatStore(dispatcher, {
         sdkDriver: {}
-      });
-      conversationAppStore = new loop.store.ConversationAppStore({
-        activeRoomStore: activeRoomStore,
-        dispatcher: dispatcher,
-        feedbackPeriod: 42,
-        feedbackTimestamp: 42,
-        facebookEnabled: false
       });
 
       loop.store.StoreMixin.register({
-        conversationAppStore: conversationAppStore
+        activeRoomStore: activeRoomStore,
+        textChatStore: textChatStore
       });
-
-      addRemoteCursorStub = sandbox.stub();
-      clickRemoteCursorStub = sandbox.stub();
-      LoopMochaUtils.stubLoopRequest({
-        AddRemoteCursorOverlay: addRemoteCursorStub,
-        ClickRemoteCursor: clickRemoteCursorStub
-      });
-
-      loop.config = {
-        tilesIframeUrl: null,
-        tilesSupportUrl: null
-      };
-
-      sinon.stub(dispatcher, "dispatch");
     });
 
     afterEach(function() {
       ccView = undefined;
     });
 
-    // XXX akita-sidebar
-    it.skip("should request AddRemoteCursorOverlay when cursor position changes", function() {
+    it("should not render any view if room state is equals to GATHER", function() {
+      activeRoomStore.setStoreState({ roomState: ROOM_STATES.GATHER });
 
-      mountTestComponent();
-      remoteCursorStore.setStoreState({
-        "remoteCursorPosition": {
-          "ratioX": 10,
-          "ratioY": 10
-        }
-      });
+      ccView = mountTestComponent();
 
-      sinon.assert.calledOnce(addRemoteCursorStub);
+      expect(ReactDOM.findDOMNode(ccView)).eql(null);
     });
 
-    // XXX akita-sidebar
-    it.skip("should NOT request AddRemoteCursorOverlay when cursor position DOES NOT changes", function() {
-
-      mountTestComponent();
-      remoteCursorStore.setStoreState({
-        "realVideoSize": {
-          "height": 400,
-          "width": 600
-        }
-      });
-
-      sinon.assert.notCalled(addRemoteCursorStub);
-    });
-
-    // XXX akita-sidebar
-    it.skip("should request ClickRemoteCursor when click event detected", function() {
-
-      mountTestComponent();
-      remoteCursorStore.setStoreState({
-        "remoteCursorClick": true
-      });
-
-      sinon.assert.calledOnce(clickRemoteCursorStub);
-    });
-
-    // XXX akita-sidebar
-    it.skip("should NOT request ClickRemoteCursor when reset click on store", function() {
-
-      mountTestComponent();
-      remoteCursorStore.setStoreState({
-        "remoteCursorClick": false
-      });
-
-      sinon.assert.notCalled(clickRemoteCursorStub);
-    });
-
-    // XXX akita-sidebar
-    it.skip("should display the RoomView for rooms", function() {
-      conversationAppStore.setStoreState({ windowType: "room" });
+    it("should display the DesktopSidebarView", function() {
       activeRoomStore.setStoreState({ roomState: ROOM_STATES.READY });
 
       ccView = mountTestComponent();
 
-      var desktopRoom = TestUtils.findRenderedComponentWithType(ccView,
-        loop.roomViews.DesktopRoomConversationView);
+      var desktopSidebarView = TestUtils.findRenderedComponentWithType(ccView,
+        loop.sidebar.DesktopSidebarView);
 
-      expect(desktopRoom.props.facebookEnabled).to.eql(false);
+      expect(desktopSidebarView).to.not.eql(null);
     });
+  });
 
-    // XXX akita-sidebar
-    it.skip("should pass the correct value of facebookEnabled to DesktopRoomConversationView",
-      function() {
-        conversationAppStore.setStoreState({
-          windowType: "room",
-          facebookEnabled: true
-        });
-        activeRoomStore.setStoreState({ roomState: ROOM_STATES.READY });
+  describe("DesktopSidebarView", function() {
+    var ccView;
 
-        ccView = mountTestComponent();
+    function mountTestComponent() {
+      return TestUtils.renderIntoDocument(
+        React.createElement(loop.sidebar.DesktopSidebarView, {
+          dispatcher: dispatcher
+        }));
+    }
 
-        var desktopRoom = TestUtils.findRenderedComponentWithType(ccView,
-            loop.roomViews.DesktopRoomConversationView);
-
-        expect(desktopRoom.props.facebookEnabled).to.eql(true);
+    beforeEach(function() {
+      activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, {
+        mozLoop: {},
+        sdkDriver: {}
       });
 
-    // XXX akita-sidebar
-    it.skip("should display the RoomFailureView for failures", function() {
-      conversationAppStore.setStoreState({
-        outgoing: false,
-        windowType: "failed"
+      textChatStore = new loop.store.TextChatStore(dispatcher, {
+        sdkDriver: {}
       });
 
-      ccView = mountTestComponent();
+      loop.store.StoreMixin.register({
+        activeRoomStore: activeRoomStore,
+        textChatStore: textChatStore
+      });
 
-      TestUtils.findRenderedComponentWithType(ccView,
-        loop.roomViews.RoomFailureView);
+      activeRoomStore.setStoreState({ roomState: ROOM_STATES.READY });
     });
 
-    // XXX akita-sidebar
-    it.skip("should set the correct title when rendering feedback view", function() {
-      conversationAppStore.setStoreState({ showFeedbackForm: true });
-
+    it("should render the SidebarView", function() {
       ccView = mountTestComponent();
 
-      sinon.assert.calledWithExactly(mozL10nGet, "conversation_has_ended");
+      var sidebarView = TestUtils.findRenderedComponentWithType(ccView,
+        loop.shared.toc.SidebarView);
+
+      expect(sidebarView).to.not.eql(null);
     });
 
-    // XXX akita-sidebar
-    it.skip("should render FeedbackView if showFeedbackForm state is true",
-       function() {
-         conversationAppStore.setStoreState({ showFeedbackForm: true });
-
-         ccView = mountTestComponent();
-
-         TestUtils.findRenderedComponentWithType(ccView, FeedbackView);
-       });
-
-    // XXX akita-sidebar
-    it.skip("should dispatch LeaveConversation when handleCallTerminated is called", function() {
+    it("#leaveRoom", function() {
       ccView = mountTestComponent();
-
-      ccView.handleCallTerminated();
+      ccView.leaveRoom();
 
       sinon.assert.calledOnce(dispatcher.dispatch);
       sinon.assert.calledWithExactly(dispatcher.dispatch,
-        new sharedActions.LeaveConversation());
+        new loop.shared.actions.LeaveRoom());
     });
   });
 });

@@ -50,9 +50,7 @@ loop.roomToc = (function() {
     var hash = locationData.hash.match(/#(.*)/);
 
     dispatcher.dispatch(new sharedActions.SetupWindowData({
-      windowId: "id-test",
-      roomToken: hash[1],
-      type: "room"
+      roomToken: hash[1]
     }));
   }
 

@@ -66,17 +66,18 @@
   <!-- Views -->
   <script src="/add-on/shared/js/views.js"></script>
   <script src="/add-on/shared/js/textChatView.js"></script>
+  <script src="/add-on/shared/js/toc.js"></script>
   <script src="/add-on/panels/js/desktopViews.js"></script>
   <script src="/add-on/panels/js/roomViews.js"></script>
   <script src="/add-on/panels/js/feedbackViews.js"></script>
-  <script src="/add-on/panels/js/conversation.js"></script>
+  <script src="/add-on/panels/js/sidebar.js"></script>
   <script src="/add-on/panels/js/copy.js"></script>
   <script src="/add-on/panels/js/panel.js"></script>
   <script src="/add-on/panels/js/slideshow.js"></script>
 
   <!-- Test scripts -->
   <script src="conversationAppStore_test.js"></script>
-  <script src="conversation_test.js"></script>
+  <script src="sidebar_test.js"></script>
   <script src="copy_test.js"></script>
   <script src="feedbackViews_test.js"></script>
   <script src="panel_test.js"></script>
@@ -88,7 +89,7 @@
   <script>
     // Stop the default init functions running to avoid conflicts in tests
     document.removeEventListener('DOMContentLoaded', loop.panel.init);
-    document.removeEventListener('DOMContentLoaded', loop.conversation.init);
+    document.removeEventListener('DOMContentLoaded', loop.sidebar.init);
     document.removeEventListener('DOMContentLoaded', loop.copy.init);
     document.removeEventListener("DOMContentLoaded", loop.slideshow.init);
 

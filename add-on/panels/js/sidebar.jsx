@@ -15,7 +15,6 @@ loop.sidebar = (function(mozL10n) {
     mixins: [loop.store.StoreMixin("activeRoomStore")],
 
     propTypes: {
-      activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
     },
 
@@ -23,28 +22,13 @@ loop.sidebar = (function(mozL10n) {
       return this.getStoreState();
     },
 
-    componentWillMount: function() {
-      this.props.activeRoomStore.on("change", function() {
-        this.setState(this.props.activeRoomStore.getStoreState());
-      }, this);
-    },
-
-    componentWillUnmount: function() {
-      this.props.activeRoomStore.off("change", null, this);
-    },
-
     render: function() {
-      if (this.state.roomState === ROOM_STATES.ROOM_GATHER) {
-        return (
-          <div>
-            <p>{"If you see this, please file a bug"}</p>
-          </div>
-        );
+      if (this.state.roomState === ROOM_STATES.GATHER) {
+        return null;
       }
 
       return (
          <DesktopSidebarView
-           activeRoomStore={this.props.activeRoomStore}
            dispatcher={this.props.dispatcher} />
       );
     }
@@ -93,13 +77,25 @@ loop.sidebar = (function(mozL10n) {
   });
 
   function init() {
+    // Obtain the windowId and pass it through
+    var locationHash = sharedUtils.locationData().hash;
+    var roomToken;
+
+    var hash = locationHash.match(/#(.*)/);
+    if (hash) {
+      roomToken = hash[1];
+    }
+
     var requests = [
       ["GetAllConstants"],
       ["GetAllStrings"],
-      ["GetLocale"]
+      ["GetLocale"],
+      ["GetLoopPref", "ot.guid"]
     ];
 
     return loop.requestMulti.apply(null, requests).then(function(results) {
+      // `requestIdx` is keyed off the order of the `requests` and `prefetch`
+      // arrays. Be careful to update both when making changes.
       var requestIdx = 0;
       var constants = results[requestIdx];
 
@@ -119,16 +115,33 @@ loop.sidebar = (function(mozL10n) {
         }
       });
 
+      // Plug in an alternate client ID mechanism, as localStorage and cookies
+      // don't work in about:pages
+      var currGuid = results[++requestIdx];
+      window.OT.overrideGuidStorage({
+        get: function(callback) {
+          callback(null, currGuid);
+        },
+        set: function(guid, callback) {
+          // See nsIPrefBranch
+          var PREF_STRING = 32;
+          currGuid = guid;
+          loop.request("SetLoopPref", "ot.guid", guid, PREF_STRING);
+          callback(null);
+        }
+      });
+
       var dispatcher = new loop.Dispatcher();
       var sdkDriver = new loop.OTSdkDriver({
-        // For the standalone, always request data channels. If they aren't
-        // implemented on the client, there won't be a similar message to us, and
-        // we won't display the UI.
         constants: constants,
+        isDesktop: true,
         useDataChannels: true,
         dispatcher: dispatcher,
         sdk: OT
       });
+
+      // expose for functional tests
+      loop.sidebar._sdkDriver = sdkDriver;
 
       var activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, {
         sdkDriver: sdkDriver
@@ -148,22 +161,20 @@ loop.sidebar = (function(mozL10n) {
       });
 
       ReactDOM.render(<SidebarControllerView
-                        activeRoomStore={activeRoomStore}
                         dispatcher={dispatcher} />, document.querySelector("#main"));
 
-      var locationData = sharedUtils.locationData();
-      var hash = locationData.hash.match(/#(.*)/);
-
       dispatcher.dispatch(new sharedActions.SetupWindowData({
-        windowId: "id-test",
-        roomToken: hash[1],
-        type: "room"
+        roomToken: roomToken
       }));
+
+      loop.request("TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", constants.LOOP_MAU_TYPE.OPEN_CONVERSATION);
     });
   }
 
   return {
-    init: init
+    DesktopSidebarView: DesktopSidebarView,
+    init: init,
+    SidebarControllerView: SidebarControllerView
   };
 })(document.mozL10n);
 

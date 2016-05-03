@@ -335,8 +335,6 @@ describe("loop.store.ActiveRoomStore", function() {
 
     it("should set the state to `GATHER`", function() {
       return store.setupWindowData(new sharedActions.SetupWindowData({
-        windowId: "42",
-        type: "room",
         roomToken: fakeToken
       })).then(function() {
         expect(store.getStoreState()).to.have.property(
@@ -346,11 +344,8 @@ describe("loop.store.ActiveRoomStore", function() {
 
     it("should store the room token and window id", function() {
       return store.setupWindowData(new sharedActions.SetupWindowData({
-        windowId: "42",
-        type: "room",
         roomToken: fakeToken
       })).then(function() {
-        expect(store.getStoreState().windowId).eql("42");
         expect(store.getStoreState().roomToken).eql(fakeToken);
       });
     });
@@ -358,8 +353,6 @@ describe("loop.store.ActiveRoomStore", function() {
     it("should dispatch an UpdateRoomInfo action if the get is successful",
       function() {
         return store.setupWindowData(new sharedActions.SetupWindowData({
-          windowId: "42",
-          type: "room",
           roomToken: fakeToken
         })).then(function() {
           sinon.assert.calledTwice(dispatcher.dispatch);
@@ -379,8 +372,6 @@ describe("loop.store.ActiveRoomStore", function() {
     it("should dispatch a JoinRoom action if the get is successful",
       function() {
         return store.setupWindowData(new sharedActions.SetupWindowData({
-          windowId: "42",
-          type: "room",
           roomToken: fakeToken
         })).then(function() {
           sinon.assert.calledTwice(dispatcher.dispatch);
@@ -396,8 +387,6 @@ describe("loop.store.ActiveRoomStore", function() {
         requestStubs["Rooms:Get"].withArgs(fakeToken).returns(fakeError);
 
         return store.setupWindowData(new sharedActions.SetupWindowData({
-          windowId: "42",
-          type: "room",
           roomToken: fakeToken
         })).then(function() {
           sinon.assert.calledOnce(dispatcher.dispatch);
@@ -1150,7 +1139,8 @@ describe("loop.store.ActiveRoomStore", function() {
         sinon.match.has("sendTwoWayMediaTelemetry", false));
     });
 
-    it("should call LoopAPI.AddConversationContext", function() {
+    // XXX akita Will be fixed in Bug 1268826
+    it.skip("should call LoopAPI.AddConversationContext", function() {
       var actionData = new sharedActions.JoinedRoom(fakeJoinedData);
 
       return store.setupWindowData(new sharedActions.SetupWindowData({
@@ -2160,8 +2150,6 @@ describe("loop.store.ActiveRoomStore", function() {
 
       store._isDesktop = true;
       store.setupWindowData(new sharedActions.SetupWindowData({
-        windowId: "42",
-        type: "room",
         roomToken: "fakeToken"
       }));
     });
@@ -2236,9 +2224,7 @@ describe("loop.store.ActiveRoomStore", function() {
         requestStubs["Rooms:Get"].returns(fakeRoomData);
 
         store.setupWindowData(new sharedActions.SetupWindowData({
-          roomToken: "fakeToken",
-          type: "room",
-          windowId: "42"
+          roomToken: "fakeToken"
         }));
       });
 
@@ -2303,9 +2289,7 @@ describe("loop.store.ActiveRoomStore", function() {
       beforeEach(function() {
         requestStubs["Rooms:Get"].returns(fakeRoomData);
         store.setupWindowData(new sharedActions.SetupWindowData({
-          roomToken: "fakeToken",
-          type: "room",
-          windowId: "42"
+          roomToken: "fakeToken"
         }));
       });
 

@@ -1043,7 +1043,7 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
     /**
      * Handles a remote peer disconnecting from the session. As we currently only
      * support 2 participants, we declare the room as SESSION_CONNECTED as soon as
-     * one participantleaves.
+     * one participant leaves.
      */
     remotePeerDisconnected: function() {
       // Update the participants to just the owner.

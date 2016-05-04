@@ -338,4 +338,16 @@ describe("loop.store.TextChatStore", function() {
       expect(store.getStoreState("messageList")[0].message).eql("peer_unexpected_quit");
     });
   });
+
+  describe("#remotePeerConnected", function() {
+    it("should append the right message when peer connected", function() {
+      store.remotePeerConnected(new sharedActions.RemotePeerConnected());
+
+      expect(store.getStoreState("messageList").length).eql(1);
+      expect(store.getStoreState("messageList")[0].contentType).eql(
+          CHAT_CONTENT_TYPES.NOTIFICATION
+      );
+      expect(store.getStoreState("messageList")[0].message).eql("peer_join_session");
+    });
+  });
 });

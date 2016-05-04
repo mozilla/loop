@@ -27,7 +27,8 @@ loop.store.TextChatStore = (function() {
       "sendTextChatMessage",
       "updateRoomInfo",
       "updateRoomContext",
-      "remotePeerDisconnected"
+      "remotePeerDisconnected",
+      "remotePeerConnected"
     ],
 
     /**
@@ -242,7 +243,25 @@ loop.store.TextChatStore = (function() {
       var message = {
         contentType: CHAT_CONTENT_TYPES.NOTIFICATION,
         message: notificationTextKey,
-        receivedTimestamp: (new Date()).toISOString()
+        receivedTimestamp: (new Date()).toISOString(),
+        extraData: {
+          peerStatus: "disconnected"
+        }
+      };
+
+      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.RECEIVED, message);
+    },
+
+    remotePeerConnected: function() {
+      var notificationTextKey = "peer_join_session";
+
+      var message = {
+        contentType: CHAT_CONTENT_TYPES.NOTIFICATION,
+        message: notificationTextKey,
+        receivedTimestamp: (new Date()).toISOString(),
+        extraData: {
+          peerStatus: "connected"
+        }
       };
 
       this._appendTextChatMessage(CHAT_MESSAGE_TYPES.RECEIVED, message);

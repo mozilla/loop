@@ -74,7 +74,12 @@ loop.shared.views.chat = (function(mozL10n) {
         return (
           <div className={classes}>
             <div className="content-wrapper">
-              <img className="notification-icon" src="shared/img/leave_notification.svg" />
+              <img className="notification-icon"
+                   src={this.props.extraData &&
+                        this.props.extraData.peerStatus === "connected" ?
+                          "shared/img/join_notification.svg" :
+                          "shared/img/leave_notification.svg"
+                   } />
               <p>{mozL10n.get(this.props.message)}</p>
             </div>
             {this.props.showTimestamp ? this._renderTimestamp() : null}

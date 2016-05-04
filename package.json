@@ -40,7 +40,7 @@
     "jpm": "1.0.7",
     "karma": "0.13.22",
     "karma-chrome-launcher": "1.0.1",
-    "karma-coverage": "0.5.5",
+    "karma-coverage": "1.0.0",
     "karma-firefox-launcher": "0.1.7",
     "karma-mocha": "1.0.1",
     "mkdirp": "0.5.1",

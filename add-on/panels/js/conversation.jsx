@@ -178,6 +178,9 @@ loop.conversation = (function(mozL10n) {
         dispatcher: dispatcher,
         sdk: OT
       });
+      var dataDriver = new loop.DataDriver({
+        dispatcher: dispatcher
+      });
 
       // expose for functional tests
       loop.conversation._sdkDriver = sdkDriver;
@@ -204,7 +207,7 @@ loop.conversation = (function(mozL10n) {
         constants: constants
       });
       var textChatStore = new loop.store.TextChatStore(dispatcher, {
-        sdkDriver: sdkDriver
+        dataDriver: dataDriver
       });
       var remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
         sdkDriver: sdkDriver

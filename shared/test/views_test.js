@@ -857,7 +857,7 @@ describe("loop.shared.views", function() {
 
     beforeEach(function() {
       textChatStore = new loop.store.TextChatStore(dispatcher, {
-        sdkDriver: {}
+        dataDriver: {}
       });
 
       loop.store.StoreMixin.register({ textChatStore: textChatStore });

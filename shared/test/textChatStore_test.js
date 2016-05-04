@@ -9,7 +9,7 @@ describe("loop.store.TextChatStore", function() {
   var CHAT_MESSAGE_TYPES = loop.store.CHAT_MESSAGE_TYPES;
   var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
 
-  var dispatcher, fakeSdkDriver, sandbox, store;
+  var dispatcher, fakeDataDriver, sandbox, store;
 
   beforeEach(function() {
     sandbox = sinon.sandbox.create();
@@ -18,12 +18,12 @@ describe("loop.store.TextChatStore", function() {
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
 
-    fakeSdkDriver = {
+    fakeDataDriver = {
       sendTextChatMessage: sinon.stub()
     };
 
     store = new loop.store.TextChatStore(dispatcher, {
-      sdkDriver: fakeSdkDriver
+      dataDriver: fakeDataDriver
     });
 
     sandbox.stub(window, "dispatchEvent");
@@ -145,8 +145,8 @@ describe("loop.store.TextChatStore", function() {
 
       store.sendTextChatMessage(messageData);
 
-      sinon.assert.calledOnce(fakeSdkDriver.sendTextChatMessage);
-      sinon.assert.calledWithExactly(fakeSdkDriver.sendTextChatMessage, messageData);
+      sinon.assert.calledOnce(fakeDataDriver.sendTextChatMessage);
+      sinon.assert.calledWithExactly(fakeDataDriver.sendTextChatMessage, messageData);
     });
 
     it("should add the message to the list", function() {

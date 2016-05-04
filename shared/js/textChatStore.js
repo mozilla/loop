@@ -36,17 +36,17 @@ loop.store.TextChatStore = (function() {
      *
      * @param  {Object} options An object containing options for this store.
      *                          It should consist of:
-     *                          - sdkDriver: The sdkDriver to use for sending
+     *                          - dataDriver: The driver to use for sending
      *                                       messages.
      */
     initialize: function(options) {
       options = options || {};
 
-      if (!options.sdkDriver) {
-        throw new Error("Missing option sdkDriver");
+      if (!options.dataDriver) {
+        throw new Error("Missing option dataDriver");
       }
 
-      this._sdkDriver = options.sdkDriver;
+      this._dataDriver = options.dataDriver;
     },
 
     /**
@@ -154,7 +154,7 @@ loop.store.TextChatStore = (function() {
      */
     sendTextChatMessage: function(actionData) {
       this._appendTextChatMessage(CHAT_MESSAGE_TYPES.SENT, actionData);
-      this._sdkDriver.sendTextChatMessage(actionData);
+      this._dataDriver.sendTextChatMessage(actionData);
     },
 
     /**

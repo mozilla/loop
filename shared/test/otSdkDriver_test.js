@@ -9,7 +9,6 @@ describe("loop.OTSdkDriver", function() {
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var STREAM_PROPERTIES = loop.shared.utils.STREAM_PROPERTIES;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
-  var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
   var CURSOR_MESSAGE_TYPES = loop.shared.utils.CURSOR_MESSAGE_TYPES;
 
   var sandbox, constants;
@@ -602,16 +601,6 @@ describe("loop.OTSdkDriver", function() {
       });
     });
 
-    it("should dispatch a DataChannelsAvailable action with available = false", function() {
-      driver.disconnectSession();
-
-      sinon.assert.called(dispatcher.dispatch);
-      sinon.assert.calledWithExactly(dispatcher.dispatch,
-        new sharedActions.DataChannelsAvailable({
-          available: false
-        }));
-    });
-
     it("should dispatch a MediaStreamDestroyed action with isLocal = false", function() {
       driver.disconnectSession();
 
@@ -777,25 +766,6 @@ describe("loop.OTSdkDriver", function() {
 
       driver.forceDisconnectAll(function() {});
       sinon.assert.calledThrice(session.forceDisconnect);
-    });
-
-    describe("#sendTextChatMessage", function() {
-      it("should send a message on the publisher data channel", function() {
-        driver._publisherChannel = {
-          send: sinon.stub()
-        };
-
-        var message = {
-          contentType: CHAT_CONTENT_TYPES.TEXT,
-          message: "Help!"
-        };
-
-        driver.sendTextChatMessage(message);
-
-        sinon.assert.calledOnce(driver._publisherChannel.send);
-        sinon.assert.calledWithExactly(driver._publisherChannel.send,
-          JSON.stringify(message));
-      });
     });
   });
 
@@ -1191,10 +1161,7 @@ describe("loop.OTSdkDriver", function() {
         });
 
         describe("Data channel setup", function() {
-          var fakeChannel;
-
           beforeEach(function() {
-            fakeChannel = _.extend({}, Backbone.Events);
             fakeStream.connection = fakeConnection;
             driver._useDataChannels = true;
 
@@ -1222,9 +1189,8 @@ describe("loop.OTSdkDriver", function() {
           it("should get the data channel after subscribe is complete", function() {
             session.trigger("streamCreated", { stream: fakeStream });
 
-            sinon.assert.calledTwice(fakeSubscriberObject._.getDataChannel);
-            sinon.assert.calledWith(fakeSubscriberObject._.getDataChannel.getCall(0), "text", {});
-            sinon.assert.calledWith(fakeSubscriberObject._.getDataChannel.getCall(1), "cursor", {});
+            sinon.assert.calledOnce(fakeSubscriberObject._.getDataChannel);
+            sinon.assert.calledWith(fakeSubscriberObject._.getDataChannel.getCall(0), "cursor", {});
           });
 
           it("should not get the data channel if data channels are not wanted", function() {
@@ -1242,7 +1208,7 @@ describe("loop.OTSdkDriver", function() {
 
             session.trigger("streamCreated", { stream: fakeStream });
 
-            sinon.assert.calledTwice(console.error);
+            sinon.assert.calledOnce(console.error);
             sinon.assert.calledWithMatch(console.error, err);
           });
 
@@ -1255,63 +1221,11 @@ describe("loop.OTSdkDriver", function() {
             sinon.assert.calledWithExactly(dispatcher.dispatch,
               new sharedActions.ConnectionStatus({
                 connections: 0,
-                event: "sdk.datachannel.sub.text.fakeError",
+                event: "sdk.datachannel.sub.cursor.fakeError",
                 sendStreams: 0,
                 state: "receiving",
                 recvStreams: 1
               }));
-          });
-
-          it("should dispatch `DataChannelsAvailable` if the publisher channel is setup", function() {
-            // Fake a publisher channel.
-            driver._publisherChannel = {};
-
-            fakeSubscriberObject._.getDataChannel.callsArgWith(2, null, fakeChannel);
-
-            session.trigger("streamCreated", { stream: fakeStream });
-
-            sinon.assert.called(dispatcher.dispatch);
-            sinon.assert.calledWithExactly(dispatcher.dispatch,
-              new sharedActions.DataChannelsAvailable({
-                available: true
-              }));
-          });
-
-          it("should not dispatch `DataChannelsAvailable` if the publisher channel isn't setup", function() {
-            fakeSubscriberObject._.getDataChannel.callsArgWith(2, null, fakeChannel);
-
-            session.trigger("streamCreated", { stream: fakeStream });
-
-            sinon.assert.neverCalledWith(dispatcher.dispatch,
-              new sharedActions.DataChannelsAvailable({
-                available: true
-              }));
-          });
-
-          it("should dispatch `ReceivedTextChatMessage` when a text message is received", function() {
-            var data = '{"contentType":"' + CHAT_CONTENT_TYPES.TEXT +
-                       '","message":"Are you there?","receivedTimestamp": "2015-06-25T00:29:14.197Z"}';
-            var clock = sinon.useFakeTimers();
-
-            fakeSubscriberObject._.getDataChannel.callsArgWith(2, null, fakeChannel);
-
-            session.trigger("streamCreated", { stream: fakeStream });
-
-            // Now send the message.
-            fakeChannel.trigger("message", {
-              data: data
-            });
-
-            sinon.assert.called(dispatcher.dispatch);
-            sinon.assert.calledWithExactly(dispatcher.dispatch,
-              new sharedActions.ReceivedTextChatMessage({
-                contentType: CHAT_CONTENT_TYPES.TEXT,
-                message: "Are you there?",
-                receivedTimestamp: "1970-01-01T00:00:00.000Z"
-              }));
-
-            /* Restore the time. */
-            clock.restore();
           });
         });
       });
@@ -1719,7 +1633,7 @@ describe("loop.OTSdkDriver", function() {
       it("should get the data channels for the publisher", function() {
         session.trigger("signal:readyForDataChannel");
 
-        sinon.assert.calledTwice(publisher._.getDataChannel);
+        sinon.assert.calledOnce(publisher._.getDataChannel);
       });
 
       it("should log an error if the data channels couldn't be obtained", function() {
@@ -1729,7 +1643,7 @@ describe("loop.OTSdkDriver", function() {
 
         session.trigger("signal:readyForDataChannel");
 
-        sinon.assert.calledTwice(console.error);
+        sinon.assert.calledOnce(console.error);
         sinon.assert.calledWithMatch(console.error, err);
       });
 
@@ -1738,43 +1652,14 @@ describe("loop.OTSdkDriver", function() {
 
         session.trigger("signal:readyForDataChannel");
 
-        sinon.assert.calledTwice(dispatcher.dispatch);
+        sinon.assert.calledOnce(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
           new sharedActions.ConnectionStatus({
             connections: 0,
-            event: "sdk.datachannel.pub.text.fakeError",
+            event: "sdk.datachannel.pub.cursor.fakeError",
             sendStreams: 0,
             state: "starting",
             recvStreams: 0
-          }));
-      });
-
-      it("should dispatch `DataChannelsAvailable` if the subscriber channel is setup", function() {
-        var fakeChannel = _.extend({}, Backbone.Events);
-
-        driver._subscriberChannel = fakeChannel;
-
-        publisher._.getDataChannel.callsArgWith(2, null, fakeChannel);
-
-        session.trigger("signal:readyForDataChannel");
-
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.DataChannelsAvailable({
-            available: true
-          }));
-      });
-
-      it("should not dispatch `DataChannelsAvailable` if the subscriber channel isn't setup", function() {
-        var fakeChannel = _.extend({}, Backbone.Events);
-
-        publisher._.getDataChannel.callsArgWith(2, null, fakeChannel);
-
-        session.trigger("signal:readyForDataChannel");
-
-        sinon.assert.neverCalledWith(dispatcher.dispatch,
-          new sharedActions.DataChannelsAvailable({
-            available: true
           }));
       });
     });

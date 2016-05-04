@@ -1,0 +1,362 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+var loop = loop || {};
+loop.DataDriver = function() {
+  "use strict";
+
+  let { actions } = loop.shared;
+
+  /**
+   * Generate an id based on a time. Declared outside of the class to use
+   * locally scoped variables.
+   * https://gist.github.com/mikelehen/3596a30bd69384624c11
+   *
+   * @param {Number} time The time to generate the id from.
+   *
+   * @return {String}
+   */
+  let makeId = function() {
+    let CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUV" +
+                "WXYZ_abcdefghijklmnopqrstuvwxyz~",
+        lastRandChars = [],
+        lastTime;
+
+    return time => {
+      let duplicateTime = time === lastTime;
+      lastTime = time;
+
+      let timeStampChars = [];
+      for (let i = 7; i >= 0; i--) {
+        timeStampChars.unshift(CHARS.charAt(time % 64));
+        time = Math.floor(time / 64);
+      }
+      if (time !== 0) {
+        throw new Error("We should have converted the entire timestamp.");
+      }
+
+      let id = timeStampChars.join("");
+      if (duplicateTime) {
+        let i;
+        for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
+          lastRandChars[i] = 0;
+        }
+        lastRandChars[i]++;
+      }
+      else {
+        for (let i = 0; i < 12; i++) {
+          lastRandChars[i] = Math.floor(Math.random() * 64);
+        }
+      }
+      for (let i = 0; i < 12; i++) {
+        id += CHARS.charAt(lastRandChars[i]);
+      }
+      if (id.length !== 20) {
+        throw new Error("Length should be 20.");
+      }
+
+      return id;
+    };
+  }();
+
+  return class DataDriver {
+    /** ************ **
+     *** DataDriver ***
+     ** ************ **/
+
+    /**
+     * Create a DataDriver ready to initialize server connections.
+     *
+     * @param {Object} options Options for the driver. Must contain dispatcher.
+     */
+    constructor(options) {
+      if (!options.dispatcher) {
+        throw new Error("Missing option dispatcher");
+      }
+
+      this._dispatcher = options.dispatcher;
+      this._dispatcher.register(this, [
+        "fetchServerData",
+        "setupWindowData"
+      ]);
+    }
+
+    /**
+     * Send a text chat message by storing in the database.
+     *
+     * @param {Object} message The message to be stored and received by others.
+     */
+    sendTextChatMessage(message) {
+      this.update("chat", this.makeId(), message);
+    }
+
+    /** **************** **
+     *** Action Handler ***
+     ** **************** **/
+
+    /**
+     * Handle fetchServerData action by connecting to the room.
+     *
+     * @param {Object} options with items:
+     *  - {String} token The room token.
+     */
+    fetchServerData({ token }) {
+      this._connectToRoom(token);
+    }
+
+    /**
+     * Handle setupWindowData action by connecting to the room.
+     *
+     * @param {Object} options with items:
+     *  - {String} roomToken The room token.
+     */
+    setupWindowData({ roomToken }) {
+      this._connectToRoom(roomToken);
+    }
+
+    /** *************** **
+     *** EventListener ***
+     ** *************** **/
+
+    /**
+     * Handle various events from addEventListener.
+     *
+     * @param {Object} event Event being handled.
+     */
+    handleEvent(event) {
+      switch (event.type) {
+        // Handle EventSource successfully connecting.
+        case "open":
+          // XXX akita bug 1274103: Refine usage of this action.
+          this._dispatcher.dispatch(new actions.DataChannelsAvailable({
+            available: true
+          }));
+          break;
+
+        // Handle EventSource receiving new data.
+        case "put":
+          try {
+            // Ignore initial put from connecting.
+            let { data, path } = JSON.parse(event.data);
+            if (path === "/") {
+              return;
+            }
+
+            // Remove the leading "/" from the path.
+            this._processRecord(path.slice(1), data);
+          } catch (ex) {
+            console.log(`Error handling EventSource.put: ${event.data}`, ex);
+          }
+          break;
+      }
+    }
+
+    /** ************* **
+     *** Data Source ***
+     ** ************* **/
+
+    /**
+     * Get the base url for the Firebase connection.
+     */
+    get BASE_FIREBASE() {
+      // XXX akita bug 1274107: Get dynamic url from loop-server.
+      return "https://blinding-fire-8842.firebaseio.com/loop-test";
+    }
+
+    /**
+     * Get the maximum query limit value: 2^31 - 1.
+     */
+    get MAX_LIMIT() {
+      return 2147483647;
+    }
+
+    /**
+     * Get the server time for a local time or now.
+     *
+     * @param {Number} time The local time to convert to server time defaulting
+     *                      to current local time.
+     *
+     * @return {Number}
+     */
+    getServerTime(time = Date.now()) {
+      return (this._clockSkew || 0) + time;
+    }
+
+    /**
+     * Generate an id based on the time.
+     *
+     * @param {Number} time The time to use generating an id defaulting to
+     *                      current server time.
+     *
+     * @return {String}
+     */
+    makeId(time = this.getServerTime()) {
+      // Call the function that has locally scoped state.
+      return makeId(time);
+    }
+
+    /**
+     * Request the most recent chat messages between two times.
+     *
+     * @param {Number} startTime Beginning time range of chat to fetch
+     *                           defaulting to start of time.
+     * @param {Number} endTime   End time range of chat to fetch defaulting to
+     *                           current server time.
+     * @param {Number} limit     Maximum chat messages preferring newer ones
+     *                           defaulting to unlimited with special value 0.
+     *
+     * @return {Promise} Resolved with an {Object} with keys of record ids.
+     */
+    requestChat(startTime = 0, endTime = this.getServerTime(), limit = 0) {
+      let query = this._buildQuery({
+        orderBy: '"$key"',
+        // Fudge the time to get an inclusive range with the random parts.
+        startAt: `"chat!${this.makeId(Math.max(0, startTime - 1))}"`,
+        endAt: `"chat!${this.makeId(endTime + 1)}"`,
+        // Always have a limit to get things sorted correctly.
+        limitToLast: limit > 0 ? limit : this.MAX_LIMIT
+      });
+      return this._request("GET", this._buildUrl(), query);
+    }
+
+    /**
+     * Update a record additionally storing the timestamp.
+     *
+     * @param {String} type  Type of record to update.
+     * @param {String} id    Id of record to update.
+     * @param {Mixed}  value Some value to store for the record.
+     *
+     * @return {Promise} Resolved with an {Object} of the updated record.
+     */
+    update(type, id, value) {
+      // XXX akita bug 1274110: Validate for certain types.
+      let key = `${type}!${id}`;
+      return this._request("PUT", this._buildUrl(key), {
+        "timestamp": {
+          ".sv": "timestamp"
+        },
+        value: value
+      });
+    }
+
+    /** ****************** **
+     *** Internal Helpers ***
+     ** ****************** **/
+
+    /**
+     * Convert an object with key/value pairs into a query string.
+     *
+     * @param {Object} object Pairs of keys and values for the query.
+     *
+     * @return {String}
+     */
+    _buildQuery(object) {
+      return Object.keys(object).map(key => encodeURIComponent(key) + "=" +
+        encodeURIComponent(object[key])).join("&");
+    }
+
+    /**
+     * Get a REST endpoint for a resource defaulting to the current room.
+     *
+     * @param {String} resource  The resource endpoint defaulting to the base.
+     * @param {String} roomToken The room to scope the resource defaulting to
+     *                           the connected room.
+     *
+     * @return {String}
+     */
+    _buildUrl(resource = "", roomToken = this._roomToken) {
+      resource = encodeURIComponent(resource);
+      roomToken = encodeURIComponent(roomToken);
+      return `${this.BASE_FIREBASE}/${roomToken}/${resource}.json`;
+    }
+
+    /**
+     * Connect to a specified room for streaming updates and future requests.
+     *
+     * @param {String} token The room token to use for connections.
+     */
+    _connectToRoom(token) {
+      this._roomToken = token;
+      this._sse = new EventSource(this._buildUrl() + "?" + this._buildQuery({
+        limitToLast: 1,
+        orderBy: '"timestamp"'
+      }));
+      this._sse.addEventListener("open", this);
+      this._sse.addEventListener("put", this);
+
+      // Determine the clock skew before continuing initialization.
+      this.update("meta", "lastConnect").then(({ timestamp }) => {
+        this._clockSkew = timestamp - Date.now();
+      }).then(() => {
+        let now = this.getServerTime();
+        // XXX akita bug 1274129: Allow a configurable time window.
+        this.requestChat(now - 24 * 60 * 60 * 1000, now, 25).then(result =>
+          this._processRecords(result));
+      });
+    }
+
+    /**
+     * Handle a single record dispatching appropriate actions.
+     *
+     * @param {String} key The record identifier.
+     * @param {Object} data with items:
+     *  - {Number} timestamp Server timestamp of when the record was modified.
+     *  - {Mixed}  value     Stored value for the record.
+     */
+    _processRecord(key, data) {
+      // XXX akita bug 1274130: Validate data/key/timestamp before processing.
+      let [, type] = key.match(/^([^!]+)!(.+)$/);
+      switch (type) {
+        case "chat": {
+          let chat = data.value;
+          chat.receivedTimestamp = new Date(data.timestamp).toISOString();
+          this._dispatcher.dispatch(new actions.ReceivedTextChatMessage(chat));
+          break;
+        }
+      }
+    }
+
+    /**
+     * Process multiple records.
+     *
+     * @param {Object} records A collection of records with each id as keys.
+     */
+    _processRecords(records) {
+      if (records !== null) {
+        Object.keys(records).map(key => this._processRecord(key, records[key]));
+      }
+    }
+
+    /**
+     * Make a HTTP/REST server request.
+     *
+     * @param {String} method The type of HTTP request.
+     * @param {String} url    Location to make the request.
+     * @param {Mixed}  data   Either GET query params or request body.
+     *
+     * @return {Promise} Resolved with an {Object} of the response.
+     */
+    _request(method, url, data) {
+      let isGet = method === "GET";
+      let body = isGet ? undefined : data;
+      let query = isGet && data ? `?${data}` : "";
+      return new Promise((resolve, reject) => {
+        let request = new XMLHttpRequest();
+        request.open(method, url + query);
+        request.onload = () => {
+          if (request.status === 200) {
+            resolve(JSON.parse(request.responseText));
+          }
+          else {
+            reject({
+              name: "REQUEST_ERROR",
+              request
+            });
+          }
+        };
+        request.send(JSON.stringify(body) || null);
+      });
+    }
+  };
+}();

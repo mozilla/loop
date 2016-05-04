@@ -178,6 +178,9 @@ loop.webapp = (function(_, OT, mozL10n) {
       dispatcher: dispatcher,
       sdk: OT
     });
+    var dataDriver = new loop.DataDriver({
+      dispatcher: dispatcher
+    });
 
     var activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, {
       sdkDriver: sdkDriver
@@ -191,7 +194,7 @@ loop.webapp = (function(_, OT, mozL10n) {
       activeRoomStore: activeRoomStore
     });
     var textChatStore = new loop.store.TextChatStore(dispatcher, {
-      sdkDriver: sdkDriver
+      dataDriver: dataDriver
     });
     var remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
       sdkDriver: sdkDriver

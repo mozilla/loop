@@ -29,6 +29,7 @@ module.exports = function(config) {
     "built/add-on/chrome/content/panels/js/models.js",
     "built/add-on/chrome/content/shared/js/mixins.js",
     "built/add-on/chrome/content/shared/js/actions.js",
+    "built/add-on/chrome/content/shared/js/dataDriver.js",
     "built/add-on/chrome/content/shared/js/otSdkDriver.js",
     "built/add-on/chrome/content/shared/js/validate.js",
     "built/add-on/chrome/content/shared/js/dispatcher.js",

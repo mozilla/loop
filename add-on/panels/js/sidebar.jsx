@@ -139,6 +139,9 @@ loop.sidebar = (function(mozL10n) {
         dispatcher: dispatcher,
         sdk: OT
       });
+      var dataDriver = new loop.DataDriver({
+        dispatcher: dispatcher
+      });
 
       // expose for functional tests
       loop.sidebar._sdkDriver = sdkDriver;
@@ -148,7 +151,7 @@ loop.sidebar = (function(mozL10n) {
       });
 
       var textChatStore = new loop.store.TextChatStore(dispatcher, {
-        sdkDriver: sdkDriver
+        dataDriver: dataDriver
       });
 
       loop.store.StoreMixin.register({

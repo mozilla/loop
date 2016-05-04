@@ -295,9 +295,6 @@ loop.OTSdkDriver = (function() {
     disconnectSession: function() {
       this.endScreenShare();
 
-      this.dispatcher.dispatch(new sharedActions.DataChannelsAvailable({
-        available: false
-      }));
       this.dispatcher.dispatch(new sharedActions.MediaStreamDestroyed({
         isLocal: true
       }));
@@ -706,16 +703,6 @@ loop.OTSdkDriver = (function() {
 
       // Set up data channels with a given type and message/channel handlers.
       var dataChannels = [
-        ["text",
-         function(message) {
-           // Append the timestamp. This is the time that gets shown.
-           message.receivedTimestamp = (new Date()).toISOString();
-           this.dispatcher.dispatch(new sharedActions.ReceivedTextChatMessage(message));
-         }.bind(this),
-         function(channel) {
-           this._subscriberChannel = channel;
-           this._checkDataChannelsAvailable();
-         }.bind(this)],
         ["cursor",
          function(message) {
             this.dispatcher.dispatch(new sharedActions.ReceivedCursorData(message));
@@ -775,11 +762,6 @@ loop.OTSdkDriver = (function() {
 
       // Set up data channels with a given type and channel handler.
       var dataChannels = [
-        ["text",
-         function(channel) {
-           this._publisherChannel = channel;
-           this._checkDataChannelsAvailable();
-         }.bind(this)],
          ["cursor",
           function(channel) {
             this._publisherCursorChannel = channel;
@@ -806,27 +788,6 @@ loop.OTSdkDriver = (function() {
           onChannel(channel);
         }.bind(this));
       }.bind(this));
-    },
-
-    /**
-     * Checks to see if all channels have been obtained, and if so it dispatches
-     * a notification to the stores to inform them.
-     */
-    _checkDataChannelsAvailable: function() {
-      if (this._publisherChannel && this._subscriberChannel) {
-        this.dispatcher.dispatch(new sharedActions.DataChannelsAvailable({
-          available: true
-        }));
-      }
-    },
-
-    /**
-     * Sends a text chat message on the data channel.
-     *
-     * @param {String} message The message to send.
-     */
-    sendTextChatMessage: function(message) {
-      this._publisherChannel.send(JSON.stringify(message));
     },
 
     /**

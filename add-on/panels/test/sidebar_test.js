@@ -173,7 +173,7 @@ describe("loop.sidebar", function() {
       });
 
       textChatStore = new loop.store.TextChatStore(dispatcher, {
-        sdkDriver: {}
+        dataDriver: {}
       });
 
       loop.store.StoreMixin.register({
@@ -223,7 +223,7 @@ describe("loop.sidebar", function() {
       });
 
       textChatStore = new loop.store.TextChatStore(dispatcher, {
-        sdkDriver: {}
+        dataDriver: {}
       });
 
       loop.store.StoreMixin.register({

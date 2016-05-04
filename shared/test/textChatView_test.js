@@ -13,7 +13,7 @@ describe("loop.shared.views.TextChatView", function() {
   var fixtures = document.querySelector("#fixtures");
   var mozL10n = navigator.mozL10n || document.mozL10n;
 
-  var dispatcher, fakeSdkDriver, originalLanguage, sandbox, store;
+  var dispatcher, fakeDataDriver, originalLanguage, sandbox, store;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
@@ -22,12 +22,12 @@ describe("loop.shared.views.TextChatView", function() {
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
 
-    fakeSdkDriver = {
+    fakeDataDriver = {
       sendTextChatMessage: sinon.stub()
     };
 
     store = new loop.store.TextChatStore(dispatcher, {
-      sdkDriver: fakeSdkDriver
+      dataDriver: fakeDataDriver
     });
 
     loop.store.StoreMixin.register({

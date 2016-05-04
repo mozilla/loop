@@ -78,6 +78,7 @@ require("imports?loop=>window.loop!exports?loop!shared/js/mixins.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/actions.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/validate.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/dispatcher.js");
+require("imports?loop=>window.loop!exports?loop!shared/js/dataDriver.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/otSdkDriver.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/store.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/activeRoomStore.js");

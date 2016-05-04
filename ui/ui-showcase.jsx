@@ -329,7 +329,7 @@
   });
 
   var textChatStore = new loop.store.TextChatStore(dispatcher, {
-    sdkDriver: mockSDK
+    dataDriver: mockSDK
   });
 
   // Update the text chat store with the room info.

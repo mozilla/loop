@@ -34,7 +34,7 @@ describe("loop.standaloneRoomViews", function() {
       sdkDriver: {}
     });
     textChatStore = new loop.store.TextChatStore(dispatcher, {
-      sdkDriver: {}
+      dataDriver: {}
     });
     remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
       sdkDriver: {}

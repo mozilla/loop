@@ -864,11 +864,19 @@ loop.shared.views = (function(_, mozL10n) {
 
     render: function() {
       if (this.props.isLoading) {
-        return <LoadingView />;
+        return (
+          <div className={this.props.mediaType}>
+            <LoadingView />
+          </div>
+        );
       }
 
       if (this.props.displayAvatar) {
-        return <AvatarView />;
+        return (
+          <div className={this.props.mediaType}>
+            <AvatarView />
+          </div>
+        );
       }
 
       if (!this.props.srcMediaElement && !this.props.posterUrl) {
@@ -885,20 +893,21 @@ loop.shared.views = (function(_, mozL10n) {
       // We might want to consider changing this if we add UI controls relating
       // to the remote audio at some stage in the future.
       return (
-        <div className="remote-video-box">
-        {this.state.videoElementSize && this.props.shareCursor ?
-          <RemoteCursorView
-            videoElementSize={this.state.videoElementSize} /> :
-            null}
-          <video className={this.props.mediaType + "-video"}
-                 muted={true}
-                 poster={this.props.posterUrl} />
+        <div className={this.props.mediaType}>
+          <div className="remote-video-box">
+          {this.state.videoElementSize && this.props.shareCursor ?
+            <RemoteCursorView
+              videoElementSize={this.state.videoElementSize} /> :
+              null}
+            <video className={this.props.mediaType + "-video"}
+                   muted={true}
+                   poster={this.props.posterUrl} />
+          </div>
         </div>
       );
     }
   });
 
-  // XXX akita-sidebar
   var MediaLayoutView = React.createClass({
     propTypes: {
       audio: React.PropTypes.object.isRequired,
@@ -911,73 +920,63 @@ loop.shared.views = (function(_, mozL10n) {
       localPosterUrl: React.PropTypes.string,
       localSrcMediaElement: React.PropTypes.object,
       localVideoMuted: React.PropTypes.bool.isRequired,
-      // Passing in matchMedia, allows it to be overriden for ui-showcase's
-      // benefit. We expect either the override or window.matchMedia.
-      matchMedia: React.PropTypes.func.isRequired,
       remotePosterUrl: React.PropTypes.string,
       remoteSrcMediaElement: React.PropTypes.object,
       renderRemoteVideo: React.PropTypes.bool.isRequired,
-      showInitialContext: React.PropTypes.bool.isRequired,
       showMediaWait: React.PropTypes.bool.isRequired,
-      showTile: React.PropTypes.bool.isRequired,
       video: React.PropTypes.object.isRequired
     },
 
-    isLocalMediaAbsolutelyPositioned: function(matchMedia) {
-      if (!matchMedia) {
-        matchMedia = this.props.matchMedia;
-      }
-      return matchMedia &&
-        // The screen width is less than 640px and we are not screen sharing.
-        (matchMedia("screen and (max-width:640px)").matches ||
-         // or the screen width is less than 300px.
-         (matchMedia("screen and (max-width:300px)").matches));
+    _shouldShowRemoteStream: function() {
+      return this.props.remoteSrcMediaElement ||
+        this.props.remotePosterUrl || this.props.isRemoteLoading;
     },
 
-    getInitialState: function() {
-      return {
-        localMediaAboslutelyPositioned: this.isLocalMediaAbsolutelyPositioned()
-      };
-    },
+    render: function() {
+      var mediaLayoutClasses = classNames({
+        "media-layout": true,
+        "showing-local-streams": this.props.localSrcMediaElement ||
+          this.props.localPosterUrl,
+        "showing-media-wait": this.props.showMediaWait,
+        "showing-remote-streams": this._shouldShowRemoteStream()
+      });
 
-    componentWillReceiveProps: function(nextProps) {
-      // This is all for the ui-showcase's benefit.
-      if (this.props.matchMedia !== nextProps.matchMedia) {
-        this.updateLocalMediaState(null, nextProps.matchMedia);
-      }
-    },
-
-    componentDidMount: function() {
-      window.addEventListener("resize", this.updateLocalMediaState);
-    },
-
-    componentWillUnmount: function() {
-      window.removeEventListener("resize", this.updateLocalMediaState);
-    },
-
-    updateLocalMediaState: function(event, matchMedia) {
-      var newState = this.isLocalMediaAbsolutelyPositioned(matchMedia);
-      if (this.state.localMediaAboslutelyPositioned !== newState) {
-        this.setState({
-          localMediaAboslutelyPositioned: newState
-        });
-      }
-    },
-
-    renderLocalVideo: function() {
       return (
-        <div className="local">
+        <div className={mediaLayoutClasses}>
+          <MediaView
+            displayAvatar={!this.props.renderRemoteVideo}
+            isLoading={this.props.isRemoteLoading}
+            mediaType="remote"
+            posterUrl={this.props.remotePosterUrl}
+            srcMediaElement={this.props.remoteSrcMediaElement} />
           <MediaView
             displayAvatar={this.props.localVideoMuted}
             isLoading={this.props.isLocalLoading}
             mediaType="local"
             posterUrl={this.props.localPosterUrl}
             srcMediaElement={this.props.localSrcMediaElement} />
+          <MediaButtonsView
+            audio={this.props.audio}
+            dispatcher={this.props.dispatcher}
+            leaveRoom={this.props.leaveRoom}
+            video={this.props.video} />
+          <MediaWaitView
+            showMediaWait={this.props.showMediaWait} />
         </div>
       );
+    }
+  });
+
+  var MediaWaitView = React.createClass({
+    propTypes: {
+      showMediaWait: React.PropTypes.bool.isRequired
     },
 
-    renderMediaWait: function() {
+    render: function() {
+      if (!this.props.showMediaWait) {
+        return null;
+      }
+
       var msg = mozL10n.get("call_progress_getting_media_description",
                                 { clientShortname: mozL10n.get("clientShortname2") });
       var utils = loop.shared.utils;
@@ -993,74 +992,14 @@ loop.shared.views = (function(_, mozL10n) {
       });
       return (
         <div className="prompt-media-message-wrapper">
-        <p className={promptMediaMessageClasses}>
-          {msg}
-        </p>
-        </div>
-      );
-    },
-
-    render: function() {
-      var remoteStreamClasses = classNames({
-        "remote": true,
-        // XXX akita-sidebar
-        // "focus-stream": !this.props.displayScreenShare
-        "focus-stream": false
-      });
-
-      var mediaWrapperClasses = classNames({
-        "media-wrapper": true,
-        // XXX akita-sidebar
-        // "receiving-screen-share": this.props.displayScreenShare,
-        "receiving-screen-share": false,
-        "showing-local-streams": this.props.localSrcMediaElement ||
-          this.props.localPosterUrl,
-        "showing-media-wait": this.props.showMediaWait,
-        "showing-remote-streams": this.props.remoteSrcMediaElement ||
-          this.props.remotePosterUrl || this.props.isRemoteLoading
-      });
-
-      // XXX akita-sidebar
-      return (
-        <div className="media-layout">
-          <div className={mediaWrapperClasses}>
-            <span className="self-view-hidden-message">
-              {mozL10n.get("self_view_hidden_message")}
-            </span>
-            <div className={remoteStreamClasses}>
-              <MediaView
-                displayAvatar={!this.props.renderRemoteVideo}
-                isLoading={this.props.isRemoteLoading}
-                mediaType="remote"
-                posterUrl={this.props.remotePosterUrl}
-                srcMediaElement={this.props.remoteSrcMediaElement} />
-              {this.state.localMediaAboslutelyPositioned ?
-                this.renderLocalVideo() : null}
-              {this.props.children}
-            </div>
-            {
-              !this.props.showMediaWait ?
-                <MediaButtonsView
-                  audio={this.props.audio}
-                  dispatcher={this.props.dispatcher}
-                  leaveRoom={this.props.leaveRoom}
-                  video={this.props.video} /> : null
-            }
-            <loop.shared.views.chat.TextChatView
-              dispatcher={this.props.dispatcher}
-              showInitialContext={this.props.showInitialContext}
-              showTile={this.props.showTile} />
-            {this.state.localMediaAboslutelyPositioned ?
-              null : this.renderLocalVideo()}
-            {this.props.showMediaWait ?
-              this.renderMediaWait() : null}
-          </div>
+          <p className={promptMediaMessageClasses}>
+            {msg}
+          </p>
         </div>
       );
     }
   });
 
-  // XXX akita-sidebar
   var MediaButtonsView = React.createClass({
     propTypes: {
       audio: React.PropTypes.object.isRequired,
@@ -1223,6 +1162,7 @@ loop.shared.views = (function(_, mozL10n) {
     }
   });
 
+  // XXX akita currently unused. Need to use it or remove it
   var AdsTileView = React.createClass({
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
@@ -1328,6 +1268,7 @@ loop.shared.views = (function(_, mozL10n) {
     MediaControlButton: MediaControlButton,
     MediaLayoutView: MediaLayoutView,
     MediaView: MediaView,
+    MediaWaitView: MediaWaitView,
     LoadingView: LoadingView,
     NotificationListView: NotificationListView,
     RemoteCursorView: RemoteCursorView,

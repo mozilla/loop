@@ -3,96 +3,579 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /* XXX akita: Tidy up css */
-.media-wrapper:not(.showing-local-streams) > .media-control-buttons {
+/*------------------------------------*\
+    SIDEBAR
+\*------------------------------------*/
+
+body.sidebar {
+  height: 100%;
+}
+
+.sidebar-wrapper {
+  display: flex;
+  flex-flow: column wrap;
+  width: 250px;
+  height: 100%;
+}
+
+.sidebar-wrapper > .media-layout {
+  display: flex;
+  flex-flow: column wrap;
+  /* 188px video height + 40px media buttons height */
+  height: calc(188px + 40px);
+  position: relative;
+}
+
+.sidebar-wrapper > .media-layout.showing-media-wait {
+  height: 188px;
+}
+
+.media-layout > .remote,
+.media-layout > .local {
+  /* to keep the 4:3 ratio set both height and width */
+  height: 188px;
+  width: 250px;
+  position: relative;
+  overflow: hidden;
+}
+
+.media-layout.showing-media-wait > .local {
   display: none;
 }
 
-.media-wrapper.showing-local-streams > .media-control-buttons {
+.media-layout > .remote .remote-video {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.media-layout > .remote {
+  /* Works around an issue with object-fit: cover in Google Chrome - it doesn't
+     currently crop but overlaps the surrounding elements.
+     https://code.google.com/p/chromium/issues/detail?id=400829 */
+  overflow: hidden;
+}
+
+.media-layout.showing-remote-streams > .local {
+  position: absolute;
+  z-index: 2;
+  padding: 8px;
+  right: 0;
+  left: auto;
+  bottom: 40px;
+  /* to keep the 4:3 ratio 80x60px + 16px padding + 4px border */
+  width: calc(80px + 16px + 4px);
+  height: calc(60px + 16px + 4px);
+}
+
+.media-layout.showing-remote-streams > .local > .remote-video-box {
+  border: solid 2px #fff;
+}
+
+.media-layout.showing-local-streams > .local > .remote-video-box > video {
+  width: 100%;
+  height: 100%;
+  /* Transform is to make the local video act like a mirror, as is the
+     convention in video conferencing systems. */
+  transform: scale(-1, 1);
+  transform-origin: 50% 50% 0;
+}
+
+
+/*------------------------------------*\
+    AVATAR
+    For any audio-only streams, we want
+    to display our own background
+\*------------------------------------*/
+
+.avatar {
+  background-image: url("../img/audio-call-avatar.svg");
+  background-repeat: no-repeat;
+  background-color: #4BA6E7;
+  background-size: contain;
+  background-position: center;
+  /*
+   * Expand to fill the available space, since there is no video any
+   * intrinsic width. XXX should really change to an <img> for clarity
+   */
+  height: 100%;
+  width: 100%;
+}
+
+/*------------------------------------*\
+    MEDIA CONTROL BUTTONS
+\*------------------------------------*/
+
+.media-layout:not(.showing-local-streams) > .media-control-buttons {
+  display: none;
+}
+
+.media-layout.showing-local-streams > .media-control-buttons {
   display: flex;
   justify-content: space-around;
   order: 2;
 }
 
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn,
-.media-wrapper.showing-local-streams > .media-control-buttons > .general-support-url {
+.media-layout.showing-local-streams > .media-control-buttons > .btn,
+.media-layout.showing-local-streams > .media-control-buttons > .general-support-url {
   height: 40px;
   margin-left: 1px;
   width: 42px;
 }
 
-html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn,
-html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .general-support-url {
-  margin-left: 0;
-  margin-right: 1px;
-}
-
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-hangup {
+.media-layout.showing-local-streams > .media-control-buttons > .btn-hangup {
   background-color: #c33c32;
 }
 
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-hangup:after {
-  content: url("/shared/img/leave.svg");
+.media-layout.showing-local-streams > .media-control-buttons > .btn-hangup:after {
+  content: url("../img/leave.svg");
   margin-right: -2px;
 }
 
-html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:after {
+html[dir="rtl"] .media-layout.showing-local-streams >
+.media-control-buttons > .btn-hangup:after {
   display: inline-block;
   margin-left: -2px;
   margin-right: 0;
   transform: scaleX(-1);
 }
 
-
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-hangup:hover {
+.media-layout.showing-local-streams > .media-control-buttons > .btn-hangup:hover {
   background-color: #AF352C;
 }
 
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-audio,
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-video {
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio,
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video {
   background-color: inherit;
 }
 
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-audio:hover:after,
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-audio:active:after {
-  content: url("/shared/img/audio.svg");
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio:hover:after,
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio:active:after {
+  content: url("../img/audio.svg");
 }
 
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-audio.muted:after {
-  content: url("/shared/img/audio-muted-darkgrey.svg");
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio.muted:after {
+  content: url("../img/audio-muted-darkgrey.svg");
 }
 
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-video:after {
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video:after {
   margin-left: -4px;
 }
 
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-video:hover:after,
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-video:active:after {
-  content: url("/shared/img/video.svg");
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video:hover:after,
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video:active:after {
+  content: url("../img/video.svg");
 }
 
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn-mute-video.muted:after {
-  content: url("/shared/img/video-muted-darkgrey.svg");
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video.muted:after {
+  content: url("../img/video-muted-darkgrey.svg");
 }
 
-.media-wrapper.showing-local-streams > .media-control-buttons > .general-support-url {
+.media-layout.showing-local-streams > .media-control-buttons > .general-support-url {
   align-items: center;
   display: flex;
   justify-content: center;
 }
 
 /* Highlight on hover. */
-.media-wrapper.showing-local-streams > .media-control-buttons > .general-support-url:hover,
-.media-wrapper.showing-local-streams > .media-control-buttons > .btn:not(.btn-hangup):hover {
+.media-layout.showing-local-streams > .media-control-buttons > .general-support-url:hover,
+.media-layout.showing-local-streams > .media-control-buttons > .btn:not(.btn-hangup):hover {
   background-color: rgba(51, 51, 51, 0.1);
 }
 
-.media-wrapper.showing-local-streams > .remote  {
+/*------------------------------------*\
+    TEXT CHAT
+\*------------------------------------*/
+
+.text-chat-view {
+  flex: 0 0 auto;
+  /* Leaves enough room for the streams and the media buttons */
+  height: calc(100% - 228px);
+  width: 250px;
+  background-color: #fff;
+}
+
+.text-chat-view > .text-chat-entries {
+  width: 100%;
+  overflow: auto;
+  padding-top: 15px;
+  /* 40px is the height of .text-chat-box. */
+  height: calc(100% - 40px);
+}
+
+.text-chat-entry,
+.text-chat-header {
+  display: flex;
+  margin-bottom: .5em;
+  align-items: flex-start;
+}
+
+.text-chat-header > p {
+  margin: 0;
+}
+
+.text-chat-entry {
+  /* aligns paragraph to side where reading starts from */
+  text-align: start;
+}
+
+/* Sent text chat entries should be on the right */
+.text-chat-entry.sent {
+  /* aligns paragraph to right side */
+  justify-content: flex-end;
+  margin-left: 0;
+  margin-right: 10px;
+}
+
+.text-chat-entry.received {
+  margin-left: 10px;
+  margin-right: 0;
+}
+
+html[dir="rtl"] .text-chat-entry.sent {
+  margin-left: 10px;
+  margin-right: 0;
+}
+
+
+html[dir="rtl"] .text-chat-entry.received {
+  margin-left: 0;
+  margin-right: 10px;
+}
+
+.text-chat-entry > p {
+  position: relative;
+  z-index: 10;
+  /* Drop the default margins from the 'p' element. */
+  margin: 0;
+  padding: .8rem;
+  /* leave some room for the chat bubble arrow */
+  max-width: 70%;
+  border-radius: 15px;
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  word-wrap: break-word;
+  flex: 0 1 auto;
   order: 1;
 }
 
-.media-wrapper.showing-local-streams > .remote > .local > .remote-video-box > video {
+.text-chat-entry > .context-wrapper {
+  flex: 0 1 auto;
+  order: 1;
+}
+
+.text-chat-entry.sent > p {
+  border-bottom-right-radius: 0;
+}
+
+.text-chat-entry.received > p {
+  border-top-left-radius: 0;
+  border-color: #5cccee;
+}
+
+html[dir="rtl"] .text-chat-entry.sent > p {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 15px;
+}
+
+html[dir="rtl"] .text-chat-entry.received > p {
+  border-top-right-radius: 0;
+  border-top-left-radius: 15px;
+}
+
+/* Text chat entry timestamp */
+.text-chat-entry-timestamp {
+  margin: 0 .5em;
+  color: #aaa;
+  font-style: italic;
+  font-size: .8em;
+  flex: 0 1 auto;
+  align-self: center;
+}
+
+.received > .text-chat-entry-timestamp {
+  order: 2;
+}
+
+/* Pseudo element used to cover part between chat bubble and chat arrow.
+   dimensions may change for each position */
+.text-chat-entry > p:after {
+  position: absolute;
+  background: #fff;
+  content: "";
+  /* default dimensions */
+  width: 6px;
+  height: 7px;
+}
+
+.text-chat-entry.sent > p:after {
+  right: -1px;
+  bottom: 0;
+  width: 7px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.text-chat-entry.received > p:after {
+  top: 0;
+  left: -1px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+html[dir="rtl"] .text-chat-entry.sent > p:after {
+  /* Reset */
+  right: auto;
+  left: -1px;
+  bottom: 0;
+}
+
+html[dir="rtl"] .text-chat-entry.received > p:after {
+  /* Reset */
+  top: 0;
+  right: -1px;
+  width: 9px;
+  height: 6px;
+}
+
+/* Text chat entry arrow */
+.text-chat-arrow {
+  width: 18px;
+  background-repeat: no-repeat;
+  flex: 0 1 auto;
+  position: relative;
+  z-index: 5;
+}
+
+.text-chat-entry.sent .text-chat-arrow {
+  margin-bottom: -1px;
+  margin-left: -11px;
+  height: 10px;
+  background-image: url("../img/chatbubble-arrow-right.svg");
+  order: 2;
+  align-self: flex-end;
+}
+
+.text-chat-entry.received .text-chat-arrow {
+  margin-left: 0;
+  margin-right: -9px;
+  height: 10px;
+  background-image: url("../img/chatbubble-arrow-left.svg");
+  align-self: auto;
+}
+
+.text-chat-notif {
+  display: flex;
+  margin-bottom: .5em;
+}
+
+.text-chat-notif > .content-wrapper {
+  margin-left: 10px;
+  display: flex;
+  border: 1px solid #B1B1B1;
+}
+
+.content-wrapper > .notification-icon {
+  margin: 8px 5px 8px 10px;
+}
+
+.content-wrapper > p {
+  margin-top: 8px;
+  margin-right: 10px;
+  margin-bottom: 8px;
+  color: #757575;
+  font-size: 12px;
+}
+
+html[dir="rtl"] .text-chat-notif > .content-wrapper {
+  margin-right: 10px;
+  margin-left: 0px;
+}
+
+html[dir="rtl"] .content-wrapper > .notification-icon {
+  margin: 8px 10px 8px 5px;
+}
+
+html[dir="rtl"] .content-wrapper > p {
+  margin-left: 10px;
+  margin-right: 0px;
+}
+
+html[dir="rtl"] .text-chat-arrow {
+  transform: scaleX(-1);
+}
+
+html[dir="rtl"] .text-chat-entry.sent .text-chat-arrow {
+  /* Reset margin. */
+  margin-left: 0;
+  margin-right: -11px;
+}
+
+html[dir="rtl"] .text-chat-entry.received .text-chat-arrow {
+  /* Reset margin. */
+  margin-right: 0;
+  margin-left: -10px;
+}
+
+/* Context updated */
+.text-chat-entry > .context-content > .context-wrapper {
+  max-width: 300px;
+  min-height: 50px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 1px 1px rgba(0,0,0,.15);
+}
+
+.text-chat-entry.received > .context-content > .context-wrapper {
+  max-width: 180px;
+}
+
+.text-chat-header.special.room-name {
+  color: #666;
+  font-weight: bold;
+  margin-bottom: 0;
+  margin-right: 0;
+}
+
+.text-chat-header.special.room-name p {
+  width: 100%;
+  padding: 0.8rem 1rem 1.4rem;
+  margin: 0;
+}
+
+.text-chat-header.special > p {
+  border: none;
+}
+
+.text-chat-box {
+  margin: auto;
+  flex: 0 0 auto;
+  max-height: 40px;
+  min-height: 40px;
+  width: 100%;
+}
+
+.text-chat-box > form > input {
+  width: 100%;
+  height: 40px;
+  padding: 0 .4rem .4rem;
+  font-size: 1.1em;
+  border: 0;
+  border-top: 1px solid #d8d8d8;
+}
+
+.text-chat-box > form > input::-webkit-input-placeholder {
+  font-size: 1.1em;
+  color: #999;
+}
+
+.text-chat-box > form > input::-moz-placeholder {
+  font-size: 1.1em;
+  color: #999;
+}
+
+.text-chat-box > form > input:-moz-placeholder {
+  font-size: 1.1em;
+  color: #999;
+}
+
+.text-chat-box > form > input:-ms-input-placeholder {
+  font-size: 1.1em;
+  color: #999;
+}
+
+.text-chat-box > form > input:input-placeholder {
+  font-size: 1.1em;
+  color: #999;
+}
+
+/* turn the visible border blue as a visual indicator of focus */
+.text-chat-box > form > input:focus {
+  border-top: 1px solid #66c9f2;
+}
+
+/*------------------------------------*\
+    gUM PROMPTS
+\*------------------------------------*/
+
+.prompt-media-message-wrapper {
+  background-color: #333;
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  width: 250px;
+  height: 188px;
+  padding: 0 10px;
+}
+
+.prompt-media-message {
+  color: #fff;
+  margin: auto;
+}
+
+.prompt-media-message:before {
+  display: block;
+  margin: auto;
+  content: "";
+  background-image: url("../img/gum-others.svg");
+  background-repeat: no-repeat;
+  background-position: center center;
+  /* The background-image is scaled up at 2x the instrinsic size
+     (witdh & height) to make it easier to see. */
+  background-size: 186px 112px;
+  width: 186px;
+  height: 112px;
+  margin-bottom: 10px;
+}
+
+.prompt-media-message.chrome:before {
+  background-image: url("../img/gum-chrome.svg");
+}
+
+.prompt-media-message.firefox:before {
+  background-image: url("../img/gum-firefox.svg");
+}
+
+.prompt-media-message.opera:before {
+  background-image: url("../img/gum-opera.svg");
+}
+
+/*------------------------------------*\
+    LOADING VIEW
+\*------------------------------------*/
+
+.loading-stream {
+  /* vertical and horizontal center */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -50px;
+  margin-top: -50px;
+  width: 100px;
+  height: 100px;
+
+  /* place the animation */
+  background-image: url("../img/spinner.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 40%;
+
+  /* 12 is the number of lines in the spinner image */
+  animation: rotate-spinner 1s steps(12, end) infinite;
+}
+
+@keyframes rotate-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Make sure the loading spinner always gets the same background */
+.loading-background {
+  background: black;
+  position: relative;
   width: 100%;
   height: 100%;
-  transform: scale(-1, 1);
-  transform-origin: 50% 50% 0;
 }

@@ -499,9 +499,10 @@ loop.shared.toc = (function(mozL10n) {
                 !this.state.mediaConnected);
     },
 
+    // XXX akita display MediaLayoutView only if room has participants
     render: function() {
       return (
-        <div className="sidebar">
+        <div className="sidebar-wrapper">
           <sharedViews.MediaLayoutView
             audio={this.props.audio}
             dispatcher={this.props.dispatcher}
@@ -515,10 +516,11 @@ loop.shared.toc = (function(mozL10n) {
             remotePosterUrl={this.props.remotePosterUrl}
             remoteSrcMediaElement={this.state.remoteSrcMediaElement}
             renderRemoteVideo={this.shouldRenderRemoteVideo()}
-            showInitialContext={true}
             showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
-            showTile={false}
             video={this.props.video} />
+          <loop.shared.views.chat.TextChatView
+            dispatcher={this.props.dispatcher}
+            showInitialContext={true} />
         </div>
       );
     }

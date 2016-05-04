@@ -881,25 +881,18 @@ describe("loop.shared.views", function() {
 
   describe("MediaLayoutView", function() {
     var textChatStore,
-        remoteCursorStore,
         view;
 
     function mountTestComponent(extraProps) {
       var defaultProps = {
         audio: { enabled: true, visible: true },
-        cursorStore: remoteCursorStore,
         dispatcher: dispatcher,
-        displayScreenShare: false,
         isLocalLoading: false,
         isRemoteLoading: false,
-        isScreenShareLoading: false,
         leaveRoom: function foo() {},
         localVideoMuted: false,
-        matchMedia: window.matchMedia,
         renderRemoteVideo: false,
-        showInitialContext: false,
         showMediaWait: false,
-        showTile: false,
         video: { enabled: true, visible: true }
       };
 
@@ -909,50 +902,14 @@ describe("loop.shared.views", function() {
     }
 
     beforeEach(function() {
-      loop.config = {
-        tilesIframeUrl: "",
-        tilesSupportUrl: ""
-      };
       textChatStore = new loop.store.TextChatStore(dispatcher, {
-        sdkDriver: {}
-      });
-      remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
         sdkDriver: {}
       });
 
       loop.store.StoreMixin.register({ textChatStore: textChatStore });
-
-      // Need to stub these methods because when mounting the AdsTileView we are
-      // attaching listeners to the window object and "AdsTileView" tests will failed
-      sandbox.stub(window, "addEventListener");
-      sandbox.stub(window, "removeEventListener");
     });
 
-    // XXX akita-sidebar
-    it.skip("should mark the remote stream as the focus stream when not displaying screen share", function() {
-      view = mountTestComponent({
-        displayScreenShare: false
-      });
-
-      var node = ReactDOM.findDOMNode(view);
-
-      expect(node.querySelector(".remote").classList.contains("focus-stream")).eql(true);
-      expect(node.querySelector(".screen").classList.contains("focus-stream")).eql(false);
-    });
-
-    // XXX akita-sidebar
-    it.skip("should mark the screen share stream as the focus stream when displaying screen share", function() {
-      view = mountTestComponent({
-        displayScreenShare: true
-      });
-
-      var node = ReactDOM.findDOMNode(view);
-
-      expect(node.querySelector(".remote").classList.contains("focus-stream")).eql(false);
-      expect(node.querySelector(".screen").classList.contains("focus-stream")).eql(true);
-    });
-
-    // XXX akita-sidebar
+    // XXX akita-sidebar: We should move this test to the new ScreenShare component
     it.skip("should mark the screen share stream as paused when screen shared has been paused", function() {
       view = mountTestComponent({
         screenSharingPaused: true
@@ -963,33 +920,33 @@ describe("loop.shared.views", function() {
       expect(node.querySelector(".screen").classList.contains("screen-sharing-paused")).eql(true);
     });
 
-    it("should not mark the wrapper as receiving screen share when not displaying a screen share", function() {
+    // XXX akita-sidebar: We should move this test to the new ScreenShare component
+    it.skip("should not mark the wrapper as receiving screen share when not displaying a screen share", function() {
       view = mountTestComponent({
         displayScreenShare: false
       });
 
-      expect(ReactDOM.findDOMNode(view).querySelector(".media-wrapper")
+      expect(ReactDOM.findDOMNode(view)
         .classList.contains("receiving-screen-share")).eql(false);
     });
 
-    // XXX akita-sidebar
+    // XXX akita-sidebar: We should move this test to the new ScreenShare component
     it.skip("should mark the wrapper as receiving screen share when displaying a screen share", function() {
       view = mountTestComponent({
         displayScreenShare: true
       });
 
-      expect(ReactDOM.findDOMNode(view).querySelector(".media-wrapper")
+      expect(ReactDOM.findDOMNode(view)
         .classList.contains("receiving-screen-share")).eql(true);
     });
 
-    it("should not mark the wrapper as showing local streams when not displaying a stream", function() {
+    it("should not mark the layout as showing local streams when not displaying a stream", function() {
       view = mountTestComponent({
         localSrcMediaElement: null,
         localPosterUrl: null
       });
 
-      expect(ReactDOM.findDOMNode(view).querySelector(".media-wrapper")
-        .classList.contains("showing-local-streams")).eql(false);
+      expect(ReactDOM.findDOMNode(view).classList.contains("showing-local-streams")).eql(false);
     });
 
     it("should mark the wrapper as showing local streams when displaying a stream", function() {
@@ -998,8 +955,7 @@ describe("loop.shared.views", function() {
         localPosterUrl: null
       });
 
-      expect(ReactDOM.findDOMNode(view).querySelector(".media-wrapper")
-        .classList.contains("showing-local-streams")).eql(true);
+      expect(ReactDOM.findDOMNode(view).classList.contains("showing-local-streams")).eql(true);
     });
 
     it("should mark the wrapper as showing local streams when displaying a poster url", function() {
@@ -1008,8 +964,7 @@ describe("loop.shared.views", function() {
         localPosterUrl: "fake/url"
       });
 
-      expect(ReactDOM.findDOMNode(view).querySelector(".media-wrapper")
-        .classList.contains("showing-local-streams")).eql(true);
+      expect(ReactDOM.findDOMNode(view).classList.contains("showing-local-streams")).eql(true);
     });
 
     it("should not mark the wrapper as showing remote streams when not displaying a stream", function() {
@@ -1018,8 +973,7 @@ describe("loop.shared.views", function() {
         remotePosterUrl: null
       });
 
-      expect(ReactDOM.findDOMNode(view).querySelector(".media-wrapper")
-        .classList.contains("showing-remote-streams")).eql(false);
+      expect(ReactDOM.findDOMNode(view).classList.contains("showing-remote-streams")).eql(false);
     });
 
     it("should mark the wrapper as showing remote streams when displaying a stream", function() {
@@ -1028,8 +982,7 @@ describe("loop.shared.views", function() {
         remotePosterUrl: null
       });
 
-      expect(ReactDOM.findDOMNode(view).querySelector(".media-wrapper")
-        .classList.contains("showing-remote-streams")).eql(true);
+      expect(ReactDOM.findDOMNode(view).classList.contains("showing-remote-streams")).eql(true);
     });
 
     it("should mark the wrapper as showing remote streams when displaying a poster url", function() {
@@ -1038,8 +991,7 @@ describe("loop.shared.views", function() {
         remotePosterUrl: "fake/url"
       });
 
-      expect(ReactDOM.findDOMNode(view).querySelector(".media-wrapper")
-        .classList.contains("showing-remote-streams")).eql(true);
+      expect(ReactDOM.findDOMNode(view).classList.contains("showing-remote-streams")).eql(true);
     });
 
     it("should mark the wrapper as showing media wait tile when asking for user media", function() {
@@ -1047,8 +999,7 @@ describe("loop.shared.views", function() {
         showMediaWait: true
       });
 
-      expect(ReactDOM.findDOMNode(view).querySelector(".media-wrapper")
-        .classList.contains("showing-media-wait")).eql(true);
+      expect(ReactDOM.findDOMNode(view).classList.contains("showing-media-wait")).eql(true);
     });
 
     it("should display a media wait tile when asking for user media", function() {

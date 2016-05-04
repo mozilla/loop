@@ -364,11 +364,6 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
   width: 16px;
  }
 
-/* Account for the height of the standalone infobar. */
-.media-layout {
-  padding-top: 40px;
-}
-
 .btn-large {
   font-size: 1rem;
   padding: .3em .5rem;
@@ -527,51 +522,6 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
   position: relative;
   height: 100%;
   display: flex;
-}
-
-/* gUM prompts */
-
-.prompt-media-message-wrapper {
-  background-color: #333;
-  display: flex;
-  align-items: center;
-  flex: 0 1 auto;
-  width: 272px;
-  height: 204px;
-  order: 1;
-  padding: 0 10px;
-}
-
-.prompt-media-message {
-  color: #fff;
-  margin: auto;
-}
-
-.prompt-media-message:before {
-  display: block;
-  margin: auto;
-  content: "";
-  background-image: url("../img/gum-others.svg");
-  background-repeat: no-repeat;
-  background-position: center center;
-  /* The background-image is scaled up at 2x the instrinsic size
-     (witdh & height) to make it easier to see. */
-  background-size: 202px 122px;
-  width: 202px;
-  height: 122px;
-  margin-bottom: 10px;
-}
-
-.prompt-media-message.chrome:before {
-  background-image: url("../img/gum-chrome.svg");
-}
-
-.prompt-media-message.firefox:before {
-  background-image: url("../img/gum-firefox.svg");
-}
-
-.prompt-media-message.opera:before {
-  background-image: url("../img/gum-opera.svg");
 }
 
 /* Room Info area layout */

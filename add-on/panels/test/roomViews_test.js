@@ -444,7 +444,8 @@ describe("loop.roomViews", function() {
             loop.roomViews.RoomFailureView);
         });
 
-      it("should render the DesktopRoomInvitationView if roomState is `JOINED`",
+      // XXX akita will be fixed in Bug 1268826
+      it.skip("should render the DesktopRoomInvitationView if roomState is `JOINED`",
         function() {
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.JOINED });
 
@@ -454,7 +455,8 @@ describe("loop.roomViews", function() {
             loop.shared.desktopViews.SharePanelView))).to.not.eql(null);
         });
 
-      it("should render the DesktopRoomInvitationView if roomState is `JOINED` with just owner",
+      // XXX akita will be fixed in Bug 1268826
+      it.skip("should render the DesktopRoomInvitationView if roomState is `JOINED` with just owner",
         function() {
           activeRoomStore.setStoreState({
             participants: [{ owner: true }],
@@ -467,7 +469,8 @@ describe("loop.roomViews", function() {
             loop.shared.desktopViews.SharePanelView))).to.not.eql(null);
         });
 
-      it("should render the DesktopRoomConversationView if roomState is `JOINED` with remote participant",
+      // XXX akita will be fixed in Bug 1268826
+      it.skip("should render the DesktopRoomConversationView if roomState is `JOINED` with remote participant",
         function() {
           activeRoomStore.setStoreState({
             participants: [{}],
@@ -482,7 +485,8 @@ describe("loop.roomViews", function() {
             loop.shared.desktopViews.SharePanelView))).to.eql(null);
         });
 
-      it("should render the DesktopRoomConversationView if roomState is `JOINED` with participants",
+      // XXX akita will be fixed in Bug 1268826
+      it.skip("should render the DesktopRoomConversationView if roomState is `JOINED` with participants",
         function() {
           activeRoomStore.setStoreState({
             participants: [{ owner: true }, {}],
@@ -497,7 +501,8 @@ describe("loop.roomViews", function() {
             loop.shared.desktopViews.SharePanelView))).to.eql(null);
         });
 
-      it("should render the DesktopRoomConversationView if roomState is `HAS_PARTICIPANTS`",
+      // XXX akita-sidebar Will be fixed in Bug 1268826
+      it.skip("should render the DesktopRoomConversationView if roomState is `HAS_PARTICIPANTS`",
         function() {
           activeRoomStore.setStoreState({ roomState: ROOM_STATES.HAS_PARTICIPANTS });
 
@@ -561,7 +566,8 @@ describe("loop.roomViews", function() {
                .eql(null);
          });
 
-      it("should display an avatar for remote video when the room has participants but video is not enabled",
+      // XXX akita will be fixed in Bug 1268826
+      it.skip("should display an avatar for remote video when the room has participants but video is not enabled",
         function() {
           activeRoomStore.setStoreState({
             roomState: ROOM_STATES.HAS_PARTICIPANTS,

@@ -748,7 +748,7 @@ var LoopRoomsInternal = {
 
     let win = Services.wm.getMostRecentWindow("navigator:browser");
     win.LoopUI.loadSidebar(roomToken);
-    MozLoopService.openUrl(TOC_URL + roomToken);
+    MozLoopService.openURL(TOC_URL + roomToken);
   },
 
   /**

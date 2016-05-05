@@ -8,11 +8,11 @@
     "ecmaFeatures": {
       "jsx": true,
     },
-    "ecmaVersion": 5,
+    "ecmaVersion": 6,
   },
   "env": {
     "browser": true,
-    "es6": false,
+    "es6": true,
     "mocha": true,
   },
   "extends": "eslint:recommended",

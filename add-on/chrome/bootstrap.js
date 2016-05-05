@@ -1253,6 +1253,19 @@ let Throttler = {
 
       // Handle responses from the DNS resolution service request.
       let onDNS = (request, record) => {
+        // Failed to get A-record, so skip for now.
+        if (record === null) {
+          reject();
+          return;
+        }
+
+        // Ensure we have a special loopback value before checking other blocks.
+        let ipBlocks = record.getNextAddrAsString().split(".");
+        if (ipBlocks[0] !== "127") {
+          reject();
+          return;
+        }
+
         // Use a specific part of the A-record IP address depending on the
         // channel. I.e., 127.[release/other].[beta].[aurora/nightly].
         let index = 1;
@@ -1268,8 +1281,7 @@ let Throttler = {
 
         // Select the 1 out of 4 parts of the "."-separated IP address to check
         // if the 8-bit threshold (0-255) exceeds the ticket (0-254).
-        let threshold = record && record.getNextAddrAsString().split(".")[index];
-        if (threshold && ticket < threshold) {
+        if (ticket < ipBlocks[index]) {
           // Remember that we're good to go to avoid future DNS checks.
           Services.prefs.setIntPref(prefTicket, this.TICKET_LIMIT);
           resolve();

@@ -17,7 +17,7 @@ pref("loop.retry_delay.start", 60000);
 pref("loop.retry_delay.limit", 300000);
 pref("loop.ping.interval", 1800000);
 pref("loop.ping.timeout", 10000);
-pref("loop.copy.showLimit", 5);
+pref("loop.copy.showLimit", 3);
 pref("loop.copy.shown", false);
 pref("loop.copy.throttler", "copy.loop.services.mozilla.com");
 pref("loop.copy.ticket", -1);

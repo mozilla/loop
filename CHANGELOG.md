@@ -1,6 +1,23 @@
 # Changelog
 
-## 1.3.1
+## 1.3.2
+
+### New
+
+* Bug 1270526 - Stop showing copy panel after 3 times instead of 5. rs=Standard8. [Ed Lee]
+
+* Bug 1257266 - Change NPS survey link to dynamically add firefox hello version number to survey link. r=Standard8. [David Critchley]
+
+* Bug 1270123 - Some routers can cause &quot;Copy Panel&quot; to be turned on if internet is offline. r=Standard8. [Ed Lee]
+
+* Bug 1267960 - Hello copy popup notification is displayed upon copying the URL bar even if the user is already in a Hello call or shown enough times. r=dcritch. [Ed Lee]
+
+### Chores
+
+* Update L10n from changeset 5cecbb23cad87e05ce6e032f94da6ffd3ac202e2. [Mark Banner]
+
+
+## v1.3.1 (2016-04-26)
 
 ### New
 
@@ -23,6 +40,10 @@
 * Update script-loader to version 0.7.0. r=Standard8. [Greenkeeper]
 
 * Update babel-cli to version 6.7.7. r=standard8. [greenkeeperio-bot]
+
+### Other
+
+* 1.3.1. [Mark Banner]
 
 
 ## v1.3.0 (2016-04-18)

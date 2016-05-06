@@ -112,6 +112,11 @@ html[dir="rtl"] .conversation-toolbar-media-btn-group-box > button:first-child:h
   content: url("../img/video.svg");
 }
 
+/* Screen mute button */
+.btn-mute-screen:after {
+  content: url("../img/screen.svg");
+}
+
 .btn-settings {
   width: 28px;
   height: 28px;

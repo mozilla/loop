@@ -198,8 +198,13 @@
 .screen {
   display: none;
   height: 100%;
-  width: calc(100% - 272px);
+  width: calc(100% - 250px);
   position: relative;
+}
+
+.screen > .screen-share {
+  width: 100%;
+  height: 100%;
 }
 
 .screen.focus-stream {

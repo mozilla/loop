@@ -357,6 +357,7 @@ loop.roomViews = (function(mozL10n) {
                 remotePosterUrl={this.props.remotePosterUrl}
                 remoteSrcMediaElement={this.state.remoteSrcMediaElement}
                 renderRemoteVideo={this.shouldRenderRemoteVideo()}
+                screen={{ enabled: false }}
                 screenShareMediaElement={this.state.screenShareMediaElement}
                 screenSharePosterUrl={null}
                 showInitialContext={false}

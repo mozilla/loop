@@ -300,6 +300,39 @@ loop.shared.views = (function(_, mozL10n) {
     }
   });
 
+  var ScreenShareButton = React.createClass({
+    propTypes: {
+      disabled: React.PropTypes.bool,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher),
+      muted: React.PropTypes.bool.isRequired
+    },
+
+    getDefaultProps: function() {
+      return {
+        disabled: false
+      };
+    },
+
+    toggleScreenShare: function() {
+      if (this.props.disabled) {
+        return;
+      }
+
+      var action = this.props.muted ? "StartBrowserShare" : "EndScreenShare";
+      this.props.dispatcher.dispatch(new sharedActions[action]());
+    },
+
+    render: function() {
+      return (
+        <MediaControlButton action={this.toggleScreenShare}
+                            disabled={this.props.disabled}
+                            muted={this.props.muted || this.props.disabled}
+                            scope="local"
+                            type="screen" />
+      );
+    }
+  });
+
   var Button = React.createClass({
     propTypes: {
       additionalClass: React.PropTypes.string,
@@ -839,6 +872,7 @@ loop.shared.views = (function(_, mozL10n) {
       remotePosterUrl: React.PropTypes.string,
       remoteSrcMediaElement: React.PropTypes.object,
       renderRemoteVideo: React.PropTypes.bool.isRequired,
+      screen: React.PropTypes.object.isRequired,
       showMediaWait: React.PropTypes.bool.isRequired,
       video: React.PropTypes.object.isRequired
     },
@@ -875,6 +909,7 @@ loop.shared.views = (function(_, mozL10n) {
             audio={this.props.audio}
             dispatcher={this.props.dispatcher}
             leaveRoom={this.props.leaveRoom}
+            screen={this.props.screen}
             video={this.props.video} />
           <MediaWaitView
             showMediaWait={this.props.showMediaWait} />
@@ -921,13 +956,15 @@ loop.shared.views = (function(_, mozL10n) {
       audio: React.PropTypes.object.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       leaveRoom: React.PropTypes.func.isRequired,
+      screen: React.PropTypes.object.isRequired,
       video: React.PropTypes.object.isRequired
     },
 
     getDefaultProps: function() {
       return {
         video: { enabled: true, visible: true },
-        audio: { enabled: true, visible: true }
+        audio: { enabled: true, visible: true },
+        screen: { enabled: false, visible: true }
       };
     },
 
@@ -940,6 +977,12 @@ loop.shared.views = (function(_, mozL10n) {
           <AudioMuteButton
             dispatcher={this.props.dispatcher}
             muted={!this.props.audio.enabled} />
+          {
+            loop.shared.utils.isDesktop() ?
+              <ScreenShareButton
+                dispatcher={this.props.dispatcher}
+                muted={!this.props.screen.enabled} /> : null
+          }
           <HangUpControlButton
             action={this.props.leaveRoom}
             title={mozL10n.get("rooms_leave_button_label")} />
@@ -1187,6 +1230,7 @@ loop.shared.views = (function(_, mozL10n) {
     MediaWaitView: MediaWaitView,
     LoadingView: LoadingView,
     RemoteCursorView: RemoteCursorView,
+    ScreenShareButton: ScreenShareButton,
     ScreenShareView: ScreenShareView,
     VideoMuteButton: VideoMuteButton
   };

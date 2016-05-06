@@ -145,10 +145,12 @@ html[dir="rtl"] .media-layout.showing-local-streams >
 }
 
 .media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio,
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video {
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video,
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen {
   background-color: inherit;
 }
 
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio:after,
 .media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio:hover:after,
 .media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio:active:after {
   content: url("../img/audio.svg");
@@ -162,6 +164,7 @@ html[dir="rtl"] .media-layout.showing-local-streams >
   margin-left: -4px;
 }
 
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video:after,
 .media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video:hover:after,
 .media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video:active:after {
   content: url("../img/video.svg");
@@ -169,6 +172,19 @@ html[dir="rtl"] .media-layout.showing-local-streams >
 
 .media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video.muted:after {
   content: url("../img/video-muted-darkgrey.svg");
+}
+
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen:after {
+  content: url("../img/screen.svg");
+}
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen:after,
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen:hover:after,
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen:active:after {
+  content: url("../img/screen.svg");
+}
+
+.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen.muted:after {
+  content: url("../img/screen-muted.svg");
 }
 
 .media-layout.showing-local-streams > .media-control-buttons > .general-support-url {

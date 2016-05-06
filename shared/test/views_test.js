@@ -845,6 +845,7 @@ describe("loop.shared.views", function() {
         leaveRoom: function foo() {},
         localVideoMuted: false,
         renderRemoteVideo: false,
+        screen: { enabled: true },
         showMediaWait: false,
         video: { enabled: true, visible: true }
       };

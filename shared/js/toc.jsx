@@ -14,6 +14,7 @@ loop.shared.toc = (function(mozL10n) {
   var sharedActions = loop.shared.actions;
   var sharedMixins = loop.shared.mixins;
   var sharedViews = loop.shared.views;
+  var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
 
   // XXX akita: to store mixin
   // XXX akita: make activeRoomStore just handle the A/V connections.
@@ -514,6 +515,7 @@ loop.shared.toc = (function(mozL10n) {
             remotePosterUrl={this.props.remotePosterUrl}
             remoteSrcMediaElement={this.state.remoteSrcMediaElement}
             renderRemoteVideo={this.shouldRenderRemoteVideo()}
+            screen={{ enabled: this.state.screenSharingState !== SCREEN_SHARE_STATES.INACTIVE }}
             showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
             video={this.props.video} />
           <loop.shared.views.chat.TextChatView

@@ -1274,7 +1274,8 @@ var MozLoopServiceInternal = {
    */
   _fxAOAuthComplete: function(deferred, result, keys) {
     if (keys.kBr) {
-      Services.prefs.setCharPref("loop.key.fxa", keys.kBr.k);
+      // Trim Base64 padding from relier keys.
+      Services.prefs.setCharPref("loop.key.fxa", keys.kBr.k.replace(/=/g, "")); // eslint-disable-line no-div-regex
     }
     gFxAOAuthClientPromise = null;
     // Note: The state was already verified in FxAccountsOAuthClient.

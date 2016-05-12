@@ -52,7 +52,7 @@ AboutPage.prototype = {
   },
 
   createInstance: function(outer, iid) {
-    if (outer != null) {
+    if (outer !== null) {
       throw Cr.NS_ERROR_NO_AGGREGATION;
     }
     return this.QueryInterface(iid);
@@ -77,38 +77,38 @@ var AboutLoop = {};
 // checks in mozilla-central (eg getUserMedia-related), so if we want to
 // make changes to the URL names themselves, we'll need to change them
 // there too...
-XPCOMUtils.defineLazyGetter(AboutLoop, "conversation", () => {
-  return new AboutPage("chrome://loop/content/panels/sidebar.html",
-                       "loopconversation",
-                       "E79DB45D-2D6D-48BE-B179-6A16C95E97BA",
-                       "About Loop Conversation",
-                       Ci.nsIAboutModule.ALLOW_SCRIPT |
-                        Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
-                        Ci.nsIAboutModule.MAKE_UNLINKABLE |
-                        Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT |
-                        Ci.nsIAboutModule.URI_MUST_LOAD_IN_CHILD);
-});
+XPCOMUtils.defineLazyGetter(AboutLoop, "conversation", () =>
+  new AboutPage("chrome://loop/content/panels/sidebar.html",
+                "loopconversation",
+                "E79DB45D-2D6D-48BE-B179-6A16C95E97BA",
+                "About Loop Conversation",
+                Ci.nsIAboutModule.ALLOW_SCRIPT |
+                 Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
+                 Ci.nsIAboutModule.MAKE_UNLINKABLE |
+                 Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT |
+                 Ci.nsIAboutModule.URI_MUST_LOAD_IN_CHILD)
+);
 
-XPCOMUtils.defineLazyGetter(AboutLoop, "panel", () => {
-  return new AboutPage("chrome://loop/content/panels/panel.html",
-                       "looppanel",
-                       "A5DE152B-DE58-42BC-A68C-33E00B17EC2C",
-                       "About Loop Panel",
-                       Ci.nsIAboutModule.ALLOW_SCRIPT |
-                        Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
-                        Ci.nsIAboutModule.MAKE_UNLINKABLE |
-                        Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT);
-});
+XPCOMUtils.defineLazyGetter(AboutLoop, "panel", () =>
+  new AboutPage("chrome://loop/content/panels/panel.html",
+                "looppanel",
+                "A5DE152B-DE58-42BC-A68C-33E00B17EC2C",
+                "About Loop Panel",
+                Ci.nsIAboutModule.ALLOW_SCRIPT |
+                 Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
+                 Ci.nsIAboutModule.MAKE_UNLINKABLE |
+                 Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT)
+);
 
-XPCOMUtils.defineLazyGetter(AboutLoop, "toc", () => {
-  return new AboutPage("chrome://loop/content/panels/toc.html",
-                       "looptoc",
-                       "A1220CE0-E5D1-45B6-BEBA-3706166A2AA4",
-                       "About Loop ToC",
-                       Ci.nsIAboutModule.ALLOW_SCRIPT |
-                        Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
-                        Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT |
-                        Ci.nsIAboutModule.MAKE_UNLINKABLE); // XXX akita-sidebar load in child?
-});
+XPCOMUtils.defineLazyGetter(AboutLoop, "toc", () =>
+  new AboutPage("chrome://loop/content/panels/toc.html",
+                "looptoc",
+                "A1220CE0-E5D1-45B6-BEBA-3706166A2AA4",
+                "About Loop ToC",
+                Ci.nsIAboutModule.ALLOW_SCRIPT |
+                 Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
+                 Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT |
+                 Ci.nsIAboutModule.MAKE_UNLINKABLE) // XXX akita-sidebar load in child?
+);
 
 this.EXPORTED_SYMBOLS = ["AboutLoop"];

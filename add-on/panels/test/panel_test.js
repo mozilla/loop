@@ -14,6 +14,7 @@ describe("loop.panel", function() {
   var requests = [];
   var roomData, roomData2, roomData3, roomData4, roomData5, roomData6;
   var roomList, roomName;
+  var sharedModels = loop.panel.models;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
@@ -42,7 +43,7 @@ describe("loop.panel", function() {
     };
     loop.shared.mixins.setRootObject(fakeWindow);
 
-    notifications = new loop.shared.models.NotificationCollection();
+    notifications = new loop.panel.models.NotificationCollection();
 
     LoopMochaUtils.stubLoopRequest(requestStubs = {
       GetDoNotDisturb: function() { return true; },
@@ -1963,6 +1964,52 @@ describe("loop.panel", function() {
       });
 
       sinon.assert.notCalled(dispatcher.dispatch);
+    });
+  });
+
+  describe("NotificationListView", function() {
+    var coll, view, testNotif;
+
+    function mountTestComponent(props) {
+      props = _.extend({
+        key: 0
+      }, props || {});
+      return TestUtils.renderIntoDocument(
+        React.createElement(loop.panel.NotificationListView, props));
+    }
+
+    beforeEach(function() {
+      coll = new sharedModels.NotificationCollection();
+      view = mountTestComponent({ notifications: coll });
+      testNotif = { level: "warning", message: "foo" };
+      sinon.spy(view, "render");
+    });
+
+    afterEach(function() {
+      view.render.restore();
+    });
+
+    describe("Collection events", function() {
+      it("should render when a notification is added to the collection",
+        function() {
+          coll.add(testNotif);
+
+          sinon.assert.calledOnce(view.render);
+        });
+
+      it("should render when a notification is removed from the collection",
+        function() {
+          coll.add(testNotif);
+          coll.remove(testNotif);
+
+          sinon.assert.calledOnce(view.render);
+        });
+
+      it("should render when the collection is reset", function() {
+        coll.reset();
+
+        sinon.assert.calledOnce(view.render);
+      });
     });
   });
 });

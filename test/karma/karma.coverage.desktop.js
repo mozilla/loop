@@ -26,7 +26,7 @@ module.exports = function(config) {
     "built/add-on/chrome/content/panels/vendor/l10n.js",
     "built/add-on/chrome/content/shared/js/loopapi-client.js",
     "built/add-on/chrome/content/shared/js/utils.js",
-    "built/add-on/chrome/content/shared/js/models.js",
+    "built/add-on/chrome/content/panels/js/models.js",
     "built/add-on/chrome/content/shared/js/mixins.js",
     "built/add-on/chrome/content/shared/js/actions.js",
     "built/add-on/chrome/content/shared/js/otSdkDriver.js",

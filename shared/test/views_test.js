@@ -9,7 +9,6 @@ describe("loop.shared.views", function() {
   var l10n = navigator.mozL10n || document.mozL10n;
   var TestUtils = React.addons.TestUtils;
   var sharedActions = loop.shared.actions;
-  var sharedModels = loop.shared.models;
   var sharedViews = loop.shared.views;
   var sandbox, clock, dispatcher, OS, OSVersion;
 
@@ -302,52 +301,6 @@ describe("loop.shared.views", function() {
 
       sinon.assert.calledOnce(hangup);
       sinon.assert.calledWithExactly(hangup);
-    });
-  });
-
-  describe("NotificationListView", function() {
-    var coll, view, testNotif;
-
-    function mountTestComponent(props) {
-      props = _.extend({
-        key: 0
-      }, props || {});
-      return TestUtils.renderIntoDocument(
-        React.createElement(sharedViews.NotificationListView, props));
-    }
-
-    beforeEach(function() {
-      coll = new sharedModels.NotificationCollection();
-      view = mountTestComponent({ notifications: coll });
-      testNotif = { level: "warning", message: "foo" };
-      sinon.spy(view, "render");
-    });
-
-    afterEach(function() {
-      view.render.restore();
-    });
-
-    describe("Collection events", function() {
-      it("should render when a notification is added to the collection",
-        function() {
-          coll.add(testNotif);
-
-          sinon.assert.calledOnce(view.render);
-        });
-
-      it("should render when a notification is removed from the collection",
-        function() {
-          coll.add(testNotif);
-          coll.remove(testNotif);
-
-          sinon.assert.calledOnce(view.render);
-        });
-
-      it("should render when the collection is reset", function() {
-        coll.reset();
-
-        sinon.assert.calledOnce(view.render);
-      });
     });
   });
 

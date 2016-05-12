@@ -27,7 +27,8 @@ loop.store.TextChatStore = (function() {
       "sendTextChatMessage",
       "updateRoomInfo",
       "updateRoomContext",
-      "remotePeerDisconnected"
+      "remotePeerDisconnected",
+      "remotePeerConnected"
     ],
 
     /**
@@ -58,6 +59,7 @@ loop.store.TextChatStore = (function() {
         // this - do not update the in-store array directly, but use a clone or
         // separate array and then use setStoreState().
         messageList: [],
+        roomName: null,
         length: 0
       };
     },
@@ -118,8 +120,7 @@ loop.store.TextChatStore = (function() {
 
       // Notify MozLoopService if appropriate that a message has been appended
       // and it should therefore check if we need a different sized window or not.
-      if (message.contentType !== CHAT_CONTENT_TYPES.ROOM_NAME &&
-          message.contentType !== CHAT_CONTENT_TYPES.CONTEXT &&
+      if (message.contentType !== CHAT_CONTENT_TYPES.CONTEXT &&
           message.contentType !== CHAT_CONTENT_TYPES.NOTIFICATION) {
         if (this._storeState.textChatEnabled) {
           window.dispatchEvent(new CustomEvent("LoopChatMessageAppended"));
@@ -158,7 +159,7 @@ loop.store.TextChatStore = (function() {
 
     /**
      * Handles receiving information about the room - specifically the room name
-     * so it can be added to the list.
+     * so it can be updated.
      *
      * @param  {sharedActions.UpdateRoomInfo} actionData
      */
@@ -171,10 +172,7 @@ loop.store.TextChatStore = (function() {
           roomName = actionData.roomContextUrls[0].description ||
                      actionData.roomContextUrls[0].url;
         }
-        this._appendTextChatMessage(CHAT_MESSAGE_TYPES.SPECIAL, {
-          contentType: CHAT_CONTENT_TYPES.ROOM_NAME,
-          message: roomName
-        });
+        this.setStoreState({ roomName: roomName });
       }
 
       // Append the context if we have any.
@@ -245,7 +243,25 @@ loop.store.TextChatStore = (function() {
       var message = {
         contentType: CHAT_CONTENT_TYPES.NOTIFICATION,
         message: notificationTextKey,
-        receivedTimestamp: (new Date()).toISOString()
+        receivedTimestamp: (new Date()).toISOString(),
+        extraData: {
+          peerStatus: "disconnected"
+        }
+      };
+
+      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.RECEIVED, message);
+    },
+
+    remotePeerConnected: function() {
+      var notificationTextKey = "peer_join_session";
+
+      var message = {
+        contentType: CHAT_CONTENT_TYPES.NOTIFICATION,
+        message: notificationTextKey,
+        receivedTimestamp: (new Date()).toISOString(),
+        extraData: {
+          peerStatus: "connected"
+        }
       };
 
       this._appendTextChatMessage(CHAT_MESSAGE_TYPES.RECEIVED, message);

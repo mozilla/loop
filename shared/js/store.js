@@ -47,10 +47,10 @@ loop.store.createStore = (function() {
      * @param {Object} newState The new store state object.
      */
     setStoreState: function(newState) {
-      for (var key in newState) {
+      Object.keys(newState).forEach(function(key) {
         this._storeState[key] = newState[key];
         this.trigger("change:" + key);
-      }
+      }.bind(this));
       this.trigger("change");
     },
 

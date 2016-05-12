@@ -31,8 +31,7 @@ describe("loop.store.ConversationAppStore", function() {
   describe("#constructor", function() {
     it("should throw an error if the activeRoomStore is missing", function() {
       expect(function() {
-        new loop.store.ConversationAppStore({
-          dispatcher: dispatcher,
+        new loop.store.ConversationAppStore(dispatcher, {
           feedbackPeriod: 1,
           feedbackTimestamp: 1
         });
@@ -41,7 +40,7 @@ describe("loop.store.ConversationAppStore", function() {
 
     it("should throw an error if the dispatcher is missing", function() {
       expect(function() {
-        new loop.store.ConversationAppStore({
+        new loop.store.ConversationAppStore(undefined, {
           activeRoomStore: activeRoomStore,
           feedbackPeriod: 1,
           feedbackTimestamp: 1
@@ -51,9 +50,8 @@ describe("loop.store.ConversationAppStore", function() {
 
     it("should throw an error if feedbackPeriod is missing", function() {
       expect(function() {
-        new loop.store.ConversationAppStore({
+        new loop.store.ConversationAppStore(dispatcher, {
           activeRoomStore: activeRoomStore,
-          dispatcher: dispatcher,
           feedbackTimestamp: 1
         });
       }).to.Throw(/feedbackPeriod/);
@@ -61,9 +59,8 @@ describe("loop.store.ConversationAppStore", function() {
 
     it("should throw an error if feedbackTimestamp is missing", function() {
       expect(function() {
-        new loop.store.ConversationAppStore({
+        new loop.store.ConversationAppStore(dispatcher, {
           activeRoomStore: activeRoomStore,
-          dispatcher: dispatcher,
           feedbackPeriod: 1
         });
       }).to.Throw(/feedbackTimestamp/);
@@ -74,9 +71,8 @@ describe("loop.store.ConversationAppStore", function() {
         addEventListener: sinon.stub()
       };
 
-      var store = new loop.store.ConversationAppStore({
+      var store = new loop.store.ConversationAppStore(dispatcher, {
         activeRoomStore: activeRoomStore,
-        dispatcher: dispatcher,
         feedbackPeriod: 1,
         feedbackTimestamp: 1,
         rootObject: fakeWindow
@@ -116,9 +112,8 @@ describe("loop.store.ConversationAppStore", function() {
         SetLoopPref: setLoopPrefStub
       });
 
-      store = new loop.store.ConversationAppStore({
+      store = new loop.store.ConversationAppStore(dispatcher, {
         activeRoomStore: activeRoomStore,
-        dispatcher: dispatcher,
         feedbackPeriod: 42,
         feedbackTimestamp: 42
       });
@@ -188,9 +183,8 @@ describe("loop.store.ConversationAppStore", function() {
         GetLoopPref: function() {}
       });
 
-      store = new loop.store.ConversationAppStore({
+      store = new loop.store.ConversationAppStore(dispatcher, {
         activeRoomStore: activeRoomStore,
-        dispatcher: dispatcher,
         feedbackPeriod: 1,
         feedbackTimestamp: 1,
         rootObject: fakeWindow

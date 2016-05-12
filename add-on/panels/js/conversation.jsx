@@ -187,9 +187,8 @@ loop.conversation = (function(mozL10n) {
         isDesktop: true,
         sdkDriver: sdkDriver
       });
-      var conversationAppStore = new loop.store.ConversationAppStore({
+      var conversationAppStore = new loop.store.ConversationAppStore(dispatcher, {
         activeRoomStore: activeRoomStore,
-        dispatcher: dispatcher,
         feedbackPeriod: results[++requestIdx],
         feedbackTimestamp: results[++requestIdx],
         facebookEnabled: results[++requestIdx]

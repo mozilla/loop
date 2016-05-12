@@ -152,8 +152,12 @@ describe("loop.shared.views.TextChatView", function() {
       view.componentWillReceiveProps({
         messageList: [{
           type: CHAT_MESSAGE_TYPES.SPECIAL,
-          contentType: CHAT_CONTENT_TYPES.ROOM_NAME,
+          contentType: CHAT_CONTENT_TYPES.CONTEXT,
           message: "Hello!",
+          extraData: {
+            location: "http://wonderful.invalid",
+            thumbnail: "fake"
+          },
           receivedTimestamp: "2015-06-25T17:53:55.357Z"
         }]
       });
@@ -615,8 +619,7 @@ describe("loop.shared.views.TextChatView", function() {
 
       var entries = node.querySelectorAll(".text-chat-header");
       expect(entries.length).eql(1);
-      expect(entries[0].classList.contains("special")).eql(true);
-      expect(entries[0].classList.contains("room-name")).eql(true);
+      expect(node.querySelector(".text-chat-header.special")).to.not.eql(null);
     });
 
     it("should render a special entry for the context url", function() {
@@ -672,6 +675,33 @@ describe("loop.shared.views.TextChatView", function() {
 
       expect(node.querySelector(".showing-room-name")).to.eql(null);
       expect(node.querySelector(".context-url-view-wrapper")).to.eql(null);
+    });
+
+    it("should display only one 'You have joined' message when no room name is set", function() {
+      view = mountTestComponent();
+      mozL10n.reset;
+
+      store.updateRoomInfo(new sharedActions.UpdateRoomInfo({
+        roomName: "",
+        roomUrl: "http://showcase"
+      }));
+
+      var node = ReactDOM.findDOMNode(view);
+      expect(node.querySelectorAll(".text-chat-header.special").length).to.eql(1);
+      expect(node.querySelector(".text-chat-header.special")).to.not.eql(null);
+    });
+
+    it("should display only one 'You have joined' message when room name is set", function() {
+      view = mountTestComponent();
+
+      store.updateRoomInfo(new sharedActions.UpdateRoomInfo({
+        roomName: "New Room Name",
+        roomUrl: "http://showcase"
+      }));
+
+      var node = ReactDOM.findDOMNode(view);
+      expect(node.querySelectorAll(".text-chat-header.special").length).to.eql(1);
+      expect(node.querySelector(".text-chat-header.special")).to.not.eql(null);
     });
 
     it("should dispatch SendTextChatMessage action when enter is pressed", function() {

@@ -14,7 +14,7 @@ LOOP_PRODUCT_HOMEPAGE_URL := $(shell echo $${LOOP_PRODUCT_HOMEPAGE_URL-"https://
 # This should always be a nn.* version, so that the add-on is compatible with not
 # only the release but any security/stability releases as well.
 # Note that MOZ_APP_MAXVERSION is the variable name used by mozilla-central.
-MOZ_APP_MAXVERSION=48.*
+MOZ_APP_MAXVERSION=49.*
 
 # Work around for realpath not working as expected
 NODE_LOCAL_BIN := $(abspath ./node_modules/.bin)
@@ -233,34 +233,18 @@ $(BUILT)/add-on/install.rdf: add-on/install.rdf.in \
 	         -o $@ $<
 
 
-# Build our jsx files into appropriately placed js files.  Note that the rules
-# are somewhat repetitive, and less elegant than they might be.  We _could_
-# use more terse make syntax here, but the idea is that it's better to
-# keep the feel readable/maintainable by non Make-experts, even at the cost
-# of some repetition.
+# Build source javascript files into appropriately placed .js files. The general
+# pattern is to match all source files with a wildcard to then create an
+# explicit list of built .js files to be used both as prerequisites and as
+# targets themselves. A shared recipe builds each of the .js files by compiling
+# the appropriate prerequisite file.
 
 # The shared files currently get built once for each destination; we could
-# optimize this away.  We used the shared_jsx_temporary to make this code more
-# readable.
+# optimize this away. We use the shared_jsx_files to make this more readable.
 shared_jsx_files=$(wildcard shared/js/*.jsx)
 built_ui_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/ui/%.js)
 built_add_on_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/add-on/chrome/content/%.js)
 built_standalone_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/standalone/content/%.js)
-
-# We can't use $(shared_jsx_files) here because % rules don't accept that.
-$(BUILT)/standalone/content/shared/js/%.js: shared/js/%.jsx
-	@mkdir -p $(@D)
-	$(BABEL) $< --out-file $@
-
-# We can't use $(shared_jsx_files) here because % rules don't accept that.
-$(BUILT)/add-on/chrome/content/shared/js/%.js: shared/js/%.jsx
-	@mkdir -p $(@D)
-	$(BABEL) $< --out-file $@
-
-# We can't use $(shared_jsx_files) here because % rules don't accept that.
-$(BUILT)/ui/shared/js/%.js: shared/js/%.jsx
-	@mkdir -p $(@D)
-	$(BABEL) $< --out-file $@
 
 #
 # The following sections are for the non-shared assets:
@@ -270,17 +254,9 @@ $(BUILT)/ui/shared/js/%.js: shared/js/%.jsx
 ui_jsx_files=$(wildcard ui/*.jsx)
 built_ui_js_files=$(ui_jsx_files:%.jsx=$(BUILT)/%.js)
 
-$(BUILT)/ui/%.js: ui/%.jsx
-	@mkdir -p $(@D)
-	$(BABEL) $< --out-file $@
-
 # standalone
 standalone_jsx_files=$(wildcard standalone/content/js/*.jsx)
 built_standalone_js_files=$(standalone_jsx_files:%.jsx=$(BUILT)/%.js)
-
-$(BUILT)/standalone/content/js/%.js: standalone/content/js/%.jsx
-	@mkdir -p $(@D)
-	$(BABEL) $< --out-file $@
 
 standalone_l10n_files=$(wildcard locale/*/standalone.properties)
 built_standalone_l10n_files=$(patsubst locale/%/standalone.properties, \
@@ -297,18 +273,10 @@ built_add_on_js_files=$(patsubst add-on/panels/js/%.jsx, \
 	 $(BUILT)/add-on/chrome/content/panels/js/%.js, \
 	 $(add_on_jsx_files))
 
-$(BUILT)/add-on/chrome/content/panels/js/%.js: add-on/panels/js/%.jsx
-	@mkdir -p $(@D)
-	$(BABEL) $< --out-file $@
-
 add_on_vendor_jsx_files=$(wildcard add-on/panels/vendor/*.jsx)
 built_add_on_vendor_js_files=$(patsubst add-on/panels/vendor/%.jsx, \
 	 $(BUILT)/add-on/chrome/content/panels/vendor/%.js, \
 	 $(add_on_vendor_jsx_files))
-
-$(BUILT)/add-on/chrome/content/panels/vendor/%.js: add-on/panels/vendor/%.jsx
-	@mkdir -p $(@D)
-	$(BABEL) $< --out-file $@
 
 add_on_l10n_files=$(wildcard locale/*/add-on.properties)
 built_add_on_l10n_files=$(patsubst locale/%/add-on.properties, \
@@ -318,6 +286,39 @@ built_add_on_l10n_files=$(patsubst locale/%/add-on.properties, \
 $(BUILT)/add-on/chrome/locale/%/loop.properties: locale/%/add-on.properties locale/%/shared.properties
 	@mkdir -p $(@D)
 	cat $^ > $@
+
+# For each of the built js file patterns, create a pattern-specific variable
+# `PREREQ` to match the prerequisite in the appropriate source directory to be
+# used during secondary expansion for the shared build recipe.
+#
+# NB: The following targets are ordered in a way that puts general rules above
+# specific rules, i.e., a target for a parent directory (which happens to match
+# all sub directories) comes before a sub directory with a different `PREREQ`.
+# This ordering can be achieved by keeping the list lexicographically sorted.
+$(BUILT)/add-on/chrome/content/panels/js/%.js: PREREQ = add-on/panels/js/$(@F)x
+$(BUILT)/add-on/chrome/content/panels/vendor/%.js: PREREQ = add-on/panels/vendor/$(@F)x
+$(BUILT)/add-on/chrome/content/shared/js/%.js: PREREQ = shared/js/$(@F)x
+$(BUILT)/standalone/content/js/%.js: PREREQ = standalone/content/js/$(@F)x
+$(BUILT)/standalone/content/shared/js/%.js: PREREQ = shared/js/$(@F)x
+$(BUILT)/ui/%.js: PREREQ = ui/$(@F)x
+$(BUILT)/ui/shared/js/%.js: PREREQ = shared/js/$(@F)x
+
+# During Makefile's secondary $$(variable) expansion, use the prerequisite
+# specified in the pattern-specific `PREREQ` to build one of the explicily
+# listed targets from the `built_*_js_files` variables.
+ALL_BUILT_JS_FILES = \
+	$(built_add_on_js_files) \
+	$(built_add_on_shared_js_files) \
+	$(built_add_on_vendor_js_files) \
+	$(built_standalone_js_files) \
+	$(built_standalone_shared_js_files) \
+	$(built_ui_js_files) \
+	$(built_ui_shared_js_files)
+
+.SECONDEXPANSION:
+$(ALL_BUILT_JS_FILES): %: $$(PREREQ)
+	@mkdir -p $(@D)
+	$(BABEL) $< --out-file $@
 
 # XXX maybe just build one copy of shared in standalone, and then use
 # server.js magic to redirect?
@@ -491,6 +492,11 @@ ifdef TEST_E10S
 E10S_ARGS = --e10s
 endif
 
+# Note: the path can be a file path or a url.
+ifdef SYMBOLS_PATH
+SYMBOLS_ARGS = --symbols-path=$(SYMBOLS_PATH)
+endif
+
 .PHONY: functional
 ifeq ($(SKIP_FUNCTIONAL),1)
 functional:
@@ -506,6 +512,7 @@ functional: build $(XPI_FILE)
 	                       --type=browser \
 	                       --gecko-log $(BUILT)/functional/gecko.log \
 	                       $(E10S_ARGS) \
+	                       $(SYMBOLS_ARGS) \
 	                       test/functional/manifest.ini
 endif
 
@@ -516,8 +523,8 @@ endif
 .PHONY: build
 build: add-on standalone ui
 
-GIT_EXPORT_LOCATION := $(shell echo $${GIT_EXPORT_LOCATION-../gecko-dev})
-GIT_EXPORT_DIR := $(GIT_EXPORT_LOCATION)/browser/extensions/loop
+EXPORT_MC_LOCATION := $(shell echo $${EXPORT_MC_LOCATION-../gecko-dev})
+GIT_EXPORT_DIR := $(EXPORT_MC_LOCATION)/browser/extensions/loop
 
 ifeq ($(shell uname -s),Linux)
   FIND_COMMAND := find $(GIT_EXPORT_DIR) -regextype posix-extended
@@ -525,8 +532,8 @@ else
   FIND_COMMAND := find -E $(GIT_EXPORT_DIR)
 endif
 
-.PHONY: git-export
-git-export: build dist_export
+.PHONY: export_mc
+export_mc: build dist_export
 	$(FIND_COMMAND) -type f ! -regex \
 	  '.*/(moz.build|README.txt|.gitignore|run-all-loop-tests.sh|manifest.ini)' -delete
 	$(RSYNC) $(DIST_EXPORT_DIR)/* $(GIT_EXPORT_DIR)

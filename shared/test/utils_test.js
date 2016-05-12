@@ -376,14 +376,20 @@ describe("loop.shared.utils", function() {
 
       sinon.assert.calledOnce(requestStubs.ComposeEmail);
       sinon.assert.calledWith(requestStubs.ComposeEmail,
-                              "subject", "body" + "footer", "fake@invalid.tld");
+                              "subject",
+                              "body" +
+                                "footer",
+                              "fake@invalid.tld");
     });
 
     it("should compose a different email when context info is provided", function() {
       sharedUtils.composeCallUrlEmail("http://invalid", null, "Hello, is me you're looking for?");
 
       sinon.assert.calledOnce(requestStubs.ComposeEmail);
-      sinon.assert.calledWith(requestStubs.ComposeEmail, "subject", "body_context" + "footer");
+      sinon.assert.calledWith(requestStubs.ComposeEmail,
+                              "subject",
+                              "body_context" +
+                                "footer");
     });
   });
 
@@ -623,7 +629,7 @@ describe("loop.shared.utils", function() {
         prop1: null,
         prop2: false,
         prop3: undefined,
-        prop4: void 0,
+        prop4: void 0, // eslint-disable-line no-void
         prop5: "",
         prop6: 0
       };

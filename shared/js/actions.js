@@ -17,9 +17,9 @@ loop.shared.actions = (function() {
   function Action(name, schema, values) {
     var validatedData = new loop.validate.Validator(schema || {})
                                          .validate(values || {});
-    for (var prop in validatedData) {
+    Object.keys(validatedData).forEach(function(prop) {
       this[prop] = validatedData[prop];
-    }
+    }.bind(this));
 
     this.name = name;
   }

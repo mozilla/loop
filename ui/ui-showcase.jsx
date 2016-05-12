@@ -459,8 +459,8 @@
     uid: "0354b278a381d3cb408bb46ffc01266"
   };
 
-  var notifications = new loop.shared.models.NotificationCollection();
-  var errNotifications = new loop.shared.models.NotificationCollection();
+  var notifications = new loop.panel.models.NotificationCollection();
+  var errNotifications = new loop.panel.models.NotificationCollection();
   errNotifications.add({
     level: "error",
     message: "Could Not Authenticate",

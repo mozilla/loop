@@ -3,8 +3,8 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 var loop = loop || {};
-loop.shared = loop.shared || {};
-loop.shared.models = (function() {
+loop.panel = loop.panel || {};
+loop.panel.models = (function() {
   "use strict";
 
   /**

@@ -6,6 +6,7 @@
     // Bootstrap magic globals.
     "APP_SHUTDOWN": false,
     // Gecko + Loop Globals.
+    "AboutLoop": false,
     "AppConstants": false,
     "appInfo": false,
     "Chat": false,

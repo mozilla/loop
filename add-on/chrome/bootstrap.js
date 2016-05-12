@@ -16,6 +16,8 @@ const CURSOR_CLICK_DELAY = 1000;
 // Due to bug 1051238 frame scripts are cached forever, so we can't update them
 // as a restartless add-on. The Math.random() is the work around for this.
 const FRAME_SCRIPT = "chrome://loop/content/modules/tabFrame.js?" + Math.random();
+// Process scripts may or may not need this too, but it won't hurt us
+const PROCESS_SCRIPT = "chrome://loop/content/modules/loop-content-process.js?" + Math.random();
 
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -323,8 +325,8 @@ var WindowListener = {
         // expected errors to the console, so we catch them here.
         this.MozLoopService.initialize(WindowListener.addonVersion).catch(ex => {
           if (!ex.message ||
-              (!ex.message.contains("not enabled") &&
-               !ex.message.contains("not needed"))) {
+              (!ex.message.includes("not enabled") &&
+               !ex.message.includes("not needed"))) {
             console.error(ex);
           }
         });
@@ -1432,10 +1434,9 @@ function startup(data) {
     return;
   }
 
-  // register about: handlers
-  AboutLoop.conversation.register(); // eslint-disable-line no-undef
-  AboutLoop.panel.register(); // eslint-disable-line no-undef
-  AboutLoop.toc.register(); // eslint-disable-line no-undef
+  // Take care of things that need to happen in each process, such as
+  // registering about: handlers
+  Services.ppmm.loadProcessScript(PROCESS_SCRIPT, true);
 
   createLoopButton();
 
@@ -1508,10 +1509,17 @@ function shutdown(data, reason) {
   // Stop waiting for browser windows to open.
   wm.removeListener(WindowListener);
 
-  // unregister about: handlers
-  AboutLoop.conversation.unregister(); // eslint-disable-line no-undef
-  AboutLoop.panel.unregister(); // eslint-disable-line no-undef
-  AboutLoop.toc.unregister(); // eslint-disable-line no-undef
+  let ppmm = Cc["@mozilla.org/parentprocessmessagemanager;1"]
+           .getService(Ci.nsIMessageBroadcaster);
+  ppmm.broadcastAsyncMessage("LoopShuttingDown");
+
+  // Don't bother listening for a success response,
+  // there's nothing we could do if it failed...
+  AboutLoop.conversation.unregister();
+  AboutLoop.panel.unregister();
+  AboutLoop.toc.unregister();
+
+  Services.ppmm.removeDelayedProcessScript(PROCESS_SCRIPT);
 
   // If the app is shutting down, don't worry about cleaning up, just let
   // it fade away...
@@ -1539,6 +1547,7 @@ function shutdown(data, reason) {
   Cu.unload("chrome://loop/content/modules/MozLoopAPI.jsm");
   Cu.unload("chrome://loop/content/modules/LoopRooms.jsm");
   Cu.unload("chrome://loop/content/modules/MozLoopService.jsm");
+  Cu.unload("chrome://loop/content/modules/AboutLoop.jsm");
 }
 
 function install() {}

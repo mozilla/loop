@@ -25,7 +25,7 @@ XPCOMUtils.defineLazyGetter(this, "log", () => {
 
 
 function AboutPage(chromeURL, aboutHost, classID, description, uriFlags) {
-this.chromeURL = chromeURL;
+  this.chromeURL = chromeURL;
   this.aboutHost = aboutHost;
   this.classID = Components.ID(classID);
   this.description = description;
@@ -45,7 +45,8 @@ AboutPage.prototype = {
     channel.originalURI = aURI;
 
     if (this.uriFlags & Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT) {
-      let principal = Services.scriptSecurityManager.getNoAppCodebasePrincipal(aURI);
+      let principal =
+        Services.scriptSecurityManager.getNoAppCodebasePrincipal(aURI);
       channel.owner = principal;
     }
     return channel;
@@ -83,10 +84,10 @@ XPCOMUtils.defineLazyGetter(AboutLoop, "conversation", () =>
                 "E79DB45D-2D6D-48BE-B179-6A16C95E97BA",
                 "About Loop Conversation",
                 Ci.nsIAboutModule.ALLOW_SCRIPT |
-                 Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
-                 Ci.nsIAboutModule.MAKE_UNLINKABLE |
-                 Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT |
-                 Ci.nsIAboutModule.URI_MUST_LOAD_IN_CHILD)
+                  Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
+                  Ci.nsIAboutModule.MAKE_UNLINKABLE |
+                  Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT |
+                  Ci.nsIAboutModule.URI_MUST_LOAD_IN_CHILD)
 );
 
 XPCOMUtils.defineLazyGetter(AboutLoop, "panel", () =>
@@ -95,9 +96,9 @@ XPCOMUtils.defineLazyGetter(AboutLoop, "panel", () =>
                 "A5DE152B-DE58-42BC-A68C-33E00B17EC2C",
                 "About Loop Panel",
                 Ci.nsIAboutModule.ALLOW_SCRIPT |
-                 Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
-                 Ci.nsIAboutModule.MAKE_UNLINKABLE |
-                 Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT)
+                  Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
+                  Ci.nsIAboutModule.MAKE_UNLINKABLE |
+                  Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT)
 );
 
 XPCOMUtils.defineLazyGetter(AboutLoop, "toc", () =>
@@ -106,9 +107,10 @@ XPCOMUtils.defineLazyGetter(AboutLoop, "toc", () =>
                 "A1220CE0-E5D1-45B6-BEBA-3706166A2AA4",
                 "About Loop ToC",
                 Ci.nsIAboutModule.ALLOW_SCRIPT |
-                 Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
-                 Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT |
-                 Ci.nsIAboutModule.MAKE_UNLINKABLE) // XXX akita-sidebar load in child?
+                  Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
+                  Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT |
+                  Ci.nsIAboutModule.MAKE_UNLINKABLE)
+                  // XXX akita-sidebar load in child?
 );
 
 this.EXPORTED_SYMBOLS = ["AboutLoop"];

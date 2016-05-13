@@ -108,9 +108,9 @@ XPCOMUtils.defineLazyGetter(AboutLoop, "toc", () =>
                 "About Loop ToC",
                 Ci.nsIAboutModule.ALLOW_SCRIPT |
                   Ci.nsIAboutModule.HIDE_FROM_ABOUTABOUT |
+                  Ci.nsIAboutModule.MAKE_UNLINKABLE |
                   Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT |
-                  Ci.nsIAboutModule.MAKE_UNLINKABLE)
-                  // XXX akita-sidebar load in child?
+                  Ci.nsIAboutModule.URI_MUST_LOAD_IN_CHILD)
 );
 
 this.EXPORTED_SYMBOLS = ["AboutLoop"];

@@ -18,6 +18,8 @@ const CURSOR_CLICK_DELAY = 1000;
 const FRAME_SCRIPT = "chrome://loop/content/modules/tabFrame.js?" + Math.random();
 // Process scripts may or may not need this too, but it won't hurt us
 const PROCESS_SCRIPT = "chrome://loop/content/modules/loop-content-process.js?" + Math.random();
+// This is part of the browser, so we don't need the random element.
+const BROWSER_FRAME_SCRIPT = "chrome://browser/content/content.js";
 
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -349,6 +351,11 @@ var WindowListener = {
         // future.
         this.mm.loadFrameScript(FRAME_SCRIPT, true);
 
+        // This loads the generic browser content script into our special "loop"
+        // message manager for the sidebar.
+        let loopMessageManager = window.getGroupMessageManager("loop");
+        loopMessageManager.loadFrameScript(BROWSER_FRAME_SCRIPT, true);
+
         // Cleanup when the window unloads.
         window.addEventListener("unload", () => {
           Services.obs.removeObserver(this, "loop-status-changed");
@@ -369,15 +376,12 @@ var WindowListener = {
 
         let sidebarBrowser = document.createElementNS(kNSXUL, "browser");
         sidebarBrowser.setAttribute("id", "loop-side-browser");
-        sidebarBrowser.setAttribute("disable-history", "true");
-        sidebarBrowser.setAttribute("disable-global-history", "true");
-
-        // XXX akita something like these seem likely to be required once we
-        // electrolyze this along with a URI_MUST_LOAD_IN_CHILD in
-        // AboutLoop.jsm
-        // sidebarBrowser.setAttribute("message-manager-group", "social");
-        // sidebarBrowser.setAttribute("message", "true");
-        // sidebarBrowser.setAttribute("remote", "true");
+        sidebarBrowser.setAttribute("disablehistory", "true");
+        sidebarBrowser.setAttribute("disableglobalhistory", "true");
+        sidebarBrowser.setAttribute("frameType", "loop");
+        sidebarBrowser.setAttribute("messagemanagergroup", "loop");
+        sidebarBrowser.setAttribute("message", "true");
+        sidebarBrowser.setAttribute("remote", "true");
 
         sidebarBrowser.setAttribute("type", "content");
 
@@ -1225,6 +1229,9 @@ var WindowListener = {
       // This stops the frame script being loaded to new tabs, but doesn't
       // remove it from existing tabs (there's no way to do that).
       window.LoopUI.mm.removeDelayedFrameScript(FRAME_SCRIPT);
+
+      let loopMessageManager = window.getGroupMessageManager("loop");
+      loopMessageManager.removeDelayedFrameScript(BROWSER_FRAME_SCRIPT);
 
       // XXX Bug 1229352 - Add in tear-down of the panel.
     }

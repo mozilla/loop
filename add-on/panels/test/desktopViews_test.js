@@ -101,6 +101,19 @@ describe("loop.shared.desktopViews", function() {
 
       sinon.assert.calledOnce(callback);
     });
+
+    it("should not invoke callback if component has been unmounted", function() {
+      var callback = sinon.stub();
+      view = mountTestComponent({
+        callback: callback
+      });
+      var copyBtn = ReactDOM.findDOMNode(view);
+      React.addons.TestUtils.Simulate.click(copyBtn);
+      view.componentWillUnmount();
+      clock.tick(sharedDesktopViews.CopyLinkButton.TRIGGERED_RESET_DELAY);
+
+      sinon.assert.notCalled(callback);
+    });
   });
 
   describe("EmailLinkButton", function() {

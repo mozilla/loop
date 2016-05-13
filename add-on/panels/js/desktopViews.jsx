@@ -31,6 +31,12 @@ loop.shared.desktopViews = (function(mozL10n) {
       };
     },
 
+    componentWillUnmount: function() {
+      if (this._copyTimeout) {
+        clearTimeout(this._copyTimeout);
+      }
+    },
+
     handleCopyButtonClick: function(event) {
       event.preventDefault();
 
@@ -40,7 +46,8 @@ loop.shared.desktopViews = (function(mozL10n) {
       }));
 
       this.setState({ copiedUrl: true });
-      setTimeout(this.resetTriggeredButtons, this.constructor.TRIGGERED_RESET_DELAY);
+      this._copyTimeout = setTimeout(this.resetTriggeredButtons,
+        this.constructor.TRIGGERED_RESET_DELAY);
     },
 
     /**

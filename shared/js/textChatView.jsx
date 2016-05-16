@@ -320,7 +320,6 @@ loop.shared.views.chat = (function(mozL10n) {
    */
   var TextChatInputView = React.createClass({
     mixins: [
-      React.addons.LinkedStateMixin,
       React.addons.PureRenderMixin
     ],
 
@@ -334,6 +333,10 @@ loop.shared.views.chat = (function(mozL10n) {
       return {
         messageDetail: ""
       };
+    },
+
+    handleChange: function(event) {
+      this.setState({ messageDetail: event.target.value });
     },
 
     /**
@@ -380,10 +383,11 @@ loop.shared.views.chat = (function(mozL10n) {
         <div className="text-chat-box">
           <form onSubmit={this.handleFormSubmit}>
             <input
+              onChange={this.handleChange}
               onKeyDown={this.handleKeyDown}
               placeholder={this.props.showPlaceholder ? mozL10n.get("chat_textbox_placeholder") : ""}
               type="text"
-              valueLink={this.linkState("messageDetail")} />
+              value={this.state.messageDetail} />
           </form>
         </div>
       );
@@ -400,7 +404,6 @@ loop.shared.views.chat = (function(mozL10n) {
    */
   var TextChatView = React.createClass({
     mixins: [
-      React.addons.LinkedStateMixin,
       loop.store.StoreMixin("textChatStore")
     ],
 

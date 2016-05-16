@@ -37,7 +37,7 @@ if (typeof __PROD__ !== "undefined") {
   // webpack warns if we try to minify some prebuilt libraries, so we
   // pull in the unbuilt version from node_modules
   require("expose?React!react");
-  require("expose?React!react/addons");
+  require("expose?React.addons.PureRenderMixin!react-addons-pure-render-mixin");
   require("expose?ReactDOM!react-dom");
   require("expose?classNames!classnames");
 } else {

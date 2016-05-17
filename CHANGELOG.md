@@ -1,6 +1,111 @@
 # Changelog
 
-## 1.3.2
+## 1.4.0
+
+### New
+
+* Bug 1272664 - Port bug 1111440 (Replace -moz- prefixed logical margin/padding/border properties with their standard versions). r=Standard8. [Ed Lee]
+
+* Bug 1271444 - Make conversation popup disabled permanently. r=Standard8. [David Critchley]
+
+* Bug 1270525 - Use babel on all js files except files inside vendor directories. [Donovan Preston]
+
+* Bug 1257266 - Adding xpcshell test. r=Standard8. [David Critchley]
+
+* Bug 1273067 - Loop adaptions for React 15.0.2 upgrade. r=dcritch. [Mark Banner]
+
+* No bug. Allow a branch to be specified when deploying to the standalone. rs=Mardak. [Mark Banner]
+
+* Bug 1271896 - No icon for Your friend has joined in standalone (r=mancas) [Fernando Campo]
+
+* Bug 1254097 - Text chat notification when user joins room (r=crafuse,ux-r=pau) [Fernando Campo]
+
+* Bug 1270778 - Trim Base64 padding from FxA relier keys. r=Standard8. [Kit Cambridge]
+
+* Bug 1270526 - Stop showing copy panel after 3 times instead of 5. rs=Standard8. [Ed Lee]
+
+* Bug 1257266 - Change NPS survey link to dynamically add firefox hello version number to survey link. r=Standard8. [David Critchley]
+
+* Bug 1270123 - Some routers can cause &quot;Copy Panel&quot; to be turned on if internet is offline. r=Standard8. [Ed Lee]
+
+* Bug 1262441 - Change Welcome To message to You have joined. r=standard8. [David Critchley]
+
+* Bug 1242580 - Document how to run mochitest and xpcshell tests. r=Standard8. [Chris Rafuse]
+
+* Bug 1225057 - Part 1. Move the notification models and views into the desktop specific directory. r=Standard8. [malayaleecoder]
+
+* Bug 1267960 - Hello copy popup notification is displayed upon copying the URL bar even if the user is already in a Hello call or shown enough times. r=dcritch. [Ed Lee]
+
+* Bug 1225035 - Rewrite standaloneAppStore.js and conversationAppStore.js to use createStore r=Standard8. [Donovan Preston]
+
+* Bug 1241097 - Email link option throws an error in Browser console, r=Mardak. [Chris Rafuse]
+
+* Bug 1263715. Allow the path to symbol files to be specified for the functional tests. r=mancas. [Mark Banner]
+
+* Bug 1267882 - Multiple errors during mochitest TypeError: PanelUI.panel is undefined. r=mancas. [Ed Lee]
+
+* Bug 1234905 - Upgrade React to 0.14.8. r=Standard8. [Chris Rafuse]
+
+### Chores
+
+* Update L10n from changeset 3f20c234ec767d7d6a0691a3ed36ac0ead71a6c0. [Mark Banner]
+
+* Update eslint to version 2.10.2. r=Standard8. [Greenkeeper]
+
+* Update L10n from changeset c53b232b49b8827ea0f9a99e317a03764e9d4228. [Mark Banner]
+
+* Update react and react-dom to version 15.0.2 r=dcritch. [greenkeeperio-bot]
+
+* Update eslint to version 2.10.1. r=Standard8. [Greenkeeper]
+
+* Update compression to version 1.6.2. r=Standard8. [Greenkeeper]
+
+* Update eslint-plugin-react to version 5.1.1. r=Standard8. [Greenkeeper]
+
+* Update L10n from changeset 5cecbb23cad87e05ce6e032f94da6ffd3ac202e2. [Mark Banner]
+
+* Update karma-firefox-launcher to version 1.0.0. r=Standard8. [Greenkeeper]
+
+* Update karma-coverage to version 1.0.0. r=Standard8. [Greenkeeper]
+
+* Update Firefox max version to match the new nightly version. rs=release-bump. [Mark Banner]
+
+* Update babel-cli to version 6.8.0 r=Standard8. [Greenkeeper]
+
+* Update babel-plugin-transform-react-display-name to version 6.8.0. [greenkeeperio-bot]
+
+* Update karma-chrome-launcher to version 1.0.1. [greenkeeperio-bot]
+
+* Update karma-mocha to version 1.0.1. [greenkeeperio-bot]
+
+* Update babel-plugin-transform-react-jsx to version 6.8.0. [greenkeeperio-bot]
+
+* Update classnames to version 2.2.5. [greenkeeperio-bot]
+
+* Update nodemon to version 1.9.2. [greenkeeperio-bot]
+
+* Update eslint to version 2.9.0. [greenkeeperio-bot]
+
+### Other
+
+* Follow-up to bug 1262441 - Add back the string that's used on the standalone infobar. r=dcritch. [Mark Banner]
+
+* Add Push To Try documentation. r=Standard8. [David Critchley]
+
+* Clean up Makefile to use a single shared babel recipe for building js files. r=Standard8. [Ed Lee]
+
+* Fix bustage in localhost panels tests from bug 1225057. rs=dmose. [Mark Banner]
+
+* Fix ui-showcase bustage from bug 1225057. rs=bustage-fix. [Mark Banner]
+
+* Enable eslint rules that needed a small number of fixes. r=Standard8 fix 1 no-confusing-arrow; fix 1 no-throw-literal; fix 1 no-void; fix 1 radix; fix 3 no-useless-concat; fix 4 guard-for-in; fix 4 max-statements-per-line; fix 4 one-var-declaration-per-line; fix 4 block-scoped-var; fix 5 no-lonely-if; fix 8 no-useless-escape; fix 9 arrow-body-style. [Ed Lee]
+
+* Enable various eslint rules that are already passing. r=Standard8. [Ed Lee]
+
+* Point jar.mn to chrome/ for newly added react files. r=Standard8. [Ed Lee]
+
+
+## v1.3.2 (2016-05-05)
 
 ### New
 
@@ -15,6 +120,10 @@
 ### Chores
 
 * Update L10n from changeset 5cecbb23cad87e05ce6e032f94da6ffd3ac202e2. [Mark Banner]
+
+### Other
+
+* 1.3.2. [Mark Banner]
 
 
 ## v1.3.1 (2016-04-26)

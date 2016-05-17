@@ -73,7 +73,7 @@ describe("loop.slideshow", function() {
 
   describe("#init", function() {
     beforeEach(function() {
-      sandbox.stub(React, "render");
+      sandbox.stub(ReactDOM, "render");
       sandbox.stub(document.mozL10n, "initialize");
       sandbox.stub(loop.SimpleSlideshow, "init");
     });

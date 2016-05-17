@@ -105,7 +105,7 @@ var inChrome = typeof Components != "undefined" && "utils" in Components;
     return new Promise(function(resolve, reject) {
       // First import the key to a format we can use.
       rootObject.crypto.subtle.importKey(KEY_FORMAT,
-        { k: key, kty: KEY_TYPE },
+        { k: key.replace(/=/g, ""), kty: KEY_TYPE }, // eslint-disable-line no-div-regex
         ALGORITHM,
         // If the key is extractable.
         true,
@@ -158,7 +158,7 @@ var inChrome = typeof Components != "undefined" && "utils" in Components;
     return new Promise(function(resolve, reject) {
       // First import the key to a format we can use.
       rootObject.crypto.subtle.importKey(KEY_FORMAT,
-        { k: key, kty: KEY_TYPE },
+        { k: key.replace(/=/g, ""), kty: KEY_TYPE }, // eslint-disable-line no-div-regex
         ALGORITHM,
         // If the key is extractable.
         true,

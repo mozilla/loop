@@ -726,7 +726,9 @@ loop.OTSdkDriver = (function() {
       ];
 
       dataChannels.forEach(function(args) {
-        var type = args[0], onMessage = args[1], onChannel = args[2];
+        var type = args[0],
+            onMessage = args[1],
+            onChannel = args[2];
         sdkSubscriberObject._.getDataChannel(type, {}, function(err, channel) {
           // Sends will queue until the channel is fully open.
           if (err) {
@@ -786,7 +788,8 @@ loop.OTSdkDriver = (function() {
 
       // This won't work until a subscriber exists for this publisher
       dataChannels.forEach(function(args) {
-        var type = args[0], onChannel = args[1];
+        var type = args[0],
+            onChannel = args[1];
         this.publisher._.getDataChannel(type, {}, function(err, channel) {
           if (err) {
             console.error(err);

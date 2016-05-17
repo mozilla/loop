@@ -3,14 +3,14 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 var loop = loop || {};
-loop.panel = (function(_, mozL10n) {
+loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
   "use strict";
 
   var sharedActions = loop.shared.actions;
   var sharedMixins = loop.shared.mixins;
-  var sharedModels = loop.shared.models;
   var sharedDesktopViews = loop.shared.desktopViews;
   var sharedViews = loop.shared.views;
+  var panelModels = loop.panel.models;
   var Button = sharedViews.Button;
 
   // XXX This must be kept in sync with the number in MozLoopService.jsm.
@@ -145,19 +145,21 @@ loop.panel = (function(_, mozL10n) {
     },
 
     render: function() {
+      var tosString =
+        '<a href="' + this.state.terms_of_use_url + '" target="_blank">' +
+        mozL10n.get("legal_text_tos") +
+        "</a>";
+
+      var privacyString =
+        '<a href="' + this.state.privacy_notice_url + '" target="_blank">' +
+        mozL10n.get("legal_text_privacy") +
+        "</a>";
+
       var locale = mozL10n.language.code;
       var tosHTML = mozL10n.get("legal_text_and_links3", {
         "clientShortname": mozL10n.get("clientShortname2"),
-        "terms_of_use": React.renderToStaticMarkup(
-          <a href={this.state.terms_of_use_url} target="_blank">
-            {mozL10n.get("legal_text_tos")}
-          </a>
-        ),
-        "privacy_notice": React.renderToStaticMarkup(
-          <a href={this.state.privacy_notice_url} target="_blank">
-            {mozL10n.get("legal_text_privacy")}
-          </a>
-        )
+        "terms_of_use": tosString,
+        "privacy_notice": privacyString
       });
 
       return (
@@ -169,7 +171,7 @@ loop.panel = (function(_, mozL10n) {
           </p>
           <p className="terms-service"
              dangerouslySetInnerHTML={{ __html: tosHTML }}
-             onClick={this.handleLinkClick}></p>
+             onClick={this.handleLinkClick} />
          </div>
       );
     }
@@ -463,7 +465,7 @@ loop.panel = (function(_, mozL10n) {
 
     componentDidUpdate: function() {
       if (this.state.editMode) {
-        this.getDOMNode().querySelector(".edit-room-input").focus();
+        ReactDOM.findDOMNode(this).querySelector(".edit-room-input").focus();
       }
     },
 
@@ -713,12 +715,13 @@ loop.panel = (function(_, mozL10n) {
     },
 
     componentDidMount: function() {
-      var menuNode = this.getDOMNode();
+      var menuNode = ReactDOM.findDOMNode(this);
+
       var menuNodeRect = menuNode.getBoundingClientRect();
 
       // Get the parent element and make sure the menu does not overlow its
       // container.
-      var listNode = loop.shared.utils.findParentNode(this.getDOMNode(),
+      var listNode = loop.shared.utils.findParentNode(ReactDOM.findDOMNode(this),
                                                       "rooms");
       var listNodeRect = listNode.getBoundingClientRect();
 
@@ -1055,7 +1058,7 @@ loop.panel = (function(_, mozL10n) {
     componentDidUpdate: function() {
       if (this.state.showPanel) {
         setTimeout(() => {
-          this.getDOMNode().classList.add("share-panel-open");
+          ReactDOM.findDOMNode(this).classList.add("share-panel-open");
         }, this.constructor.SHOW_PANEL_DELAY);
       }
     },
@@ -1146,7 +1149,7 @@ loop.panel = (function(_, mozL10n) {
     },
 
     componentDidMount: function() {
-      this.getDOMNode().querySelector("input").focus();
+      ReactDOM.findDOMNode(this).querySelector("input").focus();
     },
 
     handleBlur: function() {
@@ -1155,7 +1158,7 @@ loop.panel = (function(_, mozL10n) {
 
     handleFocus: function() {
       this.setState({ focused: true });
-      this.getDOMNode().querySelector("input").select();
+      ReactDOM.findDOMNode(this).querySelector("input").select();
     },
 
     handleKeyDown: function(event) {
@@ -1166,7 +1169,7 @@ loop.panel = (function(_, mozL10n) {
 
     handleNameChange: function() {
       let token = this.props.roomToken,
-          name = this.getDOMNode().querySelector("input").value || "";
+          name = ReactDOM.findDOMNode(this).querySelector("input").value || "";
 
       if (name !== this.props.roomName) {
         this.props.dispatcher.dispatch(
@@ -1380,8 +1383,6 @@ loop.panel = (function(_, mozL10n) {
     },
 
     render: function() {
-      var NotificationListView = sharedViews.NotificationListView;
-
       if (this.state.multiProcessActive && !this.state.remoteAutoStart) {
         return (
           <E10sNotSupported onClick={this.launchNonE10sWindow} />
@@ -1446,6 +1447,89 @@ loop.panel = (function(_, mozL10n) {
   });
 
   /**
+   * Notification view.
+   */
+  var NotificationView = React.createClass({
+    mixins: [Backbone.Events],
+
+    propTypes: {
+      notification: React.PropTypes.object.isRequired
+    },
+
+    render: function() {
+      var notification = this.props.notification;
+      return (
+        <div className="notificationContainer">
+          <div className={"alert alert-" + notification.get("level")}>
+            <span className="message">{notification.get("message")}</span>
+          </div>
+          <div className={"detailsBar details-" + notification.get("level")}
+               hidden={!notification.get("details")}>
+            <button className="detailsButton btn-info"
+                    hidden={!notification.get("detailsButtonLabel") || !notification.get("detailsButtonCallback")}
+                    onClick={notification.get("detailsButtonCallback")}>
+              {notification.get("detailsButtonLabel")}
+            </button>
+            <span className="details">{notification.get("details")}</span>
+          </div>
+        </div>
+      );
+    }
+  });
+
+  /**
+   * Notification list view.
+   */
+  var NotificationListView = React.createClass({
+    mixins: [Backbone.Events, sharedMixins.DocumentVisibilityMixin],
+
+    propTypes: {
+      clearOnDocumentHidden: React.PropTypes.bool,
+      notifications: React.PropTypes.object.isRequired
+    },
+
+    getDefaultProps: function() {
+      return { clearOnDocumentHidden: false };
+    },
+
+    componentDidMount: function() {
+      this.listenTo(this.props.notifications, "reset add remove", function() {
+        this.forceUpdate();
+      });
+    },
+
+    componentWillUnmount: function() {
+      this.stopListening(this.props.notifications);
+    },
+
+    /**
+     * Provided by DocumentVisibilityMixin. Clears notifications stack when the
+     * current document is hidden if the clearOnDocumentHidden prop is set to
+     * true and the collection isn't empty.
+     */
+    onDocumentHidden: function() {
+      if (this.props.clearOnDocumentHidden &&
+          this.props.notifications.length > 0) {
+        // Note: The `silent` option prevents the `reset` event to be triggered
+        // here, preventing the UI to "jump" a little because of the event
+        // callback being processed in another tick (I think).
+        this.props.notifications.reset([], { silent: true });
+        this.forceUpdate();
+      }
+    },
+
+    render: function() {
+      return (
+        <div className="messages">
+          {this.props.notifications.map(function(notification, key) {
+            return <NotificationView key={key} notification={notification} />;
+          })}
+        </div>
+      );
+    }
+  });
+
+  /**
    * Panel initialisation.
    */
   function init() {
@@ -1495,14 +1579,14 @@ loop.panel = (function(_, mozL10n) {
         loop.storeRequest(req, results[++requestIdx]);
       });
 
-      var notifications = new sharedModels.NotificationCollection();
+      var notifications = new panelModels.NotificationCollection();
       var dispatcher = new loop.Dispatcher();
       var roomStore = new loop.store.RoomStore(dispatcher, {
         notifications: notifications,
         constants: constants
       });
 
-      React.render(<PanelView
+      ReactDOM.render(<PanelView
         dispatcher={dispatcher}
         notifications={notifications}
         roomStore={roomStore} />, document.querySelector("#main"));
@@ -1526,6 +1610,7 @@ loop.panel = (function(_, mozL10n) {
     GettingStartedView: GettingStartedView,
     init: init,
     NewRoomView: NewRoomView,
+    NotificationListView: NotificationListView,
     PanelView: PanelView,
     RenameRoomView: RenameRoomView,
     RoomEntry: RoomEntry,
@@ -1536,6 +1621,6 @@ loop.panel = (function(_, mozL10n) {
     SignInRequestView: SignInRequestView,
     ToSView: ToSView
   };
-})(_, document.mozL10n);
+})(_, document.mozL10n));
 
 document.addEventListener("DOMContentLoaded", loop.panel.init);

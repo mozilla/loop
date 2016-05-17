@@ -300,7 +300,7 @@ PingMonitor.prototype = {
   restart: function() {
     consoleLog.info("PushHandler: ping timeout restart");
     this.stop();
-    this._pingTimerID = setTimeout(() => { this._pingSend(); }, this._pingInterval);
+    this._pingTimerID = setTimeout(() => this._pingSend(), this._pingInterval);
   },
 
   /**

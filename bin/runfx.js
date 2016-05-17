@@ -63,7 +63,7 @@ var profile = Commander.profile || DEFAULT_PROFILE;
 var extensionsDir, addonTargetDir;
 Fs.stat(addonSourceDir).then(function(sourceStat) {
   if (!sourceStat.isDirectory()) {
-    throw "Not a directory";
+    throw new Error("Not a directory");
   }
 }).catch(function(err) {
   onExit(err, "ERROR! Please run `make build` first!");

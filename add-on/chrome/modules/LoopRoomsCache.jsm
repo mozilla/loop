@@ -63,9 +63,8 @@ LoopRoomsCache.prototype = {
   _setCache: function(contents) {
     this._cache = contents;
 
-    return OS.File.makeDir(this.baseDir, { ignoreExisting: true }).then(() => {
-        return CommonUtils.writeJSON(contents, this.path);
-      });
+    return OS.File.makeDir(this.baseDir, { ignoreExisting: true }).then(() =>
+      CommonUtils.writeJSON(contents, this.path));
   },
 
   /**

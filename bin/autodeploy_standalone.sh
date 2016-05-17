@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
   cat <<USAGE_END
-  Usage: autodeploy_standalone.sh <BASEDIR>
+  Usage: autodeploy_standalone.sh <BASEDIR> <BRANCH>
 
   A script to automatically deploy the latest version of the loop standalone
   server, with latest localisations from loop-client-l10n.
@@ -33,6 +33,7 @@ fi
 set -e
 
 BASEDIR=$1
+BRANCH=$2
 
 env
 
@@ -45,7 +46,7 @@ git reset --hard HEAD
 git clean -f
 
 # Now pull latest...
-git pull origin master
+git pull origin $BRANCH
 
 make install
 

@@ -180,7 +180,7 @@ loop.SimpleSlideshow = (function() {
     else {
       component = <EmptyMessage />;
     }
-    React.render(
+    ReactDOM.render(
       component,
       document.querySelector(renderTo ? renderTo : "#main")
     );

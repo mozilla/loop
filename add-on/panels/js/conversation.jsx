@@ -187,9 +187,8 @@ loop.conversation = (function(mozL10n) {
         isDesktop: true,
         sdkDriver: sdkDriver
       });
-      var conversationAppStore = new loop.store.ConversationAppStore({
+      var conversationAppStore = new loop.store.ConversationAppStore(dispatcher, {
         activeRoomStore: activeRoomStore,
-        dispatcher: dispatcher,
         feedbackPeriod: results[++requestIdx],
         feedbackTimestamp: results[++requestIdx],
         facebookEnabled: results[++requestIdx]
@@ -217,7 +216,7 @@ loop.conversation = (function(mozL10n) {
         textChatStore: textChatStore
       });
 
-      React.render(
+      ReactDOM.render(
         <AppControllerView
           cursorStore={remoteCursorStore}
           dispatcher={dispatcher}

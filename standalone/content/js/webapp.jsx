@@ -184,8 +184,7 @@ loop.webapp = (function(_, OT, mozL10n) {
     });
 
     // Stores
-    var standaloneAppStore = new loop.store.StandaloneAppStore({
-      dispatcher: dispatcher,
+    var standaloneAppStore = new loop.store.StandaloneAppStore(dispatcher, {
       sdk: OT
     });
     var standaloneMetricsStore = new loop.store.StandaloneMetricsStore(dispatcher, {
@@ -211,7 +210,7 @@ loop.webapp = (function(_, OT, mozL10n) {
       dispatcher.dispatch(new sharedActions.WindowUnload());
     });
 
-    React.render(<WebappRootView
+    ReactDOM.render(<WebappRootView
       activeRoomStore={activeRoomStore}
       cursorStore={remoteCursorStore}
       dispatcher={dispatcher}

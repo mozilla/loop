@@ -44,9 +44,9 @@ loop.store = loop.store || {};
   function Room(values) {
     var validatedData = new loop.validate.Validator(roomSchema || {})
                                          .validate(values || {});
-    for (var prop in validatedData) {
+    Object.keys(validatedData).forEach(prop => {
       this[prop] = validatedData[prop];
-    }
+    });
   }
 
   loop.store.Room = Room;

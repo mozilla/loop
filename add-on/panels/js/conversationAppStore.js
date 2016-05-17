@@ -18,45 +18,40 @@ loop.store.ConversationAppStore = (function() {
    * @param {Object} options Options for the store. Should contain the
    *                         activeRoomStore and dispatcher objects.
    */
-  var ConversationAppStore = function(options) {
-    if (!options.activeRoomStore) {
-      throw new Error("Missing option activeRoomStore");
-    }
-    if (!options.dispatcher) {
-      throw new Error("Missing option dispatcher");
-    }
-    if (!("feedbackPeriod" in options)) {
-      throw new Error("Missing option feedbackPeriod");
-    }
-    if (!("feedbackTimestamp" in options)) {
-      throw new Error("Missing option feedbackTimestamp");
-    }
+  var ConversationAppStore = loop.store.createStore({
+    initialize: function(options) {
+      if (!options.activeRoomStore) {
+        throw new Error("Missing option activeRoomStore");
+      }
+      if (!("feedbackPeriod" in options)) {
+        throw new Error("Missing option feedbackPeriod");
+      }
+      if (!("feedbackTimestamp" in options)) {
+        throw new Error("Missing option feedbackTimestamp");
+      }
+      this._activeRoomStore = options.activeRoomStore;
+      this._facebookEnabled = options.facebookEnabled;
+      this._feedbackPeriod = options.feedbackPeriod;
+      this._feedbackTimestamp = options.feedbackTimestamp;
+      this._rootObj = ("rootObject" in options) ? options.rootObject : window;
+      this._storeState = this.getInitialStoreState();
 
-    this._activeRoomStore = options.activeRoomStore;
-    this._dispatcher = options.dispatcher;
-    this._facebookEnabled = options.facebookEnabled;
-    this._feedbackPeriod = options.feedbackPeriod;
-    this._feedbackTimestamp = options.feedbackTimestamp;
-    this._rootObj = ("rootObject" in options) ? options.rootObject : window;
-    this._storeState = this.getInitialStoreState();
+      // Start listening for specific events, coming from the window object.
+      this._eventHandlers = {};
+      ["unload", "LoopHangupNow", "socialFrameAttached", "socialFrameDetached", "ToggleBrowserSharing"]
+        .forEach(function(eventName) {
+          var handlerName = eventName + "Handler";
+          this._eventHandlers[eventName] = this[handlerName].bind(this);
+          this._rootObj.addEventListener(eventName, this._eventHandlers[eventName]);
+        }.bind(this));
 
-    // Start listening for specific events, coming from the window object.
-    this._eventHandlers = {};
-    ["unload", "LoopHangupNow", "socialFrameAttached", "socialFrameDetached", "ToggleBrowserSharing"]
-      .forEach(function(eventName) {
-        var handlerName = eventName + "Handler";
-        this._eventHandlers[eventName] = this[handlerName].bind(this);
-        this._rootObj.addEventListener(eventName, this._eventHandlers[eventName]);
-      }.bind(this));
+      this.dispatcher.register(this, [
+        "getWindowData",
+        "showFeedbackForm",
+        "leaveConversation"
+      ]);
+    },
 
-    this._dispatcher.register(this, [
-      "getWindowData",
-      "showFeedbackForm",
-      "leaveConversation"
-    ]);
-  };
-
-  ConversationAppStore.prototype = _.extend({
     getInitialStoreState: function() {
       return {
         chatWindowDetached: false,
@@ -120,7 +115,7 @@ loop.store.ConversationAppStore = (function() {
 
       this.setStoreState({ windowType: windowData.type });
 
-      this._dispatcher.dispatch(new loop.shared.actions.SetupWindowData(_.extend({
+      this.dispatcher.dispatch(new loop.shared.actions.SetupWindowData(_.extend({
         windowId: actionData.windowId }, windowData)));
     },
 
@@ -131,7 +126,7 @@ loop.store.ConversationAppStore = (function() {
      * and will remove all event handlers attached to the window object.
      */
     unloadHandler: function() {
-      this._dispatcher.dispatch(new loop.shared.actions.WindowUnload());
+      this.dispatcher.dispatch(new loop.shared.actions.WindowUnload());
 
       // Unregister event handlers.
       var eventNames = Object.getOwnPropertyNames(this._eventHandlers);
@@ -148,7 +143,7 @@ loop.store.ConversationAppStore = (function() {
      * the window when no session is currently active.
      */
     LoopHangupNowHandler: function() {
-      this._dispatcher.dispatch(new loop.shared.actions.LeaveConversation());
+      this.dispatcher.dispatch(new loop.shared.actions.LeaveConversation());
     },
 
     /**
@@ -169,10 +164,10 @@ loop.store.ConversationAppStore = (function() {
       // 0 is default value for pref. Always show feedback form on first use.
       if (this.getStoreState().feedbackTimestamp === 0 ||
           delta >= this.getStoreState().feedbackPeriod) {
-        this._dispatcher.dispatch(new loop.shared.actions.LeaveRoom({
+        this.dispatcher.dispatch(new loop.shared.actions.LeaveRoom({
           windowStayingOpen: true
         }));
-        this._dispatcher.dispatch(new loop.shared.actions.ShowFeedbackForm());
+        this.dispatcher.dispatch(new loop.shared.actions.ShowFeedbackForm());
         return;
       }
 
@@ -185,7 +180,7 @@ loop.store.ConversationAppStore = (function() {
      * It'll attempt to pause or resume the screen share as appropriate.
      */
     ToggleBrowserSharingHandler: function(actionData) {
-      this._dispatcher.dispatch(new loop.shared.actions.ToggleBrowserSharing({
+      this.dispatcher.dispatch(new loop.shared.actions.ToggleBrowserSharing({
         enabled: !actionData.detail
       }));
     },
@@ -205,7 +200,7 @@ loop.store.ConversationAppStore = (function() {
     socialFrameDetachedHandler: function() {
       this.setStoreState({ chatWindowDetached: true });
     }
-  }, Backbone.Events);
+  });
 
   return ConversationAppStore;
 

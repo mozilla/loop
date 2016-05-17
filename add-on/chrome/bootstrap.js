@@ -1374,13 +1374,6 @@ function loadDefaultPrefs() {
   if (Services.vc.compare(Services.appinfo.version, "47.0a1") < 0) {
     branch.setBoolPref("loop.remote.autostart", false);
   }
-
-  // Don't enable pop-outs in Firefox 47 - that's where e10s is enabled, and popping
-  // out currently fails (bug 1245813).
-  if (Services.vc.compare(Services.appinfo.version, "47.0a1") >= 0 &&
-      Services.vc.compare(Services.appinfo.version, "48.0a1") < 0) {
-    branch.setBoolPref("loop.conversationPopOut.enabled", false);
-  }
 }
 
 /**

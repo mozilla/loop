@@ -77,7 +77,7 @@ describe("loop.feedbackViews", function() {
       getAddonVersionStub.returns(addonVersion);
       view = mountTestComponent();
 
-      TestUtils.Simulate.click(view.refs.feedbackFormBtn.getDOMNode());
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(view.refs.feedbackFormBtn));
 
       sinon.assert.calledOnce(openURLStub);
       sinon.assert.calledWithExactly(openURLStub, fakeURL);
@@ -88,7 +88,7 @@ describe("loop.feedbackViews", function() {
       getAddonVersionStub.returns(addonVersion);
       view = mountTestComponent();
 
-      TestUtils.Simulate.click(view.refs.feedbackFormBtn.getDOMNode());
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(view.refs.feedbackFormBtn));
 
       sinon.assert.calledOnce(getLoopPrefStub);
       sinon.assert.calledWithExactly(getLoopPrefStub, "feedback.formURL");
@@ -99,7 +99,7 @@ describe("loop.feedbackViews", function() {
       getAddonVersionStub.returns(addonVersion);
       view = mountTestComponent();
 
-      TestUtils.Simulate.click(view.refs.feedbackFormBtn.getDOMNode());
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(view.refs.feedbackFormBtn));
 
       sinon.assert.calledOnce(getAddonVersionStub);
       sinon.assert.calledWithExactly(getAddonVersionStub);
@@ -110,7 +110,7 @@ describe("loop.feedbackViews", function() {
       getAddonVersionStub.returns(addonVersion);
       view = mountTestComponent();
 
-      TestUtils.Simulate.click(view.refs.feedbackFormBtn.getDOMNode());
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(view.refs.feedbackFormBtn));
 
       sinon.assert.calledOnce(feedbackReceivedStub);
     });

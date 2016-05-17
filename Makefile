@@ -52,7 +52,7 @@ XPI_NAME := loop@mozilla.org.xpi
 XPI_FILE := $(BUILT)/$(XPI_NAME)
 
 VENV := $(BUILT)/.venv
-BABEL := $(NODE_LOCAL_BIN)/babel
+BABEL := $(NODE_LOCAL_BIN)/babel --retain-lines
 ESLINT := $(NODE_LOCAL_BIN)/eslint
 FLAKE8 := $(NODE_LOCAL_BIN)/flake8
 
@@ -239,44 +239,58 @@ $(BUILT)/add-on/install.rdf: add-on/install.rdf.in \
 # targets themselves. A shared recipe builds each of the .js files by compiling
 # the appropriate prerequisite file.
 
-# The shared files currently get built once for each destination; we could
-# optimize this away. We use the shared_jsx_files to make this more readable.
+shared_js_files=$(wildcard shared/js/*.js)
 shared_jsx_files=$(wildcard shared/js/*.jsx)
-built_ui_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/ui/%.js)
-built_add_on_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/add-on/chrome/content/%.js)
-built_standalone_shared_js_files=$(shared_jsx_files:%.jsx=$(BUILT)/standalone/content/%.js)
+shared_test_files=$(wildcard shared/test/*.js)
+shared_files=$(shared_js_files) $(shared_jsx_files:.jsx=.js) $(shared_test_files)
+built_shared_js_files=$(addprefix $(BUILT)/, $(shared_files))
 
 #
 # The following sections are for the non-shared assets:
 #
 
 # ui-showcase
+ui_js_files=$(wildcard ui/*.js)
 ui_jsx_files=$(wildcard ui/*.jsx)
-built_ui_js_files=$(ui_jsx_files:%.jsx=$(BUILT)/%.js)
+ui_files=$(ui_js_files) $(ui_jsx_files:%.jsx=%.js)
+built_ui_js_files= $(addprefix $(BUILT)/, $(ui_files))
 
 # standalone
+standalone_js_files=$(wildcard standalone/content/js/*.js)
 standalone_jsx_files=$(wildcard standalone/content/js/*.jsx)
-built_standalone_js_files=$(standalone_jsx_files:%.jsx=$(BUILT)/%.js)
+standalone_misc_files=$(wildcard standalone/*.js) \
+	$(wildcard standalone/content/*.js)
+standalone_test_files=$(wildcard standalone/test/*.js)
+standalone_files=$(standalone_js_files) \
+	$(standalone_jsx_files:%.jsx=%.js) \
+	$(standalone_misc_files) \
+	$(standalone_test_files)
+built_standalone_js_files= \
+	$(addprefix $(BUILT)/, $(standalone_files))
 
 standalone_l10n_files=$(wildcard locale/*/standalone.properties)
-built_standalone_l10n_files=$(patsubst locale/%/standalone.properties, \
-	$(BUILT)/standalone/content/l10n/%/loop.properties, \
-	$(standalone_l10n_files))
+built_standalone_l10n_files= \
+	$(standalone_l10n_files:locale/%/standalone.properties=$(BUILT)/standalone/content/l10n/%/loop.properties)
 
 $(BUILT)/standalone/content/l10n/%/loop.properties: locale/%/standalone.properties locale/%/shared.properties
 	@mkdir -p $(@D)
 	cat $^ > $@
 
 # add-on
+add_on_js_files=$(wildcard add-on/panels/js/*.js)
 add_on_jsx_files=$(wildcard add-on/panels/js/*.jsx)
-built_add_on_js_files=$(patsubst add-on/panels/js/%.jsx, \
-	 $(BUILT)/add-on/chrome/content/panels/js/%.js, \
-	 $(add_on_jsx_files))
-
+add_on_module_js_files=$(wildcard add-on/chrome/modules/*.js)
+add_on_module_jsm_files=$(wildcard add-on/chrome/modules/*.jsm)
+add_on_test_files=$(wildcard add-on/panels/test/*.js)
 add_on_vendor_jsx_files=$(wildcard add-on/panels/vendor/*.jsx)
-built_add_on_vendor_js_files=$(patsubst add-on/panels/vendor/%.jsx, \
-	 $(BUILT)/add-on/chrome/content/panels/vendor/%.js, \
-	 $(add_on_vendor_jsx_files))
+add_on_files=$(add_on_js_files) \
+	$(add_on_jsx_files:%.jsx=%.js) \
+	$(add_on_module_js_files) \
+	$(add_on_module_jsm_files) \
+	$(add_on_test_files) \
+	$(add_on_vendor_jsx_files:%.jsx=%.js)
+built_add_on_js_files=$(addprefix $(BUILT)/, add-on/bootstrap.js \
+	$(subst chrome/,chrome/content/, $(subst panels/,chrome/panels/, $(add_on_files))))
 
 add_on_l10n_files=$(wildcard locale/*/add-on.properties)
 built_add_on_l10n_files=$(patsubst locale/%/add-on.properties, \
@@ -295,28 +309,35 @@ $(BUILT)/add-on/chrome/locale/%/loop.properties: locale/%/add-on.properties loca
 # specific rules, i.e., a target for a parent directory (which happens to match
 # all sub directories) comes before a sub directory with a different `PREREQ`.
 # This ordering can be achieved by keeping the list lexicographically sorted.
-$(BUILT)/add-on/chrome/content/panels/js/%.js: PREREQ = add-on/panels/js/$(@F)x
-$(BUILT)/add-on/chrome/content/panels/vendor/%.js: PREREQ = add-on/panels/vendor/$(@F)x
-$(BUILT)/add-on/chrome/content/shared/js/%.js: PREREQ = shared/js/$(@F)x
-$(BUILT)/standalone/content/js/%.js: PREREQ = standalone/content/js/$(@F)x
-$(BUILT)/standalone/content/shared/js/%.js: PREREQ = shared/js/$(@F)x
-$(BUILT)/ui/%.js: PREREQ = ui/$(@F)x
-$(BUILT)/ui/shared/js/%.js: PREREQ = shared/js/$(@F)x
+
+# Lines below that end in * are directories that contain both jsx and js files;
+# Directories that contain one or the other don't include the *.
+$(BUILT)/add-on/bootstrap.js: PREREQ = add-on/chrome/bootstrap.js
+$(BUILT)/add-on/chrome/content/modules/%.js: PREREQ = add-on/chrome/modules/$(@F)
+$(BUILT)/add-on/chrome/content/modules/%.jsm: PREREQ = add-on/chrome/modules/$(@F)
+$(BUILT)/add-on/chrome/content/panels/js/%.js: PREREQ = add-on/panels/js/$(@F)*
+$(BUILT)/add-on/chrome/content/panels/test/%.js: PREREQ = add-on/panels/test/$(@F)
+$(BUILT)/add-on/chrome/content/panels/vendor/%.js: PREREQ = add-on/panels/vendor/$(@F)*
+$(BUILT)/shared/js/%.js: PREREQ = shared/js/$(@F)*
+$(BUILT)/shared/test/%.js: PREREQ = shared/test/$(@F)*
+$(BUILT)/standalone/%.js: PREREQ = standalone/$(@F)
+$(BUILT)/standalone/content/%.js: PREREQ = standalone/content/$(@F)
+$(BUILT)/standalone/content/js/%.js: PREREQ = standalone/content/js/$(@F)*
+$(BUILT)/standalone/test/%.js: PREREQ = standalone/test/$(@F)*
+$(BUILT)/ui/%.js: PREREQ = ui/$(@F)*
+
 
 # During Makefile's secondary $$(variable) expansion, use the prerequisite
 # specified in the pattern-specific `PREREQ` to build one of the explicily
 # listed targets from the `built_*_js_files` variables.
 ALL_BUILT_JS_FILES = \
 	$(built_add_on_js_files) \
-	$(built_add_on_shared_js_files) \
-	$(built_add_on_vendor_js_files) \
+	$(built_shared_js_files) \
 	$(built_standalone_js_files) \
-	$(built_standalone_shared_js_files) \
-	$(built_ui_js_files) \
-	$(built_ui_shared_js_files)
+	$(built_ui_js_files)
 
 .SECONDEXPANSION:
-$(ALL_BUILT_JS_FILES): %: $$(PREREQ)
+$(ALL_BUILT_JS_FILES): %: $$(PREREQ) .babelrc
 	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
@@ -324,11 +345,13 @@ $(ALL_BUILT_JS_FILES): %: $$(PREREQ)
 # server.js magic to redirect?
 # XXX ecma3 transform for IE?
 .PHONY: ui
-ui: node_modules $(built_ui_js_files) $(built_ui_shared_js_files) vendor_libs
+ui: node_modules $(built_ui_js_files) $(built_shared_js_files) vendor_libs
 	mkdir -p $(BUILT)/$@
-	$(RSYNC) $@ $(BUILT)
+	$(RSYNC) --exclude='*.js' $@ $(BUILT)
 	mkdir -p $(BUILT)/$@/shared
-	$(RSYNC) shared $(BUILT)/$@
+	$(RSYNC) $(BUILT)/shared $(BUILT)/$@
+	$(RSYNC) --exclude='*.js' shared $(BUILT)/$@
+	$(RSYNC) shared/vendor $(BUILT)/$@/shared
 
 .PHONY: standalone
 standalone: node_modules \
@@ -336,34 +359,36 @@ standalone: node_modules \
             $(BACKBONE_OBJS) \
             $(LODASH_OBJS) \
             $(built_standalone_js_files) \
-            $(built_standalone_shared_js_files) \
+            $(built_shared_js_files) \
             $(built_standalone_l10n_files)
 	mkdir -p $(BUILT)/$@
-	$(RSYNC) $@ $(BUILT)
+	$(RSYNC) --exclude='*.js' $@ $(BUILT)
+	$(RSYNC) $@/content/vendor $(BUILT)/$@/content
 	mkdir -p $(BUILT)/$@/content/shared
-	$(RSYNC) shared $(BUILT)/$@/content
+	$(RSYNC) $(BUILT)/shared $(BUILT)/$@/content
+	$(RSYNC) --exclude='*.js' shared $(BUILT)/$@/content
+	$(RSYNC) shared/vendor $(BUILT)/$@/content/shared
 
 .PHONY: add-on
 add-on: node_modules \
 	      vendor_libs \
 	      $(built_add_on_js_files) \
-	      $(built_add_on_shared_js_files) \
-	      $(built_add_on_vendor_js_files) \
+	      $(built_shared_js_files) \
 	      $(built_add_on_l10n_files) \
 	      $(BUILT)/$(ADD-ON)/chrome.manifest \
 	      $(BUILT)/$(ADD-ON)/chrome/locale/chrome.manifest \
 	      $(BUILT)/$(ADD-ON)/install.rdf \
 	      $(BUILT)/add-on/chrome/content/preferences/prefs.js
 	mkdir -p $(BUILT)/$@
-	$(RSYNC) $@/chrome/bootstrap.js $(BUILT)/$@
 	mkdir -p $(BUILT)/$@/chrome/content/panels
-	$(RSYNC) $@/panels $(BUILT)/$@/chrome/content
-	mkdir -p $(BUILT)/$@/chrome/content/modules
-	$(RSYNC) $@/chrome/modules $(BUILT)/$@/chrome/content
+	$(RSYNC) --exclude='*.js' $@/panels $(BUILT)/$@/chrome/content
+	$(RSYNC) $@/panels/vendor $(BUILT)/$@/chrome/content/panels
 	mkdir -p $(BUILT)/$@/chrome/test
 	$(RSYNC) $@/chrome/test $(BUILT)/$@/chrome
 	mkdir -p $(BUILT)/$@/chrome/content/shared
-	$(RSYNC) shared $(BUILT)/$@/chrome/content
+	$(RSYNC) $(BUILT)/shared $(BUILT)/$@/chrome/content
+	$(RSYNC) --exclude='*.js' shared $(BUILT)/$@/chrome/content
+	$(RSYNC) shared/vendor $(BUILT)/$@/chrome/content/shared
 	$(RSYNC) $@/chrome/skin $(BUILT)/$@/chrome/
 
 $(BUILT)/$(ADD-ON)/chrome.manifest: $(ADD-ON)/jar.mn

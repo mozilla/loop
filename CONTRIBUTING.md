@@ -93,6 +93,12 @@ When practical:
 - The images are optimized
 - It should be (keyboard- and/or ARIA-) accessible
 
+Testing new Mochitests:
+While it is usually sufficient to test new mochitests locally, some tests 
+may fail running on other platforms. Pushing your new tests to the Try 
+server is necessary before landing. See [Push-To-Try.md](docs/Push-To-Try.md) 
+for how to setup and push to Try server.
+
 Landing
 -------
 

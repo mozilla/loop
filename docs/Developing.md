@@ -34,7 +34,7 @@ can use the command to run the standalone server:
 
 ```shell
 $ make runserver
-````
+```
 
 Running
 =======
@@ -137,10 +137,10 @@ modules and files.
 
 **Test Export to Mozilla Central**
 
-The mozilla-central repo is cloned locally and is used as the xpcshell and 
+The mozilla-central repo is cloned locally and is used as the xpcshell and
 mochitest test build. See [the simple Firefox build instructions]
-(https://developer.mozilla.org/docs/Mozilla/Developer_guide/Build_Instructions/Simple_Firefox_build) 
-for setting up a repository for a Firefox build. There is also a 
+(https://developer.mozilla.org/docs/Mozilla/Developer_guide/Build_Instructions/Simple_Firefox_build)
+for setting up a repository for a Firefox build. There is also a
 [git-cinnibar](https://github.com/glandium/git-cinnabar) wrapper to allow using git for the repository.
 
 Note: different integration branches may be used, e.g. most of the team develops against `fx-team`
@@ -154,30 +154,30 @@ mozilla-central$ git checkout fx-team
 mozilla-central$ git reset --hard HEAD
 mozilla-central$ git clean -f
 mozilla-central$ git status
-``` 
+```
 
 ```shell
 mozilla-central$ hg pull
 mozilla-central$ hg purge .
 mozilla-central$ hg update -r default
-``` 
+```
 
 Once reset, you should not see mozilla-central/browser/extensions/loop/ directory or files.
 You can now pull fx-team latest.
 ```shell
 mozilla-central$ git pull
-```  
+```
 
 ```shell
 mozilla-central$ hg pull
-```  
+```
 
 **Git export from loop repo**
 
-You can export from any branch of the repository, but it is generally advised 
+You can export from any branch of the repository, but it is generally advised
 for it to be based on latest master for running tests.
 
-You can set your default export_mc location by setting the environment variable 
+You can set your default export_mc location by setting the environment variable
 EXPORT_MC_LOCATION to the location of your repository. If you do not set the environment variable
 it defaults to `../gecko-dev`
 
@@ -192,11 +192,11 @@ Run status to show the add-on extension directory and files now appear in the mo
 It will take some time to build.
 ```shell
 mozilla-central$ ./mach build
-``` 
+```
 
 **Running Tests**
 
-To run all the tests for both XPCShell and Mochitest 
+To run all the tests for both XPCShell and Mochitest
 ```shell
 mozilla-central$ ./mach test browser/extensions/loop/chrome/test
 ```
@@ -221,12 +221,15 @@ mozilla-central$ ./mach build browser/extensions/loop
 
 **Run all tests relevant to Loop**
 
-If you are doing big changes, you might want to run all tests that are known 
+If you are doing big changes, you might want to run all tests that are known
 that could be broken by Loop. To do that, run this command:
 
 ```shell
-mozilla-central$ sh ./browser/extensions/loop/run-all-loop-tests.sh 
+mozilla-central$ sh ./browser/extensions/loop/run-all-loop-tests.sh
 ```
+
+Testing mochitests on the try server is necessary as some tests may fail on other platforms.
+Please see [Push-To-Try.md](docs/Push-To-Try.md) for how to setup and push to Try server.
 
 Functional Tests
 ----------------

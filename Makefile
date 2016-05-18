@@ -492,6 +492,10 @@ eslint:
 flake8: $(VENV)
 	. $(VENV)/bin/activate && flake8 .
 
+.PHONY: check_strings
+check_strings:
+	@$(VENV)/bin/python bin/stringsCompletenessTest.py
+
 .PHONY: lint
 lint: eslint flake8
 

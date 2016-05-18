@@ -1171,4 +1171,108 @@ describe("loop.shared.views", function() {
         }));
     });
   });
+
+  describe("EditableFieldView", function() {
+    var testView, onEditionCompleteStub;
+
+    function mountTestComponent(props) {
+      props = props || {};
+      var view = TestUtils.renderIntoDocument(
+        React.createElement(sharedViews.EditableFieldView, props));
+
+      return view;
+    }
+
+    beforeEach(function() {
+      onEditionCompleteStub = sinon.stub();
+      testView = mountTestComponent({
+        label: "Fake label",
+        onEditionComplete: onEditionCompleteStub
+      });
+    });
+
+    it("should enter in edit mode when label is clicked", function() {
+      var label = ReactDOM.findDOMNode(testView).querySelector("span");
+      TestUtils.Simulate.click(label);
+
+      expect(testView.state.editMode).eql(true);
+    });
+
+    it("should render an editable component", function() {
+      testView.setState({
+        editMode: true
+      });
+
+      expect(ReactDOM.findDOMNode(testView).classList.contains("edit-mode-enabled")).eql(true);
+    });
+
+    it("should update the label state when input has changed", function() {
+      testView.setState({
+        editMode: true
+      });
+
+      var input = testView.refs.editableInput;
+      input.value = "Label changed";
+      TestUtils.Simulate.change(input);
+
+      expect(testView.state.editableLabel).eql("Label changed");
+    });
+
+    it("should update the input width when content changes", function() {
+      testView.setState({
+        editMode: true
+      });
+
+      var spy = sinon.spy(testView, "_calculateInputWidth");
+
+      var input = testView.refs.editableInput;
+      input.value = "Label changed";
+      TestUtils.Simulate.change(input);
+
+      sinon.assert.calledOnce(spy);
+    });
+
+    it("should exit edit mode when user press enter key", function() {
+      testView.setState({
+        editMode: true
+      });
+
+      var input = testView.refs.editableInput;
+      TestUtils.Simulate.keyDown(input, { key: "Enter", keyCode: 13, which: 13 });
+
+      expect(testView.state.editMode).eql(false);
+    });
+
+    it("should exit edit mode when user press enter key", function() {
+      testView.setState({
+        editMode: true
+      });
+
+      var input = testView.refs.editableInput;
+      TestUtils.Simulate.keyDown(input, { key: "Enter", keyCode: 13, which: 13 });
+
+      expect(testView.state.editMode).eql(false);
+    });
+
+    it("should invoke callback on exiting edit mode", function() {
+      testView.setState({
+        editMode: true
+      });
+
+      var input = testView.refs.editableInput;
+      TestUtils.Simulate.keyDown(input, { key: "Enter", keyCode: 13, which: 13 });
+
+      sinon.assert.calledOnce(onEditionCompleteStub);
+    });
+
+    it("should not render an editable field when forceNotEditable prop is enabled", function() {
+      testView = mountTestComponent({
+        forceNotEditable: true,
+        label: "Fake label"
+      });
+
+      var input = testView.refs.editableInput;
+      expect(input).eql(undefined);
+    });
+  });
 });

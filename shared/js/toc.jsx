@@ -75,6 +75,7 @@ loop.shared.toc = (function(mozL10n) {
           <RoomInfoBarView
             addUrlTile={this.addTile}
             dispatcher={this.props.dispatcher}
+            isDesktop={loop.shared.utils.isDesktop()}
             roomName={this.state.roomName ? this.state.roomName
               : "BUG: NO NAME SPECIFIED"}
             roomToken={this.state.roomToken} />
@@ -89,6 +90,7 @@ loop.shared.toc = (function(mozL10n) {
     propTypes: {
       addUrlTile: React.PropTypes.func.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      isDesktop: React.PropTypes.bool.isRequired,
       roomName: React.PropTypes.string.isRequired,
       roomToken: React.PropTypes.string.isRequired
     },
@@ -99,67 +101,29 @@ loop.shared.toc = (function(mozL10n) {
       });
     },
 
-    componentDidUpdate: function() {
-      if (this.state.editMode) {
-        ReactDOM.findDOMNode(this).querySelector(".edit-room-name").focus();
-      }
-    },
-
     getInitialState: function() {
       return {
-        editMode: false,
         roomName: this.props.roomName || "#ROOM NAME"
       };
     },
 
-    // XXX akita: add jsdoc
-    toggleEditMode: function() {
-      this.setState({
-        editMode: true
-      });
-    },
-
-    /**
-     * Handles a key being pressed - looking for the return key for saving
-     * the new room name.
-     */
-    handleKeyDown: function(event) {
-      if (event.which === 13) {
-        this.exitEditMode();
-      }
-    },
-
-    // XXX akita: add jsdoc
-    exitEditMode: function() {
+    exitEditMode: function(value) {
       this.props.dispatcher.dispatch(
         new sharedActions.UpdateRoomContext({
           roomToken: this.props.roomToken,
-          newRoomName: this.state.roomName
+          newRoomName: value
         })
       );
-      this.setState({ editMode: false });
-    },
-
-    // XXX akita: add jsdoc
-    handleEditInputChange: function(event) {
-      this.setState({ roomName: event.target.value });
     },
 
     render: function() {
       return (
         <div className="toc-room-info-bar">
           <div className="room-name">
-            {
-              !this.state.editMode ?
-              <h1 onClick={this.toggleEditMode}>{this.state.roomName}</h1> :
-              <input
-                className="edit-room-name"
-                onBlur={this.exitEditMode}
-                onChange={this.handleEditInputChange}
-                onKeyDown={this.handleKeyDown}
-                type="text"
-                value={this.state.roomName} />
-            }
+            <sharedViews.EditableFieldView
+              forceNotEditable={!this.props.isDesktop}
+              label={this.state.roomName}
+              onEditionComplete={this.exitEditMode} />
           </div>
           <RoomPresenceView />
           <RoomActionsView

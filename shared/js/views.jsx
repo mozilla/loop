@@ -1213,6 +1213,118 @@ loop.shared.views = (function(_, mozL10n) {
     }
   });
 
+  var EditableFieldView = React.createClass({
+    propTypes: {
+      forceNotEditable: React.PropTypes.bool,
+      label: React.PropTypes.string.isRequired,
+      onEditionComplete: React.PropTypes.func
+    },
+
+    getDefaultProps: function() {
+      return {
+        forceNotEditable: false
+      };
+    },
+
+    getInitialState: function() {
+      return {
+        editableLabel: this.props.label,
+        editMode: false
+      };
+    },
+
+    shouldComponentUpdate: function(nextProps) {
+      return !nextProps.forceNotEditable;
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+      if (this.props.label === nextProps.label) {
+        return;
+      }
+
+      this.setState({
+        editableLabel: nextProps.label
+      });
+    },
+
+    componentDidUpdate: function() {
+      if (this.state.editMode) {
+        this._calculateInputWidth();
+        this.refs.editableInput.focus();
+      }
+    },
+
+    _calculateInputWidth: function() {
+      var label = this.refs.editableLabel;
+      var input = this.refs.editableInput;
+      var realWidth = window.getComputedStyle(label, null).getPropertyValue("width");
+      input.style.width = realWidth;
+    },
+
+    /**
+     * Toggles the edit mode state
+     */
+    toggleEditMode: function() {
+      if (this.state.editMode) {
+        this.props.onEditionComplete &&
+          this.props.onEditionComplete(this.state.editableLabel);
+      }
+
+      this.setState({
+        editMode: !this.state.editMode
+      });
+    },
+
+    /**
+     * Handles a key being pressed - looking for the return key for saving
+     * the new room name.
+     */
+    handleKeyDown: function(event) {
+      if (event.which === 13) {
+        this.toggleEditMode();
+      }
+    },
+
+    /**
+     * Handles a change in the input element - Pushing into the state
+     * the new input value
+     */
+    handleEditInputChange: function(event) {
+      this.setState({ editableLabel: event.target.value });
+    },
+
+    render: function() {
+      if (this.props.forceNotEditable) {
+        return (
+          <span>{this.state.editableLabel}</span>
+        );
+      }
+
+      var wrapperCSS = {
+        "editable-field": true,
+        "edit-mode-enabled": this.state.editMode
+      };
+
+      return (
+        <div className={classNames(wrapperCSS)}>
+          <span
+            onClick={this.toggleEditMode}
+            ref="editableLabel">
+            {this.state.editableLabel}
+          </span>
+          <input
+            className="edit-room-name"
+            onBlur={this.toggleEditMode}
+            onChange={this.handleEditInputChange}
+            onKeyDown={this.handleKeyDown}
+            ref="editableInput"
+            type="text"
+            value={this.state.editableLabel} />
+        </div>
+      );
+    }
+  });
+
   return {
     AdsTileView: AdsTileView,
     AudioMuteButton: AudioMuteButton,
@@ -1223,6 +1335,7 @@ loop.shared.views = (function(_, mozL10n) {
     ContextUrlLink: ContextUrlLink,
     ContextUrlView: ContextUrlView,
     ConversationToolbar: ConversationToolbar,
+    EditableFieldView: EditableFieldView,
     HangUpControlButton: HangUpControlButton,
     MediaControlButton: MediaControlButton,
     MediaLayoutView: MediaLayoutView,

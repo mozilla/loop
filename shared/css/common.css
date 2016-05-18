@@ -661,3 +661,40 @@ html[dir="rtl"] .context-wrapper > .context-preview {
 .remote-video-box > .remote-cursor-clicked:before {
   animation: double-pulse-2 800ms ease-out forwards;
 }
+
+/* Editable fields */
+.editable-field {
+  display: inline-block;
+  height: 26px;
+}
+
+.editable-field > span {
+  padding: 3px 8px;
+  text-overflow: ellipsis;
+  white-space: pre;
+  line-height: 20px;
+  position: absolute;
+  height: 26px;
+}
+
+.editable-field > span:hover {
+  border: solid 1px #333;
+  padding: 2px 7px;
+}
+
+.editable-field.edit-mode-enabled > span {
+  visibility: hidden;
+}
+
+.editable-field.edit-mode-enabled > input {
+  visibility: visible;
+}
+
+.editable-field > input {
+  font-family: sans-serif;
+  font-size: 16px;
+  visibility: hidden;
+  height: 26px;
+  border: solid 1px;
+  padding: 2px 7px;
+}

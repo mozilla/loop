@@ -29,7 +29,10 @@ describe("loop.DataDriver", () => {
     };
     sandbox.stub(window, "EventSource", url => {
       requests.push({ url });
-      return { addEventListener: () => {} };
+      return {
+        addEventListener() {},
+        removeEventListener() {}
+      };
     });
   });
 
@@ -148,6 +151,34 @@ describe("loop.DataDriver", () => {
           receivedTimestamp: "2009-02-13T23:31:30.123Z",
           sentTimestamp: "2016-05-10T18:26:58.235Z"
         }));
+    });
+  });
+
+  describe("#handleEvent.error", () => {
+    it("should retry the connection on error", () => {
+        // This calls _connectToRoom, so don't stub it out until after.
+        driver.setupWindowData(new actions.SetupWindowData({
+          roomToken: "fakeSetup"
+        }));
+        sandbox.stub(driver, "_connectToRoom");
+        driver.handleEvent({ type: "error" });
+        clock.tick(driver.INITIAL_RETRY_TIMEOUT + 1);
+        sinon.assert.called(driver._connectToRoom);
+    });
+
+    it("should exponentially back off while retrying", () => {
+        driver.setupWindowData(new actions.SetupWindowData({
+          roomToken: "fakeSetup"
+        }));
+        driver.handleEvent({ type: "error" });
+        clock.tick(driver.INITIAL_RETRY_TIMEOUT + 1);
+        expect(driver._retryTimeout).eql(driver.INITIAL_RETRY_TIMEOUT * 2);
+        driver.handleEvent({ type: "error" });
+        clock.tick(driver.INITIAL_RETRY_TIMEOUT * 2 + 1);
+        expect(driver._retryTimeout).eql(driver.INITIAL_RETRY_TIMEOUT * 4);
+        driver.handleEvent({ type: "error" });
+        clock.tick(driver.INITIAL_RETRY_TIMEOUT * 4 + 1);
+        expect(driver._retryTimeout).eql(driver.INITIAL_RETRY_TIMEOUT * 8);
     });
   });
 

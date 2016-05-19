@@ -75,6 +75,8 @@ loop.DataDriver = function() {
         throw new Error("Missing option dispatcher");
       }
 
+      this._retryTimeout = this.INITIAL_RETRY_TIMEOUT;
+
       this._dispatcher = options.dispatcher;
       this._dispatcher.register(this, [
         "fetchServerData",
@@ -128,6 +130,7 @@ loop.DataDriver = function() {
       switch (event.type) {
         // Handle EventSource successfully connecting.
         case "open":
+          this._retryTimeout = this.INITIAL_RETRY_TIMEOUT;
           // XXX akita bug 1274103: Refine usage of this action.
           this._dispatcher.dispatch(new actions.DataChannelsAvailable({
             available: true
@@ -149,6 +152,27 @@ loop.DataDriver = function() {
             console.log(`Error handling EventSource.put: ${event.data}`, ex);
           }
           break;
+
+        // Handle an error from being unable to initially connect or
+        // unexpected disconnection of an open connection.
+        // Chrome follows the spec more closely than Firefox, and is
+        // able to recover from transient network conditions more reliably.
+        // Chrome will try to reconnect on error, still sending an error event,
+        // but readyState will be CONNECTING instead of CLOSED. In this
+        // case, we can just ignore the error event. Firefox sometimes sends
+        // an error event when readyState is CLOSED. At this point Firefox will
+        // not do anything to attempt to recover the connection, and thus
+        // this code runs to attempt to reconnect manually.
+        case "error":
+          if (this._sse.readyState === this._sse.CLOSED) {
+            this._sse.removeEventListener("open", this);
+            this._sse.removeEventListener("put", this);
+            this._sse.removeEventListener("error", this);
+            this._sse = null;
+            setTimeout(() => this._connectToRoom(), this._retryTimeout);
+            this._retryTimeout *= 2;
+          }
+          break;
       }
     }
 
@@ -162,6 +186,13 @@ loop.DataDriver = function() {
     get BASE_FIREBASE() {
       // XXX akita bug 1274107: Get dynamic url from loop-server.
       return "https://blinding-fire-8842.firebaseio.com/loop-test";
+    }
+
+    /**
+     * Get the initial retry delay, in ms.
+     */
+    get INITIAL_RETRY_TIMEOUT() {
+      return 2000;
     }
 
     /**
@@ -276,7 +307,7 @@ loop.DataDriver = function() {
      *
      * @param {String} token The room token to use for connections.
      */
-    _connectToRoom(token) {
+    _connectToRoom(token = this._roomToken) {
       this._roomToken = token;
       this._sse = new EventSource(this._buildUrl() + "?" + this._buildQuery({
         limitToLast: 1,
@@ -284,6 +315,7 @@ loop.DataDriver = function() {
       }));
       this._sse.addEventListener("open", this);
       this._sse.addEventListener("put", this);
+      this._sse.addEventListener("error", this);
 
       // Determine the clock skew before continuing initialization.
       this.update("meta", "lastConnect").then(({ timestamp }) => {

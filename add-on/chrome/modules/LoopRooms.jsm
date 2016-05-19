@@ -3,7 +3,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 "use strict";
 
-const { utils: Cu } = Components;
+const { classes: Cc, interfaces: Ci, utils: Cu } = Components;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
@@ -746,9 +746,31 @@ var LoopRoomsInternal = {
       eventEmitter.emit("close");
     });*/
 
-    let win = Services.wm.getMostRecentWindow("navigator:browser");
-    win.LoopUI.loadSidebar(roomToken);
-    MozLoopService.openURL(TOC_URL + roomToken);
+    let urlToLoad =
+      Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+    urlToLoad.data = TOC_URL + roomToken;
+
+    let windowArgs =
+      Cc["@mozilla.org/supports-array;1"].createInstance(Ci.nsISupportsArray);
+    windowArgs.AppendElement(urlToLoad);
+
+    // If we ever decide we want to do anything slightly more sophisticated (eg
+    // allow Hello in private browsing mode), we may want to use
+    // utilityOverlay.js:openUILinkIn (which calls
+    // utilityOverlay.js:openLinkIn).  Doing this is rather gross, as we would
+    // need to get the most recently used window and then reach in and invoke
+    // window.openUILinkIn, and it's also conceivably fragile, since this is
+    // unlikely to be a supported way to use that API.
+
+    // For cases where we need reverse map a window to a Hello room,
+    // we'll likely need to set an object and token on the window object
+    // for the newly created window after creation (eg in
+    // bootstrap.js:onOpenWindow), and use that as our flag.
+
+    Services.ww.openWindow(null,
+      "chrome://browser/content/browser.xul", null,
+      "chrome,dialog=no,all",
+      windowArgs);
   },
 
   /**

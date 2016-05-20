@@ -11,6 +11,7 @@ loop.roomToc = (function(mozL10n) {
   var sharedUtils = loop.shared.utils;
 
   function init() {
+    // XXX akita what's this for?
     loop.shared.utils.getBoolPreference = function foo() {};
 
     var requests = [
@@ -65,8 +66,15 @@ loop.roomToc = (function(mozL10n) {
       var locationData = sharedUtils.locationData();
       var hash = locationData.hash.match(/#(.*)/);
 
+      var roomToken = hash[1];
+
+      // Kick off loading the content for this room into the sidebar
+      // XXX could this race with something that SetupWindowData is already
+      // expecting to be done?
+      loop.request("LoadSidebar", roomToken);
+
       dispatcher.dispatch(new sharedActions.SetupWindowData({
-        roomToken: hash[1]
+        roomToken: roomToken
       }));
     });
   }

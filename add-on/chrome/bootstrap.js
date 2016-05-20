@@ -365,8 +365,6 @@ var WindowListener = {
 
         this.maybeAddCopyPanel();
         this.updateToolbarState();
-
-        this.addSidebar();
       },
 
       /* XXX akita make this into it's own object. */
@@ -392,6 +390,8 @@ var WindowListener = {
       },
 
       loadSidebar: function(token) {
+        this.addSidebar();
+
         log.info("loadSidebar called:", token, this.sidebar);
         let url = "about:loopconversation#" + token;
         Services.perms.add(Services.io.newURI(url, null, null), "camera",

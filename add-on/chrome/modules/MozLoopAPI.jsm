@@ -236,6 +236,25 @@ const kMessageHandlers = {
   },
 
   /**
+   * Creates a sidebar containing the given room in the XUL window where the
+   * given message came from.
+   *
+   * @param {Object}  message Message meant for the handler function; contains
+   *                          a room token in its 'data' property.
+   *
+   * @param {Function} reply  Callback function, invoked with the result of the
+   *                          message handler. The result will be sent back to
+   *                          the senders' channel.
+   */
+  LoadSidebar: function(message, reply) {
+
+    let topLevelWindowForMsg = message.target.browser.ownerGlobal;
+    topLevelWindowForMsg.LoopUI.loadSidebar(message.data);
+
+    reply();
+  },
+
+  /**
    * Shows the click event on the remote cursor.
    *
    * @param {Object}  message Message meant for the handler function, contains

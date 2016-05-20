@@ -297,6 +297,8 @@ loop.shared.toc = (function(mozL10n) {
             <a
               className="tile-name"
               href={this.props.tile.location}
+              rel="noopener noreferrer"
+              target="_blank"
               title={this.props.tile.description}>
                 {this.props.tile.description}
             </a>

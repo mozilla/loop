@@ -1,7 +1,7 @@
 pref("loop.enabled", true);
 pref("loop.remote.autostart", true);
 #ifdef LOOP_DEV_XPI
-pref("loop.server", "https://loop-dev.stage.mozaws.net/v0");
+pref("loop.server", "https://loop.dev.mozaws.net/v0");
 pref("loop.linkClicker.url", "https://loop-webapp-dev.stage.mozaws.net/");
 #else
 pref("loop.server", "https://loop.services.mozilla.com/v0");

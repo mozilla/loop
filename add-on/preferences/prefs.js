@@ -1,7 +1,7 @@
 pref("loop.enabled", true);
 pref("loop.remote.autostart", true);
 #ifdef LOOP_DEV_XPI
-pref("loop.server", "https://loop-dev.stage.mozaws.net/v0");
+pref("loop.server", "https://loop.dev.mozaws.net/v0");
 pref("loop.linkClicker.url", "https://loop-webapp-dev.stage.mozaws.net/");
 #else
 pref("loop.server", "https://loop.services.mozilla.com/v0");
@@ -47,4 +47,4 @@ pref("loop.facebook.enabled", true);
 pref("loop.facebook.appId", "1519239075036718");
 pref("loop.facebook.shareUrl", "https://www.facebook.com/dialog/send?app_id=%APP_ID%&link=%ROOM_URL%&redirect_uri=%REDIRECT_URI%");
 pref("loop.facebook.fallbackUrl", "https://hello.firefox.com/");
-pref("loop.conversationPopOut.enabled", true);
+pref("loop.conversationPopOut.enabled", false);

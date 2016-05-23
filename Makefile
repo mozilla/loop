@@ -21,6 +21,29 @@ NODE_LOCAL_BIN := $(abspath ./node_modules/.bin)
 REPO_BIN_DIR := ./bin
 RSYNC := rsync --archive --exclude='*.jsx'
 
+BUILT := ./built
+ADD-ON := add-on
+BUILT_ADD_ON := $(BUILT)/$(ADD-ON)
+DIST := ./dist
+DIST_EXPORT_DIR := ./dist/export-gecko
+XPI_NAME := loop@mozilla.org.xpi
+XPI_FILE := $(BUILT)/$(XPI_NAME)
+
+VENV := .venv
+BABEL := $(NODE_LOCAL_BIN)/babel --retain-lines
+ESLINT := $(NODE_LOCAL_BIN)/eslint
+FLAKE8 := $(NODE_LOCAL_BIN)/flake8
+
+# For building a dev xpi, set this in the environment/on the command line, e.g.
+# `DEV_XPI=1 make build`.
+ifdef DEV_XPI
+LOOP_XPI_DATE=`date +"%Y%m%d%H%M"`
+LOOP_DEV_XPI_DEFS=-D LOOP_DEV_XPI=1
+else
+LOOP_XPI_DATE=
+LOOP_DEV_XPI_DEFS=
+endif
+
 .PHONY: install
 install: node_modules
 
@@ -36,35 +59,12 @@ dist: build dist_xpi dist_export dist_standalone
 
 .PHONY: distclean
 distclean: clean
-	rm -rf dist
 	rm -rf node_modules
+	rm -rf $(VENV)
 
 .PHONY: distserver
 distserver: remove_old_config dist_standalone
 	LOOP_CONTENT_DIR=`pwd`/dist/standalone node bin/server.js
-
-BUILT := ./built
-ADD-ON := add-on
-BUILT_ADD_ON := $(BUILT)/$(ADD-ON)
-DIST := ./dist
-DIST_EXPORT_DIR := ./dist/export-gecko
-XPI_NAME := loop@mozilla.org.xpi
-XPI_FILE := $(BUILT)/$(XPI_NAME)
-
-VENV := $(BUILT)/.venv
-BABEL := $(NODE_LOCAL_BIN)/babel --retain-lines
-ESLINT := $(NODE_LOCAL_BIN)/eslint
-FLAKE8 := $(NODE_LOCAL_BIN)/flake8
-
-# For building a dev xpi, set this in the environment/on the command line, e.g.
-# `DEV_XPI=1 make build`.
-ifdef DEV_XPI
-LOOP_XPI_DATE=`date +"%Y%m%d%H%M"`
-LOOP_DEV_XPI_DEFS=-D LOOP_DEV_XPI=1
-else
-LOOP_XPI_DATE=
-LOOP_DEV_XPI_DEFS=
-endif
 
 # In the PACKAGE_VERSION below we:
 # - parse package.json
@@ -492,6 +492,10 @@ eslint:
 flake8: $(VENV)
 	. $(VENV)/bin/activate && flake8 .
 
+.PHONY: check_strings
+check_strings:
+	@$(VENV)/bin/python bin/stringsCompletenessTest.py
+
 .PHONY: lint
 lint: eslint flake8
 
@@ -570,6 +574,7 @@ export_mc: build dist_export
 .PHONY: clean
 clean:
 	rm -rf $(BUILT)
+	rm -rf $(DIST)
 
 .PHONY: cleanbuild
 cleanbuild: clean build

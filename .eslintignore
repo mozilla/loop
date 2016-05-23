@@ -1,4 +1,5 @@
 # Libs we don't need to check
+.venv
 node_modules
 **/vendor
 

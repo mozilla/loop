@@ -291,7 +291,7 @@ $ LOOP_SERVER_URL=https://path/to/server make runserver
 
 Replace the server path with one of:
 
-* Development server: https://loop-dev.stage.mozaws.net
+* Development server: https://loop.dev.mozaws.net
 * Production server: https://loop.services.mozilla.com
 
 (Generally its better to use the development server than the production one to
@@ -304,7 +304,7 @@ server:
 (since changing the pref below will loose your previously created conversations).
 See the [Running](#running) section above for how to create a profile and use it.
 * Visit about:config, change the loop.server preference to be
-https://loop-dev.stage.mozaws.net/v0
+https://loop.dev.mozaws.net/v0
 * Restart Firefox after changing the pref
 * From the Hello panel, select "Browse this page with a friend"
 * Copy the url, and paste it into a browser window, but change the url

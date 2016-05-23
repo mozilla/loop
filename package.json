@@ -53,7 +53,7 @@
     "exports-loader": "0.6.3",
     "expose-loader": "0.7.x",
     "express": "4.13.4",
-    "firefox-profile": "0.3.13",
+    "firefox-profile": "0.4.0",
     "fs-promise": "0.5.0",
     "fx-runner": "1.0.1",
     "imports-loader": "0.6.5",

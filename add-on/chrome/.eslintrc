@@ -40,6 +40,7 @@
     "loopCrypto": false,
     "LoopRooms": true,
     "LoopRoomsCache": true,
+    "LoopSidebar": false,
     "MozLoopPushHandler": true,
     "MozLoopService": true,
     "NewTabURL": false,

@@ -36,6 +36,7 @@
     "LoopUI": false,
     // Other items
     "Chat": true,
+    "WAS_OFFLINE": false,
     "WebChannel": true,
     "executeSoon": true
   }

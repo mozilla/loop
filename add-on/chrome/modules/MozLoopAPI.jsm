@@ -38,6 +38,9 @@ XPCOMUtils.defineLazyServiceGetter(this, "clipboardHelper",
 XPCOMUtils.defineLazyServiceGetter(this, "extProtocolSvc",
                                          "@mozilla.org/uriloader/external-protocol-service;1",
                                          "nsIExternalProtocolService");
+XPCOMUtils.defineLazyModuleGetter(this, "LoopSidebar",
+  "chrome://loop/content/modules/LoopSidebar.jsm");
+
 this.EXPORTED_SYMBOLS = ["LoopAPI"];
 
 const cloneableError = function(source) {
@@ -247,9 +250,8 @@ const kMessageHandlers = {
    *                          the senders' channel.
    */
   LoadSidebar: function(message, reply) {
-
-    let topLevelWindowForMsg = message.target.browser.ownerGlobal;
-    topLevelWindowForMsg.LoopUI.loadSidebar(message.data);
+    let win = Services.wm.getMostRecentWindow("navigator:browser");
+    LoopSidebar.createSidebar(win, message.data);
 
     reply();
   },

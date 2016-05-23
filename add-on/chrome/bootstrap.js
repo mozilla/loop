@@ -18,8 +18,6 @@ const CURSOR_CLICK_DELAY = 1000;
 const FRAME_SCRIPT = "chrome://loop/content/modules/tabFrame.js?" + Math.random();
 // Process scripts may or may not need this too, but it won't hurt us
 const PROCESS_SCRIPT = "chrome://loop/content/modules/loop-content-process.js?" + Math.random();
-// This is part of the browser, so we don't need the random element.
-const BROWSER_FRAME_SCRIPT = "chrome://browser/content/content.js";
 
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -33,6 +31,8 @@ XPCOMUtils.defineLazyModuleGetter(this, "Task",
   "resource://gre/modules/Task.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "AboutLoop",
   "chrome://loop/content/modules/AboutLoop.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "LoopSidebar",
+  "chrome://loop/content/modules/LoopSidebar.jsm");
 
 // See LOG_LEVELS in Console.jsm. Common examples: "All", "Info", "Warn", & "Error".
 const PREF_LOG_LEVEL = "loop.debug.loglevel";
@@ -351,11 +351,6 @@ var WindowListener = {
         // future.
         this.mm.loadFrameScript(FRAME_SCRIPT, true);
 
-        // This loads the generic browser content script into our special "loop"
-        // message manager for the sidebar.
-        let loopMessageManager = window.getGroupMessageManager("loop");
-        loopMessageManager.loadFrameScript(BROWSER_FRAME_SCRIPT, true);
-
         // Cleanup when the window unloads.
         window.addEventListener("unload", () => {
           Services.obs.removeObserver(this, "loop-status-changed");
@@ -365,38 +360,6 @@ var WindowListener = {
 
         this.maybeAddCopyPanel();
         this.updateToolbarState();
-      },
-
-      /* XXX akita make this into it's own object. */
-      addSidebar: function() {
-        let ownerDocument = gBrowser.ownerDocument;
-        var browser = ownerDocument.getElementById("browser");
-
-        let sidebarBrowser = document.createElementNS(kNSXUL, "browser");
-        sidebarBrowser.setAttribute("id", "loop-side-browser");
-        sidebarBrowser.setAttribute("disablehistory", "true");
-        sidebarBrowser.setAttribute("disableglobalhistory", "true");
-        sidebarBrowser.setAttribute("frameType", "loop");
-        sidebarBrowser.setAttribute("messagemanagergroup", "loop");
-        sidebarBrowser.setAttribute("message", "true");
-        sidebarBrowser.setAttribute("remote", "true");
-
-        sidebarBrowser.setAttribute("type", "content");
-
-        this.sidebar = sidebarBrowser;
-        this.sidebar.width = 250;
-
-        browser.appendChild(sidebarBrowser);
-      },
-
-      loadSidebar: function(token) {
-        this.addSidebar();
-
-        log.info("loadSidebar called:", token, this.sidebar);
-        let url = "about:loopconversation#" + token;
-        Services.perms.add(Services.io.newURI(url, null, null), "camera",
-                         Services.perms.ALLOW_ACTION, Services.perms.EXPIRE_SESSION);
-        this.sidebar.setAttribute("src", url);
       },
 
       /**
@@ -1230,8 +1193,7 @@ var WindowListener = {
       // remove it from existing tabs (there's no way to do that).
       window.LoopUI.mm.removeDelayedFrameScript(FRAME_SCRIPT);
 
-      let loopMessageManager = window.getGroupMessageManager("loop");
-      loopMessageManager.removeDelayedFrameScript(BROWSER_FRAME_SCRIPT);
+      LoopSidebar.tearDown(window);
 
       // XXX Bug 1229352 - Add in tear-down of the panel.
     }
@@ -1548,6 +1510,7 @@ function shutdown(data, reason) {
   Cu.unload("chrome://loop/content/modules/LoopRooms.jsm");
   Cu.unload("chrome://loop/content/modules/MozLoopService.jsm");
   Cu.unload("chrome://loop/content/modules/AboutLoop.jsm");
+  Cu.unload("chrome://loop/content/modules/LoopSidebar.jsm");
 }
 
 function install() {}

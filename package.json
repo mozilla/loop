@@ -17,9 +17,9 @@
     "backbone": "1.3.3",
     "classnames": "2.2.5",
     "lodash": "3.9.3",
-    "react": "15.0.2",
-    "react-addons-pure-render-mixin": "15.0.2",
-    "react-dom": "15.0.2"
+    "react": "15.1.0",
+    "react-addons-pure-render-mixin": "15.1.0",
+    "react-dom": "15.1.0"
   },
   "devDependencies": {
     "babel-cli": "6.9.0",

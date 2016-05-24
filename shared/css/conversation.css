@@ -388,11 +388,6 @@ html, .fx-embedded, #main,
   width: 272px;
 }
 
-.media-wrapper > .screen .screen-share-video {
-  width: 100%;
-  height: 100%;
-}
-
 /* Note: we can't use "display: flex;" for the text-chat-view itself,
    as this lets it overflow the expected column heights, and we can't
    fix its height. */
@@ -508,11 +503,6 @@ html, .fx-embedded, #main,
     bottom: calc(30% + 1.5rem);
   }
 
-
-  .media-wrapper.receiving-screen-share > .screen {
-    order: 1;
-  }
-
   .media-wrapper.receiving-screen-share > .remote {
     /* Screen shares have remote & local video side-by-side on narrow screens */
     order: 2;
@@ -588,10 +578,6 @@ html, .fx-embedded, #main,
   html[dir="rtl"] .media-wrapper > .focus-stream > .local {
     left: 0;
     right: auto;
-  }
-
-  .screen > .no-video {
-    display: none;
   }
 
   .media-wrapper:not(.showing-remote-streams) > .focus-stream > .no-video {

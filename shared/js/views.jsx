@@ -1191,6 +1191,7 @@ loop.shared.views = (function(_, mozL10n) {
     render: function() {
       var screenShareStreamClasses = classNames({
         "screen": true,
+        // XXX-akita: Remove focus-stream?
         "focus-stream": this.props.displayScreenShare,
         "screen-sharing-paused": this.props.screenSharingPaused
       });

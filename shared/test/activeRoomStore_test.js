@@ -1339,6 +1339,24 @@ describe("loop.store.ActiveRoomStore", function() {
       expect(store.getStoreState().remoteVideoEnabled).eql(true);
       expect(store.getStoreState().remoteAudioEnabled).eql(true);
     });
+
+    it("should call startBrowserShare when is desktop", function() {
+      sandbox.stub(store, "startBrowserShare");
+      store._isDesktop = true;
+      store.setStoreState({
+        localVideoEnabled: false,
+        remoteVideoEnabled: false
+      });
+
+      store.mediaStreamCreated(new sharedActions.MediaStreamCreated({
+        hasAudio: true,
+        hasVideo: true,
+        isLocal: false,
+        srcMediaElement: fakeStreamElement
+      }));
+
+      sinon.assert.calledOnce(store.startBrowserShare);
+    });
   });
 
   describe("#mediaStreamDestroyed", function() {

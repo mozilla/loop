@@ -782,6 +782,10 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
         remoteVideoEnabled: actionData.hasVideo,
         remoteSrcMediaElement: actionData.srcMediaElement
       });
+
+      if (this._isDesktop) {
+        this.startBrowserShare();
+      }
     },
 
     /**

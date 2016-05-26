@@ -85,6 +85,30 @@ describe("loop.DataDriver", () => {
     });
   });
 
+  describe("#updateCurrentPresence", () => {
+    it("should update the current presence data for ping", () => {
+      driver.updateCurrentPresence("theUserId", true, {
+        focused: false
+      });
+
+      let { method, requestBody, url } = requests[0];
+      expect(method).eql("PUT");
+      expect(requestBody).eql('{"timestamp":{".sv":"timestamp"},"value":{"isHere":true,"focused":false}}');
+      expect(getResource(url)).eql("presence!theUserId.json");
+    });
+
+    it("should update the current presence data for leaving", () => {
+      driver.updateCurrentPresence("theUserId", false, {
+        focused: false
+      });
+
+      let { method, requestBody, url } = requests[0];
+      expect(method).eql("PUT");
+      expect(requestBody).eql('{"timestamp":{".sv":"timestamp"},"value":{"isHere":false,"focused":false}}');
+      expect(getResource(url)).eql("presence!theUserId.json");
+    });
+  });
+
   describe("#fetchServerData", () => {
     it("should connect to the room on server data", () => {
       driver.fetchServerData(new actions.FetchServerData({
@@ -446,6 +470,25 @@ describe("loop.DataDriver", () => {
       sinon.assert.calledWithExactly(dispatcher.dispatch,
         new actions.UpdatedParticipant({
           name: "Cool Name",
+          userId: "theUserId"
+        }));
+    });
+  });
+
+  describe("#_processRecord.presence", () => {
+    it("should dispatch `UpdatedPresence` for presence record", () => {
+      driver._processRecord("presence!theUserId", {
+        timestamp: 1234567890123,
+        value: {
+          isHere: true
+        }
+      });
+
+      sinon.assert.called(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new actions.UpdatedPresence({
+          isHere: true,
+          pingTime: 1234567890123,
           userId: "theUserId"
         }));
     });

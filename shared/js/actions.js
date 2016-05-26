@@ -135,6 +135,16 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     * Notifies that presence data has been received.
+     */
+    UpdatedPresence: Action.define("updatedPresence", {
+      isHere: Boolean,
+      pingTime: Number,
+      // This id was originally provided by loop-server on getting room data.
+      userId: String
+    }),
+
+    /**
      *  Used to send cursor data to the other peer
      */
     SendCursorData: Action.define("sendCursorData", {

@@ -100,8 +100,20 @@ loop.DataDriver = function() {
      * @param {Object} participant The data to be stored and received by others.
      */
     updateCurrentParticipant(userId, participant) {
-      // XXX akita bug: verify userId is a valid firebase id
+      // XXX akita bug 1276095: Verify userId is a valid firebase id.
       this.update("participant", userId, participant);
+    }
+
+    /**
+     * Update the current user's presence record.
+     *
+     * @param {String}  userId   The id to associate with stored presence.
+     * @param {Boolean} isHere   Is the current user here (true) or left (false)?
+     * @param {Object}  presence The data to be stored and received by others.
+     */
+    updateCurrentPresence(userId, isHere, presence) {
+      // XXX akita bug 1276095: Verify userId is a valid firebase id.
+      this.update("presence", userId, Object.assign({ isHere }, presence));
     }
 
     /** **************** **
@@ -363,6 +375,14 @@ loop.DataDriver = function() {
         case "participant":
           dispatchAction = "UpdatedParticipant";
           dispatchExtra = {
+            userId: id
+          };
+          break;
+
+        case "presence":
+          dispatchAction = "UpdatedPresence";
+          dispatchExtra = {
+            pingTime: data.timestamp,
             userId: id
           };
           break;

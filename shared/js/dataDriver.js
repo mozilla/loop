@@ -275,6 +275,23 @@ loop.DataDriver = function() {
     }
 
     /**
+     * Request all room data except for chat.
+     *
+     * @return {Promise} Resolved with an {Object} with keys of record ids.
+     */
+    requestRoomData() {
+      let query = this._buildQuery({
+        orderBy: '"$key"',
+        // NB: All record types must come lexicographically after "chat" for
+        // this query to request all records except for type "chat".
+        startAt: '"chat~"',
+        // NB: Firebase requires a limit to have things sorted correctly.
+        limitToLast: this.MAX_LIMIT
+      });
+      return this._request("GET", this._buildUrl(), query);
+    }
+
+    /**
      * Update a record additionally storing the timestamp.
      *
      * @param {String} type  Type of record to update.
@@ -326,9 +343,11 @@ loop.DataDriver = function() {
     }
 
     /**
-     * Connect to a specified room for streaming updates and future requests.
+     * Connect to a specified room for streaming updates and future requests
+     * then initialize with existing data.
      *
-     * @param {String} token The room token to use for connections.
+     * @param {String} token The room token to use for connections defaulting to
+     *                       the current room for reconnect.
      */
     _connectToRoom(token = this._roomToken) {
       this._roomToken = token;
@@ -343,11 +362,23 @@ loop.DataDriver = function() {
       // Determine the clock skew before continuing initialization.
       this.update("meta", "lastConnect").then(({ timestamp }) => {
         this._clockSkew = timestamp - Date.now();
-      }).then(() => {
-        let now = this.getServerTime();
+        this._loadExistingData();
+      });
+    }
+
+    /**
+     * Request all desired existing data and process them.
+     */
+    _loadExistingData() {
+      let now = this.getServerTime();
+      Promise.all([
+        this.requestRoomData(),
         // XXX akita bug 1274129: Allow a configurable time window.
-        this.requestChat(now - 24 * 60 * 60 * 1000, now, 25).then(result =>
-          this._processRecords(result));
+        this.requestChat(now - 24 * 60 * 60 * 1000, now, 25)
+      ]).then(([roomData, chatData]) => {
+        // Process room data first to get participants then handle chat.
+        this._processRecords(roomData);
+        this._processRecords(chatData);
       });
     }
 

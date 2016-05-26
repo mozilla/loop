@@ -43,8 +43,21 @@ var LoopMochaUtils = (function(global, _) {
         return this;
       }
 
-      continuations.push(contFn);
-      return this;
+      // Allow chaining of `then` by returning Promises that resolve on result.
+      return new SyncThenable(resolve => {
+        continuations.push(result => {
+          // Figure out the return value type of the function passed to `then`,
+          // so for a Promise, wait to pass the result to a chained `then`.
+          let ret = contFn(result);
+          if (ret instanceof SyncThenable) {
+            ret.then(resolve);
+          }
+          // For non-Promise, no need to wait to pass to a chained `then`.
+          else {
+            resolve(ret);
+          }
+        });
+      });
     };
 
     /**
@@ -80,14 +93,19 @@ var LoopMochaUtils = (function(global, _) {
   SyncThenable.all = function(promises) {
     return new SyncThenable(function(resolve) {
       var results = [];
+      let resultCount = 0;
 
-      promises.forEach(function(promise) {
+      // Wait for each promise's result to store in the same original order.
+      promises.forEach((promise, i) => {
         promise.then(function(result) {
-          results.push(result);
+          results[i] = result;
+
+          // Resolve only when we've gotten enough results.
+          if (++resultCount === promises.length) {
+            resolve(results);
+          }
         });
       });
-
-      resolve(results);
     });
   };
 

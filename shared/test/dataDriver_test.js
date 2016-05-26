@@ -42,14 +42,24 @@ describe("loop.DataDriver", () => {
     LoopMochaUtils.restore();
   });
 
-  // Helper to get the room and resource of a url.
-  function getRoomResource(url) {
-    return url.match(/[^\/]+\/[^\/]+$/)[0];
+  // Helper to check if queries contains a key/value
+  function expectQuery(queries, key, value) {
+    expect(queries).contain(driver._buildQuery({ [key]: value }));
+  }
+
+  // Helper to get the query parts of a url.
+  function getQueries(url) {
+    return url.split("?")[1].split("&").sort();
   }
 
   // Helper to get just the resource of a url.
   function getResource(url) {
     return getRoomResource(url).split("/")[1];
+  }
+
+  // Helper to get the room and resource of a url.
+  function getRoomResource(url) {
+    return url.match(/[^\/]+\/[^\/]+$/)[0];
   }
 
   describe("Constructor", () => {
@@ -275,9 +285,9 @@ describe("loop.DataDriver", () => {
       driver.requestChat();
       let idNow = driver.makeId(Date.now() + 1).slice(0, 8);
 
-      let queries = requests[0].url.split("?")[1].split("&").sort();
-      expect(queries).contain("orderBy=%22%24key%22");
-      expect(queries).contain(`limitToLast=${driver.MAX_LIMIT}`);
+      let queries = getQueries(requests[0].url);
+      expectQuery(queries, "orderBy", '"$key"');
+      expectQuery(queries, "limitToLast", driver.MAX_LIMIT);
       expect(queries[3].match(/^.+chat!.{8}/)[0]).eql("startAt=%22chat!00000000");
       expect(queries[0].match(/^.+chat!.{8}/)[0]).eql(`endAt=%22chat!${idNow}`);
     });
@@ -285,7 +295,7 @@ describe("loop.DataDriver", () => {
     it("should support inclusive time ranges", () => {
       driver.requestChat(2, 8);
 
-      let queries = requests[0].url.split("?")[1].split("&").sort();
+      let queries = getQueries(requests[0].url);
       expect(queries[3].match(/^.+chat!.{8}/)[0]).eql("startAt=%22chat!00000001");
       expect(queries[0].match(/^.+chat!.{8}/)[0]).eql("endAt=%22chat!00000009");
     });
@@ -293,8 +303,19 @@ describe("loop.DataDriver", () => {
     it("should support limits", () => {
       driver.requestChat(0, 1, 2);
 
-      let queries = requests[0].url.split("?")[1].split("&").sort();
-      expect(queries).contain("limitToLast=2");
+      let queries = getQueries(requests[0].url);
+      expectQuery(queries, "limitToLast", 2);
+    });
+  });
+
+  describe("#requestRoomData", () => {
+    it("should request everything but chat", () => {
+      driver.requestRoomData();
+
+      let queries = getQueries(requests[0].url);
+      expectQuery(queries, "orderBy", '"$key"');
+      expectQuery(queries, "startAt", '"chat~"');
+      expectQuery(queries, "limitToLast", driver.MAX_LIMIT);
     });
   });
 
@@ -395,15 +416,38 @@ describe("loop.DataDriver", () => {
       expect(driver._clockSkew).eql(-4321);
     });
 
-    it("should request last 24 hours of chat after updating lastConnect", () => {
+    it("should load room data after updating lastConnect", () => {
+      sandbox.stub(driver, "_loadExistingData");
+
+      driver._connectToRoom("theRoom");
+      requests[1].respond(200, {}, '{"timestamp":1234}');
+
+      sinon.assert.called(driver._loadExistingData);
+    });
+  });
+
+  describe("#_loadExistingData", () => {
+    it("should request last 24 hours of chat", () => {
       sandbox.stub(driver, "requestChat", () => Promise.resolve({}));
 
       let oneOverDay = 24 * 60 * 60 * 1000 + 1;
-      driver._connectToRoom("theRoom");
-      requests[1].respond(200, {}, `{"timestamp":${oneOverDay}}`);
+      clock.tick(oneOverDay);
+      driver._loadExistingData();
 
       sinon.assert.called(driver.requestChat);
       sinon.assert.calledWithExactly(driver.requestChat, 1, oneOverDay, 25);
+    });
+
+    it("should process room data before chat data", () => {
+      sandbox.stub(driver, "requestRoomData", () => Promise.resolve("room"));
+      sandbox.stub(driver, "requestChat", () => Promise.resolve("chat"));
+      sandbox.stub(driver, "_processRecords");
+
+      driver._loadExistingData();
+
+      sinon.assert.calledTwice(driver._processRecords);
+      sinon.assert.calledWithExactly(driver._processRecords.getCall(0), "room");
+      sinon.assert.calledWithExactly(driver._processRecords.getCall(1), "chat");
     });
   });
 

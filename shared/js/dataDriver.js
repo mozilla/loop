@@ -93,6 +93,17 @@ loop.DataDriver = function() {
       this.update("chat", this.makeId(), message);
     }
 
+    /**
+     * Update the current user's participant record.
+     *
+     * @param {String} userId      The id to associate with stored participant.
+     * @param {Object} participant The data to be stored and received by others.
+     */
+    updateCurrentParticipant(userId, participant) {
+      // XXX akita bug: verify userId is a valid firebase id
+      this.update("participant", userId, participant);
+    }
+
     /** **************** **
      *** Action Handler ***
      ** **************** **/
@@ -337,15 +348,30 @@ loop.DataDriver = function() {
      *  - {Mixed}  value     Stored value for the record.
      */
     _processRecord(key, data) {
+      let dispatchAction, dispatchExtra = {};
       // XXX akita bug 1274130: Validate data/key/timestamp before processing.
-      let [, type] = key.match(/^([^!]+)!(.+)$/);
+      let [, type, id] = key.match(/^([^!]+)!(.+)$/);
       switch (type) {
-        case "chat": {
-          let chat = data.value;
-          chat.receivedTimestamp = new Date(data.timestamp).toISOString();
-          this._dispatcher.dispatch(new actions.ReceivedTextChatMessage(chat));
+        case "chat":
+          dispatchAction = "ReceivedTextChatMessage";
+          dispatchExtra = {
+            receivedTimestamp: new Date(data.timestamp).toISOString()
+          };
           break;
-        }
+
+        case "participant":
+          dispatchAction = "UpdatedParticipant";
+          dispatchExtra = {
+            userId: id
+          };
+          break;
+      }
+
+      // Dispatch the desired action with an object that combines the record's
+      // value and any additional keys without modifying the data parameter.
+      if (dispatchAction) {
+        this._dispatcher.dispatch(new actions[dispatchAction](Object.assign({},
+          data.value, dispatchExtra)));
       }
     }
 

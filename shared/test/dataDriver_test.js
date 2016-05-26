@@ -72,6 +72,19 @@ describe("loop.DataDriver", () => {
     });
   });
 
+  describe("#updateCurrentParticipant", () => {
+    it("should update the current participant data", () => {
+      driver.updateCurrentParticipant("theUserId", {
+        name: "Cool Name"
+      });
+
+      let { method, requestBody, url } = requests[0];
+      expect(method).eql("PUT");
+      expect(requestBody).eql('{"timestamp":{".sv":"timestamp"},"value":{"name":"Cool Name"}}');
+      expect(getResource(url)).eql("participant!theUserId.json");
+    });
+  });
+
   describe("#fetchServerData", () => {
     it("should connect to the room on server data", () => {
       driver.fetchServerData(new actions.FetchServerData({
@@ -370,6 +383,34 @@ describe("loop.DataDriver", () => {
     });
   });
 
+  describe("#_processRecord", () => {
+    it("should dispatch objects without modifying params", () => {
+      let origValue = { name: "Cool Name" };
+      driver._processRecord("participant!theUserId", {
+        timestamp: 1234567890123,
+        value: origValue
+      });
+
+      expect(origValue).not.to.have.property("userId");
+    });
+
+    it("should dispatch objects preferring extra keys", () => {
+      driver._processRecord("participant!theUserId", {
+        timestamp: 1234567890123,
+        value: {
+          name: "Cool Name",
+          userId: "should be replaced"
+        }
+      });
+
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new actions.UpdatedParticipant({
+          name: "Cool Name",
+          userId: "theUserId"
+        }));
+    });
+  });
+
   describe("#_processRecord.chat", () => {
     it("should dispatch `ReceivedTextChatMessage` for chat record", () => {
       driver._processRecord("chat!01234567abcdefghijkl", {
@@ -388,6 +429,24 @@ describe("loop.DataDriver", () => {
           message: "Are you there?",
           receivedTimestamp: "2009-02-13T23:31:30.123Z",
           sentTimestamp: "2016-05-10T18:26:58.235Z"
+        }));
+    });
+  });
+
+  describe("#_processRecord.participant", () => {
+    it("should dispatch `UpdatedParticipant` for participant record", () => {
+      driver._processRecord("participant!theUserId", {
+        timestamp: 1234567890123,
+        value: {
+          name: "Cool Name"
+        }
+      });
+
+      sinon.assert.called(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new actions.UpdatedParticipant({
+          name: "Cool Name",
+          userId: "theUserId"
         }));
     });
   });

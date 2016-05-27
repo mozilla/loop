@@ -348,7 +348,8 @@ loop.DataDriver = function() {
      *  - {Mixed}  value     Stored value for the record.
      */
     _processRecord(key, data) {
-      let dispatchAction, dispatchExtra = {};
+      let dispatchAction;
+      let dispatchExtra = {};
       // XXX akita bug 1274130: Validate data/key/timestamp before processing.
       let [, type, id] = key.match(/^([^!]+)!(.+)$/);
       switch (type) {

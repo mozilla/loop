@@ -94,12 +94,19 @@ loop.shared.views.chat = (function(mozL10n) {
         };
       }
 
+      // XXX factor out the speech bubble into its own component
       return (
         <div className={classes}>
-          <sharedViews.LinkifiedTextView
-            linkClickHandler={linkClickHandler}
-            rawText={this.props.message} />
-          <span className="text-chat-arrow" />
+          <span className="speech-bubble-arrow" />
+          <span className="speech-bubble">
+            <span className="text-chat-entry-displayname">
+              {this.props.type === CHAT_MESSAGE_TYPES.RECEIVED ?
+                "Your Friend" : "You"}
+            </span>
+            <sharedViews.LinkifiedTextView
+              linkClickHandler={linkClickHandler}
+              rawText={this.props.message} />
+          </span>
           {this.props.showTimestamp ? this._renderTimestamp() : null}
         </div>
       );

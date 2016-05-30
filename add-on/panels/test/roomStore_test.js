@@ -104,7 +104,9 @@ describe("loop.store.RoomStore", function() {
       ctime: 1405518241
     }];
 
-    document.mozL10n.get = function(str) { return str; };
+    document.mozL10n.get = function(str) {
+      return str;
+    };
   });
 
   afterEach(function() {

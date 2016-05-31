@@ -1128,8 +1128,7 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
             facebookEnabled={this.state.facebookEnabled}
             locationForMetrics="panel"
             roomData={roomData}
-            show={true}
-            socialShareProviders={this.state.socialShareProviders} />
+            show={true} />
         </div>
       );
     }

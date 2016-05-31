@@ -662,64 +662,6 @@ describe("loop.store.RoomStore", function() {
       });
     });
 
-    describe("#shareRoomUrl", function() {
-      var socialShareRoomStub;
-
-      beforeEach(function() {
-        socialShareRoomStub = sinon.stub();
-        LoopMochaUtils.stubLoopRequest({
-          SocialShareRoom: socialShareRoomStub
-        });
-      });
-
-      it("should pass the correct data for GMail sharing", function() {
-        var roomUrl = "http://invalid";
-        var origin = "https://mail.google.com/v1";
-        store.shareRoomUrl(new sharedActions.ShareRoomUrl({
-          roomUrl: roomUrl,
-          provider: {
-            origin: origin
-          }
-        }));
-
-        sinon.assert.calledOnce(socialShareRoomStub);
-        sinon.assert.calledWithExactly(socialShareRoomStub,
-          origin,
-          roomUrl,
-          "share_email_subject7",
-          "share_email_body7" +
-            "share_email_footer2");
-      });
-
-      it("should pass the correct data for all other Social Providers", function() {
-        var roomUrl = "http://invalid2";
-        var origin = "https://twitter.com/share";
-        store.shareRoomUrl(new sharedActions.ShareRoomUrl({
-          roomUrl: roomUrl,
-          provider: {
-            origin: origin
-          }
-        }));
-
-        sinon.assert.calledOnce(socialShareRoomStub);
-        sinon.assert.calledWithExactly(socialShareRoomStub, origin,
-          roomUrl, "share_tweet", null);
-      });
-    });
-
-    describe("#addSocialShareProvider", function() {
-      it("should invoke to the correct mozLoop function", function() {
-        var stub = sinon.stub();
-        LoopMochaUtils.stubLoopRequest({
-          AddSocialShareProvider: stub
-        });
-
-        store.addSocialShareProvider(new sharedActions.AddSocialShareProvider());
-
-        sinon.assert.calledOnce(stub);
-      });
-    });
-
     describe("#setStoreState", function() {
       it("should update store state data", function() {
         store.setStoreState({ pendingCreation: true });

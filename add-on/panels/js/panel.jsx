@@ -220,6 +220,10 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
   var SettingsDropdown = React.createClass({
     mixins: [sharedMixins.DropdownMenuMixin(), sharedMixins.WindowCloseMixin],
 
+    propTypes: {
+      handleEditUsernameButtonClick: React.PropTypes.func.isRequired
+    },
+
     getInitialState: function() {
       return {
         signedIn: !!loop.getStoredRequest(["GetUserProfile"]),
@@ -308,6 +312,10 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
              title={mozL10n.get("settings_menu_button_tooltip")} />
           <ul className={cx({ "dropdown-menu": true, hide: !this.state.showMenu })}>
             <SettingsDropdownEntry
+                extraCSSClass="entry-settings-username entries-divider"
+                label={mozL10n.get("settings_menu_item_change_username")}
+                onClick={this.props.handleEditUsernameButtonClick} />
+            <SettingsDropdownEntry
                 extraCSSClass="entry-settings-notifications entries-divider"
                 label={mozL10n.get(notificationsLabel)}
                 onClick={this.handleToggleNotifications} />
@@ -368,6 +376,96 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
             {mozL10n.get("panel_footer_signin_or_signup_link")}
           </a>
         </p>
+      );
+    }
+  });
+
+  var UsernameView = React.createClass({
+    mixins: [sharedMixins.WindowCloseMixin],
+
+    propTypes: {
+      editMode: React.PropTypes.bool.isRequired,
+      onEditComplete: React.PropTypes.func.isRequired,
+      username: React.PropTypes.string.isRequired
+    },
+
+    getInitialState: function() {
+      return {
+        editMode: this.props.editMode,
+        username: this.props.username
+      };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+      this.setState({
+        editMode: nextProps.editMode,
+        username: nextProps.username
+      });
+    },
+
+    componentDidUpdate: function() {
+      if (this.state.editMode) {
+        this.refs.editableInput.focus();
+      }
+    },
+
+    onDocumentHidden: function() {
+      this.exitEditMode();
+    },
+
+    /**
+     * Handles a key being pressed - looking for the return key for saving
+     * the new room name.
+     */
+    handleKeyDown: function(event) {
+      if (event.which === 13) {
+        this.exitEditMode(this.state.username);
+      }
+    },
+
+    /**
+     * Forces exit edit mode when the input lose focus.
+     */
+    handleOnBlur: function() {
+      this.exitEditMode();
+    },
+
+    /**
+     * Invokes completion callback which exits the edit mode
+     * and saves the new value.
+     */
+    exitEditMode: function(newValue) {
+      this.props.onEditComplete(newValue);
+    },
+
+    /**
+     * Handles a change in the input value - updating the component state
+     * with the new value of the input field.
+     */
+    handleEditInputChange: function(event) {
+      this.setState({ username: event.target.value });
+    },
+
+    render: function() {
+      if (!this.state.editMode) {
+        return (
+          <div className="username-field">
+            <h2>{this.state.username}</h2>
+          </div>
+        );
+      }
+
+      return (
+        <div className="username-field">
+          <input
+            className="edit-username-input"
+            onBlur={this.handleOnBlur}
+            onChange={this.handleEditInputChange}
+            onKeyDown={this.handleKeyDown}
+            ref="editableInput"
+            type="text"
+            value={this.state.username} />
+        </div>
       );
     }
   });
@@ -1241,6 +1339,7 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
 
     getInitialState: function() {
       return {
+        editUsername: false,
         hasEncryptionKey: loop.getStoredRequest(["GetHasEncryptionKey"]),
         userProfile: loop.getStoredRequest(["GetUserProfile"]),
         gettingStartedSeen: loop.getStoredRequest(["GetLoopPref", "gettingStarted.latestFTUVersion"]) >= FTU_VERSION,
@@ -1350,6 +1449,11 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
       this.updateServiceErrors();
       this.listenTo(this.props.roomStore, "change:closingNewRoom",
                     this._onClosingNewRoom);
+      loop.request("GetLoopPref", "username").then(username => {
+        this.setState({
+          username: username
+        });
+      });
     },
 
     componentDidMount: function() {
@@ -1374,6 +1478,37 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
     toggleSharePanelState: function() {
       this.setState({
         sharePanelOpened: !this.state.sharePanelOpened
+      });
+    },
+
+    onEditComplete: function(newUsername) {
+      if (this.state.editionCancelled ||
+        this.state.username === newUsername || !newUsername) {
+        this.toggleEditUsername({
+          editionCancelled: false
+        });
+        return;
+      }
+
+      // See nsIPrefBranch
+      var PREF_STRING = 32;
+      loop.request("SetLoopPref", "username", newUsername, PREF_STRING).then(() => {
+        this.toggleEditUsername({
+          editionCancelled: true,
+          username: newUsername
+        });
+      });
+    },
+
+    toggleEditUsername: function(extraState) {
+      this.setState(_.extend({
+        editUsername: !this.state.editUsername
+      }, extraState || {}));
+    },
+
+    cancelEditUsername: function() {
+      this.toggleEditUsername({
+        editionCancelled: true
       });
     },
 
@@ -1426,9 +1561,17 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
             <RoomList dispatcher={this.props.dispatcher}
               store={this.props.roomStore} />
             <div className="footer">
-                <AccountLink userProfile={this.props.userProfile || this.state.userProfile} />
+                <UsernameView
+                  editMode={this.state.editUsername}
+                  onEditComplete={this.onEditComplete}
+                  username={this.state.username} />
               <div className="signin-details">
-                <SettingsDropdown />
+              {
+                this.state.editUsername ?
+                  <button onClick={this.cancelEditUsername}>{mozL10n.get("cancel_edit_mode")}</button> :
+                  <SettingsDropdown
+                    handleEditUsernameButtonClick={this.toggleEditUsername} />
+              }
               </div>
             </div>
             <SharePanelView
@@ -1614,7 +1757,8 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
     SettingsDropdown: SettingsDropdown,
     SharePanelView: SharePanelView,
     SignInRequestView: SignInRequestView,
-    ToSView: ToSView
+    ToSView: ToSView,
+    UsernameView: UsernameView
   };
 })(_, document.mozL10n));
 

@@ -48,3 +48,4 @@ pref("loop.facebook.appId", "1519239075036718");
 pref("loop.facebook.shareUrl", "https://www.facebook.com/dialog/send?app_id=%APP_ID%&link=%ROOM_URL%&redirect_uri=%REDIRECT_URI%");
 pref("loop.facebook.fallbackUrl", "https://hello.firefox.com/");
 pref("loop.conversationPopOut.enabled", false);
+pref("loop.username", "");

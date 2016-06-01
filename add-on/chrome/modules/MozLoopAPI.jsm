@@ -197,8 +197,7 @@ const kMessageHandlers = {
   },
 
   /**
-   * Creates a sidebar containing the given room in the XUL window where the
-   * given message came from.
+   * @see LoopSidebar.createSidebar
    *
    * @param {Object}  message Message meant for the handler function; contains
    *                          a room token in its 'data' property.

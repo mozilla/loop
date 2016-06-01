@@ -30,7 +30,7 @@ XPCOMUtils.defineLazyGetter(this, "log", () => {
 var LoopSidebarInternal = {
   /**
    * Creates a sidebar in the given browser window and loads the content based
-   * on the room token
+   * on the room token. It will ensure that the sidebar is only opened once.
    *
    * @param {Object}  window  Browser window where the sidebar will be created
    *
@@ -38,6 +38,11 @@ var LoopSidebarInternal = {
    */
   createSidebar: function(window, token) {
     let ownerDocument = window.gBrowser.ownerDocument;
+
+    if (ownerDocument.getElementById("loop-side-browser")) {
+      return;
+    }
+
     var browser = ownerDocument.getElementById("browser");
 
     let sidebarBrowser = ownerDocument.createElementNS(kNSXUL, "browser");
@@ -47,8 +52,9 @@ var LoopSidebarInternal = {
     sidebarBrowser.setAttribute("frameType", "loop");
     sidebarBrowser.setAttribute("messagemanagergroup", "loop");
     sidebarBrowser.setAttribute("message", "true");
-    sidebarBrowser.setAttribute("remote", "true");
-
+    // Ensure the sidebar only runs in the remote process if e10s is turned on.
+    sidebarBrowser.setAttribute("remote", window.gMultiProcessBrowser ? "true" : "false");
+    sidebarBrowser.setAttribute("tooltip", "aHTMLTooltip");
     sidebarBrowser.setAttribute("type", "content");
 
     sidebarBrowser.width = SIDEBAR_WIDTH;
@@ -59,8 +65,11 @@ var LoopSidebarInternal = {
 
     log.info("createSidebar called:", token, sidebarBrowser);
     let url = "about:loopconversation#" + token;
+
+    // Ensure camera access is allowed for the url.
     Services.perms.add(Services.io.newURI(url, null, null), "camera",
                      Services.perms.ALLOW_ACTION, Services.perms.EXPIRE_SESSION);
+
     sidebarBrowser.setAttribute("src", url);
   },
 

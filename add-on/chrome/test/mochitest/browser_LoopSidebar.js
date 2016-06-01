@@ -45,6 +45,16 @@ add_task(function* test_LoopSidebar_createSidebar() {
   let sidebar = win.document.getElementById("loop-side-browser");
   Assert.ok(sidebar, "there should create a sidebar");
   Assert.strictEqual(sidebar.getAttribute("src"), "about:loopconversation#faketoken", "Url must be set properly");
+
+  let parentNode = sidebar.parentNode;
+  let originalBrowserElementCount = parentNode.getElementsByTagName("browser").length;
+
+  LoopSidebar.createSidebar(win, "faketoken");
+
+  Assert.equal(parentNode.getElementsByTagName("browser").length,
+               originalBrowserElementCount,
+               "there should only ever be one sidebar created");
+
   yield closeWindow();
 });
 

@@ -6,6 +6,9 @@
 
 /* Only apply to browser.xul documents */
 @-moz-document url("chrome://browser/content/browser.xul") {
+  browser[frameType="loop"][remote="true"] {
+    -moz-binding: url("chrome://global/content/bindings/remote-browser.xml#remote-browser");
+  }
   /*
      XXX Copied from browser/themes/<platform>/browser.css. Should really be
      changing the sizes of icons in files to 16px x 16px and no borders.

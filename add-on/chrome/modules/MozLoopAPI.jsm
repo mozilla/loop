@@ -87,47 +87,6 @@ const getObjectAPIFunctionName = function(action) {
 };
 
 /**
- * Retrieves a list of Social Providers from the Social API that are explicitly
- * capable of sharing URLs.
- * It also adds a listener that is fired whenever a new Provider is added or
- * removed.
- *
- * @return {Array} Sorted list of share-capable Social Providers.
- */
-const updateSocialProvidersCache = function() {
-  let providers = [];
-
-  for (let provider of Social.providers) {
-    if (!provider.shareURL) {
-      continue;
-    }
-
-    // Only pass the relevant data on to content.
-    providers.push({
-      iconURL: provider.iconURL,
-      name: provider.name,
-      origin: provider.origin
-    });
-  }
-
-  let providersWasSet = !!gSocialProviders;
-  // Replace old with new.
-  gSocialProviders = providers.sort((a, b) =>
-    a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-
-  // Start listening for changes in the social provider list, if we're not
-  // doing that yet.
-  if (!providersWasSet) {
-    Services.obs.addObserver(updateSocialProvidersCache, "social:providers-changed", false);
-  } else {
-    // Dispatch an event to content to let stores freshen-up.
-    LoopAPIInternal.broadcastPushMessage("SocialProvidersChanged");
-  }
-
-  return gSocialProviders;
-};
-
-/**
  *  Checks that [browser.js]'s global variable `gMultiProcessBrowser` is active,
  *  instead of checking on first available browser element.
  *  :see bug 1257243 comment 5:
@@ -142,7 +101,6 @@ var gBrowserSharingListeners = new Set();
 var gBrowserSharingWindows = new Set();
 var gPageListeners = null;
 var gOriginalPageListeners = null;
-var gSocialProviders = null;
 var gStringBundle = null;
 var gStubbedMessageHandlers = null;
 const kBatchMessage = "Batch";
@@ -295,27 +253,6 @@ const kMessageHandlers = {
       sessionId: sessionId,
       callId: callid
     });
-    reply();
-  },
-
-  /**
-   * Activates the Social Share panel with the Social Provider panel opened
-   * when the popup open.
-   *
-   * @param {Object}   message Message meant for the handler function, containing
-   *                           the following parameters in its `data` property:
-   *                           [ ]
-   * @param {Function} reply   Callback function, invoked with the result of this
-   *                           message handler. The result will be sent back to
-   *                           the senders' channel.
-   */
-  AddSocialShareProvider: function(message, reply) {
-    let win = Services.wm.getMostRecentWindow("navigator:browser");
-    if (!win || !win.SocialShare) {
-      reply();
-      return;
-    }
-    win.SocialShare.showDirectory(win.LoopUI.toolbarButton.anchor);
     reply();
   },
 
@@ -721,25 +658,6 @@ const kMessageHandlers = {
   },
 
   /**
-   * Returns a sorted list of Social Providers that can share URLs. See
-   * `updateSocialProvidersCache()` for more information.
-   *
-   * @param {Object}   message Message meant for the handler function, containing
-   *                           the following parameters in its `data` property:
-   *                           [ ]
-   * @param {Function} reply   Callback function, invoked with the result of this
-   *                           message handler. The result will be sent back to
-   *                           the senders' channel.
-   * @return {Array} Sorted list of share-capable Social Providers.
-   */
-  GetSocialShareProviders: function(message, reply) {
-    if (!gSocialProviders) {
-      updateSocialProvidersCache();
-    }
-    reply(gSocialProviders);
-  },
-
-  /**
    * Gets an object with data that represents the currently
    * authenticated user's identity.
    *
@@ -1112,42 +1030,6 @@ const kMessageHandlers = {
   },
 
   /**
-   * Share a room URL with the Social API.
-   *
-   * @param {Object}   message Message meant for the handler function, containing
-   *                           the following parameters in its `data` property:
-   *                           [
-   *                             {String} providerOrigin URL fragment that identifies
-   *                                                     a social provider
-   *                             {String} roomURL        URL of a room
-   *                             {String} title          Title of the sharing message
-   *                             {String} body           Body of the sharing message
-   *                           ]
-   * @param {Function} reply   Callback function, invoked with the result of this
-   *                           message handler. The result will be sent back to
-   *                           the senders' channel.
-   */
-  SocialShareRoom: function(message, reply) {
-    let win = Services.wm.getMostRecentWindow("navigator:browser");
-    if (!win || !win.SocialShare) {
-      reply();
-      return;
-    }
-
-    let [providerOrigin, roomURL, title, body] = message.data;
-    let graphData = {
-      url: roomURL,
-      title: title
-    };
-    if (body) {
-      graphData.body = body;
-    }
-    win.SocialShare.sharePage(providerOrigin, graphData, null,
-      win.LoopUI.toolbarButton.anchor);
-    reply();
-  },
-
-  /**
    * Adds a value to a telemetry histogram.
    *
    * @param {Object}   message Message meant for the handler function, containing
@@ -1439,10 +1321,6 @@ const LoopAPIInternal = {
 
     // Unsubscribe from global events.
     Services.obs.removeObserver(this.handleStatusChanged, "loop-status-changed");
-    // Stop listening for changes in the social provider list, if necessary.
-    if (gSocialProviders) {
-      Services.obs.removeObserver(updateSocialProvidersCache, "social:providers-changed");
-    }
   }
 };
 

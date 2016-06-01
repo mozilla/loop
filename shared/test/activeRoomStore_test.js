@@ -38,7 +38,6 @@ describe("loop.store.ActiveRoomStore", function() {
       "Rooms:PushSubscription": sinon.stub(),
       SetScreenShareState: sinon.stub(),
       GetActiveTabWindowId: sandbox.stub().returns(42),
-      GetSocialShareProviders: sinon.stub().returns([]),
       TelemetryAddValue: sinon.stub()
     });
 
@@ -363,8 +362,7 @@ describe("loop.store.ActiveRoomStore", function() {
               participants: [],
               roomName: fakeRoomData.decryptedContext.roomName,
               roomState: ROOM_STATES.READY,
-              roomUrl: fakeRoomData.roomUrl,
-              socialShareProviders: []
+              roomUrl: fakeRoomData.roomUrl
             }));
         });
       });
@@ -792,28 +790,6 @@ describe("loop.store.ActiveRoomStore", function() {
       }));
 
       expect(store.getStoreState().userAgentHandlesRoom).eql(true);
-    });
-  });
-
-  describe("#updateSocialShareInfo", function() {
-    var fakeSocialShareInfo;
-
-    beforeEach(function() {
-      fakeSocialShareInfo = {
-        socialShareProviders: [{
-          name: "foo",
-          origin: "https://example.com",
-          iconURL: "icon.png"
-        }]
-      };
-    });
-
-    it("should save the Social API information", function() {
-      store.updateSocialShareInfo(new sharedActions.UpdateSocialShareInfo(fakeSocialShareInfo));
-
-      var state = store.getStoreState();
-      expect(state.socialShareProviders)
-        .eql(fakeSocialShareInfo.socialShareProviders);
     });
   });
 
@@ -2116,24 +2092,6 @@ describe("loop.store.ActiveRoomStore", function() {
 
       expect(store._storeState.roomName).eql("fred");
       expect(store._storeState.roomContextUrls).eql([{ fake: 1 }]);
-    });
-  });
-
-  describe("#_handleSocialShareUpdate", function() {
-    it("should dispatch an UpdateRoomInfo action", function() {
-      store._handleSocialShareUpdate();
-
-      sinon.assert.calledOnce(dispatcher.dispatch);
-      sinon.assert.calledWithExactly(dispatcher.dispatch,
-        new sharedActions.UpdateSocialShareInfo({
-          socialShareProviders: []
-        }));
-    });
-
-    it("should call respective mozLoop methods", function() {
-      store._handleSocialShareUpdate();
-
-      sinon.assert.calledOnce(requestStubs.GetSocialShareProviders);
     });
   });
 

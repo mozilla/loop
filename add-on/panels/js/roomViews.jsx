@@ -376,8 +376,7 @@ loop.roomViews = (function(mozL10n) {
                   facebookEnabled={this.props.facebookEnabled}
                   locationForMetrics="conversation"
                   roomData={roomData}
-                  show={shouldRenderInvitationOverlay}
-                  socialShareProviders={this.state.socialShareProviders} />
+                  show={shouldRenderInvitationOverlay} />
               </sharedViews.MediaLayoutView>
             </div>
           );

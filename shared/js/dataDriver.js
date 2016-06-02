@@ -413,7 +413,7 @@ loop.DataDriver = function() {
         case "presence":
           dispatchAction = "UpdatedPresence";
           dispatchExtra = {
-            pingTime: data.timestamp,
+            pingedAgo: this.getServerTime() - data.timestamp,
             userId: id
           };
           break;

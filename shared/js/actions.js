@@ -129,7 +129,7 @@ loop.shared.actions = (function() {
      * Notifies that participant data has been received.
      */
     UpdatedParticipant: Action.define("updatedParticipant", {
-      name: String,
+      participantName: String,
       // This id was originally provided by loop-server on getting room data.
       userId: String
     }),
@@ -139,7 +139,7 @@ loop.shared.actions = (function() {
      */
     UpdatedPresence: Action.define("updatedPresence", {
       isHere: Boolean,
-      pingTime: Number,
+      pingedAgo: Number,
       // This id was originally provided by loop-server on getting room data.
       userId: String
     }),

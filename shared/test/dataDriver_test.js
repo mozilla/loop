@@ -85,12 +85,12 @@ describe("loop.DataDriver", () => {
   describe("#updateCurrentParticipant", () => {
     it("should update the current participant data", () => {
       driver.updateCurrentParticipant("theUserId", {
-        name: "Cool Name"
+        participantName: "Cool Name"
       });
 
       let { method, requestBody, url } = requests[0];
       expect(method).eql("PUT");
-      expect(requestBody).eql('{"timestamp":{".sv":"timestamp"},"value":{"name":"Cool Name"}}');
+      expect(requestBody).eql('{"timestamp":{".sv":"timestamp"},"value":{"participantName":"Cool Name"}}');
       expect(getResource(url)).eql("participant!theUserId.json");
     });
   });
@@ -453,7 +453,7 @@ describe("loop.DataDriver", () => {
 
   describe("#_processRecord", () => {
     it("should dispatch objects without modifying params", () => {
-      let origValue = { name: "Cool Name" };
+      let origValue = { participantName: "Cool Name" };
       driver._processRecord("participant!theUserId", {
         timestamp: 1234567890123,
         value: origValue
@@ -466,14 +466,14 @@ describe("loop.DataDriver", () => {
       driver._processRecord("participant!theUserId", {
         timestamp: 1234567890123,
         value: {
-          name: "Cool Name",
+          participantName: "Cool Name",
           userId: "should be replaced"
         }
       });
 
       sinon.assert.calledWithExactly(dispatcher.dispatch,
         new actions.UpdatedParticipant({
-          name: "Cool Name",
+          participantName: "Cool Name",
           userId: "theUserId"
         }));
     });
@@ -506,14 +506,14 @@ describe("loop.DataDriver", () => {
       driver._processRecord("participant!theUserId", {
         timestamp: 1234567890123,
         value: {
-          name: "Cool Name"
+          participantName: "Cool Name"
         }
       });
 
       sinon.assert.called(dispatcher.dispatch);
       sinon.assert.calledWithExactly(dispatcher.dispatch,
         new actions.UpdatedParticipant({
-          name: "Cool Name",
+          participantName: "Cool Name",
           userId: "theUserId"
         }));
     });
@@ -521,8 +521,10 @@ describe("loop.DataDriver", () => {
 
   describe("#_processRecord.presence", () => {
     it("should dispatch `UpdatedPresence` for presence record", () => {
+      let now = 1234567890123;
+      clock.tick(now);
       driver._processRecord("presence!theUserId", {
-        timestamp: 1234567890123,
+        timestamp: now - 1000,
         value: {
           isHere: true
         }
@@ -532,7 +534,7 @@ describe("loop.DataDriver", () => {
       sinon.assert.calledWithExactly(dispatcher.dispatch,
         new actions.UpdatedPresence({
           isHere: true,
-          pingTime: 1234567890123,
+          pingedAgo: 1000,
           userId: "theUserId"
         }));
     });

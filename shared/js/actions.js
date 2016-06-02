@@ -145,6 +145,15 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     * Notifies that a tile has been received from the other peer.
+     */
+    AddedPage: Action.define("addedPage", {
+      title: String,
+      url: String
+      // metadata: Object (optional)
+    }),
+
+    /**
      *  Used to send cursor data to the other peer
      */
     SendCursorData: Action.define("sendCursorData", {

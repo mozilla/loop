@@ -85,6 +85,15 @@ loop.DataDriver = function() {
     }
 
     /**
+     * Add a page to the room's table of contents.
+     *
+     * @param {Object} page      The page object to add.
+     */
+    addPage(page) {
+      this.update("page", this.makeId(), page);
+    }
+
+    /**
      * Send a text chat message by storing in the database.
      *
      * @param {Object} message The message to be stored and received by others.
@@ -401,6 +410,10 @@ loop.DataDriver = function() {
           dispatchExtra = {
             receivedTimestamp: new Date(data.timestamp).toISOString()
           };
+          break;
+
+        case "page":
+          dispatchAction = "AddedPage";
           break;
 
         case "participant":

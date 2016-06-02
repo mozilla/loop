@@ -68,6 +68,35 @@ describe("loop.DataDriver", () => {
     });
   });
 
+  describe("#addPage", () => {
+    it("should send page data by updating a page record", () => {
+      driver.addPage({
+        url: "http://example.com",
+        title: "cool page"
+      });
+
+      let { method, requestBody, url } = requests[0];
+      expect(method).eql("PUT");
+      expect(requestBody).eql('{"timestamp":{".sv":"timestamp"},"value":{"url":"http://example.com","title":"cool page"}}');
+      expect(url.match(/([^\/]+).{12}\.json$/)[1]).eql("page!00000000");
+    });
+
+    it("should dispatch a AddedPage action for a page record", () => {
+      let record = {
+        title: "cool page",
+        url: "http://example.com"
+      };
+      driver._processRecord("page!00000000", {
+       timestamp: 1234567890123,
+       value: record
+      });
+
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new actions.AddedPage(record)
+      );
+    });
+  });
+
   describe("#sendTextChatMessage", () => {
     it("should send a message by updating a chat record", () => {
       driver.sendTextChatMessage({

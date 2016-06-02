@@ -35,6 +35,7 @@ module.exports = function(config) {
     "built/standalone/content/shared/js/dataDriver.js",
     "built/standalone/content/shared/js/otSdkDriver.js",
     "built/standalone/content/shared/js/activeRoomStore.js",
+    "built/standalone/content/shared/js/serverConnectionStore.js",
     "built/standalone/content/shared/js/participantStore.js",
     "built/standalone/content/shared/js/remoteCursorStore.js",
     "built/standalone/content/shared/js/views.js",

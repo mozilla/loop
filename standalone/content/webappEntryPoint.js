@@ -82,6 +82,7 @@ require("imports?loop=>window.loop!exports?loop!shared/js/dataDriver.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/otSdkDriver.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/store.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/activeRoomStore.js");
+require("imports?loop=>window.loop!exports?loop!shared/js/serverConnectionStore.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/remoteCursorStore.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/participantStore.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/views.js");

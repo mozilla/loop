@@ -202,11 +202,13 @@ loop.webapp = (function(_, OT, mozL10n) {
       sdkDriver: sdkDriver
     });
     var participantStore = new loop.store.ParticipantStore(dispatcher);
+    var serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher, {});
 
     loop.store.StoreMixin.register({
       activeRoomStore,
       participantStore,
       remoteCursorStore,
+      serverConnectionStore,
       // This isn't used in any views, but is saved here to ensure it
       // is kept alive.
       standaloneMetricsStore,

@@ -150,12 +150,15 @@ loop.sidebar = (function(mozL10n) {
         sdkDriver: sdkDriver
       });
 
+      var serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher, {});
+
       var textChatStore = new loop.store.TextChatStore(dispatcher, {
         dataDriver: dataDriver
       });
 
       loop.store.StoreMixin.register({
         activeRoomStore: activeRoomStore,
+        serverConnectionStore: serverConnectionStore,
         textChatStore: textChatStore
       });
 

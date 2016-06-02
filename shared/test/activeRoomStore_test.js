@@ -986,36 +986,6 @@ describe("loop.store.ActiveRoomStore", function() {
 
       expect(store.getStoreState().roomState).eql(ROOM_STATES.JOINING);
     });
-
-    it("should call rooms.join on mozLoop", function() {
-      store.gotMediaPermission();
-
-      sinon.assert.calledOnce(requestStubs["Rooms:Join"]);
-      sinon.assert.calledWith(requestStubs["Rooms:Join"], "tokenFake", "display_name_guest");
-    });
-
-    it("should dispatch `JoinedRoom` on success", function() {
-      store.gotMediaPermission();
-
-      sinon.assert.calledOnce(dispatcher.dispatch);
-      sinon.assert.calledWith(dispatcher.dispatch,
-        new sharedActions.JoinedRoom(responseData));
-    });
-
-    it("should dispatch `RoomFailure` on error", function() {
-      var fakeError = new Error("fake");
-      fakeError.isError = true;
-      requestStubs["Rooms:Join"].returns(fakeError);
-
-      store.gotMediaPermission();
-
-      sinon.assert.calledOnce(dispatcher.dispatch);
-      sinon.assert.calledWith(dispatcher.dispatch,
-        new sharedActions.RoomFailure({
-          error: fakeError,
-          failedJoinRequest: true
-        }));
-    });
   });
 
   describe("#joinedRoom", function() {
@@ -1129,55 +1099,6 @@ describe("loop.store.ActiveRoomStore", function() {
         sinon.assert.calledWithExactly(requestStubs.AddConversationContext,
                                        "42", "15263748", "");
       });
-    });
-
-    it("should call Rooms:RefreshMembership before the expiresTime",
-      function() {
-        store.joinedRoom(new sharedActions.JoinedRoom(fakeJoinedData));
-
-        sandbox.clock.tick(fakeJoinedData.expires * 1000);
-
-        sinon.assert.calledOnce(requestStubs["Rooms:RefreshMembership"]);
-        sinon.assert.calledWith(requestStubs["Rooms:RefreshMembership"],
-          "fakeToken", "12563478");
-    });
-
-    it("should call mozLoop.rooms.refreshMembership before the next expiresTime",
-      function() {
-        requestStubs["Rooms:RefreshMembership"].returns({ expires: 40 });
-
-        store.joinedRoom(new sharedActions.JoinedRoom(fakeJoinedData));
-
-        // Clock tick for the first expiry time (which
-        // sets up the refreshMembership).
-        sandbox.clock.tick(fakeJoinedData.expires * 1000);
-
-        // Clock tick for expiry time in the refresh membership response.
-        sandbox.clock.tick(40000);
-
-        sinon.assert.calledTwice(requestStubs["Rooms:RefreshMembership"]);
-        sinon.assert.calledWith(requestStubs["Rooms:RefreshMembership"],
-          "fakeToken", "12563478");
-    });
-
-    it("should dispatch `RoomFailure` if the refreshMembership call failed",
-      function() {
-        var fakeError = new Error("fake");
-        fakeError.isError = true;
-        requestStubs["Rooms:RefreshMembership"].returns(fakeError);
-
-        store.joinedRoom(new sharedActions.JoinedRoom(fakeJoinedData));
-
-        // Clock tick for the first expiry time (which
-        // sets up the refreshMembership).
-        sandbox.clock.tick(fakeJoinedData.expires * 1000);
-
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWith(dispatcher.dispatch,
-          new sharedActions.RoomFailure({
-            error: fakeError,
-            failedJoinRequest: false
-          }));
     });
   });
 

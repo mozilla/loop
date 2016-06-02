@@ -32,7 +32,7 @@ loop.store.ROOM_STATES = {
     CLOSING: "room-closing"
 };
 
-loop.store.ActiveRoomStore = (function(mozL10n) {
+loop.store.ActiveRoomStore = (function() {
   "use strict";
 
   var sharedActions = loop.shared.actions;
@@ -69,11 +69,6 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
    * - {OTSdkDriver} sdkDriver  The SDK driver instance.
    */
   var ActiveRoomStore = loop.store.createStore({
-    /**
-     * The time factor to adjust the expires time to ensure that we send a refresh
-     * before the expiry. Currently set as 90%.
-     */
-    expiresTimeFactor: 0.9,
 
     // XXX Further actions are registered in setupWindowData and
     // fetchServerData when we know what window type this is. At some stage,
@@ -660,35 +655,11 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
      */
     gotMediaPermission: function() {
       this.setStoreState({ roomState: ROOM_STATES.JOINING });
-
-      loop.request("Rooms:Join", this._storeState.roomToken,
-                   mozL10n.get("display_name_guest")).then(function(result) {
-        if (result.isError) {
-          this.dispatchAction(new sharedActions.RoomFailure({
-            error: result,
-            // This is an explicit flag to avoid the leave happening if join
-            // fails. We can't track it on ROOM_STATES.JOINING as the user
-            // might choose to leave the room whilst the XHR is in progress
-            // which would then mean we'd run the race condition of not
-            // notifying the server of a leave.
-            failedJoinRequest: true
-          }));
-          return;
-        }
-
-        this.dispatchAction(new sharedActions.JoinedRoom({
-          apiKey: result.apiKey,
-          sessionToken: result.sessionToken,
-          sessionId: result.sessionId,
-          expires: result.expires
-        }));
-      }.bind(this));
     },
 
     /**
      * Handles the data received from joining a room. It stores the relevant
-     * data, and sets up the refresh timeout for ensuring membership of the room
-     * is refreshed regularly.
+     * data
      *
      * @param {sharedActions.JoinedRoom} actionData
      */
@@ -708,8 +679,6 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
         sessionId: actionData.sessionId,
         roomState: ROOM_STATES.JOINED
       });
-
-      this._setRefreshTimeout(actionData.expires);
 
       // Only send media telemetry on one side of the call: the desktop side.
       actionData.sendTwoWayMediaTelemetry = this._isDesktop;
@@ -1067,36 +1036,6 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
     },
 
     /**
-     * Handles setting of the refresh timeout callback.
-     *
-     * @param {Integer} expireTime The time until expiry (in seconds).
-     */
-    _setRefreshTimeout: function(expireTime) {
-      this._timeout = setTimeout(this._refreshMembership.bind(this),
-        expireTime * this.expiresTimeFactor * 1000);
-    },
-
-    /**
-     * Refreshes the membership of the room with the server, and then
-     * sets up the refresh for the next cycle.
-     */
-    _refreshMembership: function() {
-      loop.request("Rooms:RefreshMembership", this._storeState.roomToken,
-        this._storeState.sessionToken)
-        .then(function(result) {
-          if (result.isError) {
-            this.dispatchAction(new sharedActions.RoomFailure({
-              error: result,
-              failedJoinRequest: false
-            }));
-            return;
-          }
-
-          this._setRefreshTimeout(result.expires);
-        }.bind(this));
-    },
-
-    /**
      * Handles leaving a room. Clears any membership timeouts, then
      * signals to the server the leave of the room.
      * NOTE: if you add something here, please also consider if something needs
@@ -1267,4 +1206,4 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
   });
 
   return ActiveRoomStore;
-})(navigator.mozL10n || document.mozL10n);
+})();

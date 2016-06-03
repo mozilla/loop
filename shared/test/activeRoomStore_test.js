@@ -6,13 +6,11 @@ describe("loop.store.ActiveRoomStore", function() {
 
   var expect = chai.expect;
   var sharedActions = loop.shared.actions;
-  var sharedUtils = loop.shared.utils;
   var REST_ERRNOS = loop.shared.utils.REST_ERRNOS;
   var ROOM_STATES = loop.store.ROOM_STATES;
   var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
-  var ROOM_INFO_FAILURES = loop.shared.utils.ROOM_INFO_FAILURES;
   var sandbox, dispatcher, store, requestStubs, fakeSdkDriver, fakeMultiplexGum;
   var standaloneMediaRestore;
   var clock;
@@ -88,10 +86,10 @@ describe("loop.store.ActiveRoomStore", function() {
   });
 
   describe("#getInitialStoreState", function() {
-    it("should return an object with roomContextUrls set to null", function() {
+    it("should return an object with roomState set to INIT", function() {
       var initialState = store.getInitialStoreState();
 
-      expect(initialState).to.have.a.property("roomContextUrls", null);
+      expect(initialState).to.have.a.property("roomState", ROOM_STATES.INIT);
     });
   });
 
@@ -314,76 +312,32 @@ describe("loop.store.ActiveRoomStore", function() {
   });
 
   describe("#setupWindowData", function() {
-    var fakeToken, fakeRoomData;
+    var fakeToken;
 
     beforeEach(function() {
       fakeToken = "337-ff-54";
-      fakeRoomData = {
-        decryptedContext: {
-          roomName: "Monkeys"
-        },
-        participants: [],
-        roomUrl: "http://invalid"
-      };
 
       store = new loop.store.ActiveRoomStore(dispatcher, {
         sdkDriver: {}
       });
-      requestStubs["Rooms:Get"].withArgs(fakeToken).returns(fakeRoomData);
     });
 
     it("should set the state to `GATHER`", function() {
-      return store.setupWindowData(new sharedActions.SetupWindowData({
+      store.setupWindowData(new sharedActions.SetupWindowData({
         roomToken: fakeToken
-      })).then(function() {
-        expect(store.getStoreState()).to.have.property(
-          "roomState", ROOM_STATES.GATHER);
-      });
+      }));
+
+      expect(store.getStoreState()).to.have.property(
+        "roomState", ROOM_STATES.GATHER);
     });
 
     it("should store the room token and window id", function() {
-      return store.setupWindowData(new sharedActions.SetupWindowData({
+      store.setupWindowData(new sharedActions.SetupWindowData({
         roomToken: fakeToken
-      })).then(function() {
-        expect(store.getStoreState().roomToken).eql(fakeToken);
-      });
+      }));
+
+      expect(store.getStoreState().roomToken).eql(fakeToken);
     });
-
-    it("should dispatch an UpdateRoomInfo action if the get is successful",
-      function() {
-        return store.setupWindowData(new sharedActions.SetupWindowData({
-          roomToken: fakeToken
-        })).then(function() {
-          sinon.assert.calledOnce(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UpdateRoomInfo({
-              roomContextUrls: undefined,
-              roomDescription: undefined,
-              participants: [],
-              roomName: fakeRoomData.decryptedContext.roomName,
-              roomState: ROOM_STATES.READY,
-              roomUrl: fakeRoomData.roomUrl
-            }));
-        });
-      });
-
-    it("should dispatch a RoomFailure action if the get fails",
-      function() {
-        var fakeError = new Error("fake error");
-        fakeError.isError = true;
-        requestStubs["Rooms:Get"].withArgs(fakeToken).returns(fakeError);
-
-        return store.setupWindowData(new sharedActions.SetupWindowData({
-          roomToken: fakeToken
-        })).then(function() {
-          sinon.assert.calledOnce(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.RoomFailure({
-              error: fakeError,
-              failedJoinRequest: false
-            }));
-        });
-      });
   });
 
   describe("#fetchServerData", function() {
@@ -397,313 +351,15 @@ describe("loop.store.ActiveRoomStore", function() {
     });
 
     it("should save the token", function() {
-      return store.fetchServerData(fetchServerAction).then(function() {
-        expect(store.getStoreState().roomToken).eql("fakeToken");
-      });
+      store.fetchServerData(fetchServerAction);
+
+      expect(store.getStoreState().roomToken).eql("fakeToken");
     });
 
     it("should set the state to `GATHER`", function() {
-      return store.fetchServerData(fetchServerAction).then(function() {
-        expect(store.getStoreState().roomState).eql(ROOM_STATES.GATHER);
-      });
-    });
+      store.fetchServerData(fetchServerAction);
 
-    it("should call mozLoop.rooms.get to get the room data", function() {
-      return store.fetchServerData(fetchServerAction).then(function() {
-        sinon.assert.calledOnce(requestStubs["Rooms:Get"]);
-      });
-    });
-
-    it("should dispatch an UpdateRoomInfo message with failure if neither roomName nor context are supplied", function() {
-      return store.fetchServerData(fetchServerAction).then(function() {
-        sinon.assert.called(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.UpdateRoomInfo({
-            roomInfoFailure: ROOM_INFO_FAILURES.NO_DATA,
-            roomState: ROOM_STATES.READY,
-            roomUrl: "http://invalid"
-          }));
-      });
-    });
-
-    describe("mozLoop.rooms.get returns roomName as a separate field (no context)", function() {
-      it("should dispatch UpdateRoomInfo if mozLoop.rooms.get is successful", function() {
-        var roomDetails = {
-          roomName: "fakeName",
-          roomUrl: "http://invalid"
-        };
-
-        requestStubs["Rooms:Get"].returns(roomDetails);
-
-        return store.fetchServerData(fetchServerAction).then(function() {
-          sinon.assert.called(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UpdateRoomInfo(_.extend({
-              roomState: ROOM_STATES.READY
-            }, roomDetails)));
-        });
-      });
-    });
-
-    describe("mozLoop.rooms.get returns encryptedContext", function() {
-      var roomDetails, expectedDetails;
-
-      beforeEach(function() {
-        roomDetails = {
-          context: {
-            value: "fakeContext"
-          },
-          roomUrl: "http://invalid"
-        };
-        expectedDetails = {
-          roomUrl: "http://invalid"
-        };
-
-        requestStubs["Rooms:Get"].returns(roomDetails);
-
-        sandbox.stub(loop.crypto, "isSupported").returns(true);
-      });
-
-      it("should dispatch UpdateRoomInfo message with 'unsupported' failure if WebCrypto is unsupported", function() {
-        loop.crypto.isSupported.returns(false);
-
-        return store.fetchServerData(fetchServerAction).then(function() {
-          sinon.assert.called(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UpdateRoomInfo(_.extend({
-              roomInfoFailure: ROOM_INFO_FAILURES.WEB_CRYPTO_UNSUPPORTED,
-              roomState: ROOM_STATES.READY
-            }, expectedDetails)));
-        });
-      });
-
-      it("should dispatch UpdateRoomInfo message with 'no crypto key' failure if there is no crypto key", function() {
-        return store.fetchServerData(fetchServerAction).then(function() {
-          sinon.assert.called(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UpdateRoomInfo(_.extend({
-              roomInfoFailure: ROOM_INFO_FAILURES.NO_CRYPTO_KEY,
-              roomState: ROOM_STATES.READY
-            }, expectedDetails)));
-        });
-      });
-
-      it("should dispatch UpdateRoomInfo message with 'decrypt failed' failure if decryption failed", function() {
-        fetchServerAction.cryptoKey = "fakeKey";
-
-        // This is a work around to turn promise into a sync action to make handling test failures
-        // easier.
-        sandbox.stub(loop.crypto, "decryptBytes", function() {
-          return {
-            then: function(resolve, reject) {
-              reject(new Error("Operation unsupported"));
-            }
-          };
-        });
-
-        return store.fetchServerData(fetchServerAction).then(function() {
-          sinon.assert.called(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UpdateRoomInfo(_.extend({
-              roomInfoFailure: ROOM_INFO_FAILURES.DECRYPT_FAILED,
-              roomState: ROOM_STATES.READY
-            }, expectedDetails)));
-        });
-      });
-
-      it("should dispatch UpdateRoomInfo message with the context if decryption was successful", function() {
-        fetchServerAction.cryptoKey = "fakeKey";
-
-        var roomContext = {
-          description: "Never gonna let you down. Never gonna give you up...",
-          roomName: "The wonderful Loopy room",
-          urls: [{
-            description: "An invalid page",
-            location: "http://invalid.com",
-            thumbnail: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
-          }]
-        };
-
-        // This is a work around to turn promise into a sync action to make handling test failures
-        // easier.
-        sandbox.stub(loop.crypto, "decryptBytes", function() {
-          return {
-            then: function(resolve) {
-              resolve(JSON.stringify(roomContext));
-            }
-          };
-        });
-
-        return store.fetchServerData(fetchServerAction).then(function() {
-          var expectedData = _.extend({
-            roomContextUrls: roomContext.urls,
-            roomDescription: roomContext.description,
-            roomName: roomContext.roomName,
-            roomState: ROOM_STATES.READY
-          }, expectedDetails);
-
-          sinon.assert.called(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UpdateRoomInfo(expectedData));
-        });
-      });
-    });
-
-    describe("User Agent Room Handling", function() {
-      var channelListener, roomDetails;
-
-      beforeEach(function() {
-        sandbox.stub(sharedUtils, "isFirefox").returns(true);
-
-        roomDetails = {
-          roomName: "fakeName",
-          roomUrl: "http://invalid"
-        };
-        requestStubs["Rooms:Get"].returns(roomDetails);
-
-        sandbox.stub(window, "addEventListener", function(eventName, listener) {
-          if (eventName === "WebChannelMessageToContent") {
-            channelListener = listener;
-          }
-        });
-        sandbox.stub(window, "removeEventListener", function(eventName, listener) {
-          if (eventName === "WebChannelMessageToContent" &&
-              listener === channelListener) {
-            channelListener = null;
-          }
-        });
-      });
-
-      it("should dispatch UserAgentHandlesRoom with false if the user agent is not Firefox", function() {
-        sharedUtils.isFirefox.returns(false);
-
-        return store.fetchServerData(fetchServerAction).then(function() {
-          sinon.assert.called(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UserAgentHandlesRoom({
-              handlesRoom: false
-            }));
-        });
-      });
-
-      it("should dispatch with false after a timeout if there is no response from the channel", function() {
-        // When the dispatchEvent is called, we know the setup code has run, so
-        // advance the timer.
-        sandbox.stub(window, "dispatchEvent", function() {
-          sandbox.clock.tick(250);
-        });
-
-        return store.fetchServerData(fetchServerAction).then(function() {
-          sinon.assert.called(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UserAgentHandlesRoom({
-              handlesRoom: false
-            }));
-        });
-      });
-
-      it("should not dispatch if a message is returned not for the link-clicker", function() {
-        // When the dispatchEvent is called, we know the setup code has run, so
-        // advance the timer.
-        sandbox.stub(window, "dispatchEvent", function() {
-          // We call the listener twice, but the first time with an invalid id.
-          // Hence we should only get the dispatch once.
-          channelListener({
-            detail: {
-              id: "invalid-id",
-              message: null
-            }
-          });
-          channelListener({
-            detail: {
-              id: "loop-link-clicker",
-              message: null
-            }
-          });
-        });
-
-        return store.fetchServerData(fetchServerAction).then(function() {
-          // Although this is only called once for the UserAgentHandlesRoom,
-          // it gets called twice due to the UpdateRoomInfo. Therefore,
-          // we test both results here.
-          sinon.assert.calledTwice(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UserAgentHandlesRoom({
-              handlesRoom: false
-            }));
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UpdateRoomInfo(_.extend({
-              roomState: ROOM_STATES.READY
-            }, roomDetails)));
-        });
-      });
-
-      it("should dispatch with false if the user agent does not understand the message", function() {
-        // When the dispatchEvent is called, we know the setup code has run, so
-        // advance the timer.
-        sandbox.stub(window, "dispatchEvent", function() {
-          channelListener({
-            detail: {
-              id: "loop-link-clicker",
-              message: null
-            }
-          });
-        });
-
-        return store.fetchServerData(fetchServerAction).then(function() {
-          sinon.assert.called(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UserAgentHandlesRoom({
-              handlesRoom: false
-            }));
-        });
-      });
-
-      it("should dispatch with false if the user agent cannot handle the message", function() {
-        // When the dispatchEvent is called, we know the setup code has run, so
-        // advance the timer.
-        sandbox.stub(window, "dispatchEvent", function() {
-          channelListener({
-            detail: {
-              id: "loop-link-clicker",
-              message: {
-                response: false
-              }
-            }
-          });
-        });
-
-        return store.fetchServerData(fetchServerAction).then(function() {
-          sinon.assert.called(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UserAgentHandlesRoom({
-              handlesRoom: false
-            }));
-        });
-      });
-
-      it("should dispatch with true if the user agent can handle the message", function() {
-        // When the dispatchEvent is called, we know the setup code has run, so
-        // advance the timer.
-        sandbox.stub(window, "dispatchEvent", function() {
-          channelListener({
-            detail: {
-              id: "loop-link-clicker",
-              message: {
-                response: true
-              }
-            }
-          });
-        });
-
-        return store.fetchServerData(fetchServerAction).then(function() {
-          sinon.assert.called(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.UserAgentHandlesRoom({
-              handlesRoom: true
-            }));
-        });
-      });
+      expect(store.getStoreState().roomState).eql(ROOM_STATES.GATHER);
     });
   });
 
@@ -754,7 +410,11 @@ describe("loop.store.ActiveRoomStore", function() {
           thumbnail: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
         }],
         roomName: "Its a room",
-        roomUrl: "http://invalid"
+        roomUrl: "http://invalid",
+        participants: [{
+          displayName: "Owner",
+          owner: true
+        }]
       };
     });
 
@@ -762,9 +422,28 @@ describe("loop.store.ActiveRoomStore", function() {
       store.updateRoomInfo(new sharedActions.UpdateRoomInfo(fakeRoomInfo));
 
       var state = store.getStoreState();
-      expect(state.roomName).eql(fakeRoomInfo.roomName);
-      expect(state.roomUrl).eql(fakeRoomInfo.roomUrl);
-      expect(state.roomContextUrls).eql(fakeRoomInfo.roomContextUrls);
+
+      expect(state.participants).eql(fakeRoomInfo.participants);
+    });
+
+    it("should set the state to READY when the previous state was GATHER", function() {
+      store.setStoreState({ roomState: ROOM_STATES.GATHER });
+
+      store.updateRoomInfo(new sharedActions.UpdateRoomInfo(fakeRoomInfo));
+
+      var state = store.getStoreState();
+
+      expect(state.roomState).eql(ROOM_STATES.READY);
+    });
+
+    it("should not change the state when the previous state is not GATHER", function() {
+      store.setStoreState({ roomState: ROOM_STATES.INIT });
+
+      store.updateRoomInfo(new sharedActions.UpdateRoomInfo(fakeRoomInfo));
+
+      var state = store.getStoreState();
+
+      expect(state.roomState).eql(ROOM_STATES.INIT);
     });
   });
 
@@ -2080,71 +1759,6 @@ describe("loop.store.ActiveRoomStore", function() {
   });
 
   describe("Events", function() {
-    describe("update:{roomToken}", function() {
-      beforeEach(function() {
-        var fakeRoomData = {
-          decryptedContext: {
-            roomName: "Monkeys"
-          },
-          participants: [],
-          roomUrl: "http://invalid"
-        };
-        requestStubs["Rooms:Get"].returns(fakeRoomData);
-
-        store.setupWindowData(new sharedActions.SetupWindowData({
-          roomToken: "fakeToken"
-        }));
-      });
-
-      it("should dispatch an UpdateRoomInfo action", function() {
-        sinon.assert.calledOnce(requestStubs["Rooms:PushSubscription"]);
-        sinon.assert.calledWithExactly(requestStubs["Rooms:PushSubscription"],
-          ["delete:fakeToken", "update:fakeToken"]);
-
-        var fakeRoomData = {
-          decryptedContext: {
-            description: "fakeDescription",
-            roomName: "fakeName",
-            urls: {
-              fake: "url"
-            }
-          },
-          roomUrl: "original"
-        };
-
-        LoopMochaUtils.publish("Rooms:Update:fakeToken", fakeRoomData);
-
-        sinon.assert.calledTwice(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.UpdateRoomInfo({
-            roomDescription: "fakeDescription",
-            participants: undefined,
-            roomName: fakeRoomData.decryptedContext.roomName,
-            roomUrl: fakeRoomData.roomUrl,
-            roomContextUrls: {
-              fake: "url"
-            }
-          }));
-      });
-
-      it("should not update anything when another room is updated", function() {
-        var fakeRoomData = {
-          decryptedContext: {
-            description: "fakeDescription",
-            roomName: "fakeName",
-            urls: {
-              fake: "url"
-            }
-          },
-          roomUrl: "original"
-        };
-
-        LoopMochaUtils.publish("Rooms:Update:invalidToken", fakeRoomData);
-
-        sinon.assert.calledOnce(dispatcher.dispatch);
-      });
-    });
-
     describe("delete:{roomToken}", function() {
       var fakeRoomData = {
         decryptedContext: {

@@ -19,37 +19,37 @@ loop.shared.toc = (function(mozL10n) {
   // XXX akita: to store mixin
   // XXX akita: make activeRoomStore just handle the A/V connections.
   var TableOfContentView = React.createClass({
+    mixins: [
+      loop.store.StoreMixin("serverConnectionStore")
+    ],
+
     propTypes: {
-      activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isScreenShareActive: React.PropTypes.bool.isRequired,
       participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired
     },
 
     getInitialState: function() {
-      return this.props.activeRoomStore.getStoreState();
+      return this.getStoreState();
     },
 
     componentWillMount: function() {
-      this.props.activeRoomStore.on("change", this.onStoreChange);
-      // Force onStoreChange
-      this.onStoreChange();
+      this.onStoreChange(this.getStoreState());
     },
 
-    componentWillUnmount: function() {
-      this.props.activeRoomStore.off("change", this.onStoreChange);
+    componentWillUpdate: function(nextProps, nextState) {
+      this.onStoreChange(nextState);
     },
 
-    onStoreChange: function() {
-      var newState = this.props.activeRoomStore.getStoreState();
+    onStoreChange: function(nextState) {
       // We haven't decrypted data yet
-      if (!newState.roomContextUrls) {
+      if (!nextState.roomContextUrls || nextState.tiles) {
         return;
       }
 
-      var tiles = [newState.roomContextUrls[0]];
-      newState.tiles = tiles;
-      this.setState(newState);
+      this.setState({
+        tiles: [nextState.roomContextUrls[0]]
+      });
     },
 
     // XXX akita: add jsdoc

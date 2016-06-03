@@ -167,6 +167,10 @@ loop.OTSdkDriver = (function() {
      *                                           action. See action.js.
      */
     setMute: function(actionData) {
+      // XXX akita - simplify this when the activeRoomStore#setMute is fixed.
+      if (!this.publisher) {
+        return;
+      }
       if (actionData.type === "audio") {
         this.publisher.publishAudio(actionData.enabled);
       } else {

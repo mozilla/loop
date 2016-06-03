@@ -459,7 +459,6 @@ loop.shared.actions = (function() {
       // participants: Array - Optional.
       // roomContextUrls: Array - Optional.
       // See https://wiki.mozilla.org/Loop/Architecture/Context#Format_of_context.value
-      // roomDescription: String - Optional.
       // roomInfoFailure: String - Optional.
       // roomName: String - Optional.
       // roomState: String - Optional.

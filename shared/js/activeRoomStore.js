@@ -9,6 +9,7 @@ loop.store.ROOM_STATES = {
     // The initial state of the room
     INIT: "room-init",
     // The store is gathering the room data
+    // XXX akita - We could probably drop this and go from init to ready.
     GATHER: "room-gather",
     // The store has got the room data
     READY: "room-ready",
@@ -36,7 +37,6 @@ loop.store.ActiveRoomStore = (function() {
   "use strict";
 
   var sharedActions = loop.shared.actions;
-  var crypto = loop.crypto;
   var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
@@ -46,17 +46,6 @@ loop.store.ActiveRoomStore = (function() {
   var REST_ERRNOS = loop.shared.utils.REST_ERRNOS;
 
   var ROOM_STATES = loop.store.ROOM_STATES;
-
-  var ROOM_INFO_FAILURES = loop.shared.utils.ROOM_INFO_FAILURES;
-
-  var OPTIONAL_ROOMINFO_FIELDS = {
-    participants: "participants",
-    roomContextUrls: "roomContextUrls",
-    roomDescription: "roomDescription",
-    roomInfoFailure: "roomInfoFailure",
-    roomName: "roomName",
-    roomState: "roomState"
-  };
 
   var updateContextTimer = null;
 
@@ -142,21 +131,15 @@ loop.store.ActiveRoomStore = (function() {
         sharingPaused: false,
         receivingScreenShare: false,
         remotePeerDisconnected: false,
-        // Any urls (aka context) associated with the room. null if no context.
-        roomContextUrls: null,
-        // The description for a room as stored in the context data.
-        roomDescription: null,
-        // Room information failed to be obtained for a reason. See ROOM_INFO_FAILURES.
-        roomInfoFailure: null,
-        // The name of the room.
-        roomName: null,
         // True when sharing screen has been paused.
         streamPaused: false,
         // True if media has been connected both-ways.
         mediaConnected: false,
         // True if a chat message was sent or received during a session.
         // Read more at https://wiki.mozilla.org/Loop/Session.
-        chatMessageExchanged: false
+        chatMessageExchanged: false,
+        // The participants in the room.
+        participants: []
       };
     },
 
@@ -277,13 +260,11 @@ loop.store.ActiveRoomStore = (function() {
       }
       this.dispatcher.register(this, actions);
 
-      this._onUpdateListener = this._handleRoomUpdate.bind(this);
       this._onDeleteListener = this._handleRoomDelete.bind(this);
 
       var roomToken = this._storeState.roomToken;
-      loop.request("Rooms:PushSubscription", ["delete:" + roomToken, "update:" + roomToken]);
+      loop.request("Rooms:PushSubscription", ["delete:" + roomToken]);
       loop.subscribe("Rooms:Delete:" + roomToken, this._handleRoomDelete.bind(this));
-      loop.subscribe("Rooms:Update:" + roomToken, this._handleRoomUpdate.bind(this));
     },
 
     /**
@@ -301,28 +282,6 @@ loop.store.ActiveRoomStore = (function() {
       });
 
       this._registerPostSetupActions();
-
-      // Get the window data from the Loop API.
-      return loop.request("Rooms:Get", actionData.roomToken).then(function(result) {
-        var room = result;
-
-        if (result.isError) {
-          this.dispatchAction(new sharedActions.RoomFailure({
-            error: result,
-            failedJoinRequest: false
-          }));
-          return;
-        }
-
-        this.dispatchAction(new sharedActions.UpdateRoomInfo({
-          participants: room.participants,
-          roomContextUrls: room.decryptedContext.urls,
-          roomDescription: room.decryptedContext.description,
-          roomName: room.decryptedContext.roomName,
-          roomState: ROOM_STATES.READY,
-          roomUrl: room.roomUrl
-        }));
-      }.bind(this));
     },
 
     /**
@@ -332,14 +291,11 @@ loop.store.ActiveRoomStore = (function() {
      * This action is only used for the standalone UI.
      *
      * @param {sharedActions.FetchServerData} actionData
-     * @return {Promise} For testing purposes, returns a promise that is resolved
-     *                   once data is received from the server, and it is determined
-     *                   if Firefox handles the room or not.
      */
     fetchServerData: function(actionData) {
       if (actionData.windowType !== "room") {
         // Nothing for us to do here, leave it to other stores.
-        return Promise.resolve();
+        return;
       }
 
       this.setStoreState({
@@ -350,192 +306,38 @@ loop.store.ActiveRoomStore = (function() {
       });
 
       this._registerPostSetupActions();
-
-      var dataPromise = this._getRoomDataForStandalone(actionData.cryptoKey);
-
-      var userAgentHandlesPromise = this._promiseDetectUserAgentHandles();
-
-      return Promise.all([dataPromise, userAgentHandlesPromise]).then(function(results) {
-        results.forEach(function(result) {
-          this.dispatcher.dispatch(result);
-        }.bind(this));
-      }.bind(this));
-    },
-
-    /**
-     * Gets the room data for the standalone, decrypting it as necessary.
-     *
-     * @param  {String} roomCryptoKey The crypto key associated to the room.
-     * @return {Promise}              A promise that is resolved once the get
-     *                                and decryption is complete.
-     */
-    _getRoomDataForStandalone: function(roomCryptoKey) {
-      return new Promise(function(resolve) {
-        loop.request("Rooms:Get", this._storeState.roomToken).then(function(result) {
-          if (result.isError) {
-            resolve(new sharedActions.RoomFailure({
-              error: result,
-              failedJoinRequest: false
-            }));
-            return;
-          }
-
-          var roomInfoData = new sharedActions.UpdateRoomInfo({
-            // If we've got this far, then we want to go to the ready state
-            // regardless of success of failure. This is because failures of
-            // crypto don't stop the user using the room, they just stop
-            // us putting up the information.
-            roomState: ROOM_STATES.READY,
-            roomUrl: result.roomUrl
-          });
-
-          if (!result.context && !result.roomName) {
-            roomInfoData.roomInfoFailure = ROOM_INFO_FAILURES.NO_DATA;
-            resolve(roomInfoData);
-            return;
-          }
-
-          // This handles 'legacy', non-encrypted room names.
-          if (result.roomName && !result.context) {
-            roomInfoData.roomName = result.roomName;
-            resolve(roomInfoData);
-            return;
-          }
-
-          if (!crypto.isSupported()) {
-            roomInfoData.roomInfoFailure = ROOM_INFO_FAILURES.WEB_CRYPTO_UNSUPPORTED;
-            resolve(roomInfoData);
-            return;
-          }
-
-          if (!roomCryptoKey) {
-            roomInfoData.roomInfoFailure = ROOM_INFO_FAILURES.NO_CRYPTO_KEY;
-            resolve(roomInfoData);
-            return;
-          }
-
-          crypto.decryptBytes(roomCryptoKey, result.context.value)
-                .then(function(decryptedResult) {
-            var realResult = JSON.parse(decryptedResult);
-
-            roomInfoData.roomDescription = realResult.description;
-            roomInfoData.roomContextUrls = realResult.urls;
-            roomInfoData.roomName = realResult.roomName;
-
-            resolve(roomInfoData);
-          }, function() {
-            roomInfoData.roomInfoFailure = ROOM_INFO_FAILURES.DECRYPT_FAILED;
-            resolve(roomInfoData);
-          });
-        }.bind(this));
-      }.bind(this));
-    },
-
-    /**
-     * If the user agent is Firefox, it sends a message to Firefox to see if
-     * the room can be handled within Firefox rather than the standalone UI.
-     *
-     * @return {Promise} A promise that is resolved once it has been determined
-     *                   if Firefox can handle the room.
-     */
-    _promiseDetectUserAgentHandles: function() {
-      return new Promise(function(resolve) {
-        function resolveWithNotHandlingResponse() {
-          resolve(new sharedActions.UserAgentHandlesRoom({
-            handlesRoom: false
-          }));
-        }
-
-        // If we're not Firefox, don't even try to see if it can be handled
-        // in the browser.
-        if (!loop.shared.utils.isFirefox(navigator.userAgent)) {
-          resolveWithNotHandlingResponse();
-          return;
-        }
-
-        // Set up a timer in case older versions of Firefox don't give us a response.
-        var timer = setTimeout(resolveWithNotHandlingResponse, 250);
-        var webChannelListenerFunc;
-
-        // Listen for the result.
-        function webChannelListener(e) {
-          if (e.detail.id !== "loop-link-clicker") {
-            return;
-          }
-
-          // Stop the default response.
-          clearTimeout(timer);
-
-          // Remove the listener.
-          window.removeEventListener("WebChannelMessageToContent", webChannelListenerFunc);
-
-          // Resolve with the details of if we're able to handle or not.
-          resolve(new sharedActions.UserAgentHandlesRoom({
-            handlesRoom: !!e.detail.message && e.detail.message.response
-          }));
-        }
-
-        webChannelListenerFunc = webChannelListener.bind(this);
-
-        window.addEventListener("WebChannelMessageToContent", webChannelListenerFunc);
-
-        // Now send a message to the chrome to see if it can handle this room.
-        window.dispatchEvent(new window.CustomEvent("WebChannelMessageToChrome", {
-          detail: {
-            id: "loop-link-clicker",
-            message: {
-              command: "checkWillOpenRoom",
-              roomToken: this._storeState.roomToken
-            }
-          }
-        }));
-      }.bind(this));
     },
 
     /**
      * Handles the updateRoomInfo action. Updates the room data.
      *
-     * @param {sharedActions.UpdateRoomInfo} actionData
+     * @param {sharedActions.updateRoomInfo} actionData
      */
     updateRoomInfo: function(actionData) {
-      var newState = {
-        roomUrl: actionData.roomUrl
-      };
-      // Iterate over the optional fields that _may_ be present on the actionData
-      // object.
-      Object.keys(OPTIONAL_ROOMINFO_FIELDS).forEach(function(field) {
-        if (actionData[field] !== undefined) {
-          newState[OPTIONAL_ROOMINFO_FIELDS[field]] = actionData[field];
-        }
+      // Now we've got the data, bump the state to READY if we were previously
+      // waiting for it.
+      if (this._storeState.roomState === ROOM_STATES.GATHER) {
+        this.setStoreState({
+          roomState: ROOM_STATES.READY,
+          participants: actionData.participants
+        });
+        return;
+      }
+
+      this.setStoreState({
+        participants: actionData.participants
       });
-      this.setStoreState(newState);
     },
 
     /**
      * Handles the userAgentHandlesRoom action. Updates the store's data with
      * the new state.
      *
-     * @param {sharedActions.userAgentHandlesRoom} actionData
      */
     userAgentHandlesRoom: function(actionData) {
       this.setStoreState({
         userAgentHandlesRoom: actionData.handlesRoom
       });
-    },
-
-    /**
-     * Handles room updates notified by the Loop rooms API.
-     *
-     * @param {Object} roomData  The new roomData.
-     */
-    _handleRoomUpdate: function(roomData) {
-      this.dispatchAction(new sharedActions.UpdateRoomInfo({
-        roomContextUrls: roomData.decryptedContext.urls,
-        roomDescription: roomData.decryptedContext.description,
-        participants: roomData.participants,
-        roomName: roomData.decryptedContext.roomName,
-        roomUrl: roomData.roomUrl
-      }));
     },
 
     /**
@@ -721,7 +523,8 @@ loop.store.ActiveRoomStore = (function() {
      * @param {sharedActions.setMute} actionData The mute state for the stream type.
      */
     setMute: function(actionData) {
-      // XXX akita - temporary bad place to initiate joins.
+      // XXX akita - temporary bad place to initiate joins. Also see
+      // otSdkDriver#setMute.
       if (this._storeState.roomState === ROOM_STATES.READY ||
           this._storeState.roomState === ROOM_STATES.ENDED) {
         this.dispatcher.dispatch(new sharedActions.JoinRoom());
@@ -1019,10 +822,8 @@ loop.store.ActiveRoomStore = (function() {
 
       // If we're closing the window, we can stop listening to updates.
       var roomToken = this.getStoreState().roomToken;
-      loop.unsubscribe("Rooms:Update:" + roomToken, this._onUpdateListener);
       loop.unsubscribe("Rooms:Delete:" + roomToken, this._onDeleteListener);
       loop.unsubscribe("SocialProvidersChanged", this._onSocialProvidersUpdate);
-      delete this._onUpdateListener;
       delete this._onDeleteListener;
       delete this._onShareWidgetUpdate;
       delete this._onSocialProvidersUpdate;

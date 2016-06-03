@@ -35,25 +35,16 @@ loop.roomToc = (function(mozL10n) {
       });
 
       var dispatcher = new loop.Dispatcher();
-      var sdkDriver = new loop.OTSdkDriver({
-        // For the standalone, always request data channels. If they aren't
-        // implemented on the client, there won't be a similar message to us, and
-        // we won't display the UI.
-        constants,
-        useDataChannels: true,
-        dispatcher,
-        sdk: OT
-      });
 
-      var activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, { sdkDriver });
+      var serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher, {});
 
       var roomStore = new loop.store.RoomStore(dispatcher, { constants });
 
       var participantStore = new loop.store.ParticipantStore(dispatcher);
 
       loop.store.StoreMixin.register({
-        activeRoomStore,
         participantStore,
+        serverConnectionStore,
         roomStore
       });
 
@@ -62,7 +53,6 @@ loop.roomToc = (function(mozL10n) {
       });
 
       ReactDOM.render(<tocViews.TableOfContentView
-                        activeRoomStore={activeRoomStore}
                         dispatcher={dispatcher}
                         isScreenShareActive={false}
                         participantStore={participantStore} />, document.querySelector("#main"));

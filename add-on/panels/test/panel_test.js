@@ -9,7 +9,7 @@ describe("loop.panel", function() {
   var TestUtils = React.addons.TestUtils;
   var sharedActions = loop.shared.actions;
 
-  var sandbox, notifications, requestStubs;
+  var sandbox, notifications, requestStubs, dispatcher;
   var fakeXHR, fakeWindow, fakeEvent;
   var requests = [];
   var roomData, roomData2, roomData3, roomData4, roomData5, roomData6;
@@ -88,7 +88,6 @@ describe("loop.panel", function() {
       LogoutFromFxA: sinon.stub(),
       NotifyUITour: sinon.stub(),
       OpenURL: sinon.stub(),
-      GettingStartedURL: sinon.stub().returns("http://fakeFTUUrl.com"),
       OpenGettingStartedTour: sinon.stub(),
       GetSelectedTabMetadata: sinon.stub().returns({}),
       GetUserProfile: function() { return null; }
@@ -220,6 +219,9 @@ describe("loop.panel", function() {
       ctime: 1405517417
     };
 
+    dispatcher = new loop.Dispatcher();
+    sandbox.stub(dispatcher, "dispatch");
+
     roomList = [new loop.store.Room(roomData), new loop.store.Room(roomData2)];
 
     document.mozL10n.initialize({
@@ -277,10 +279,9 @@ describe("loop.panel", function() {
   });
 
   describe("loop.panel.PanelView", function() {
-    var dispatcher, roomStore;
+    var roomStore;
 
     beforeEach(function() {
-      dispatcher = new loop.Dispatcher();
       roomStore = new loop.store.RoomStore(dispatcher, {
         constants: {}
       });
@@ -824,12 +825,6 @@ describe("loop.panel", function() {
   });
 
   describe("loop.panel.RoomEntry", function() {
-    var dispatcher;
-
-    beforeEach(function() {
-      dispatcher = new loop.Dispatcher();
-    });
-
     function mountRoomEntry(props) {
       props = _.extend({
         dispatcher: dispatcher
@@ -842,10 +837,6 @@ describe("loop.panel", function() {
       var view;
 
       beforeEach(function() {
-        // Stub to prevent warnings due to stores not being set up to handle
-        // the actions we are triggering.
-        sandbox.stub(dispatcher, "dispatch");
-
         view = mountRoomEntry({
           isOpenedRoom: false,
           room: new loop.store.Room(roomData)
@@ -881,92 +872,39 @@ describe("loop.panel", function() {
       });
     });
 
-    describe("Copy button", function() {
-      var roomEntry, openURLStub;
+    describe("Click Room Entry", function() {
+      var roomEntry;
 
       beforeEach(function() {
-        // Stub to prevent warnings where no stores are set up to handle the
-        // actions we are testing.
-        sandbox.stub(dispatcher, "dispatch");
-        openURLStub = sinon.stub();
-
-        LoopMochaUtils.stubLoopRequest({
-          GetSelectedTabMetadata: function() {
-            return {
-              url: "http://invalid.com",
-              description: "fakeSite"
-            };
-          },
-          OpenURL: openURLStub
-        });
-
         roomEntry = mountRoomEntry({
-          deleteRoom: sandbox.stub(),
           isOpenedRoom: false,
           room: new loop.store.Room(roomData)
         });
       });
 
-      it("should render context actions button", function() {
-        expect(roomEntry.refs.contextActions).to.not.eql(null);
+      it("should call window.close", function() {
+        TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry.refs.roomEntry));
+
+        sinon.assert.calledOnce(fakeWindow.close);
       });
 
-      describe("OpenRoom", function() {
-        it("should call window.close", function() {
-          roomEntry.handleClickEntry(fakeEvent);
+      it("should dispatch the OpenRoom action", function() {
+        TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry.refs.roomEntry));
 
-          sinon.assert.calledOnce(fakeWindow.close);
-        });
+        sinon.assert.calledOnce(dispatcher.dispatch);
+        sinon.assert.calledWithExactly(dispatcher.dispatch,
+          new sharedActions.OpenRoom({
+            roomToken: roomData.roomToken
+          }));
+      });
 
-        it("should open the room if the room context is not blank", function() {
-          roomEntry = mountRoomEntry({
-            deleteRoom: sandbox.stub(),
-            isOpenedRoom: false,
-            room: new loop.store.Room(roomData)
-          });
+      it("should do nothing if in edit mode", function() {
+        roomEntry.setState({ editMode: true });
 
-          TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry.refs.roomEntry));
+        TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry.refs.roomEntry));
 
-          sinon.assert.calledOnce(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-                                           new sharedActions.OpenRoom({
-                                            roomToken: roomData.roomToken
-                                           }));
-        });
-
-        it("should open a new tab with the FTU Getting Started URL if the room context is blank", function() {
-          var roomDataNoURL = {
-            roomToken: "QzBbvGmIZWU",
-            roomUrl: "http://sample/QzBbvGmIZWU",
-            decryptedContext: {
-              roomName: roomName,
-              urls: [{
-                location: ""
-              }]
-            },
-            maxSize: 2,
-            participants: [{
-              displayName: "Alexis",
-              account: "alexis@example.com",
-              roomConnectionId: "2a1787a6-4a73-43b5-ae3e-906ec1e763cb"
-            }, {
-              displayName: "Adam",
-              roomConnectionId: "781f012b-f1ea-4ce1-9105-7cfc36fb4ec7"
-            }],
-            ctime: 1405517418
-          };
-          roomEntry = mountRoomEntry({
-            deleteRoom: sandbox.stub(),
-            isOpenedRoom: false,
-            room: new loop.store.Room(roomDataNoURL)
-          });
-          var ftuURL = requestStubs.GettingStartedURL() + "?noopenpanel=1";
-
-          TestUtils.Simulate.click(ReactDOM.findDOMNode(roomEntry.refs.roomEntry));
-
-          sinon.assert.calledOnce(openURLStub);
-          sinon.assert.calledWithExactly(openURLStub, ftuURL);
-        });
+        sinon.assert.notCalled(fakeWindow.close);
+        sinon.assert.notCalled(dispatcher.dispatch);
       });
     });
 
@@ -1058,8 +996,6 @@ describe("loop.panel", function() {
           editMode: true
         });
 
-        sandbox.stub(dispatcher, "dispatch");
-
         var input = ReactDOM.findDOMNode(roomEntry).querySelector("input");
         input.value = "fakeName";
         TestUtils.Simulate.change(input);
@@ -1077,8 +1013,6 @@ describe("loop.panel", function() {
         roomEntry.setState({
           editMode: true
         });
-
-        sandbox.stub(dispatcher, "dispatch");
 
         var input = ReactDOM.findDOMNode(roomEntry).querySelector("input");
         input.value = "fakeName";
@@ -1152,59 +1086,13 @@ describe("loop.panel", function() {
         expect(ReactDOM.findDOMNode(roomEntry).textContent).eql("https://fakeurl.com");
       });
     });
-
-    describe("Room entry click", function() {
-      var roomEntry;
-
-      beforeEach(function() {
-        // Stub to prevent warnings due to stores not being set up to handle
-        // the actions we are triggering.
-        sandbox.stub(dispatcher, "dispatch");
-      });
-
-      it("should require MetaData", function() {
-        roomEntry = mountRoomEntry({
-          isOpenedRoom: false,
-          room: new loop.store.Room(roomData)
-        });
-        roomEntry.handleClickEntry(fakeEvent);
-
-        sinon.assert.calledOnce(requestStubs.GetSelectedTabMetadata);
-      });
-
-      it("should close the Panel", function() {
-        roomEntry = mountRoomEntry({
-          isOpenedRoom: false,
-          room: new loop.store.Room(roomData)
-        });
-        sandbox.stub(roomEntry, "closeWindow");
-        roomEntry.handleClickEntry(fakeEvent);
-
-        sinon.assert.calledOnce(roomEntry.closeWindow);
-      });
-
-      it("should dispatch the OpenRoom action", function() {
-        roomEntry = mountRoomEntry({
-          isOpenedRoom: false,
-          room: new loop.store.Room(roomData)
-        });
-        roomEntry.handleClickEntry(fakeEvent);
-
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-                                       new sharedActions.OpenRoom({
-                                        roomToken: roomData.roomToken
-                                       }));
-      });
-    });
   });
 
   describe("loop.panel.RoomList", function() {
-    var roomStore, dispatcher, fakeEmail, dispatch;
+    var roomStore, fakeEmail;
 
     beforeEach(function() {
       fakeEmail = "fakeEmail@example.com";
-      dispatcher = new loop.Dispatcher();
       roomStore = new loop.store.RoomStore(dispatcher, {
         constants: {}
       });
@@ -1215,8 +1103,6 @@ describe("loop.panel", function() {
         rooms: [],
         error: undefined
       });
-
-      dispatch = sandbox.stub(dispatcher, "dispatch");
     });
 
     function createTestComponent() {
@@ -1232,8 +1118,8 @@ describe("loop.panel", function() {
     it("should dispatch a GetAllRooms action on mount", function() {
       createTestComponent();
 
-      sinon.assert.calledOnce(dispatch);
-      sinon.assert.calledWithExactly(dispatch, new sharedActions.GetAllRooms());
+      sinon.assert.calledOnce(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch, new sharedActions.GetAllRooms());
     });
 
     it("should not close the panel once a room is created and there is no error", function() {
@@ -1439,11 +1325,10 @@ describe("loop.panel", function() {
   });
 
   describe("loop.panel.NewRoomView", function() {
-    var roomStore, dispatcher, fakeEmail, dispatch;
+    var roomStore, fakeEmail;
 
     beforeEach(function() {
       fakeEmail = "fakeEmail@example.com";
-      dispatcher = new loop.Dispatcher();
       roomStore = new loop.store.RoomStore(dispatcher, {
         constants: {}
       });
@@ -1453,7 +1338,6 @@ describe("loop.panel", function() {
         rooms: [],
         error: undefined
       });
-      dispatch = sandbox.stub(dispatcher, "dispatch");
     });
 
     function createTestComponent(extraProps) {
@@ -1534,7 +1418,7 @@ describe("loop.panel", function() {
 
       TestUtils.Simulate.click(node.querySelector(".new-room-button"));
 
-      sinon.assert.calledWith(dispatch, new sharedActions.CreateRoom({
+      sinon.assert.calledWith(dispatcher.dispatch, new sharedActions.CreateRoom({
         urls: [{
           location: "http://invalid.com",
           description: "fakeSite",
@@ -1666,7 +1550,7 @@ describe("loop.panel", function() {
   });
 
   describe("loop.panel.RoomEntryContextButtons", function() {
-    var view, dispatcher;
+    var view;
 
     function createTestComponent(extraProps) {
       var props = _.extend({
@@ -1683,9 +1567,6 @@ describe("loop.panel", function() {
     }
 
     beforeEach(function() {
-      dispatcher = new loop.Dispatcher();
-      sandbox.stub(dispatcher, "dispatch");
-
       view = createTestComponent();
     });
 
@@ -1738,7 +1619,7 @@ describe("loop.panel", function() {
   });
 
   describe("loop.panel.SharePanelView", function() {
-    var view, dispatcher, roomStore;
+    var view, roomStore;
 
     function createTestComponent(extraProps) {
       var props = _.extend({
@@ -1751,8 +1632,6 @@ describe("loop.panel", function() {
     }
 
     beforeEach(function() {
-      dispatcher = new loop.Dispatcher();
-      sandbox.stub(dispatcher, "dispatch");
       roomStore = new loop.store.RoomStore(dispatcher, {
         constants: {}
       });
@@ -1886,8 +1765,7 @@ describe("loop.panel", function() {
   });
 
   describe("loop.panel.RenameRoomView", function() {
-    var dispatcher,
-        view;
+    var view;
 
     function mountTestComponent(name, token) {
       return TestUtils.renderIntoDocument(
@@ -1900,11 +1778,6 @@ describe("loop.panel", function() {
         )
       );
     }
-
-    beforeEach(function() {
-      dispatcher = new loop.Dispatcher();
-      sandbox.stub(dispatcher, "dispatch");
-    });
 
     it("should highlight container and select text when input gets the focus",
       function() {

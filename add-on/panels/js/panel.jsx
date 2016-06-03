@@ -574,23 +574,10 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
         return;
       }
 
-      // Open ToC or FTU if needed.
-      loop.requestMulti(
-        ["getSelectedTabMetadata"],
-        ["GettingStartedURL", null, {}]
-      ).then(function(results) {
-        var contextURL = this.props.room.decryptedContext.urls &&
-                         this.props.room.decryptedContext.urls[0].location;
-
-        if (!contextURL) {
-          loop.request("OpenURL", results[1] + "?noopenpanel=1");
-        } else {
-          this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
-            roomToken: this.props.room.roomToken
-          }));
-        }
-        this.closeWindow();
-      }.bind(this));
+      this.props.dispatcher.dispatch(new sharedActions.OpenRoom({
+        roomToken: this.props.room.roomToken
+      }));
+      this.closeWindow();
     },
 
     handleClick: function(e) {

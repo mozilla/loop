@@ -106,33 +106,29 @@ body.sidebar {
     MEDIA CONTROL BUTTONS
 \*------------------------------------*/
 
-.media-layout:not(.showing-local-streams) > .media-control-buttons {
-  display: none;
-}
-
-.media-layout.showing-local-streams > .media-control-buttons {
+.media-layout > .media-control-buttons {
   display: flex;
   justify-content: space-around;
   order: 2;
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn,
-.media-layout.showing-local-streams > .media-control-buttons > .general-support-url {
+.media-layout > .media-control-buttons > .btn,
+.media-layout > .media-control-buttons > .general-support-url {
   height: 40px;
   margin-left: 1px;
   width: 42px;
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn-hangup {
+.media-layout > .media-control-buttons > .btn-hangup {
   background-color: #c33c32;
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn-hangup:after {
+.media-layout > .media-control-buttons > .btn-hangup:after {
   content: url("../img/leave.svg");
   margin-right: -2px;
 }
 
-html[dir="rtl"] .media-layout.showing-local-streams >
+html[dir="rtl"] .media-layout >
 .media-control-buttons > .btn-hangup:after {
   display: inline-block;
   margin-left: -2px;
@@ -140,62 +136,62 @@ html[dir="rtl"] .media-layout.showing-local-streams >
   transform: scaleX(-1);
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn-hangup:hover {
+.media-layout > .media-control-buttons > .btn-hangup:hover {
   background-color: #AF352C;
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio,
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video,
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen {
+.media-layout > .media-control-buttons > .btn-mute-audio,
+.media-layout > .media-control-buttons > .btn-mute-video,
+.media-layout > .media-control-buttons > .btn-mute-screen {
   background-color: inherit;
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio:after,
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio:hover:after,
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio:active:after {
+.media-layout > .media-control-buttons > .btn-mute-audio:after,
+.media-layout > .media-control-buttons > .btn-mute-audio:hover:after,
+.media-layout > .media-control-buttons > .btn-mute-audio:active:after {
   content: url("../img/audio.svg");
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-audio.muted:after {
+.media-layout > .media-control-buttons > .btn-mute-audio.muted:after {
   content: url("../img/audio-muted-darkgrey.svg");
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video:after {
+.media-layout > .media-control-buttons > .btn-mute-video:after {
   margin-left: -4px;
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video:after,
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video:hover:after,
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video:active:after {
+.media-layout > .media-control-buttons > .btn-mute-video:after,
+.media-layout > .media-control-buttons > .btn-mute-video:hover:after,
+.media-layout > .media-control-buttons > .btn-mute-video:active:after {
   content: url("../img/video.svg");
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-video.muted:after {
+.media-layout > .media-control-buttons > .btn-mute-video.muted:after {
   content: url("../img/video-muted-darkgrey.svg");
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen:after {
+.media-layout > .media-control-buttons > .btn-mute-screen:after {
   content: url("../img/screen.svg");
 }
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen:after,
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen:hover:after,
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen:active:after {
+.media-layout > .media-control-buttons > .btn-mute-screen:after,
+.media-layout > .media-control-buttons > .btn-mute-screen:hover:after,
+.media-layout > .media-control-buttons > .btn-mute-screen:active:after {
   content: url("../img/screen.svg");
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .btn-mute-screen.muted:after {
+.media-layout > .media-control-buttons > .btn-mute-screen.muted:after {
   content: url("../img/screen-muted.svg");
 }
 
-.media-layout.showing-local-streams > .media-control-buttons > .general-support-url {
+.media-layout > .media-control-buttons > .general-support-url {
   align-items: center;
   display: flex;
   justify-content: center;
 }
 
 /* Highlight on hover. */
-.media-layout.showing-local-streams > .media-control-buttons > .general-support-url:hover,
-.media-layout.showing-local-streams > .media-control-buttons > .btn:not(.btn-hangup):hover {
+.media-layout > .media-control-buttons > .general-support-url:hover,
+.media-layout > .media-control-buttons > .btn:not(.btn-hangup):hover {
   background-color: rgba(51, 51, 51, 0.1);
 }
 

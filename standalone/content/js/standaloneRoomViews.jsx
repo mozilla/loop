@@ -630,9 +630,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
     componentDidMount: function() {
       // Adding a class to the document body element from here to ease styling it.
       document.body.classList.add("is-standalone-room");
-      // XXX akita there is no need to have a Join button so let's join
-      // the room once the component is fully loaded.
-      this.joinRoom();
     },
 
     /**

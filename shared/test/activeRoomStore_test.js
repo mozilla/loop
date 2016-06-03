@@ -354,7 +354,7 @@ describe("loop.store.ActiveRoomStore", function() {
         return store.setupWindowData(new sharedActions.SetupWindowData({
           roomToken: fakeToken
         })).then(function() {
-          sinon.assert.calledTwice(dispatcher.dispatch);
+          sinon.assert.calledOnce(dispatcher.dispatch);
           sinon.assert.calledWithExactly(dispatcher.dispatch,
             new sharedActions.UpdateRoomInfo({
               roomContextUrls: undefined,
@@ -364,17 +364,6 @@ describe("loop.store.ActiveRoomStore", function() {
               roomState: ROOM_STATES.READY,
               roomUrl: fakeRoomData.roomUrl
             }));
-        });
-      });
-
-    it("should dispatch a JoinRoom action if the get is successful",
-      function() {
-        return store.setupWindowData(new sharedActions.SetupWindowData({
-          roomToken: fakeToken
-        })).then(function() {
-          sinon.assert.calledTwice(dispatcher.dispatch);
-          sinon.assert.calledWithExactly(dispatcher.dispatch,
-            new sharedActions.JoinRoom());
         });
       });
 
@@ -2125,7 +2114,7 @@ describe("loop.store.ActiveRoomStore", function() {
 
         LoopMochaUtils.publish("Rooms:Update:fakeToken", fakeRoomData);
 
-        sinon.assert.calledThrice(dispatcher.dispatch);
+        sinon.assert.calledTwice(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
           new sharedActions.UpdateRoomInfo({
             roomDescription: "fakeDescription",
@@ -2152,7 +2141,7 @@ describe("loop.store.ActiveRoomStore", function() {
 
         LoopMochaUtils.publish("Rooms:Update:invalidToken", fakeRoomData);
 
-        sinon.assert.calledTwice(dispatcher.dispatch);
+        sinon.assert.calledOnce(dispatcher.dispatch);
       });
     });
 

@@ -322,9 +322,6 @@ loop.store.ActiveRoomStore = (function() {
           roomState: ROOM_STATES.READY,
           roomUrl: room.roomUrl
         }));
-
-        // For the sidebar, we need to automatically join the room.
-        this.dispatchAction(new sharedActions.JoinRoom());
       }.bind(this));
     },
 
@@ -724,6 +721,13 @@ loop.store.ActiveRoomStore = (function() {
      * @param {sharedActions.setMute} actionData The mute state for the stream type.
      */
     setMute: function(actionData) {
+      // XXX akita - temporary bad place to initiate joins.
+      if (this._storeState.roomState === ROOM_STATES.READY ||
+          this._storeState.roomState === ROOM_STATES.ENDED) {
+        this.dispatcher.dispatch(new sharedActions.JoinRoom());
+        return;
+      }
+
       var muteState = {};
       muteState[actionData.type + "Muted"] = !actionData.enabled;
       this.setStoreState(muteState);

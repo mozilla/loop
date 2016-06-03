@@ -9,7 +9,6 @@
 
   // Stop the default init functions running to avoid conflicts.
   document.removeEventListener("DOMContentLoaded", loop.panel.init);
-  document.removeEventListener("DOMContentLoaded", loop.conversation.init);
   document.removeEventListener("DOMContentLoaded", loop.copy.init);
 
   var sharedActions = loop.shared.actions;
@@ -20,10 +19,7 @@
   var SharePanelView = loop.panel.SharePanelView;
   var SignInRequestView = loop.panel.SignInRequestView;
   var RenameRoomView = loop.panel.RenameRoomView;
-  // 1.2. Conversation Window
-  var RoomFailureView = loop.roomViews.RoomFailureView;
-  var DesktopRoomConversationView = loop.roomViews.DesktopRoomConversationView;
-  // 1.3. Copy Panel
+  // 1.2. Copy Panel
   var CopyView = loop.copy.CopyView;
 
   // 2. Standalone webapp
@@ -40,7 +36,6 @@
 
   // Store constants
   var ROOM_STATES = loop.store.ROOM_STATES;
-  var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
 
   function noop() {}
 
@@ -258,62 +253,12 @@
     roomState: ROOM_STATES.FAILED
   });
 
-  var invitationRoomStore = new loop.store.RoomStore(dispatcher, {
-    constants: {},
-    activeRoomStore: makeActiveRoomStore({
-      roomState: ROOM_STATES.INIT,
-      roomUrl: "http://showcase"
-    })
-  });
-
   var roomStore = new loop.store.RoomStore(dispatcher, {
     constants: {},
     activeRoomStore: makeActiveRoomStore({
       roomState: ROOM_STATES.HAS_PARTICIPANTS
     }),
     IsMultiProcessEnabled: function() { return true; }
-  });
-
-  var desktopRoomStoreLoading = new loop.store.RoomStore(dispatcher, {
-    constants: {},
-    activeRoomStore: makeActiveRoomStore({
-      roomState: ROOM_STATES.HAS_PARTICIPANTS,
-      mediaConnected: false,
-      remoteSrcMediaElement: false
-    })
-  });
-
-  var desktopRoomStoreMedium = new loop.store.RoomStore(dispatcher, {
-    constants: {},
-    activeRoomStore: makeActiveRoomStore({
-      roomState: ROOM_STATES.HAS_PARTICIPANTS
-    })
-  });
-
-  var desktopRoomStoreLarge = new loop.store.RoomStore(dispatcher, {
-    constants: {},
-    activeRoomStore: makeActiveRoomStore({
-      roomState: ROOM_STATES.HAS_PARTICIPANTS
-    })
-  });
-
-  var desktopLocalFaceMuteActiveRoomStore = makeActiveRoomStore({
-    roomState: ROOM_STATES.HAS_PARTICIPANTS,
-    videoMuted: true
-  });
-  var desktopLocalFaceMuteRoomStore = new loop.store.RoomStore(dispatcher, {
-    constants: {},
-    activeRoomStore: desktopLocalFaceMuteActiveRoomStore
-  });
-
-  var desktopRemoteFaceMuteActiveRoomStore = makeActiveRoomStore({
-    roomState: ROOM_STATES.HAS_PARTICIPANTS,
-    remoteVideoEnabled: false,
-    mediaConnected: true
-  });
-  var desktopRemoteFaceMuteRoomStore = new loop.store.RoomStore(dispatcher, {
-    constants: {},
-    activeRoomStore: desktopRemoteFaceMuteActiveRoomStore
   });
 
   var screenSharePausedActiveRoomStore = makeActiveRoomStore({
@@ -942,146 +887,6 @@
                            width={480}>
               <div className="standalone">
                 <UnsupportedDeviceView platform="ios" />
-              </div>
-            </FramedExample>
-          </Section>
-
-          <Section name="RoomFailureView">
-            <FramedExample
-              dashed={true}
-              height={288}
-              summary="Desktop Room Failure View"
-              width={348}>
-              <div className="fx-embedded">
-                <RoomFailureView
-                  dispatcher={dispatcher}
-                  failureReason={FAILURE_DETAILS.UNKNOWN} />
-              </div>
-            </FramedExample>
-          </Section>
-
-          <Section name="DesktopRoomConversationView">
-            <FramedExample
-              cssClass="desktop"
-              height={448}
-              onContentsRendered={invitationRoomStore.activeRoomStore.forcedUpdate}
-              summary="Desktop room conversation (invitation, text-chat inclusion/scrollbars don't happen in real client)"
-              width={348}>
-              <div className="fx-embedded">
-                <DesktopRoomConversationView
-                  chatWindowDetached={false}
-                  dispatcher={dispatcher}
-                  facebookEnabled={true}
-                  onCallTerminated={function() {}}
-                  roomState={ROOM_STATES.INIT}
-                  roomStore={invitationRoomStore} />
-              </div>
-            </FramedExample>
-
-            <FramedExample dashed={true}
-                           height={448}
-                           onContentsRendered={desktopRoomStoreLoading.activeRoomStore.forcedUpdate}
-                           summary="Desktop room conversation (loading)"
-                           width={348}>
-              {/* Hide scrollbars here. Rotating loading div overflows and causes
-               scrollbars to appear */}
-              <div className="fx-embedded overflow-hidden">
-                <DesktopRoomConversationView
-                  chatWindowDetached={false}
-                  dispatcher={dispatcher}
-                  facebookEnabled={true}
-                  localPosterUrl="sample-img/video-screen-local.png"
-                  onCallTerminated={function() {}}
-                  remotePosterUrl="sample-img/video-screen-remote.png"
-                  roomState={ROOM_STATES.HAS_PARTICIPANTS}
-                  roomStore={desktopRoomStoreLoading} />
-              </div>
-            </FramedExample>
-
-            <FramedExample dashed={true}
-                           height={448}
-                           onContentsRendered={roomStore.activeRoomStore.forcedUpdate}
-                           summary="Desktop room conversation"
-                           width={348}>
-              <div className="fx-embedded">
-                <DesktopRoomConversationView
-                  chatWindowDetached={false}
-                  dispatcher={dispatcher}
-                  facebookEnabled={true}
-                  localPosterUrl="sample-img/video-screen-local.png"
-                  onCallTerminated={function() {}}
-                  remotePosterUrl="sample-img/video-screen-remote.png"
-                  roomState={ROOM_STATES.HAS_PARTICIPANTS}
-                  roomStore={roomStore} />
-              </div>
-            </FramedExample>
-
-            <FramedExample dashed={true}
-                           height={482}
-                           onContentsRendered={desktopRoomStoreMedium.activeRoomStore.forcedUpdate}
-                           summary="Desktop room conversation (medium)"
-                           width={602}>
-              <div className="fx-embedded">
-                <DesktopRoomConversationView
-                  chatWindowDetached={false}
-                  dispatcher={dispatcher}
-                  facebookEnabled={true}
-                  localPosterUrl="sample-img/video-screen-local.png"
-                  onCallTerminated={function() {}}
-                  remotePosterUrl="sample-img/video-screen-remote.png"
-                  roomState={ROOM_STATES.HAS_PARTICIPANTS}
-                  roomStore={desktopRoomStoreMedium} />
-              </div>
-            </FramedExample>
-
-            <FramedExample dashed={true}
-                           height={485}
-                           onContentsRendered={desktopRoomStoreLarge.activeRoomStore.forcedUpdate}
-                           summary="Desktop room conversation (large)"
-                           width={646}>
-              <div className="fx-embedded">
-                <DesktopRoomConversationView
-                  chatWindowDetached={false}
-                  dispatcher={dispatcher}
-                  facebookEnabled={true}
-                  localPosterUrl="sample-img/video-screen-local.png"
-                  onCallTerminated={function() {}}
-                  remotePosterUrl="sample-img/video-screen-remote.png"
-                  roomState={ROOM_STATES.HAS_PARTICIPANTS}
-                  roomStore={desktopRoomStoreLarge} />
-              </div>
-            </FramedExample>
-
-            <FramedExample dashed={true}
-                           height={448}
-                           onContentsRendered={desktopLocalFaceMuteRoomStore.activeRoomStore.forcedUpdate}
-                           summary="Desktop room conversation local face-mute"
-                           width={348}>
-              <div className="fx-embedded">
-                <DesktopRoomConversationView
-                  chatWindowDetached={false}
-                  dispatcher={dispatcher}
-                  facebookEnabled={true}
-                  onCallTerminated={function() {}}
-                  remotePosterUrl="sample-img/video-screen-remote.png"
-                  roomStore={desktopLocalFaceMuteRoomStore} />
-              </div>
-            </FramedExample>
-
-            <FramedExample dashed={true}
-                           height={448}
-                           onContentsRendered={desktopRemoteFaceMuteRoomStore.activeRoomStore.forcedUpdate}
-                           summary="Desktop room conversation remote face-mute"
-                           width={348} >
-              <div className="fx-embedded">
-                <DesktopRoomConversationView
-                  chatWindowDetached={false}
-                  dispatcher={dispatcher}
-                  facebookEnabled={true}
-                  localPosterUrl="sample-img/video-screen-local.png"
-                  onCallTerminated={function() {}}
-                  remotePosterUrl="sample-img/video-screen-remote.png"
-                  roomStore={desktopRemoteFaceMuteRoomStore} />
               </div>
             </FramedExample>
           </Section>

@@ -44,7 +44,6 @@ module.exports = function(config) {
     "built/add-on/chrome/content/panels/js/feedbackViews.js",
     "built/add-on/chrome/content/panels/js/conversationAppStore.js",
     "built/add-on/chrome/content/panels/js/roomStore.js",
-    "built/add-on/chrome/content/panels/js/roomViews.js",
     "built/add-on/chrome/content/shared/js/toc.js",
     "built/add-on/chrome/content/panels/js/sidebar.js",
     "built/add-on/chrome/content/panels/js/copy.js",

@@ -147,7 +147,7 @@ loop.webapp = (function(_, OT, mozL10n) {
               cursorStore={this.props.cursorStore}
               dispatcher={this.props.dispatcher}
               isFirefox={this.state.isFirefox}
-              participantStore={this.porps.participantStore} />
+              participantStore={this.props.participantStore} />
           );
         }
         case "home": {

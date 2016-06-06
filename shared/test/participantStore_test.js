@@ -44,7 +44,7 @@ describe("loop.store.ParticipantStore", () => {
       store.updatedParticipant(action);
       expect(participants.get("fakeID")).not.eql(undefined);
       expect(participants.get("fakeID")).eql({
-        name: "fakeName",
+        participantName: "fakeName",
         isHere: false,
         localPingTime: null
       });
@@ -56,7 +56,7 @@ describe("loop.store.ParticipantStore", () => {
       let currentParticipants = store.getStoreState("participants");
       store.setStoreState({
         participants: currentParticipants.set("fakeID", {
-          name: "Cool Name",
+          participantName: "Cool Name",
           isHere: false,
           localPingTime: null
         })
@@ -75,7 +75,7 @@ describe("loop.store.ParticipantStore", () => {
       let currentParticipants = store.getStoreState("participants");
       store.setStoreState({
         participants: currentParticipants.set("fakeID", {
-          name: "Cool Name",
+          participantName: "Cool Name",
           isHere: false,
           localPingTime: null
         })
@@ -86,13 +86,13 @@ describe("loop.store.ParticipantStore", () => {
       let action = new actions.UpdatedPresence({
         userId: "fakeID",
         isHere: true,
-        pingedAgo: now - 1000
+        pingedAgo: 1000
       });
 
       let participants = store.getStoreState("participants");
       store.updatedPresence(action);
       expect(participants.get("fakeID").isHere).eql(true);
-      expect(participants.get("fakeID").localPingTime).eql(1000);
+      expect(participants.get("fakeID").localPingTime).eql(now - 1000);
     });
   });
 
@@ -100,12 +100,12 @@ describe("loop.store.ParticipantStore", () => {
     beforeEach(() => {
       let currentParticipants = store.getStoreState("participants");
       currentParticipants.set("fakeID", {
-          name: "Cool Name",
+          participantName: "Cool Name",
           isHere: false,
           localPingTime: null
       });
       currentParticipants.set("fakeID2", {
-        name: "Cool Name",
+        participantName: "Cool Name",
         isHere: true,
         localPingTime: now
       });
@@ -122,9 +122,9 @@ describe("loop.store.ParticipantStore", () => {
     it("should not return participants whose pingTime has not been updated recently", () => {
       let currentParticipants = store.getStoreState("participants");
       currentParticipants.set("fakeID2", {
-        name: "Cool Name",
+        participantName: "Cool Name",
         isHere: true,
-        localPingTime: 120000
+        localPingTime: now - 120000
       });
 
       store.setStoreState({

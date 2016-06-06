@@ -38,6 +38,7 @@ module.exports = function(config) {
     "built/standalone/content/shared/js/participantStore.js",
     "built/standalone/content/shared/js/remoteCursorStore.js",
     "built/standalone/content/shared/js/views.js",
+    "built/standalone/content/shared/js/toc.js",
     "built/standalone/content/shared/js/textChatStore.js",
     "built/standalone/content/shared/js/textChatView.js",
     "built/standalone/content/shared/js/urlRegExps.js",

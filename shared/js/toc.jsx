@@ -22,7 +22,8 @@ loop.shared.toc = (function(mozL10n) {
     propTypes: {
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      isScreenShareActive: React.PropTypes.bool.isRequired
+      isScreenShareActive: React.PropTypes.bool.isRequired,
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired
     },
 
     getInitialState: function() {
@@ -76,6 +77,7 @@ loop.shared.toc = (function(mozL10n) {
             addUrlTile={this.addTile}
             dispatcher={this.props.dispatcher}
             isDesktop={loop.shared.utils.isDesktop()}
+            participantStore={this.props.participantStore}
             roomName={this.state.roomName ? this.state.roomName
               : "BUG: NO NAME SPECIFIED"}
             roomToken={this.state.roomToken} />
@@ -91,6 +93,7 @@ loop.shared.toc = (function(mozL10n) {
       addUrlTile: React.PropTypes.func.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isDesktop: React.PropTypes.bool.isRequired,
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
       roomName: React.PropTypes.string.isRequired,
       roomToken: React.PropTypes.string.isRequired
     },
@@ -125,7 +128,8 @@ loop.shared.toc = (function(mozL10n) {
               label={this.state.roomName}
               onEditionComplete={this.exitEditMode} />
           </div>
-          <RoomPresenceView />
+          <RoomPresenceView
+            participantStore={this.props.participantStore} />
           <RoomActionsView
             addUrlTile={this.props.addUrlTile} />
         </div>
@@ -133,19 +137,23 @@ loop.shared.toc = (function(mozL10n) {
     }
   });
 
-  // XXX akita: Make this work
   var RoomPresenceView = React.createClass({
-    propTypes: {},
+    propTypes: {
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired
+    },
 
     render: function() {
       return (
         <div className="room-active-users">
-          <div className="room-user" data-name="Pau Masiá">
-            <span>{'P'}</span>
-          </div>
-          <div className="room-user" data-name="Manu">
-            <span>{'M'}</span>
-          </div>
+          {
+            this.props.participantStore.getOnlineParticipants().map(function(participant, index) {
+              return (
+                <div className="room-user" data-name={participant.participantName} key={index}>
+                  <span>{participant.participantName[0].toUpperCase()}</span>
+                </div>
+              );
+            })
+          }
         </div>
       );
     }
@@ -495,6 +503,7 @@ loop.shared.toc = (function(mozL10n) {
 
   return {
     SidebarView: SidebarView,
+    RoomPresenceView: RoomPresenceView,
     TableOfContentView: TableOfContentView
   };
 })(navigator.mozL10n || document.mozL10n);

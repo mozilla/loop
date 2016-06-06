@@ -81,7 +81,8 @@ describe("loop.webapp", function() {
   describe("WebappRootView", function() {
     var sdk,
         standaloneAppStore,
-        activeRoomStore;
+        activeRoomStore,
+        participantStore;
 
     function mountTestComponent() {
       return TestUtils.renderIntoDocument(
@@ -90,6 +91,7 @@ describe("loop.webapp", function() {
             activeRoomStore: activeRoomStore,
             cursorStore: remoteCursorStore,
             dispatcher: dispatcher,
+            participantStore: participantStore,
             standaloneAppStore: standaloneAppStore
           }));
     }
@@ -108,6 +110,7 @@ describe("loop.webapp", function() {
       remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
         sdkDriver: sdk
       });
+      participantStore = new loop.store.ParticipantStore(dispatcher);
     });
 
     it("should display the UnsupportedDeviceView for `unsupportedDevice` window type",

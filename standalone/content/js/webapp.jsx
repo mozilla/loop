@@ -109,6 +109,7 @@ loop.webapp = (function(_, OT, mozL10n) {
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
       cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
       standaloneAppStore: React.PropTypes.instanceOf(
         loop.store.StandaloneAppStore).isRequired
     },
@@ -145,7 +146,8 @@ loop.webapp = (function(_, OT, mozL10n) {
               activeRoomStore={this.props.activeRoomStore}
               cursorStore={this.props.cursorStore}
               dispatcher={this.props.dispatcher}
-              isFirefox={this.state.isFirefox} />
+              isFirefox={this.state.isFirefox}
+              participantStore={this.porps.participantStore} />
           );
         }
         case "home": {
@@ -199,14 +201,16 @@ loop.webapp = (function(_, OT, mozL10n) {
     var remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
       sdkDriver: sdkDriver
     });
+    var participantStore = new loop.store.ParticipantStore(dispatcher);
 
     loop.store.StoreMixin.register({
-      activeRoomStore: activeRoomStore,
-      remoteCursorStore: remoteCursorStore,
+      activeRoomStore,
+      participantStore,
+      remoteCursorStore,
       // This isn't used in any views, but is saved here to ensure it
       // is kept alive.
-      standaloneMetricsStore: standaloneMetricsStore,
-      textChatStore: textChatStore
+      standaloneMetricsStore,
+      textChatStore
     });
 
     window.addEventListener("unload", function() {
@@ -217,6 +221,7 @@ loop.webapp = (function(_, OT, mozL10n) {
       activeRoomStore={activeRoomStore}
       cursorStore={remoteCursorStore}
       dispatcher={dispatcher}
+      participantStore={participantStore}
       standaloneAppStore={standaloneAppStore} />, document.querySelector("#main"));
 
     // Set the 'lang' and 'dir' attributes to <html> when the page is translated

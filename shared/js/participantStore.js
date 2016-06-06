@@ -9,7 +9,7 @@ loop.store.ParticipantStore = function() {
   "use strict";
 
   const PARTICIPANT_SCHEMA = {
-    name: "",
+    participantName: "",
     isHere: false,
     localPingTime: null
   };
@@ -41,7 +41,7 @@ loop.store.ParticipantStore = function() {
 
     updatedParticipant(actionData) {
       this._updateParticipantData(actionData.userId, {
-        name: actionData.participantName
+        participantName: actionData.participantName
       });
     },
 
@@ -72,11 +72,14 @@ loop.store.ParticipantStore = function() {
     /*
      * Gets the online participants in the room taking into account
      * unexpected disconnects/leaves.
+     *
+     * @return {Array} Returns an array which contains the data of the current
+     *                 online participants.
      */
     getOnlineParticipants() {
       // XXX akita bug 1277702: Max ping time allowed is not quite defined
       // yet, so use 1 minute now. If changing this, don't forget the test.
-      return [...this._storeState.participants].filter(([, participant]) =>
+      return [...this._storeState.participants.values()].filter(participant =>
         participant.isHere && Date.now() - participant.localPingTime <= 60000);
     }
   });

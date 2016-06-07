@@ -139,7 +139,9 @@ loop.store.ActiveRoomStore = (function() {
         // Read more at https://wiki.mozilla.org/Loop/Session.
         chatMessageExchanged: false,
         // The participants in the room.
-        participants: []
+        participants: [],
+        // The WebRTC tokens for the room.
+        webrtcTokens: {}
       };
     },
 
@@ -175,7 +177,7 @@ loop.store.ActiveRoomStore = (function() {
       });
 
       this._leaveRoom(actionData.error.errno === REST_ERRNOS.ROOM_FULL ?
-          ROOM_STATES.FULL : ROOM_STATES.FAILED, actionData.failedJoinRequest);
+          ROOM_STATES.FULL : ROOM_STATES.FAILED);
     },
 
     /**
@@ -204,7 +206,7 @@ loop.store.ActiveRoomStore = (function() {
           // For all other states, we simply join the room. We avoid dispatching
           // another action here so that metrics doesn't get two notifications
           // in a row (one for retry, one for the join).
-          this.joinRoom();
+          this.initiateWebRTC();
           return;
       }
     },
@@ -229,7 +231,7 @@ loop.store.ActiveRoomStore = (function() {
         "updateRoomInfo",
         "userAgentHandlesRoom",
         "gotMediaPermission",
-        "joinRoom",
+        "initiateWebRTC",
         "joinedRoom",
         "connectedToSdkServers",
         "connectionFailure",
@@ -250,7 +252,8 @@ loop.store.ActiveRoomStore = (function() {
         "toggleBrowserSharing",
         "connectionStatus",
         "mediaConnected",
-        "videoScreenStreamChanged"
+        "videoScreenStreamChanged",
+        "setupWebRTCTokens"
       ];
       // Register actions that are only used on Desktop.
       if (this._isDesktop) {
@@ -270,8 +273,6 @@ loop.store.ActiveRoomStore = (function() {
     /**
      * Execute setupWindowData event action from the dispatcher. This gets
      * the room data from the Loop API, and dispatches an UpdateRoomInfo event.
-     * It also dispatches JoinRoom as this action is only applicable to the desktop
-     * client, and needs to auto-join.
      *
      * @param {sharedActions.SetupWindowData} actionData
      */
@@ -355,7 +356,7 @@ loop.store.ActiveRoomStore = (function() {
      * room if there are. If there aren't then it will dispatch a ConnectionFailure
      * action with NO_MEDIA.
      */
-    _checkDevicesAndJoinRoom: function() {
+    _checkDevicesAndInitiateWebRTC: function() {
       // XXX Ideally we'd do this check before joining a room, but we're waiting
       // for the UX for that. See bug 1166824. In the meantime this gives us
       // additional information for analysis.
@@ -423,7 +424,7 @@ loop.store.ActiveRoomStore = (function() {
     /**
      * Handles the action to join to a room.
      */
-    joinRoom: function() {
+    initiateWebRTC: function() {
       // Reset the failure reason if necessary.
       if (this.getStoreState().failureReason) {
         this.setStoreState({ failureReason: undefined });
@@ -445,7 +446,22 @@ loop.store.ActiveRoomStore = (function() {
       }));
 
       // Otherwise, we handle the room ourselves.
-      this._checkDevicesAndJoinRoom();
+      this._checkDevicesAndInitiateWebRTC();
+    },
+
+    /**
+     * Saves the WebRTC tokens for use later.
+     *
+     * @param {sharedActions.SetupWebRTCTokens} actionData
+     */
+    setupWebRTCTokens: function(actionData) {
+      this.setStoreState({
+        webrtcTokens: {
+          apiKey: actionData.apiKey,
+          sessionToken: actionData.sessionToken,
+          sessionId: actionData.sessionId
+        }
+      });
     },
 
     /**
@@ -453,16 +469,6 @@ loop.store.ActiveRoomStore = (function() {
      * granted and starts joining the room.
      */
     gotMediaPermission: function() {
-      this.setStoreState({ roomState: ROOM_STATES.JOINING });
-    },
-
-    /**
-     * Handles the data received from joining a room. It stores the relevant
-     * data
-     *
-     * @param {sharedActions.JoinedRoom} actionData
-     */
-    joinedRoom: function(actionData) {
       // If we're standalone and firefox is handling, then just store the new
       // state. No need to do anything else.
       if (this._storeState.standalone && this._storeState.userAgentHandlesRoom) {
@@ -473,16 +479,13 @@ loop.store.ActiveRoomStore = (function() {
       }
 
       this.setStoreState({
-        apiKey: actionData.apiKey,
-        sessionToken: actionData.sessionToken,
-        sessionId: actionData.sessionId,
         roomState: ROOM_STATES.JOINED
       });
 
-      this._sdkDriver.connectSession(actionData);
+      this._sdkDriver.connectSession(this._storeState.webrtcTokens);
 
       loop.request("AddConversationContext", this._storeState.windowId,
-        actionData.sessionId, "");
+        this._storeState.webrtcTokens.sessionId, "");
     },
 
     /**
@@ -524,7 +527,7 @@ loop.store.ActiveRoomStore = (function() {
       // otSdkDriver#setMute.
       if (this._storeState.roomState === ROOM_STATES.READY ||
           this._storeState.roomState === ROOM_STATES.ENDED) {
-        this.dispatcher.dispatch(new sharedActions.JoinRoom());
+        this.dispatcher.dispatch(new sharedActions.InitiateWebRTC());
         return;
       }
 
@@ -804,7 +807,7 @@ loop.store.ActiveRoomStore = (function() {
      */
     connectionStatus: function(actionData) {
       loop.request("Rooms:SendConnectionStatus", this.getStoreState("roomToken"),
-        this.getStoreState("sessionToken"), actionData);
+        this._storeState.webrtcTokens.sessionToken, actionData);
     },
 
     /**
@@ -828,13 +831,10 @@ loop.store.ActiveRoomStore = (function() {
 
     /**
      * Handles a room being left.
-     *
-     * @param {sharedActions.LeaveRoom} actionData
      */
-    leaveRoom: function(actionData) {
+    leaveRoom: function() {
       this._leaveRoom(ROOM_STATES.ENDED,
-                      false,
-                      actionData && actionData.windowStayingOpen);
+                      false);
     },
 
     /**
@@ -845,14 +845,8 @@ loop.store.ActiveRoomStore = (function() {
      *       MozLoopService#openChatWindow).
      *
      * @param {ROOM_STATES} nextState         The next state to switch to.
-     * @param {Boolean}     failedJoinRequest Optional. Set to true if the join
-     *                                        request to loop-server failed. It
-     *                                        will skip the leave message.
-     * @param {Boolean}     windowStayingOpen Optional. Set to true to ensure
-     *                                        that messages relating to ending
-     *                                        of the conversation are sent on desktop.
      */
-    _leaveRoom: function(nextState, failedJoinRequest, windowStayingOpen) {
+    _leaveRoom: function(nextState) {
       if (this._storeState.standalone && this._storeState.userAgentHandlesRoom) {
         // If the user agent is handling the room, all we need to do is advance
         // to the next state.
@@ -866,11 +860,9 @@ loop.store.ActiveRoomStore = (function() {
         loop.standaloneMedia.multiplexGum.reset();
       }
 
-      if (this._browserSharingListener) {
-        // Remove the browser sharing listener as we don't need it now.
-        loop.unsubscribe("BrowserSwitch", this._browserSharingListener);
-        this._browserSharingListener = null;
-      }
+      // Call this direct rather than via an action, as we want it to start
+      // happening now so that it happens before the disconnectSession.
+      this.endScreenShare();
 
       // We probably don't need to end screen share separately, but lets be safe.
       this._sdkDriver.disconnectSession();
@@ -882,24 +874,10 @@ loop.store.ActiveRoomStore = (function() {
       this._statesToResetOnLeave.forEach(function(state) {
         newStoreState[state] = originalStoreState[state];
       });
+
+      newStoreState.roomState = nextState;
+
       this.setStoreState(newStoreState);
-
-      if (this._timeout) {
-        clearTimeout(this._timeout);
-        delete this._timeout;
-      }
-
-      // If we're not going to close the window, we can hangup the call ourselves.
-      // NOTE: when the window _is_ closed, hanging up the call is performed by
-      //       MozLoopService, because we can't get a message across to LoopAPI
-      //       in time whilst a window is closing.
-      if ((nextState === ROOM_STATES.FAILED || windowStayingOpen || !this._isDesktop) &&
-          !failedJoinRequest) {
-        loop.request("HangupNow", this._storeState.roomToken,
-          this._storeState.sessionToken, this._storeState.windowId);
-      }
-
-      this.setStoreState({ roomState: nextState });
     },
 
     /**

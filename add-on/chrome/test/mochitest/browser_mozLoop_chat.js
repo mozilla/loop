@@ -48,7 +48,7 @@ add_task(function* test_mozLoop_hangupOnClose() {
     }
   });
 
-  let windowId = yield LoopRooms.open(roomToken);
+  yield LoopRooms.open(roomToken);
 
   yield promiseWaitForCondition(() => {
     MozLoopService.hangupAllChatWindows();
@@ -58,7 +58,7 @@ add_task(function* test_mozLoop_hangupOnClose() {
   Assert.greaterOrEqual(hangupNowCalls.length, 1, "HangupNow handler should be called at least once");
   Assert.deepEqual(hangupNowCalls.pop(), {
     name: "HangupNow",
-    data: [roomToken, windowId]
+    data: [roomToken]
   }, "Messages should be the same");
 
   LoopAPI.restore();

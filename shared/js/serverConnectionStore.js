@@ -37,8 +37,7 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
      */
     actions: [
       "fetchServerData",
-      "joinedRoom",
-      "gotMediaPermission",
+      "setupWebRTCTokens",
       "setupWindowData",
       "updateRoomInfo",
       "windowUnload"
@@ -97,8 +96,16 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
         roomToken: actionData.roomToken
       });
 
+      var joinRoomPromise = this._joinRoom();
+
+      var roomDataPromise = this._getRoomDataForDesktop();
+
       // Get the window data from the Loop API.
-      return loop.request("Rooms:Get", actionData.roomToken).then(function(result) {
+      return Promise.all([joinRoomPromise, roomDataPromise]);
+    },
+
+    _getRoomDataForDesktop: function() {
+      return loop.request("Rooms:Get", this._storeState.roomToken).then(function(result) {
         var room = result;
 
         if (result.isError) {
@@ -142,11 +149,17 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
 
       var userAgentHandlesPromise = this._promiseDetectUserAgentHandles();
 
-      return Promise.all([dataPromise, userAgentHandlesPromise]).then(function(results) {
+      var joinRoomPromise = this._joinRoom();
+
+      return Promise.all([dataPromise, userAgentHandlesPromise, joinRoomPromise]).then(function(results) {
         this._initRoomListeners();
 
+        // We batch up actions and send them once we've got all the data, so that
+        // we don't prematurely display buttons/information before we're ready.
         results.forEach(function(result) {
-          this.dispatcher.dispatch(result);
+          if (result && "sendAction" in result) {
+            this.dispatcher.dispatch(result.sendAction);
+          }
         }.bind(this));
       }.bind(this));
     },
@@ -180,26 +193,26 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
 
           if (!result.context && !result.roomName) {
             roomInfoData.roomInfoFailure = ROOM_INFO_FAILURES.NO_DATA;
-            resolve(roomInfoData);
+            resolve({ sendAction: roomInfoData });
             return;
           }
 
           // This handles 'legacy', non-encrypted room names.
           if (result.roomName && !result.context) {
             roomInfoData.roomName = result.roomName;
-            resolve(roomInfoData);
+            resolve({ sendAction: roomInfoData });
             return;
           }
 
           if (!crypto.isSupported()) {
             roomInfoData.roomInfoFailure = ROOM_INFO_FAILURES.WEB_CRYPTO_UNSUPPORTED;
-            resolve(roomInfoData);
+            resolve({ sendAction: roomInfoData });
             return;
           }
 
           if (!roomCryptoKey) {
             roomInfoData.roomInfoFailure = ROOM_INFO_FAILURES.NO_CRYPTO_KEY;
-            resolve(roomInfoData);
+            resolve({ sendAction: roomInfoData });
             return;
           }
 
@@ -209,10 +222,10 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
 
             roomInfoData.roomContextUrls = realResult.urls;
             roomInfoData.roomName = realResult.roomName;
-            resolve(roomInfoData);
+            resolve({ sendAction: roomInfoData });
           }, function() {
             roomInfoData.roomInfoFailure = ROOM_INFO_FAILURES.DECRYPT_FAILED;
-            resolve(roomInfoData);
+            resolve({ sendAction: roomInfoData });
           });
         }.bind(this));
       }.bind(this));
@@ -227,9 +240,11 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
     _promiseDetectUserAgentHandles: function() {
       return new Promise(function(resolve) {
         function resolveWithNotHandlingResponse() {
-          resolve(new sharedActions.UserAgentHandlesRoom({
-            handlesRoom: false
-          }));
+          resolve({
+            sendAction: new sharedActions.UserAgentHandlesRoom({
+              handlesRoom: false
+            })
+          });
         }
 
         // If we're not Firefox, don't even try to see if it can be handled
@@ -256,9 +271,11 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
           window.removeEventListener("WebChannelMessageToContent", webChannelListenerFunc);
 
           // Resolve with the details of if we're able to handle or not.
-          resolve(new sharedActions.UserAgentHandlesRoom({
-            handlesRoom: !!e.detail.message && e.detail.message.response
-          }));
+          resolve({
+            sendAction: new sharedActions.UserAgentHandlesRoom({
+              handlesRoom: !!e.detail.message && e.detail.message.response
+            })
+          });
         }
 
         webChannelListenerFunc = webChannelListener.bind(this);
@@ -315,9 +332,9 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
     /**
      * Handles saving the needed sessionToken
      *
-     * @param {sharedActions.JoinedRoom} actionData
+     * @param {sharedActions.SetupWebRTCTokens} actionData
      */
-    joinedRoom: function(actionData) {
+    setupWebRTCTokens: function(actionData) {
       this.setStoreState({
         sessionToken: actionData.sessionToken
       });
@@ -327,8 +344,8 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
      * Handles the action that signifies when media permission has been
      * granted and starts joining the room.
      */
-    gotMediaPermission: function() {
-      loop.request("Rooms:Join", this._storeState.roomToken,
+    _joinRoom: function() {
+      return loop.request("Rooms:Join", this._storeState.roomToken,
         mozL10n.get("display_name_guest")).then(function(result) {
         if (result.isError) {
           this.dispatchAction(new sharedActions.RoomFailure({
@@ -343,11 +360,10 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
           return;
         }
 
-        this.dispatchAction(new sharedActions.JoinedRoom({
+        this.dispatchAction(new sharedActions.SetupWebRTCTokens({
           apiKey: result.apiKey,
           sessionToken: result.sessionToken,
-          sessionId: result.sessionId,
-          expires: result.expires
+          sessionId: result.sessionId
         }));
 
         this._setRefreshTimeout(result.expires);
@@ -358,6 +374,20 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
      * Handles the window being unloaded.
      */
     windowUnload: function() {
+      if (this._timeout) {
+        clearTimeout(this._timeout);
+        delete this._timeout;
+
+        // If we're not going to close the window, we can hangup the call ourselves.
+        // NOTE: when the window _is_ closed, hanging up the call is performed by
+        //       MozLoopService, because we can't get a message across to LoopAPI
+        //       in time whilst a window is closing.
+        if (!this._isDesktop) {
+          loop.request("HangupNow", this._storeState.roomToken,
+            this._storeState.sessionToken);
+        }
+      }
+
       if (!this._onUpdateListener) {
         return;
       }

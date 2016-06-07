@@ -84,7 +84,7 @@ add_test(function test_sendMessageToHandler() {
 
   let message = {
     name: "HangupNow",
-    data: ["fakeToken", 42]
+    data: ["fakeToken"]
   };
   LoopAPI.sendMessageToHandler(message);
 

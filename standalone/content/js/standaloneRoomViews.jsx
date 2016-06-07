@@ -73,8 +73,9 @@ loop.standaloneRoomViews = (function(mozL10n) {
       return this.getStoreState();
     },
 
+    // XXX Rename JoinButton etc.
     handleJoinButton: function() {
-      this.props.dispatcher.dispatch(new sharedActions.JoinRoom());
+      this.props.dispatcher.dispatch(new sharedActions.InitiateWebRTC());
     },
 
     _renderJoinButton: function() {
@@ -680,8 +681,9 @@ loop.standaloneRoomViews = (function(mozL10n) {
       }
     },
 
+    // XXX Rename functions
     joinRoom: function() {
-      this.props.dispatcher.dispatch(new sharedActions.JoinRoom());
+      this.props.dispatcher.dispatch(new sharedActions.InitiateWebRTC());
     },
 
     leaveRoom: function() {

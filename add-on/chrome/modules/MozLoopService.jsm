@@ -1055,7 +1055,7 @@ var MozLoopServiceInternal = {
               //       activeRoomStore#windowUnload).
               LoopAPI.sendMessageToHandler({
                 name: "HangupNow",
-                data: [conversationWindowData.roomToken, windowId]
+                data: [conversationWindowData.roomToken]
               });
             }
           };

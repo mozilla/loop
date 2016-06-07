@@ -395,6 +395,7 @@ const kMessageHandlers = {
       LOOP_SESSION_TYPE: LOOP_SESSION_TYPE,
       LOOP_MAU_TYPE: LOOP_MAU_TYPE,
       ROOM_CREATE: ROOM_CREATE,
+      ROOM_MAX_CLIENTS: ROOM_MAX_CLIENTS,
       SHARING_ROOM_URL: SHARING_ROOM_URL
     });
   },
@@ -700,25 +701,16 @@ const kMessageHandlers = {
    *                           the following parameters in its `data` property:
    *                           [
    *                             {String} roomToken The token of the room to leave
-   *                             {Number} windowId  The window ID of the chat window
    *                           ]
    * @param {Function} reply   Callback function, invoked with the result of this
    *                           message handler. The result will be sent back to
    *                           the senders' channel.
    */
   HangupNow: function(message, reply) {
-    let [roomToken, sessionToken, windowId] = message.data;
-    if (!windowId) {
-      windowId = sessionToken;
-    }
+    let [roomToken] = message.data;
 
     LoopRooms.logDomains(roomToken);
     LoopRooms.leave(roomToken);
-    MozLoopService.setScreenShareState(windowId, false);
-    LoopAPI.sendMessageToHandler({
-      name: "RemoveBrowserSharingListener",
-      data: [windowId]
-    });
     reply();
   },
 
@@ -899,6 +891,7 @@ const kMessageHandlers = {
    *                           the senders' channel.
    */
   RemoveBrowserSharingListener: function(message, reply) {
+    MozLoopService.log.error(message);
     if (!gBrowserSharingListeners.size) {
       reply();
       return;

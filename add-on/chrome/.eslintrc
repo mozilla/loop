@@ -51,6 +51,7 @@
     "PrivateBrowsingUtils": false,
     "RemotePages": false,
     "ROOM_CREATE": false,
+    "ROOM_MAX_CLIENTS": false,
     "roomsPushNotification": true,
     "Services": false,
     "SHARING_ROOM_URL": false,

@@ -17,10 +17,15 @@ describe("loop.store.ServerConnectionStore", function() {
 
     LoopMochaUtils.stubLoopRequest(requestStubs = {
       GetLoopPref: sinon.stub(),
+      HangupNow: sinon.stub(),
       "Rooms:Get": sinon.stub().returns({
         roomUrl: "http://invalid"
       }),
-      "Rooms:Join": sinon.stub().returns({}),
+      "Rooms:Join": sinon.stub().returns({
+        apiKey: "fakeKey",
+        sessionId: "fakeSessionId",
+        sessionToken: "fakeSessionToken"
+      }),
       "Rooms:PushSubscription": sinon.stub(),
       "Rooms:RefreshMembership": sinon.stub().returns({ expires: 42 })
     });
@@ -61,6 +66,7 @@ describe("loop.store.ServerConnectionStore", function() {
         roomUrl: "http://invalid"
       };
       requestStubs["Rooms:Get"].withArgs(fakeToken).returns(fakeRoomData);
+      sandbox.stub(store, "_joinRoom").returns(Promise.resolve());
     });
 
     it("should store the room token", function() {
@@ -68,6 +74,14 @@ describe("loop.store.ServerConnectionStore", function() {
         roomToken: fakeToken
       })).then(() => {
         expect(store.getStoreState("roomToken")).eql(fakeToken);
+      });
+    });
+
+    it("should call `_joinRoom`", function() {
+      return store.setupWindowData(new sharedActions.SetupWindowData({
+        roomToken: fakeToken
+      })).then(() => {
+        sinon.assert.calledOnce(store._joinRoom);
       });
     });
 
@@ -115,6 +129,7 @@ describe("loop.store.ServerConnectionStore", function() {
         windowType: "room",
         token: "fakeToken"
       });
+      sandbox.stub(store, "_joinRoom").returns(Promise.resolve());
     });
 
     it("should store the room token", function() {
@@ -123,6 +138,15 @@ describe("loop.store.ServerConnectionStore", function() {
         windowType: "room"
       })).then(() => {
         expect(store.getStoreState("roomToken")).eql("fake");
+      });
+    });
+
+    it("should call `_joinRoom`", function() {
+      return store.fetchServerData(new sharedActions.FetchServerData({
+        token: "fake",
+        windowType: "room"
+      })).then(() => {
+        sinon.assert.calledOnce(store._joinRoom);
       });
     });
 
@@ -419,20 +443,19 @@ describe("loop.store.ServerConnectionStore", function() {
     });
   });
 
-  describe("#joinedRoom", function() {
+  describe("#SetupWebRTCTokens", function() {
     it("should store the session token", function() {
-      store.joinedRoom(new sharedActions.JoinedRoom({
+      store.setupWebRTCTokens(new sharedActions.SetupWebRTCTokens({
         apiKey: "fake123",
         sessionId: "fake321",
-        sessionToken: "fake",
-        expires: 50
+        sessionToken: "fake"
       }));
 
       expect(store.getStoreState("sessionToken")).eql("fake");
     });
   });
 
-  describe("#gotMediaPermission", function() {
+  describe("#_joinRoom", function() {
     var fakeJoinedData, fakeRoomData;
 
     beforeEach(function() {
@@ -458,19 +481,24 @@ describe("loop.store.ServerConnectionStore", function() {
 
       requestStubs["Rooms:Get"].returns(fakeRoomData);
     });
+
     it("should call rooms.join on mozLoop", function() {
-      store.gotMediaPermission();
+      store._joinRoom();
 
       sinon.assert.calledOnce(requestStubs["Rooms:Join"]);
       sinon.assert.calledWith(requestStubs["Rooms:Join"], "fakeToken", "display_name_guest");
     });
 
-    it("should dispatch `JoinedRoom` on success", function() {
-      store.gotMediaPermission();
+    it("should dispatch `SetupWebRTCTokens` on success", function() {
+      store._joinRoom();
 
       sinon.assert.calledOnce(dispatcher.dispatch);
       sinon.assert.calledWith(dispatcher.dispatch,
-        new sharedActions.JoinedRoom(fakeJoinedData));
+        new sharedActions.SetupWebRTCTokens({
+          apiKey: "9876543210",
+          sessionToken: "12563478",
+          sessionId: "15263748"
+        }));
     });
 
     it("should dispatch `RoomFailure` on error", function() {
@@ -478,7 +506,7 @@ describe("loop.store.ServerConnectionStore", function() {
       fakeError.isError = true;
       requestStubs["Rooms:Join"].returns(fakeError);
 
-      store.gotMediaPermission();
+      store._joinRoom();
 
       sinon.assert.calledOnce(dispatcher.dispatch);
       sinon.assert.calledWith(dispatcher.dispatch,
@@ -491,7 +519,7 @@ describe("loop.store.ServerConnectionStore", function() {
 
     it("should call Rooms:RefreshMembership before the expiresTime",
       function() {
-        store.gotMediaPermission();
+        store._joinRoom();
 
         clock.tick(fakeJoinedData.expires * 1000);
 
@@ -504,7 +532,7 @@ describe("loop.store.ServerConnectionStore", function() {
       function() {
         requestStubs["Rooms:RefreshMembership"].returns({ expires: 40 });
 
-        store.gotMediaPermission();
+        store._joinRoom();
 
         // Clock tick for the first expiry time (which
         // sets up the refreshMembership).
@@ -524,13 +552,13 @@ describe("loop.store.ServerConnectionStore", function() {
         fakeError.isError = true;
         requestStubs["Rooms:RefreshMembership"].returns(fakeError);
 
-        store.gotMediaPermission();
+        store._joinRoom();
 
         // Clock tick for the first expiry time (which
         // sets up the refreshMembership).
         clock.tick(fakeJoinedData.expires * 1000);
 
-        // The first call is the JoinedRoom in the gotMediaPermission().
+        // The first call is the JoinedRoom in the _joinRoom().
         // The second is the subsequent failure.
         sinon.assert.calledTwice(dispatcher.dispatch);
         sinon.assert.calledWith(dispatcher.dispatch,
@@ -539,6 +567,44 @@ describe("loop.store.ServerConnectionStore", function() {
             failedJoinRequest: false
           }));
       });
+  });
+
+  describe("windowUnload", function() {
+    beforeEach(function() {
+      store.setStoreState({
+        roomToken: "fakeToken",
+        sessionToken: "1627384950"
+      });
+    });
+
+    it("should clear any existing timeout", function() {
+      sandbox.stub(window, "clearTimeout");
+      store._timeout = {};
+
+      store.windowUnload();
+
+      sinon.assert.calledOnce(clearTimeout);
+    });
+
+    it("should call 'HangupNow' Loop API if it is the standalone", function() {
+      store._isDesktop = false;
+      store._timeout = {};
+
+      store.windowUnload();
+
+      sinon.assert.calledOnce(requestStubs["HangupNow"]);
+      sinon.assert.calledWithExactly(requestStubs["HangupNow"],
+        "fakeToken", "1627384950");
+    });
+
+    it("should not call 'HangupNow' Loop API if it is on desktop", function() {
+      store._isDesktop = true;
+      store._timeout = {};
+
+      store.windowUnload();
+
+      sinon.assert.notCalled(requestStubs["HangupNow"]);
+    });
   });
 
   describe("Events", function() {

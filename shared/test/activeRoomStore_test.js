@@ -25,7 +25,6 @@ describe("loop.store.ActiveRoomStore", function() {
       SetLoopPref: sinon.stub(),
       AddConversationContext: sinon.stub(),
       AddBrowserSharingListener: sinon.stub().returns(42),
-      HangupNow: sinon.stub(),
       RemoveBrowserSharingListener: sinon.stub(),
       "Rooms:Get": sinon.stub().returns({
         roomUrl: "http://invalid"
@@ -197,18 +196,6 @@ describe("loop.store.ActiveRoomStore", function() {
       sinon.assert.calledOnce(fakeSdkDriver.disconnectSession);
     });
 
-    it("should clear any existing timeout", function() {
-      sandbox.stub(window, "clearTimeout");
-      store._timeout = {};
-
-      store.roomFailure(new sharedActions.RoomFailure({
-        error: fakeError,
-        failedJoinRequest: false
-      }));
-
-      sinon.assert.calledOnce(clearTimeout);
-    });
-
     it("should remove the sharing listener", function() {
       sandbox.stub(loop, "unsubscribe");
 
@@ -223,26 +210,6 @@ describe("loop.store.ActiveRoomStore", function() {
 
       sinon.assert.calledOnce(loop.unsubscribe);
       sinon.assert.calledWith(loop.unsubscribe, "BrowserSwitch");
-    });
-
-    it("should call 'HangupNow' Loop API", function() {
-      store.roomFailure(new sharedActions.RoomFailure({
-        error: fakeError,
-        failedJoinRequest: false
-      }));
-
-      sinon.assert.calledOnce(requestStubs["HangupNow"]);
-      sinon.assert.calledWithExactly(requestStubs["HangupNow"],
-        "fakeToken", "1627384950", "42");
-    });
-
-    it("should not call 'HangupNow' Loop API if failedJoinRequest is true", function() {
-      store.roomFailure(new sharedActions.RoomFailure({
-        error: fakeError,
-        failedJoinRequest: true
-      }));
-
-      sinon.assert.notCalled(requestStubs["HangupNow"]);
     });
   });
 
@@ -295,8 +262,8 @@ describe("loop.store.ActiveRoomStore", function() {
         }));
     });
 
-    it("should join the room for other states", function() {
-      sandbox.stub(store, "joinRoom");
+    it("should initiate webrtc for other states", function() {
+      sandbox.stub(store, "initiateWebRTC");
 
       store.setStoreState({
         failureReason: FAILURE_DETAILS.UNKNOWN,
@@ -307,7 +274,7 @@ describe("loop.store.ActiveRoomStore", function() {
 
       store.retryAfterRoomFailure();
 
-      sinon.assert.calledOnce(store.joinRoom);
+      sinon.assert.calledOnce(store.initiateWebRTC);
     });
   });
 
@@ -461,7 +428,7 @@ describe("loop.store.ActiveRoomStore", function() {
     });
   });
 
-  describe("#joinRoom", function() {
+  describe("#initiateWebRTC", function() {
     var hasDevicesStub;
 
     beforeEach(function() {
@@ -472,14 +439,14 @@ describe("loop.store.ActiveRoomStore", function() {
     it("should reset failureReason", function() {
       store.setStoreState({ failureReason: "Test" });
 
-      store.joinRoom();
+      store.initiateWebRTC();
 
       expect(store.getStoreState().failureReason).eql(undefined);
     });
 
     describe("Standalone Handles Room", function() {
       it("should dispatch a MetricsLogJoinRoom action", function() {
-        store.joinRoom();
+        store.initiateWebRTC();
 
         sinon.assert.calledOnce(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
@@ -491,7 +458,7 @@ describe("loop.store.ActiveRoomStore", function() {
       it("should set the state to MEDIA_WAIT if media devices are present", function() {
         hasDevicesStub.callsArgWith(0, true);
 
-        store.joinRoom();
+        store.initiateWebRTC();
 
         expect(store.getStoreState().roomState).eql(ROOM_STATES.MEDIA_WAIT);
       });
@@ -499,7 +466,7 @@ describe("loop.store.ActiveRoomStore", function() {
       it("should not set the state to MEDIA_WAIT if no media devices are present", function() {
         hasDevicesStub.callsArgWith(0, false);
 
-        store.joinRoom();
+        store.initiateWebRTC();
 
         expect(store.getStoreState().roomState).eql(ROOM_STATES.READY);
       });
@@ -507,7 +474,7 @@ describe("loop.store.ActiveRoomStore", function() {
       it("should dispatch `ConnectionFailure` if no media devices are present", function() {
         hasDevicesStub.callsArgWith(0, false);
 
-        store.joinRoom();
+        store.initiateWebRTC();
 
         sinon.assert.called(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
@@ -543,7 +510,7 @@ describe("loop.store.ActiveRoomStore", function() {
       });
 
       it("should dispatch a MetricsLogJoinRoom action", function() {
-        store.joinRoom();
+        store.initiateWebRTC();
 
         sinon.assert.calledOnce(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
@@ -556,7 +523,7 @@ describe("loop.store.ActiveRoomStore", function() {
       it("should dispatch an event to Firefox", function() {
         sandbox.stub(window, "dispatchEvent");
 
-        store.joinRoom();
+        store.initiateWebRTC();
 
         sinon.assert.calledOnce(window.dispatchEvent);
         sinon.assert.calledWithExactly(window.dispatchEvent, new window.CustomEvent(
@@ -573,7 +540,7 @@ describe("loop.store.ActiveRoomStore", function() {
 
       it("should log an error if Firefox doesn't handle the room", function() {
         // Start the join.
-        store.joinRoom();
+        store.initiateWebRTC();
 
         // Pretend Firefox calls back.
         channelListener({
@@ -586,9 +553,10 @@ describe("loop.store.ActiveRoomStore", function() {
         sinon.assert.calledOnce(console.error);
       });
 
-      it("should dispatch a JoinedRoom action if the room was successfully opened", function() {
+      // XXX akita - move the in-browser window opening code.
+      it.skip("should dispatch a JoinedRoom action if the room was successfully opened", function() {
         // Start the join.
-        store.joinRoom();
+        store.initiateWebRTC();
 
         // Pretend Firefox calls back.
         channelListener({
@@ -613,7 +581,7 @@ describe("loop.store.ActiveRoomStore", function() {
 
       it("should dispatch a ConnectionFailure action if the room was already opened", function() {
         // Start the join.
-        store.joinRoom();
+        store.initiateWebRTC();
 
         // Pretend Firefox calls back.
         channelListener({
@@ -636,37 +604,9 @@ describe("loop.store.ActiveRoomStore", function() {
   });
 
   describe("#gotMediaPermission", function() {
-    var responseData;
+    var fakeRoomData;
 
     beforeEach(function() {
-      responseData = {
-        apiKey: "keyFake",
-        sessionToken: "14327659860",
-        sessionId: "1357924680",
-        expires: 8
-      };
-      requestStubs["Rooms:Join"].returns(responseData);
-      store.setStoreState({ roomToken: "tokenFake" });
-    });
-
-    it("should set the room state to JOINING", function() {
-      store.gotMediaPermission();
-
-      expect(store.getStoreState().roomState).eql(ROOM_STATES.JOINING);
-    });
-  });
-
-  describe("#joinedRoom", function() {
-    var fakeJoinedData, fakeRoomData;
-
-    beforeEach(function() {
-      fakeJoinedData = {
-        apiKey: "9876543210",
-        sessionToken: "12563478",
-        sessionId: "15263748",
-        windowId: "42",
-        expires: 20
-      };
       fakeRoomData = {
         decryptedContext: {
           roomName: "Monkeys"
@@ -677,12 +617,17 @@ describe("loop.store.ActiveRoomStore", function() {
       requestStubs["Rooms:Get"].returns(fakeRoomData);
 
       store.setStoreState({
-        roomToken: "fakeToken"
+        roomToken: "fakeToken",
+        webrtcTokens: {
+          apiKey: "9876543210",
+          sessionToken: "12563478",
+          sessionId: "15263748"
+        }
       });
     });
 
     it("should set the state to `JOINED`", function() {
-      store.joinedRoom(new sharedActions.JoinedRoom(fakeJoinedData));
+      store.gotMediaPermission();
 
       expect(store._storeState.roomState).eql(ROOM_STATES.JOINED);
     });
@@ -693,53 +638,29 @@ describe("loop.store.ActiveRoomStore", function() {
         standalone: true
       });
 
-      store.joinedRoom(new sharedActions.JoinedRoom(fakeJoinedData));
+      store.gotMediaPermission();
 
       expect(store._storeState.roomState).eql(ROOM_STATES.JOINED);
     });
 
-    it("should store the session and api values", function() {
-      store.joinedRoom(new sharedActions.JoinedRoom(fakeJoinedData));
-
-      var state = store.getStoreState();
-      expect(state.apiKey).eql(fakeJoinedData.apiKey);
-      expect(state.sessionToken).eql(fakeJoinedData.sessionToken);
-      expect(state.sessionId).eql(fakeJoinedData.sessionId);
-    });
-
-    it("should not store the session and api values when Firefox handles the room", function() {
-      store.setStoreState({
-        userAgentHandlesRoom: true,
-        standalone: true
-      });
-
-      store.joinedRoom(new sharedActions.JoinedRoom(fakeJoinedData));
-
-      var state = store.getStoreState();
-      expect(state.apiKey).eql(undefined);
-      expect(state.sessionToken).eql(undefined);
-      expect(state.sessionId).eql(undefined);
-    });
-
     it("should start the session connection with the sdk", function() {
-      var actionData = new sharedActions.JoinedRoom(fakeJoinedData);
-
-      store.joinedRoom(actionData);
+      store.gotMediaPermission();
 
       sinon.assert.calledOnce(fakeSdkDriver.connectSession);
-      sinon.assert.calledWithExactly(fakeSdkDriver.connectSession,
-        actionData);
+      sinon.assert.calledWithExactly(fakeSdkDriver.connectSession, {
+        apiKey: "9876543210",
+        sessionToken: "12563478",
+        sessionId: "15263748"
+      });
     });
 
     // XXX akita Will be fixed in Bug 1268826
     it.skip("should call LoopAPI.AddConversationContext", function() {
-      var actionData = new sharedActions.JoinedRoom(fakeJoinedData);
-
       return store.setupWindowData(new sharedActions.SetupWindowData({
         windowId: "42",
         type: "room"
       })).then(function() {
-        store.joinedRoom(actionData);
+        store.gotMediaPermission();
 
         sinon.assert.calledOnce(requestStubs.AddConversationContext);
         sinon.assert.calledWithExactly(requestStubs.AddConversationContext,
@@ -790,21 +711,12 @@ describe("loop.store.ActiveRoomStore", function() {
       sinon.assert.calledOnce(fakeSdkDriver.disconnectSession);
     });
 
-    it("should clear any existing timeout", function() {
-      sandbox.stub(window, "clearTimeout");
-      store._timeout = {};
+    it("should call 'endScreenShare'", function() {
+      sandbox.stub(store, "endScreenShare");
 
       store.connectionFailure(connectionFailureAction);
 
-      sinon.assert.calledOnce(clearTimeout);
-    });
-
-    it("should call 'HangupNow' Loop API", function() {
-      store.connectionFailure(connectionFailureAction);
-
-      sinon.assert.calledOnce(requestStubs["HangupNow"]);
-      sinon.assert.calledWithExactly(requestStubs["HangupNow"],
-        "fakeToken", "1627384950", "42");
+      sinon.assert.calledOnce(store.endScreenShare);
     });
 
     it("should remove the sharing listener", function() {
@@ -1453,7 +1365,9 @@ describe("loop.store.ActiveRoomStore", function() {
     it("should call rooms.sendConnectionStatus on mozLoop", function() {
       store.setStoreState({
         roomToken: "fakeToken",
-        sessionToken: "9876543210"
+        webrtcTokens: {
+          sessionToken: "9876543210"
+        }
       });
 
       var data = new sharedActions.ConnectionStatus({
@@ -1503,33 +1417,13 @@ describe("loop.store.ActiveRoomStore", function() {
       sinon.assert.calledOnce(fakeSdkDriver.disconnectSession);
     });
 
-    it("should clear any existing timeout", function() {
-      sandbox.stub(window, "clearTimeout");
-      store._timeout = {};
+    it("should call 'endScreenShare'", function() {
+      sandbox.stub(store, "endScreenShare");
 
       store.windowUnload();
 
-      sinon.assert.calledOnce(clearTimeout);
+      sinon.assert.calledOnce(store.endScreenShare);
     });
-
-    it("should call 'HangupNow' Loop API", function() {
-      store.windowUnload();
-
-      sinon.assert.calledOnce(requestStubs["HangupNow"]);
-      sinon.assert.calledWith(requestStubs["HangupNow"], "fakeToken",
-        "1627384950", "1234");
-    });
-
-    it("should call 'HangupNow' Loop API if the room state is JOINING",
-      function() {
-        store.setStoreState({ roomState: ROOM_STATES.JOINING });
-
-        store.windowUnload();
-
-        sinon.assert.calledOnce(requestStubs["HangupNow"]);
-        sinon.assert.calledWith(requestStubs["HangupNow"], "fakeToken",
-          "1627384950", "1234");
-      });
 
     it("should remove the sharing listener", function() {
       sandbox.stub(loop, "unsubscribe");
@@ -1572,51 +1466,12 @@ describe("loop.store.ActiveRoomStore", function() {
       sinon.assert.calledOnce(fakeSdkDriver.disconnectSession);
     });
 
-    it("should clear any existing timeout", function() {
-      sandbox.stub(window, "clearTimeout");
-      store._timeout = {};
+    it("should call 'endScreenShare'", function() {
+      sandbox.stub(store, "endScreenShare");
 
-      store.leaveRoom();
+      store.windowUnload();
 
-      sinon.assert.calledOnce(clearTimeout);
-    });
-
-    it("should call 'HangupNow' Loop API", function() {
-      store.leaveRoom();
-
-      sinon.assert.calledOnce(requestStubs["HangupNow"]);
-      sinon.assert.calledWith(requestStubs["HangupNow"], "fakeToken", "1627384950");
-    });
-
-    it("should call 'HangupNow' when _isDesktop is true and windowStayingOpen", function() {
-      store._isDesktop = true;
-
-      store.leaveRoom({
-        windowStayingOpen: true
-      });
-
-      sinon.assert.calledOnce(requestStubs["HangupNow"]);
-    });
-
-    it("should not call 'HangupNow' Loop API when _isDesktop is true", function() {
-      store._isDesktop = true;
-
-      store.leaveRoom();
-
-      sinon.assert.notCalled(requestStubs["HangupNow"]);
-    });
-
-    it("should remove the sharing listener", function() {
-      sandbox.stub(loop, "unsubscribe");
-
-      // Setup the listener.
-      store.startBrowserShare(new sharedActions.StartBrowserShare());
-
-      // Now leave the room.
-      store.leaveRoom();
-
-      sinon.assert.calledOnce(loop.unsubscribe);
-      sinon.assert.calledWith(loop.unsubscribe, "BrowserSwitch");
+      sinon.assert.calledOnce(store.endScreenShare);
     });
 
     it("should set the state to ENDED", function() {

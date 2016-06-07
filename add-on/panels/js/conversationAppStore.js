@@ -164,9 +164,7 @@ loop.store.ConversationAppStore = (function() {
       // 0 is default value for pref. Always show feedback form on first use.
       if (this.getStoreState().feedbackTimestamp === 0 ||
           delta >= this.getStoreState().feedbackPeriod) {
-        this.dispatcher.dispatch(new loop.shared.actions.LeaveRoom({
-          windowStayingOpen: true
-        }));
+        this.dispatcher.dispatch(new loop.shared.actions.LeaveRoom());
         this.dispatcher.dispatch(new loop.shared.actions.ShowFeedbackForm());
         return;
       }

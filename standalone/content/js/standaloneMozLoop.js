@@ -13,7 +13,7 @@ loop.StandaloneMozLoop = (function() {
   /**
    * The maximum number of clients that we currently support.
    */
-  var ROOM_MAX_CLIENTS = 2;
+  var ROOM_MAX_CLIENTS = 999;
   var PUSH_SUBSCRIPTION = "pushSubscription";
   var BATCH_MESSAGE = "Batch";
   var MAX_LOOP_COUNT = 10;

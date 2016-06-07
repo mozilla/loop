@@ -271,9 +271,7 @@ describe("loop.store.ConversationAppStore", function() {
 
         sinon.assert.calledTwice(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.LeaveRoom({
-            windowStayingOpen: true
-          }));
+          new sharedActions.LeaveRoom());
       });
 
       it("should dispatch a ShowFeedbackForm action if timestamp is 0", function() {
@@ -301,9 +299,7 @@ describe("loop.store.ConversationAppStore", function() {
 
         sinon.assert.calledTwice(dispatcher.dispatch);
         sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.LeaveRoom({
-            windowStayingOpen: true
-          }));
+          new sharedActions.LeaveRoom());
       });
 
       it("should dispatch a ShowFeedbackForm action if delta > feedback period", function() {

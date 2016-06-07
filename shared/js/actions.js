@@ -486,6 +486,7 @@ loop.shared.actions = (function() {
      */
     RoomFailure: Action.define("roomFailure", {
       error: Object,
+      // XXX akita - Decide if this is still useful or not.
       // True when the failures occurs in the join room request to the loop-server.
       failedJoinRequest: Boolean
     }),
@@ -514,10 +515,10 @@ loop.shared.actions = (function() {
     }),
 
     /**
-     * Starts the process for the user to join the room.
+     * Starts the process for the user to start the WebRTC connection.
      * XXX: should move to some roomActions module - refs bug 1079284
      */
-    JoinRoom: Action.define("joinRoom", {
+    InitiateWebRTC: Action.define("initiateWebRTC", {
     }),
 
     /**
@@ -543,11 +544,10 @@ loop.shared.actions = (function() {
      *
      * @see https://wiki.mozilla.org/Loop/Architecture/Rooms#Joining_a_Room
      */
-    JoinedRoom: Action.define("joinedRoom", {
+    SetupWebRTCTokens: Action.define("setupWebRTCTokens", {
       apiKey: String,
       sessionToken: String,
-      sessionId: String,
-      expires: Number
+      sessionId: String
     }),
 
     /**
@@ -563,9 +563,6 @@ loop.shared.actions = (function() {
      * Used to indicate the user wishes to leave the room.
      */
     LeaveRoom: Action.define("leaveRoom", {
-      // Optional, Used to indicate that we know the window is staying open,
-      // and hence any messages to ensure the call is fully ended must be sent.
-      // windowStayingOpen: Boolean,
     }),
 
     /**

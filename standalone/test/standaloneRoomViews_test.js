@@ -165,7 +165,7 @@ describe("loop.standaloneRoomViews", function() {
       expect(button.textContent).eql("rooms_room_join_label");
     });
 
-    it("should dispatch a JoinRoom action when the join room button is clicked", function() {
+    it("should dispatch a InitiateWebRTC action when the join room button is clicked", function() {
       activeRoomStore.setStoreState({
         roomState: ROOM_STATES.READY,
         roomName: "fakeName"
@@ -177,7 +177,7 @@ describe("loop.standaloneRoomViews", function() {
       TestUtils.Simulate.click(button);
 
       sinon.assert.calledOnce(dispatcher.dispatch);
-      sinon.assert.calledWithExactly(dispatcher.dispatch, new sharedActions.JoinRoom());
+      sinon.assert.calledWithExactly(dispatcher.dispatch, new sharedActions.InitiateWebRTC());
     });
 
     it("should display a enjoy your conversation button if the state is ROOM_JOINED", function() {

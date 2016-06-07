@@ -36,10 +36,10 @@ XPCOMUtils.defineLazyModuleGetter(this, "ObjectUtils",
 
 /* exported LoopRooms, roomsPushNotification */
 
-this.EXPORTED_SYMBOLS = ["LoopRooms", "roomsPushNotification"];
+this.EXPORTED_SYMBOLS = ["LoopRooms", "roomsPushNotification", "ROOM_MAX_CLIENTS"];
 
 // The maximum number of clients that we support currently.
-const CLIENT_MAX_SIZE = 2;
+const ROOM_MAX_CLIENTS = 999;
 
 // Wait at least 5 seconds before doing opportunistic encryption.
 const MIN_TIME_BEFORE_ENCRYPTION = 5 * 1000;
@@ -831,7 +831,7 @@ var LoopRoomsInternal = {
     this._postToRoom(roomToken, {
       action: "join",
       displayName: displayName,
-      clientMaxSize: CLIENT_MAX_SIZE
+      clientMaxSize: ROOM_MAX_CLIENTS
     }, callback);
   },
 

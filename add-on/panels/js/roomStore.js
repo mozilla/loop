@@ -15,14 +15,6 @@ loop.store = loop.store || {};
   var sharedActions = loop.shared.actions;
 
   /**
-   * Maximum size given to createRoom; only 2 is supported (and is
-   * always passed) because that's what the user-experience is currently
-   * designed and tested to handle.
-   * @type {Number}
-   */
-  var MAX_ROOM_CREATION_SIZE = loop.store.MAX_ROOM_CREATION_SIZE = 2;
-
-  /**
    * Room validation schema. See validate.js.
    * @type {Object}
    */
@@ -64,14 +56,6 @@ loop.store = loop.store || {};
    *                                      throughout the store.
    */
   loop.store.RoomStore = loop.store.createStore({
-    /**
-     * Maximum size given to createRoom; only 2 is supported (and is
-     * always passed) because that's what the user-experience is currently
-     * designed and tested to handle.
-     * @type {Number}
-     */
-    maxRoomCreationSize: MAX_ROOM_CREATION_SIZE,
-
     /**
      * Registered actions.
      * @type {Array}
@@ -265,7 +249,7 @@ loop.store = loop.store || {};
 
       var roomCreationData = {
         decryptedContext: {},
-        maxSize: this.maxRoomCreationSize
+        maxSize: this._constants.ROOM_MAX_CLIENTS
       };
 
       if ("urls" in actionData) {

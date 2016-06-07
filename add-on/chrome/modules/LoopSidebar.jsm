@@ -15,6 +15,9 @@ const BROWSER_FRAME_SCRIPT = "chrome://browser/content/content.js";
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
+XPCOMUtils.defineLazyModuleGetter(this, "LoopAPI",
+  "chrome://loop/content/modules/MozLoopAPI.jsm");
+
 // See LOG_LEVELS in Console.jsm. Common examples: "All", "Info", "Warn", & "Error".
 const PREF_LOG_LEVEL = "loop.debug.loglevel";
 
@@ -71,6 +74,9 @@ var LoopSidebarInternal = {
                      Services.perms.ALLOW_ACTION, Services.perms.EXPIRE_SESSION);
 
     sidebarBrowser.setAttribute("src", url);
+
+    this._unloadListener = this.unload.bind(this, token);
+    window.addEventListener("unload", this._unloadListener);
   },
 
   /**
@@ -84,6 +90,15 @@ var LoopSidebarInternal = {
     // message manager for the sidebar.
     let loopMessageManager = window.getGroupMessageManager("loop");
     loopMessageManager.loadFrameScript(BROWSER_FRAME_SCRIPT, true);
+  },
+
+  unload: function(token, event) {
+    event.target.removeEventListener("unload", this._unloadListener);
+
+    LoopAPI.sendMessageToHandler({
+      name: "HangupNow",
+      data: [token]
+    });
   }
 };
 

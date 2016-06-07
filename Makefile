@@ -14,7 +14,7 @@ LOOP_PRODUCT_HOMEPAGE_URL := $(shell echo $${LOOP_PRODUCT_HOMEPAGE_URL-"https://
 # This should always be a nn.* version, so that the add-on is compatible with not
 # only the release but any security/stability releases as well.
 # Note that MOZ_APP_MAXVERSION is the variable name used by mozilla-central.
-MOZ_APP_MAXVERSION=49.*
+MOZ_APP_MAXVERSION=50.*
 
 # Work around for realpath not working as expected
 NODE_LOCAL_BIN := $(abspath ./node_modules/.bin)

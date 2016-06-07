@@ -768,7 +768,9 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
       topPos = clickYPos - listTop + clickOffset;
     }
     // Ensure menu is not cut off at top
-    if (topPos < 0) { topPos = 0; }
+    if (topPos < 0) {
+      topPos = 0;
+    }
 
     return topPos;
   }

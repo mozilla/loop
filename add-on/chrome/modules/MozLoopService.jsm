@@ -829,7 +829,9 @@ var MozLoopServiceInternal = {
 
       let report = convertToRTCStatsReport(internalFormat);
         let logStr = "";
-        logs.forEach(s => { logStr += s + "\n"; });
+        logs.forEach(s => {
+          logStr += s + "\n";
+        });
 
         // We have stats and logs.
 

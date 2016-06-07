@@ -669,7 +669,9 @@ var WindowListener = {
         this.activeSound.load();
         this.activeSound.play();
 
-        this.activeSound.addEventListener("ended", () => { this.activeSound = undefined; }, false);
+        this.activeSound.addEventListener("ended", () => {
+          this.activeSound = undefined;
+        }, false);
       },
 
       /**

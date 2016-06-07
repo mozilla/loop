@@ -539,6 +539,7 @@ var WindowListener = {
           mozL10nId += "-error";
         } else if (this.isSlideshowOpen) {
           state = "slideshow";
+          suffix = ".label";
         } else if (this.MozLoopService.screenShareActive) {
           state = "action";
           mozL10nId += "-screensharing";
@@ -1383,11 +1384,11 @@ function startup(data) {
   // Load our stylesheets.
   let styleSheetService = Cc["@mozilla.org/content/style-sheet-service;1"]
     .getService(Components.interfaces.nsIStyleSheetService);
-  let sheets = ["chrome://loop-shared/skin/loop.css"];
+  let sheets = [
+    "chrome://loop-shared/skin/loop.css",
+    "chrome://loop/skin/platform.css"
+  ];
 
-  if (AppConstants.platform != "linux") {
-    sheets.push("chrome://loop/skin/platform.css");
-  }
 
   for (let sheet of sheets) {
     let styleSheetURI = Services.io.newURI(sheet, null, null);

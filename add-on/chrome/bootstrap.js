@@ -747,40 +747,6 @@ var WindowListener = {
         this._listeningToTabSelect = false;
         this._browserSharePaused = false;
         this._currentRoomToken = null;
-
-        this._sendTelemetryEventsIfNeeded();
-      },
-
-      /**
-       * Sends telemetry events for pause/ resume buttons if needed.
-       */
-      _sendTelemetryEventsIfNeeded: function() {
-        // The user can't click Resume button without clicking Pause button first.
-        if (!this._pauseButtonClicked) {
-          return;
-        }
-
-        let buckets = this.constants.SHARING_SCREEN;
-        this.LoopAPI.sendMessageToHandler({
-          name: "TelemetryAddValue",
-          data: [
-            "LOOP_INFOBAR_ACTION_BUTTONS",
-            buckets.PAUSED
-          ]
-        });
-
-        if (this._resumeButtonClicked) {
-          this.LoopAPI.sendMessageToHandler({
-            name: "TelemetryAddValue",
-            data: [
-              "LOOP_INFOBAR_ACTION_BUTTONS",
-              buckets.RESUMED
-            ]
-          });
-        }
-
-        this._pauseButtonClicked = false;
-        this._resumeButtonClicked = false;
       },
 
       /**
@@ -944,11 +910,8 @@ var WindowListener = {
               buttonNode.accessKey = stringObj.accesskey;
               LoopUI.MozLoopService.toggleBrowserSharing(this._browserSharePaused);
               if (this._browserSharePaused) {
-                this._pauseButtonClicked = true;
                 // if paused we stop sharing remote cursors
                 this.removeRemoteCursor();
-              } else {
-                this._resumeButtonClicked = true;
               }
               return true;
             },

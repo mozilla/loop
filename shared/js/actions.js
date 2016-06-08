@@ -161,9 +161,18 @@ loop.shared.actions = (function() {
      * Notifies that a tile has been received from the other peer.
      */
     AddedPage: Action.define("addedPage", {
+      pageId: String,
       title: String,
       url: String
       // metadata: Object (optional)
+    }),
+
+    /**
+    * Notifies that a tile has been removed.
+     */
+    DeletedPage: Action.define("deletedPage", {
+      deletedTime: Number,
+      pageId: String
     }),
 
     /**

@@ -80,20 +80,16 @@ describe("loop.DataDriver", () => {
       expect(requestBody).eql('{"timestamp":{".sv":"timestamp"},"value":{"url":"http://example.com","title":"cool page"}}');
       expect(url.match(/([^\/]+).{12}\.json$/)[1]).eql("page!00000000");
     });
+  });
 
-    it("should dispatch a AddedPage action for a page record", () => {
-      let record = {
-        title: "cool page",
-        url: "http://example.com"
-      };
-      driver._processRecord("page!00000000", {
-       timestamp: 1234567890123,
-       value: record
-      });
+  describe("#deletePage", () => {
+    it("should remove the specified record", () => {
+      driver.deletePage("thePageId");
 
-      sinon.assert.calledWithExactly(dispatcher.dispatch,
-        new actions.AddedPage(record)
-      );
+      let { method, requestBody, url } = requests[0];
+      expect(method).eql("PUT");
+      expect(requestBody).eql('{"timestamp":{".sv":"timestamp"}}');
+      expect(getResource(url)).eql("page!thePageId.json");
     });
   });
 
@@ -566,6 +562,37 @@ describe("loop.DataDriver", () => {
           pingedAgo: 1000,
           userId: "theUserId"
         }));
+    });
+  });
+
+  describe("#_processRecord.page", () => {
+    it("should dispatch `DeletedPage` when value field is not defined", () => {
+      driver._processRecord("page!thePageId", {
+        timestamp: 1234567890123
+      });
+
+      sinon.assert.called(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new actions.DeletedPage({
+          deletedTime: 1234567890123,
+          pageId: "thePageId"
+        }));
+    });
+
+    it("should dispatch a AddedPage action for a page record", () => {
+      let record = {
+        pageId: "00000000",
+        title: "cool page",
+        url: "http://example.com"
+      };
+      driver._processRecord("page!00000000", {
+        timestamp: 1234567890123,
+        value: record
+      });
+
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new actions.AddedPage(record)
+      );
     });
   });
 

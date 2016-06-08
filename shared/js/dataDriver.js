@@ -94,6 +94,16 @@ loop.DataDriver = function() {
     }
 
     /**
+     * Delete the specified page record.
+     *
+     * @param {String}  pageId   The id to associate with stored page.
+     */
+    deletePage(pageId) {
+      // XXX akita bug 1276095: Verify pageId is a valid firebase id.
+      this.update("page", pageId);
+    }
+
+    /**
      * Send a text chat message by storing in the database.
      *
      * @param {Object} message The message to be stored and received by others.
@@ -413,7 +423,16 @@ loop.DataDriver = function() {
           break;
 
         case "page":
-          dispatchAction = "AddedPage";
+          dispatchExtra = {
+            pageId: id
+          };
+
+          if (typeof data.value !== "undefined") {
+            dispatchAction = "AddedPage";
+          } else {
+            dispatchAction = "DeletedPage";
+            dispatchExtra.deletedTime = data.timestamp;
+          }
           break;
 
         case "participant":

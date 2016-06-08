@@ -6,6 +6,7 @@ describe("loop.TableOfContents", () => {
 
   let { expect } = chai;
   let { TestUtils } = React.addons;
+  let sharedActions = loop.shared.actions;
 
   let sandbox;
   let dispatcher, fakeDataDriver, participantStore, now;
@@ -27,6 +28,10 @@ describe("loop.TableOfContents", () => {
 
     now = Date.now();
     sandbox.stub(Date, "now", () => now);
+
+    sandbox.stub(document.mozL10n ? document.mozL10n : navigator.mozL10n, "get", function(x) {
+      return x;
+    });
   });
 
   afterEach(() => {
@@ -89,6 +94,73 @@ describe("loop.TableOfContents", () => {
 
       let activeParticipants = ReactDOM.findDOMNode(view).querySelectorAll(".room-user");
       expect(activeParticipants.length).eql(0);
+    });
+  });
+
+  describe("ToC.AddUrlPanelView", () => {
+    let view, addURLStub;
+
+    function mountTestComponent() {
+      return TestUtils.renderIntoDocument(
+        React.createElement(loop.shared.toc.AddUrlPanelView, {
+          dispatcher: dispatcher,
+          handleAddUrlClick: addURLStub
+        }));
+    }
+
+    beforeEach(() => {
+      addURLStub = sandbox.stub();
+      sandbox.stub(loop.shared.utils, "getPageMetadata", args => {
+        if (args === "http://fakeurl.com") {
+          return Promise.resolve();
+        }
+
+        return {
+          then: function() {
+            return {
+              catch: function(cb) {
+                cb();
+              }
+            };
+          }
+        };
+      });
+      view = mountTestComponent();
+    });
+
+    it("should do nothing when the input is empty", () => {
+      var button = ReactDOM.findDOMNode(view).querySelector("button");
+      TestUtils.Simulate.click(button);
+
+      sinon.assert.notCalled(dispatcher.dispatch);
+    });
+
+    it("should dispatch a `showSnackbar` action if url is valid", () => {
+      var input = view.refs.siteUrl;
+      input.value = "http://fakeurl.com";
+      TestUtils.Simulate.change(input);
+      var button = ReactDOM.findDOMNode(view).querySelector("button");
+      TestUtils.Simulate.click(button);
+
+      sinon.assert.called(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new sharedActions.ShowSnackbar({
+          label: "snackbar_page_added"
+        }));
+    });
+
+    it("should dispatch a `showSnackbar` action if url isn't valid", () => {
+      var input = view.refs.siteUrl;
+      input.value = "invalidurl";
+      TestUtils.Simulate.change(input);
+      var button = ReactDOM.findDOMNode(view).querySelector("button");
+      TestUtils.Simulate.click(button);
+
+      sinon.assert.called(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new sharedActions.ShowSnackbar({
+          label: "snackbar_page_not_added"
+        }));
     });
   });
 });

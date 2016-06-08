@@ -81,7 +81,8 @@ describe("loop.webapp", function() {
     var sdk,
         standaloneAppStore,
         activeRoomStore,
-        participantStore;
+        participantStore,
+        snackbarStore;
 
     function mountTestComponent() {
       return TestUtils.renderIntoDocument(
@@ -91,6 +92,7 @@ describe("loop.webapp", function() {
             cursorStore: remoteCursorStore,
             dispatcher: dispatcher,
             participantStore: participantStore,
+            snackbarStore: snackbarStore,
             standaloneAppStore: standaloneAppStore
           }));
     }
@@ -110,6 +112,9 @@ describe("loop.webapp", function() {
         sdkDriver: sdk
       });
       participantStore = new loop.store.ParticipantStore(dispatcher, {
+        dataDriver: {}
+      });
+      snackbarStore = new loop.store.SnackbarStore(dispatcher, {
         dataDriver: {}
       });
     });

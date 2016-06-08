@@ -110,6 +110,7 @@ loop.webapp = (function(_, OT, mozL10n) {
       cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
+      snackbarStore: React.PropTypes.instanceOf(loop.store.SnackbarStore).isRequired,
       standaloneAppStore: React.PropTypes.instanceOf(
         loop.store.StandaloneAppStore).isRequired
     },
@@ -147,7 +148,8 @@ loop.webapp = (function(_, OT, mozL10n) {
               cursorStore={this.props.cursorStore}
               dispatcher={this.props.dispatcher}
               isFirefox={this.state.isFirefox}
-              participantStore={this.props.participantStore} />
+              participantStore={this.props.participantStore}
+              snackbarStore={this.props.snackbarStore} />
           );
         }
         case "home": {
@@ -204,6 +206,7 @@ loop.webapp = (function(_, OT, mozL10n) {
       updateParticipant: true
     });
     var serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher, {});
+    let snackbarStore = new loop.store.SnackbarStore(dispatcher);
 
     // XXX akita bug 1279042 - need to get displayname from username pref
     // rather than defaulting
@@ -232,6 +235,7 @@ loop.webapp = (function(_, OT, mozL10n) {
       cursorStore={remoteCursorStore}
       dispatcher={dispatcher}
       participantStore={participantStore}
+      snackbarStore={snackbarStore}
       standaloneAppStore={standaloneAppStore} />, document.querySelector("#main"));
 
     // Set the 'lang' and 'dir' attributes to <html> when the page is translated

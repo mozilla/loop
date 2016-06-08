@@ -576,6 +576,13 @@ loop.shared.actions = (function() {
       connections: Number,
       sendStreams: Number,
       recvStreams: Number
+    }),
+
+    /**
+     * Used to show the snackbar.
+     */
+    ShowSnackbar: Action.define("showSnackbar", {
+      label: String
     })
   };
 })();

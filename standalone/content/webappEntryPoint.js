@@ -85,6 +85,7 @@ require("imports?loop=>window.loop!exports?loop!shared/js/activeRoomStore.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/serverConnectionStore.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/remoteCursorStore.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/participantStore.js");
+require("imports?loop=>window.loop!exports?loop!shared/js/snackbarStore.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/views.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/toc.js");
 require("imports?loop=>window.loop!exports?loop!shared/js/urlRegExps.js");

@@ -21,6 +21,8 @@ if (inChrome) {
   }
 }
 
+const API_KEY = "b0bbaba8774f4134b503644bfac12acd";
+
 (function() {
   "use strict";
 
@@ -812,6 +814,31 @@ if (inChrome) {
     return node;
   }
 
+  function getPageMetadata(url) {
+    return new Promise((resolve, reject) => {
+      let result = { url };
+      let request = new XMLHttpRequest();
+      request.open("GET",
+        `https://api.embedly.com/1/extract?url=${encodeURIComponent(url)}&key=${encodeURIComponent(API_KEY)}`);
+      request.onload = () => {
+        if (request.status !== 200) {
+          reject(request);
+          return;
+        }
+
+        let extracted = JSON.parse(request.responseText);
+        result.url = extracted.provider_url;
+        result.description = extracted.description;
+        result.title = extracted.title;
+        result.images = extracted.images;
+        result.favicon_url = extracted.favicon_url;
+        resolve(result);
+      };
+
+      request.send();
+    });
+  }
+
   this.utils = {
     CALL_TYPES: CALL_TYPES,
     CHAT_CONTENT_TYPES: CHAT_CONTENT_TYPES,
@@ -830,6 +857,7 @@ if (inChrome) {
     getBoolPreference: getBoolPreference,
     getOS: getOS,
     getOSVersion: getOSVersion,
+    getPageMetadata: getPageMetadata,
     getPlatform: getPlatform,
     isChrome: isChrome,
     isDesktop: isDesktop,

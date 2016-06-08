@@ -593,7 +593,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
       participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
       remotePosterUrl: React.PropTypes.string,
       roomState: React.PropTypes.string,
-      screenSharePosterUrl: React.PropTypes.string
+      screenSharePosterUrl: React.PropTypes.string,
+      snackbarStore: React.PropTypes.instanceOf(loop.store.SnackbarStore).isRequired
     },
     getInitialState: function() {
       // Uncomment this line to see the slideshow every time while developing:
@@ -825,7 +826,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
           <sharedToc.TableOfContentView
             dispatcher={this.props.dispatcher}
             isScreenShareActive={displayScreenShare}
-            participantStore={this.props.participantStore} />
+            participantStore={this.props.participantStore}
+            snackbarStore={this.props.snackbarStore} />
           <sharedViews.ScreenShareView
             cursorStore={this.props.cursorStore}
             dispatcher={this.props.dispatcher}
@@ -957,7 +959,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
       cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isFirefox: React.PropTypes.bool.isRequired,
-      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
+      snackbarStore: React.PropTypes.instanceOf(loop.store.SnackbarStore).isRequired
     },
 
     getInitialState: function() {
@@ -984,7 +987,8 @@ loop.standaloneRoomViews = (function(mozL10n) {
           cursorStore={this.props.cursorStore}
           dispatcher={this.props.dispatcher}
           isFirefox={this.props.isFirefox}
-          participantStore={this.props.participantStore} />
+          participantStore={this.props.participantStore}
+          snackbarStore={this.props.snackbarStore} />
       );
     }
   });

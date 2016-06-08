@@ -43,6 +43,8 @@ loop.roomToc = (function(mozL10n) {
 
       let participantStore = new loop.store.ParticipantStore(dispatcher, { dataDriver });
 
+      let snackbarStore = new loop.store.SnackbarStore(dispatcher);
+
       loop.store.StoreMixin.register({
         participantStore,
         serverConnectionStore,
@@ -56,7 +58,8 @@ loop.roomToc = (function(mozL10n) {
       ReactDOM.render(<tocViews.TableOfContentView
                         dispatcher={dispatcher}
                         isScreenShareActive={false}
-                        participantStore={participantStore} />, document.querySelector("#main"));
+                        participantStore={participantStore}
+                        snackbarStore={snackbarStore} />, document.querySelector("#main"));
 
       var locationData = sharedUtils.locationData();
       var hash = locationData.hash.match(/#(.*)/);

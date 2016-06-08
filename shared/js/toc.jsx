@@ -26,7 +26,8 @@ loop.shared.toc = (function(mozL10n) {
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isScreenShareActive: React.PropTypes.bool.isRequired,
-      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
+      snackbarStore: React.PropTypes.instanceOf(loop.store.SnackbarStore).isRequired
     },
 
     getInitialState: function() {
@@ -52,12 +53,14 @@ loop.shared.toc = (function(mozL10n) {
       });
     },
 
-    // XXX akita: add jsdoc
-    addTile: function(url) {
+    /**
+     * Adds a new tile to the ToC
+     */
+    addTile: function(metadata) {
       var tiles = this.state.tiles;
       tiles.push({
-        location: url,
-        description: url
+        location: metadata.url,
+        description: metadata.description
       });
 
       this.setState({
@@ -83,6 +86,8 @@ loop.shared.toc = (function(mozL10n) {
             roomToken={this.state.roomToken} />
           <RoomContentView
             tiles={this.state.tiles} />
+          <SnackbarView
+            snackbarStore={this.props.snackbarStore} />
         </div>
       );
     }
@@ -131,7 +136,8 @@ loop.shared.toc = (function(mozL10n) {
           <RoomPresenceView
             participantStore={this.props.participantStore} />
           <RoomActionsView
-            addUrlTile={this.props.addUrlTile} />
+            addUrlTile={this.props.addUrlTile}
+            dispatcher={this.props.dispatcher} />
         </div>
       );
     }
@@ -181,7 +187,8 @@ loop.shared.toc = (function(mozL10n) {
 
   var RoomActionsView = React.createClass({
     propTypes: {
-      addUrlTile: React.PropTypes.func.isRequired
+      addUrlTile: React.PropTypes.func.isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
     },
 
     getInitialState: function() {
@@ -197,9 +204,9 @@ loop.shared.toc = (function(mozL10n) {
       });
     },
 
-    handleAddUrlClick: function(url) {
+    handleAddUrlClick: function(metadata) {
       this.toggleAddUrlPanel();
-      this.props.addUrlTile(url);
+      this.props.addUrlTile(metadata);
     },
 
     render: function() {
@@ -210,6 +217,7 @@ loop.shared.toc = (function(mozL10n) {
             {
               this.state.showAddUrlPanel ?
                 <AddUrlPanelView
+                  dispatcher={this.props.dispatcher}
                   handleAddUrlClick={this.handleAddUrlClick} /> : null
             }
           </div>
@@ -223,13 +231,29 @@ loop.shared.toc = (function(mozL10n) {
 
   var AddUrlPanelView = React.createClass({
     propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       handleAddUrlClick: React.PropTypes.func.isRequired
     },
 
     handleClick: function(event) {
       event.preventDefault();
       var input = this.refs.siteUrl;
-      input.value && this.props.handleAddUrlClick(input.value);
+      var url = input.value;
+
+      if (!url) {
+        return;
+      }
+
+      loop.shared.utils.getPageMetadata(url).then(result => {
+        this.props.dispatcher.dispatch(new sharedActions.ShowSnackbar({
+          label: mozL10n.get("snackbar_page_added")
+        }));
+        this.props.handleAddUrlClick(result);
+      }).catch(() => {
+        this.props.dispatcher.dispatch(new sharedActions.ShowSnackbar({
+          label: mozL10n.get("snackbar_page_not_added")
+        }));
+      });
     },
 
     render: function() {
@@ -520,8 +544,60 @@ loop.shared.toc = (function(mozL10n) {
     }
   });
 
+  var SnackbarView = React.createClass({
+    statics: {
+      CLOSE_DELAY: 3000
+    },
+
+    propTypes: {
+      snackbarStore: React.PropTypes.instanceOf(loop.store.SnackbarStore).isRequired
+    },
+
+    componentDidMount: function() {
+      this.props.snackbarStore.on("change:label", this.handleStoreChange);
+    },
+
+    componentWillUnmount: function() {
+      this.props.snackbarStore.off("change:label", this.handleStoreChange);
+    },
+
+    handleStoreChange: function() {
+      this.setState(_.extend(this.props.snackbarStore.getStoreState(), {
+        snackbarOpened: true
+      }));
+
+      setTimeout(() => {
+        // Let's hide the snackbar
+        this.setState({
+          snackbarOpened: false
+        });
+      }, this.constructor.CLOSE_DELAY);
+    },
+
+    getInitialState: function() {
+      return _.extend(this.props.snackbarStore.getStoreState(), {
+        snackbarOpened: false
+      });
+    },
+
+    render: function() {
+      var cssClasses = {
+        "snackbar": true,
+        "open": this.state.snackbarOpened
+      };
+
+      return (
+        <div className={classNames(cssClasses)}>
+          <div className="snackbar-wrapper">
+            <p>{this.state.label}</p>
+          </div>
+        </div>
+      );
+    }
+  });
 
   return {
+    AddUrlPanelView: AddUrlPanelView,
     SidebarView: SidebarView,
     RoomPresenceView: RoomPresenceView,
     TableOfContentView: TableOfContentView

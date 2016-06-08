@@ -29,22 +29,6 @@ describe("loop.standaloneRoomViews", function() {
     sandbox = LoopMochaUtils.createSandbox();
     dispatcher = new loop.Dispatcher();
     dispatch = sandbox.stub(dispatcher, "dispatch");
-    activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, {
-      mozLoop: {},
-      sdkDriver: {}
-    });
-    textChatStore = new loop.store.TextChatStore(dispatcher, {
-      sdkDriver: {}
-    });
-    remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
-      sdkDriver: {}
-    });
-    loop.store.StoreMixin.register({
-      cursorStore: remoteCursorStore,
-      activeRoomStore: activeRoomStore,
-      textChatStore: textChatStore
-    });
-
     clock = sandbox.useFakeTimers();
     fakeWindow = {
       close: sandbox.stub(),
@@ -73,6 +57,22 @@ describe("loop.standaloneRoomViews", function() {
     LoopMochaUtils.stubLoopRequest({
       GetDoNotDisturb: sinon.stub().returns(true),
       GetLoopPref: sinon.stub()
+    });
+
+    activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, {
+      mozLoop: {},
+      sdkDriver: {}
+    });
+    textChatStore = new loop.store.TextChatStore(dispatcher, {
+      sdkDriver: {}
+    });
+    remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+      sdkDriver: {}
+    });
+    loop.store.StoreMixin.register({
+      cursorStore: remoteCursorStore,
+      activeRoomStore: activeRoomStore,
+      textChatStore: textChatStore
     });
   });
 
@@ -653,6 +653,10 @@ describe("loop.standaloneRoomViews", function() {
       beforeEach(function() {
         view = mountTestComponent();
         activeRoomStore.setStoreState({
+          // XXX Pretend we've been receiving a screenshare. This might be indicative
+          // of the displayScreenShare in StandaloneRoomView#render being calculated
+          // wrongly. However, it seems to work for now.
+          receivingScreenShare: true,
           roomContextUrls: [{
             description: "fakeStartPage",
             location: null

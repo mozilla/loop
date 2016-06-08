@@ -18,11 +18,14 @@ loop.shared.views.chat = (function(mozL10n) {
    * Renders an individual entry for the text chat entries view.
    */
   var TextChatEntry = React.createClass({
-    mixins: [React.addons.PureRenderMixin],
+    mixins: [
+      React.addons.PureRenderMixin
+    ],
 
     propTypes: {
       contentType: React.PropTypes.string.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher),
+      displayName: React.PropTypes.string,
       extraData: React.PropTypes.object,
       message: React.PropTypes.string.isRequired,
       showTimestamp: React.PropTypes.bool.isRequired,
@@ -87,6 +90,15 @@ loop.shared.views.chat = (function(mozL10n) {
         );
       }
 
+      // Only render messages after they've come back from the server to avoid
+      // dups in a simple way for early product standup.
+      //
+      // XXX akita Filed bug 1279054 to unregress the fact that all speech bubbles
+      // are now blue on and on the left side.
+      if (this.props.type === CHAT_MESSAGE_TYPES.SENT) {
+        return null;
+      }
+
       var linkClickHandler;
       if (loop.shared.utils.isDesktop()) {
         linkClickHandler = function(url) {
@@ -100,8 +112,7 @@ loop.shared.views.chat = (function(mozL10n) {
           <span className="speech-bubble-arrow" />
           <span className="speech-bubble">
             <span className="text-chat-entry-displayname">
-              {this.props.type === CHAT_MESSAGE_TYPES.RECEIVED ?
-                "Your Friend" : "You"}
+              {this.props.displayName}
             </span>
             <sharedViews.LinkifiedTextView
               linkClickHandler={linkClickHandler}
@@ -261,6 +272,7 @@ loop.shared.views.chat = (function(mozL10n) {
                 return (
                   <TextChatEntry contentType={entry.contentType}
                                  dispatcher={this.props.dispatcher}
+                                 displayName={entry.displayName}
                                  extraData={entry.extraData}
                                  key={i}
                                  message={entry.message}

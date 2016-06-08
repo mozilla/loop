@@ -156,6 +156,9 @@ loop.sidebar = (function(mozL10n) {
         dataDriver: dataDriver
       });
 
+      dispatcher.dispatch(
+        new sharedActions.SetOwnDisplayName({ displayName: "Room Owner" }));
+
       loop.store.StoreMixin.register({
         activeRoomStore: activeRoomStore,
         serverConnectionStore: serverConnectionStore,

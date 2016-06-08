@@ -36,6 +36,12 @@ describe("loop.store.TextChatStore", function() {
     sandbox.restore();
   });
 
+  describe("#actions", function() {
+    it("should have 'setOwnDisplayName' in the actions array", function() {
+      expect("setOwnDisplayName").to.be.oneOf(store.actions);
+    });
+  });
+
   describe("#dataChannelsAvailable", function() {
     it("should set textChatEnabled to the supplied state", function() {
       store.dataChannelsAvailable(new sharedActions.DataChannelsAvailable({
@@ -64,6 +70,14 @@ describe("loop.store.TextChatStore", function() {
     });
   });
 
+  describe("#getInitialStoreState", function() {
+    it("should return an object which has no ownUserInfo property", function() {
+      let initialState = store.getInitialStoreState();
+
+      expect(initialState).to.not.have.property("displayName");
+    });
+  });
+
   describe("#receivedTextChatMessage", function() {
     it("should add the message to the list", function() {
       var message = "Hello!";
@@ -71,6 +85,7 @@ describe("loop.store.TextChatStore", function() {
       store.receivedTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: message,
+        displayName: "Display Name",
         extraData: undefined,
         sentTimestamp: "2015-06-24T23:58:53.848Z",
         receivedTimestamp: "1970-01-01T00:00:00.000Z"
@@ -80,6 +95,7 @@ describe("loop.store.TextChatStore", function() {
         type: CHAT_MESSAGE_TYPES.RECEIVED,
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: message,
+        displayName: "Display Name",
         extraData: undefined,
         sentTimestamp: "2015-06-24T23:58:53.848Z",
         receivedTimestamp: "1970-01-01T00:00:00.000Z"
@@ -117,7 +133,8 @@ describe("loop.store.TextChatStore", function() {
     it("should not add messages for unknown content types", function() {
       store.receivedTextChatMessage({
         contentType: "invalid type",
-        message: "Hi"
+        message: "Hi",
+        displayName: "Display Name"
       });
 
       expect(store.getStoreState("messageList").length).eql(0);
@@ -127,7 +144,8 @@ describe("loop.store.TextChatStore", function() {
       store.setStoreState({ textChatEnabled: true });
       store.receivedTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
-        message: "Hello!"
+        message: "Hello!",
+        displayName: "Fake Name"
       });
 
       sinon.assert.calledOnce(window.dispatchEvent);
@@ -138,8 +156,10 @@ describe("loop.store.TextChatStore", function() {
 
   describe("#sendTextChatMessage", function() {
     it("should send the message", function() {
+      store.setStoreState({ displayName: "John Smith" });
       var messageData = {
         contentType: CHAT_CONTENT_TYPES.TEXT,
+        displayName: "John Smith",
         message: "Yes, that's what this is called."
       };
 
@@ -150,6 +170,7 @@ describe("loop.store.TextChatStore", function() {
     });
 
     it("should add the message to the list", function() {
+      store.setStoreState({ displayName: "John Smith" });
       var messageData = {
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "It's awesome!",
@@ -162,6 +183,7 @@ describe("loop.store.TextChatStore", function() {
       expect(store.getStoreState("messageList")).eql([{
         type: CHAT_MESSAGE_TYPES.SENT,
         contentType: messageData.contentType,
+        displayName: "John Smith",
         message: messageData.message,
         extraData: undefined,
         sentTimestamp: "2015-06-24T23:58:53.848Z",
@@ -179,6 +201,16 @@ describe("loop.store.TextChatStore", function() {
       sinon.assert.calledOnce(window.dispatchEvent);
       sinon.assert.calledWithExactly(window.dispatchEvent,
         new CustomEvent("LoopChatMessageAppended"));
+    });
+  });
+
+  describe("#setOwnDisplayName", function() {
+    it("should store ownUserInfo from the actionData", function() {
+      let fakeDisplayName = "Fake displayName";
+
+      store.setOwnDisplayName({ displayName: fakeDisplayName });
+
+      expect(store.getStoreState("displayName")).to.eql(fakeDisplayName);
     });
   });
 

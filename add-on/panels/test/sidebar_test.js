@@ -139,7 +139,6 @@ describe("loop.sidebar", function() {
     it("should trigger a setupWindowData action", function() {
       loop.sidebar.init();
 
-      sinon.assert.calledOnce(loop.Dispatcher.prototype.dispatch);
       sinon.assert.calledWithExactly(loop.Dispatcher.prototype.dispatch,
         new loop.shared.actions.SetupWindowData({
           roomToken: "42"

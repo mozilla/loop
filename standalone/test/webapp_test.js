@@ -69,7 +69,6 @@ describe("loop.webapp", function() {
 
       loop.webapp.init();
 
-      sinon.assert.calledOnce(loop.Dispatcher.prototype.dispatch);
       sinon.assert.calledWithExactly(loop.Dispatcher.prototype.dispatch,
         new sharedActions.ExtractTokenInfo({
           windowPath: "/c/faketoken",

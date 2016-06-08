@@ -28,7 +28,8 @@ loop.store.TextChatStore = (function() {
       "updateRoomInfo",
       "updateRoomContext",
       "remotePeerDisconnected",
-      "remotePeerConnected"
+      "remotePeerConnected",
+      "setOwnDisplayName"
     ],
 
     /**
@@ -98,6 +99,12 @@ loop.store.TextChatStore = (function() {
         sentTimestamp: messageData.sentTimestamp,
         receivedTimestamp: messageData.receivedTimestamp
       };
+
+      // only chat messages will have this
+      if ("displayName" in messageData) {
+        message.displayName = messageData.displayName;
+      }
+
       var newList = [].concat(this._storeState.messageList);
       var isContext = message.contentType === CHAT_CONTENT_TYPES.CONTEXT;
       if (isContext) {
@@ -148,13 +155,24 @@ loop.store.TextChatStore = (function() {
     },
 
     /**
-     * Handles sending of a chat message.
+     * Handles sending of a chat message.  Sets the displayName of the sender of
+     * this message from the displayName state in this store, if available.
      *
      * @param {sharedActions.SendTextChatMessage} actionData
      */
     sendTextChatMessage: function(actionData) {
-      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.SENT, actionData);
-      this._dataDriver.sendTextChatMessage(actionData);
+      var messageToSend = Object.assign({}, actionData);
+
+      // text chat types get the sender's name added
+      if (actionData.contentType === CHAT_CONTENT_TYPES.TEXT) {
+        var displayName = this.getStoreState("displayName");
+        if (displayName) {
+          Object.assign(messageToSend, { displayName: displayName }); // XXX no tst cov
+        }
+      }
+
+      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.SENT, messageToSend);
+      this._dataDriver.sendTextChatMessage(messageToSend);
     },
 
     /**
@@ -285,6 +303,15 @@ loop.store.TextChatStore = (function() {
       };
 
       this.sendTextChatMessage(msgData);
+    },
+
+    /**
+     * Sets the user name to be used when transmitting chat messages.
+     *
+     * @param {sharedActions.SetOwnDisplayName} actionData
+     */
+    setOwnDisplayName(actionData) {
+      this.setStoreState({ displayName: actionData.displayName });
     }
   });
 

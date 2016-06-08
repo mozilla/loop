@@ -204,6 +204,13 @@ loop.webapp = (function(_, OT, mozL10n) {
     var participantStore = new loop.store.ParticipantStore(dispatcher);
     var serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher, {});
 
+    // XXX akita bug 1279042 - need to get displayname from username pref
+    // rather than defaulting
+    dispatcher.dispatch(
+      new sharedActions.SetOwnDisplayName({
+        displayName: "Guest " + Math.random().toFixed(1).slice(-1)
+      }));
+
     loop.store.StoreMixin.register({
       activeRoomStore,
       participantStore,

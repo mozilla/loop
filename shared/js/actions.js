@@ -12,8 +12,12 @@ loop.shared.actions = (function() {
    * or by an async event, e.g. status received.
    *
    * They should be dispatched to stores via the dispatcher.
-   */
-
+   *
+   * @note  "name" in the ActionData is overwritten with the name
+   *        of the action itself, meaning that using your own parameter
+   *        called "name" will make things go sideways.  XXX we should
+   *        make this harder to trip on or disappear.
+  */
   function Action(name, schema, values) {
     var validatedData = new loop.validate.Validator(schema || {})
                                          .validate(values || {});
@@ -121,9 +125,18 @@ loop.shared.actions = (function() {
     ReceivedTextChatMessage: Action.define("receivedTextChatMessage", {
       contentType: String,
       message: String,
+      // XXX (optional because we don't use this for tiles.  Should refactor)
+      // displayName: String,
       receivedTimestamp: String
       // sentTimestamp: String (optional)
     }),
+
+    /**
+     * Display name to be used identifying this user
+     */
+     SetOwnDisplayName: Action.define("setOwnDisplayName", {
+       displayName: String
+     }),
 
     /**
      * Notifies that participant data has been received.

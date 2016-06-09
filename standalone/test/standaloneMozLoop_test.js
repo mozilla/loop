@@ -99,13 +99,15 @@ describe("loop.StandaloneMozLoop", function() {
     });
 
     it("should call the callback with success parameters", function() {
+      localStorage.userId = "test.id";
       var promise = loop.request("Rooms:Get", "fakeToken").then(function(result) {
         expect(result).eql(roomDetails);
       });
 
       var roomDetails = {
         roomName: "fakeName",
-        roomUrl: "http://invalid"
+        roomUrl: "http://invalid",
+        userId: "test.id"
       };
 
       requests[0].respond(200, { "Content-Type": "application/json" },

@@ -36,6 +36,7 @@ module.exports = function(config) {
     "built/add-on/chrome/content/panels/test/fake-components.js",
     "built/add-on/chrome/content/shared/js/store.js",
     "built/add-on/chrome/content/shared/js/activeRoomStore.js",
+    "built/add-on/chrome/content/shared/js/participantStore.js",
     "built/add-on/chrome/content/shared/js/serverConnectionStore.js",
     "built/add-on/chrome/content/shared/js/remoteCursorStore.js",
     "built/add-on/chrome/content/shared/js/views.js",

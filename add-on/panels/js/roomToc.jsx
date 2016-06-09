@@ -35,12 +35,13 @@ loop.roomToc = (function(mozL10n) {
       });
 
       var dispatcher = new loop.Dispatcher();
+      let dataDriver = new loop.DataDriver({ dispatcher });
 
       var serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher, {});
 
       var roomStore = new loop.store.RoomStore(dispatcher, { constants });
 
-      var participantStore = new loop.store.ParticipantStore(dispatcher);
+      let participantStore = new loop.store.ParticipantStore(dispatcher, { dataDriver });
 
       loop.store.StoreMixin.register({
         participantStore,

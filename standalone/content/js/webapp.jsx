@@ -180,9 +180,7 @@ loop.webapp = (function(_, OT, mozL10n) {
       dispatcher: dispatcher,
       sdk: OT
     });
-    var dataDriver = new loop.DataDriver({
-      dispatcher: dispatcher
-    });
+    let dataDriver = new loop.DataDriver({ dispatcher });
 
     var activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, {
       sdkDriver: sdkDriver
@@ -201,7 +199,10 @@ loop.webapp = (function(_, OT, mozL10n) {
     var remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
       sdkDriver: sdkDriver
     });
-    var participantStore = new loop.store.ParticipantStore(dispatcher);
+    let participantStore = new loop.store.ParticipantStore(dispatcher, {
+      dataDriver,
+      updateParticipant: true
+    });
     var serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher, {});
 
     // XXX akita bug 1279042 - need to get displayname from username pref

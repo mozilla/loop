@@ -142,11 +142,31 @@ loop.shared.toc = (function(mozL10n) {
       participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired
     },
 
+    getInitialState() {
+      return this._getOnlineParticipants();
+    },
+
+    _getOnlineParticipants() {
+      return {
+        participants: this.props.participantStore.getOnlineParticipants()
+      };
+    },
+
+    componentWillMount() {
+      this.props.participantStore.on("change", () => {
+        this.setState(this._getOnlineParticipants());
+      }, this);
+    },
+
+    componentWillUnmount() {
+      this.props.participantStore.off("change", null, this);
+    },
+
     render: function() {
       return (
         <div className="room-active-users">
           {
-            this.props.participantStore.getOnlineParticipants().map(function(participant, index) {
+            this.state.participants.map(function(participant, index) {
               return (
                 <div className="room-user" data-name={participant.participantName} key={index}>
                   <span>{participant.participantName[0].toUpperCase()}</span>

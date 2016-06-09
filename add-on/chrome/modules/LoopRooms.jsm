@@ -1175,7 +1175,20 @@ this.LoopRooms = {
   },
 
   get: function(roomToken, callback) {
-    return LoopRoomsInternal.get(roomToken, callback);
+    return LoopRoomsInternal.get(roomToken, (error, room) => {
+      // XXX akita bug 1278849 Actually get the userId from the server.
+      const USER_ID_PREFNAME = "loop.bug1278849.userId";
+      let userId;
+      try {
+        userId = Services.prefs.getCharPref(USER_ID_PREFNAME);
+      }
+      catch (ex) {
+        userId = Math.random().toFixed(20).slice(2);
+        Services.prefs.setCharPref(USER_ID_PREFNAME, userId);
+      }
+      room.userId = userId;
+      callback(error, room);
+    });
   },
 
   create: function(options, callback) {

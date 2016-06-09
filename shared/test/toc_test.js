@@ -8,7 +8,7 @@ describe("loop.TableOfContents", () => {
   let { TestUtils } = React.addons;
 
   let sandbox;
-  let dispatcher, participantStore, now;
+  let dispatcher, fakeDataDriver, participantStore, now;
 
   beforeEach(() => {
     sandbox = LoopMochaUtils.createSandbox();
@@ -16,7 +16,14 @@ describe("loop.TableOfContents", () => {
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
 
-    participantStore = new loop.store.ParticipantStore(dispatcher);
+    fakeDataDriver = {
+      updateCurrentParticipant: sinon.stub(),
+      updateCurrentPresence: sinon.stub()
+    };
+
+    participantStore = new loop.store.ParticipantStore(dispatcher, {
+      dataDriver: fakeDataDriver
+    });
 
     now = Date.now();
     sandbox.stub(Date, "now", () => now);
@@ -68,6 +75,18 @@ describe("loop.TableOfContents", () => {
     it("should no render bubbles if there is no online users", () => {
       participant.isHere = false;
       mountTestComponent();
+      let activeParticipants = ReactDOM.findDOMNode(view).querySelectorAll(".room-user");
+      expect(activeParticipants.length).eql(0);
+    });
+
+    it("should update on participant store change", () => {
+      mountTestComponent();
+      participantStore.updatedPresence({
+        userId: "fakeID",
+        pingedAgo: 0,
+        isHere: false
+      });
+
       let activeParticipants = ReactDOM.findDOMNode(view).querySelectorAll(".room-user");
       expect(activeParticipants.length).eql(0);
     });

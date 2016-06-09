@@ -82,7 +82,8 @@ describe("loop.store.ServerConnectionStore", function() {
               roomContextUrls: undefined,
               participants: [],
               roomName: fakeRoomData.decryptedContext.roomName,
-              roomUrl: fakeRoomData.roomUrl
+              roomUrl: fakeRoomData.roomUrl,
+              userId: undefined
             }));
         });
       });
@@ -137,7 +138,8 @@ describe("loop.store.ServerConnectionStore", function() {
         sinon.assert.calledWithExactly(dispatcher.dispatch,
           new sharedActions.UpdateRoomInfo({
             roomInfoFailure: ROOM_INFO_FAILURES.NO_DATA,
-            roomUrl: "http://invalid"
+            roomUrl: "http://invalid",
+            userId: undefined
           }));
       });
     });
@@ -146,7 +148,8 @@ describe("loop.store.ServerConnectionStore", function() {
       it("should dispatch UpdateRoomInfo if mozLoop.rooms.get is successful", function() {
         var roomDetails = {
           roomName: "fakeName",
-          roomUrl: "http://invalid"
+          roomUrl: "http://invalid",
+          userId: undefined
         };
 
         requestStubs["Rooms:Get"].returns(roomDetails);
@@ -168,10 +171,12 @@ describe("loop.store.ServerConnectionStore", function() {
           context: {
             value: "fakeContext"
           },
-          roomUrl: "http://invalid"
+          roomUrl: "http://invalid",
+          userId: undefined
         };
         expectedDetails = {
-          roomUrl: "http://invalid"
+          roomUrl: "http://invalid",
+          userId: undefined
         };
 
         requestStubs["Rooms:Get"].returns(roomDetails);
@@ -265,7 +270,8 @@ describe("loop.store.ServerConnectionStore", function() {
 
         roomDetails = {
           roomName: "fakeName",
-          roomUrl: "http://invalid"
+          roomUrl: "http://invalid",
+          userId: undefined
         };
         requestStubs["Rooms:Get"].returns(roomDetails);
 

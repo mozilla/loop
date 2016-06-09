@@ -139,9 +139,7 @@ loop.sidebar = (function(mozL10n) {
         dispatcher: dispatcher,
         sdk: OT
       });
-      var dataDriver = new loop.DataDriver({
-        dispatcher: dispatcher
-      });
+      let dataDriver = new loop.DataDriver({ dispatcher });
 
       // expose for functional tests
       loop.sidebar._sdkDriver = sdkDriver;
@@ -152,6 +150,11 @@ loop.sidebar = (function(mozL10n) {
 
       var serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher, {});
 
+      let participantStore = new loop.store.ParticipantStore(dispatcher, {
+        dataDriver,
+        updateParticipant: true
+      });
+
       var textChatStore = new loop.store.TextChatStore(dispatcher, {
         dataDriver: dataDriver
       });
@@ -161,6 +164,7 @@ loop.sidebar = (function(mozL10n) {
 
       loop.store.StoreMixin.register({
         activeRoomStore: activeRoomStore,
+        participantStore,
         serverConnectionStore: serverConnectionStore,
         textChatStore: textChatStore
       });

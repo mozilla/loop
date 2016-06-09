@@ -115,7 +115,8 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
           participants: room.participants,
           roomContextUrls: room.decryptedContext.urls,
           roomName: room.decryptedContext.roomName,
-          roomUrl: room.roomUrl
+          roomUrl: room.roomUrl,
+          userId: room.userId
         }));
       }.bind(this));
     },
@@ -173,7 +174,8 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
             // regardless of success of failure. This is because failures of
             // crypto don't stop the user using the room, they just stop
             // us putting up the information.
-            roomUrl: result.roomUrl
+            roomUrl: result.roomUrl,
+            userId: result.userId
           });
 
           if (!result.context && !result.roomName) {

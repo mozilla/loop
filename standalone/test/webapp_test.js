@@ -109,7 +109,9 @@ describe("loop.webapp", function() {
       remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
         sdkDriver: sdk
       });
-      participantStore = new loop.store.ParticipantStore(dispatcher);
+      participantStore = new loop.store.ParticipantStore(dispatcher, {
+        dataDriver: {}
+      });
     });
 
     it("should display the UnsupportedDeviceView for `unsupportedDevice` window type",

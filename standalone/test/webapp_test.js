@@ -81,6 +81,7 @@ describe("loop.webapp", function() {
     var sdk,
         standaloneAppStore,
         activeRoomStore,
+        pageStore,
         participantStore,
         snackbarStore;
 
@@ -91,6 +92,7 @@ describe("loop.webapp", function() {
             activeRoomStore: activeRoomStore,
             cursorStore: remoteCursorStore,
             dispatcher: dispatcher,
+            pageStore,
             participantStore: participantStore,
             snackbarStore: snackbarStore,
             standaloneAppStore: standaloneAppStore
@@ -110,6 +112,9 @@ describe("loop.webapp", function() {
       });
       remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
         sdkDriver: sdk
+      });
+      pageStore = new loop.store.PageStore(dispatcher, {
+        dataDriver: {}
       });
       participantStore = new loop.store.ParticipantStore(dispatcher, {
         dataDriver: {}

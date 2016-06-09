@@ -590,6 +590,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
       isFirefox: React.PropTypes.bool.isRequired,
       // The poster URLs are for UI-showcase testing and development
       localPosterUrl: React.PropTypes.string,
+      pageStore: React.PropTypes.instanceOf(loop.store.PageStore).isRequired,
       participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
       remotePosterUrl: React.PropTypes.string,
       roomState: React.PropTypes.string,
@@ -826,6 +827,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
           <sharedToc.TableOfContentView
             dispatcher={this.props.dispatcher}
             isScreenShareActive={displayScreenShare}
+            pageStore={this.props.pageStore}
             participantStore={this.props.participantStore}
             snackbarStore={this.props.snackbarStore} />
           <sharedViews.ScreenShareView
@@ -959,6 +961,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
       cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isFirefox: React.PropTypes.bool.isRequired,
+      pageStore: React.PropTypes.instanceOf(loop.store.PageStore).isRequired,
       participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
       snackbarStore: React.PropTypes.instanceOf(loop.store.SnackbarStore).isRequired
     },
@@ -987,6 +990,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
           cursorStore={this.props.cursorStore}
           dispatcher={this.props.dispatcher}
           isFirefox={this.props.isFirefox}
+          pageStore={this.props.pageStore}
           participantStore={this.props.participantStore}
           snackbarStore={this.props.snackbarStore} />
       );

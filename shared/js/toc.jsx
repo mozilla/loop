@@ -26,46 +26,29 @@ loop.shared.toc = (function(mozL10n) {
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isScreenShareActive: React.PropTypes.bool.isRequired,
+      pageStore: React.PropTypes.instanceOf(loop.store.PageStore).isRequired,
       participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
       snackbarStore: React.PropTypes.instanceOf(loop.store.SnackbarStore).isRequired
     },
 
     getInitialState: function() {
-      return this.getStoreState();
+      return _.extend(this.getStoreState(), this._getPages());
     },
 
-    componentWillMount: function() {
-      this.onStoreChange(this.getStoreState());
+    _getPages: function() {
+      return {
+        pages: this.props.pageStore.getStoreState("pages")
+      };
     },
 
-    componentWillUpdate: function(nextProps, nextState) {
-      this.onStoreChange(nextState);
+    componentWillMount() {
+      this.props.pageStore.on("change", () => {
+        this.setState(this._getPages());
+      }, this);
     },
 
-    onStoreChange: function(nextState) {
-      // We haven't decrypted data yet
-      if (!nextState.roomContextUrls || nextState.tiles) {
-        return;
-      }
-
-      this.setState({
-        tiles: [nextState.roomContextUrls[0]]
-      });
-    },
-
-    /**
-     * Adds a new tile to the ToC
-     */
-    addTile: function(metadata) {
-      var tiles = this.state.tiles;
-      tiles.push({
-        location: metadata.url,
-        description: metadata.description
-      });
-
-      this.setState({
-        tiles: tiles
-      });
+    componentWillUnmount() {
+      this.props.pageStore.off("change", null, this);
     },
 
     render: function() {
@@ -77,7 +60,6 @@ loop.shared.toc = (function(mozL10n) {
       return (
         <div className={cssClasses}>
           <RoomInfoBarView
-            addUrlTile={this.addTile}
             dispatcher={this.props.dispatcher}
             isDesktop={loop.shared.utils.isDesktop()}
             participantStore={this.props.participantStore}
@@ -85,7 +67,7 @@ loop.shared.toc = (function(mozL10n) {
               : "BUG: NO NAME SPECIFIED"}
             roomToken={this.state.roomToken} />
           <RoomContentView
-            tiles={this.state.tiles} />
+            pages={this.state.pages} />
           <SnackbarView
             snackbarStore={this.props.snackbarStore} />
         </div>
@@ -95,7 +77,6 @@ loop.shared.toc = (function(mozL10n) {
 
   var RoomInfoBarView = React.createClass({
     propTypes: {
-      addUrlTile: React.PropTypes.func.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isDesktop: React.PropTypes.bool.isRequired,
       participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
@@ -136,7 +117,6 @@ loop.shared.toc = (function(mozL10n) {
           <RoomPresenceView
             participantStore={this.props.participantStore} />
           <RoomActionsView
-            addUrlTile={this.props.addUrlTile}
             dispatcher={this.props.dispatcher} />
         </div>
       );
@@ -187,7 +167,6 @@ loop.shared.toc = (function(mozL10n) {
 
   var RoomActionsView = React.createClass({
     propTypes: {
-      addUrlTile: React.PropTypes.func.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
     },
 
@@ -206,7 +185,7 @@ loop.shared.toc = (function(mozL10n) {
 
     handleAddUrlClick: function(metadata) {
       this.toggleAddUrlPanel();
-      this.props.addUrlTile(metadata);
+      this.props.dispatcher.dispatch(new sharedActions.AddPage(metadata));
     },
 
     render: function() {
@@ -269,12 +248,12 @@ loop.shared.toc = (function(mozL10n) {
 
   var RoomContentView = React.createClass({
     propTypes: {
-      tiles: React.PropTypes.array
+      pages: React.PropTypes.array
     },
 
     getDefaultProps: function() {
       return {
-        tiles: []
+        pages: []
       };
     },
 
@@ -282,11 +261,11 @@ loop.shared.toc = (function(mozL10n) {
       return (
         <div className="room-toc">
           {
-            this.props.tiles.map(function(tile, index) {
+            this.props.pages.map(function(page, index) {
               return (
-                <TileView
+                <PageView
                   key={index}
-                  tile={tile} />
+                  page={page} />
               );
             }, this)
           }
@@ -295,9 +274,9 @@ loop.shared.toc = (function(mozL10n) {
     }
   });
 
-  var TileView = React.createClass({
+  var PageView = React.createClass({
     propTypes: {
-      tile: React.PropTypes.object.isRequired
+      page: React.PropTypes.object.isRequired
     },
 
     // XXX akita: add tile screenshot
@@ -305,20 +284,20 @@ loop.shared.toc = (function(mozL10n) {
     render: function() {
       return (
         <div className="toc-tile">
-          <div className="room-user" data-name="Pau Masiá">
-            <span>{'P'}</span>
+          <div className="room-user" data-name={this.props.page.userName}>
+            <span>{this.props.page.userName[0].toUpperCase()}</span>
           </div>
           <img className="tile-screenshot" src="" />
           <div className="tile-info">
             <a
               className="tile-name"
-              href={this.props.tile.location}
+              href={this.props.page.url}
               rel="noopener noreferrer"
               target="_blank"
-              title={this.props.tile.description}>
-                {this.props.tile.description}
+              title={this.props.page.description}>
+                {this.props.page.title}
             </a>
-            <h3 className="tile-url">{this.props.tile.location}</h3>
+            <h3 className="tile-url">{this.props.page.url}</h3>
           </div>
         </div>
       );

@@ -828,7 +828,7 @@ const API_KEY = "b0bbaba8774f4134b503644bfac12acd";
 
         let extracted = JSON.parse(request.responseText);
         result.url = extracted.provider_url;
-        result.description = extracted.description;
+        result.description = extracted.description || "";
         result.title = extracted.title;
         result.images = extracted.images;
         result.favicon_url = extracted.favicon_url;

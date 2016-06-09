@@ -109,6 +109,7 @@ loop.webapp = (function(_, OT, mozL10n) {
       activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
       cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      pageStore: React.PropTypes.instanceOf(loop.store.PageStore).isRequired,
       participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
       snackbarStore: React.PropTypes.instanceOf(loop.store.SnackbarStore).isRequired,
       standaloneAppStore: React.PropTypes.instanceOf(
@@ -148,6 +149,7 @@ loop.webapp = (function(_, OT, mozL10n) {
               cursorStore={this.props.cursorStore}
               dispatcher={this.props.dispatcher}
               isFirefox={this.state.isFirefox}
+              pageStore={this.props.pageStore}
               participantStore={this.props.participantStore}
               snackbarStore={this.props.snackbarStore} />
           );
@@ -207,6 +209,7 @@ loop.webapp = (function(_, OT, mozL10n) {
     });
     var serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher, {});
     let snackbarStore = new loop.store.SnackbarStore(dispatcher);
+    let pageStore = new loop.store.PageStore(dispatcher, { dataDriver });
 
     // XXX akita bug 1279042 - need to get displayname from username pref
     // rather than defaulting
@@ -234,6 +237,7 @@ loop.webapp = (function(_, OT, mozL10n) {
       activeRoomStore={activeRoomStore}
       cursorStore={remoteCursorStore}
       dispatcher={dispatcher}
+      pageStore={pageStore}
       participantStore={participantStore}
       snackbarStore={snackbarStore}
       standaloneAppStore={standaloneAppStore} />, document.querySelector("#main"));

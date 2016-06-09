@@ -159,6 +159,7 @@ loop.sidebar = (function(mozL10n) {
         dataDriver: dataDriver
       });
 
+      // XXX akita bug 1279042 Use user set name instead of fake name.
       dispatcher.dispatch(
         new sharedActions.SetOwnDisplayName({ displayName: "Room Owner" }));
 

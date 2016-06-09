@@ -45,8 +45,15 @@ loop.roomToc = (function(mozL10n) {
 
       let snackbarStore = new loop.store.SnackbarStore(dispatcher);
 
+      let pageStore = new loop.store.PageStore(dispatcher, { dataDriver });
+
+      // XXX akita bug 1279042 Use user set name instead of fake name.
+      dispatcher.dispatch(
+        new sharedActions.SetOwnDisplayName({ displayName: "Room Owner" }));
+
       loop.store.StoreMixin.register({
         participantStore,
+        pageStore,
         serverConnectionStore,
         roomStore
       });
@@ -58,6 +65,7 @@ loop.roomToc = (function(mozL10n) {
       ReactDOM.render(<tocViews.TableOfContentView
                         dispatcher={dispatcher}
                         isScreenShareActive={false}
+                        pageStore={pageStore}
                         participantStore={participantStore}
                         snackbarStore={snackbarStore} />, document.querySelector("#main"));
 

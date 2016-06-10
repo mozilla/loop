@@ -163,4 +163,37 @@ describe("loop.TableOfContents", () => {
         }));
     });
   });
+
+  describe("ToC.PageView", () => {
+    let view;
+
+    function mountTestComponent() {
+      return TestUtils.renderIntoDocument(
+        React.createElement(loop.shared.toc.PageView, {
+          dispatcher: dispatcher,
+          page: {
+            id: "fakeId",
+            title: "fakeTitle",
+            thumbnail_img: "fakeImg",
+            url: "fakeUrl",
+            userName: "Cool name"
+          }
+        }));
+    }
+
+    beforeEach(() => {
+      view = mountTestComponent();
+    });
+
+    it("should dispatch a `DeletePage` action when clicking the delete button", () => {
+      var button = ReactDOM.findDOMNode(view).querySelector("button.tile-delete-btn");
+      TestUtils.Simulate.click(button);
+
+      sinon.assert.called(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new sharedActions.DeletePage({
+          pageId: "fakeId"
+        }));
+    });
+  });
 });

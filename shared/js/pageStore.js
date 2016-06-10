@@ -5,8 +5,10 @@
 var loop = loop || {};
 loop.store = loop.store || {};
 
-loop.store.PageStore = function() {
+loop.store.PageStore = function(mozL10n) {
   "use strict";
+
+  var sharedActions = loop.shared.actions;
 
   /**
    * Page store.
@@ -85,14 +87,21 @@ loop.store.PageStore = function() {
     },
 
     /**
-     * Handle DeletedPage action by updating the stroe state.
+     * Handle DeletedPage action by updating the store state.
      */
     deletedPage(actionData) {
       let pages = this._storeState.pages;
+      let pagesLength = pages.length;
       pages = pages.filter(page => page.id !== actionData.pageId);
       this.setStoreState({ pages });
+
+      if (pagesLength !== pages.length) {
+        this.dispatchAction(new sharedActions.ShowSnackbar({
+          label: mozL10n.get("snackbar_page_deleted")
+        }));
+      }
     }
   });
 
   return PageStore;
-}();
+}(navigator.mozL10n || document.mozL10n);

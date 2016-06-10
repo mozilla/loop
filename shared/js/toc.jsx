@@ -67,6 +67,7 @@ loop.shared.toc = (function(mozL10n) {
               : "BUG: NO NAME SPECIFIED"}
             roomToken={this.state.roomToken} />
           <RoomContentView
+            dispatcher={this.props.dispatcher}
             pages={this.state.pages} />
           <SnackbarView
             snackbarStore={this.props.snackbarStore} />
@@ -257,6 +258,7 @@ loop.shared.toc = (function(mozL10n) {
 
   var RoomContentView = React.createClass({
     propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       pages: React.PropTypes.array
     },
 
@@ -273,6 +275,7 @@ loop.shared.toc = (function(mozL10n) {
             this.props.pages.map(function(page, index) {
               return (
                 <PageView
+                  dispatcher={this.props.dispatcher}
                   key={index}
                   page={page} />
               );
@@ -285,12 +288,17 @@ loop.shared.toc = (function(mozL10n) {
 
   var PageView = React.createClass({
     propTypes: {
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       page: React.PropTypes.object.isRequired
     },
 
+    /**
+     * Removes the page record from Firebase
+     */
     deleteTile: function() {
-      // XXX akita delete tile from firebase
-      console.info("Tile should be deleted from Firebase at this point");
+      this.props.dispatcher.dispatch(new sharedActions.DeletePage({
+        pageId: this.props.page.id
+      }));
     },
 
     // XXX akita: add tile screenshot
@@ -602,8 +610,9 @@ loop.shared.toc = (function(mozL10n) {
 
   return {
     AddUrlPanelView: AddUrlPanelView,
-    SidebarView: SidebarView,
+    PageView: PageView,
     RoomPresenceView: RoomPresenceView,
+    SidebarView: SidebarView,
     TableOfContentView: TableOfContentView
   };
 })(navigator.mozL10n || document.mozL10n);

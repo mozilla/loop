@@ -22,6 +22,10 @@ describe("loop.store.PageStore", () => {
     store = new loop.store.PageStore(dispatcher, {
       dataDriver: fakeDataDriver
     });
+
+    sandbox.stub(document.mozL10n ? document.mozL10n : navigator.mozL10n, "get", function(x) {
+      return x;
+    });
   });
 
   afterEach(() => {
@@ -119,6 +123,30 @@ describe("loop.store.PageStore", () => {
       store.deletedPage(action);
 
       expect(store.getStoreState("pages")).to.have.lengthOf(0);
+    });
+
+    it("should dispatch a `ShowSnackbar` action", () => {
+      let action = new actions.DeletedPage({
+        deletedTime: Date.now(),
+        pageId: "fakeId"
+      });
+      store.deletedPage(action);
+
+      sinon.assert.called(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new actions.ShowSnackbar({
+          label: "snackbar_page_deleted"
+        }));
+    });
+
+    it("should not dispatch a `ShowSnackbar` action on loading Firebase", () => {
+      let action = new actions.DeletedPage({
+        deletedTime: Date.now(),
+        pageId: "oldRemovedId"
+      });
+      store.deletedPage(action);
+
+      sinon.assert.notCalled(dispatcher.dispatch);
     });
   });
 });

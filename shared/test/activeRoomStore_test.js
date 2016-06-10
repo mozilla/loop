@@ -731,28 +731,6 @@ describe("loop.store.ActiveRoomStore", function() {
         actionData);
     });
 
-    it("should pass 'sendTwoWayMediaTelemetry' as true to connectSession if " +
-       "store._isDesktop is true", function() {
-      store._isDesktop = true;
-
-      store.joinedRoom(new sharedActions.JoinedRoom(fakeJoinedData));
-
-      sinon.assert.calledOnce(fakeSdkDriver.connectSession);
-      sinon.assert.calledWithMatch(fakeSdkDriver.connectSession,
-        sinon.match.has("sendTwoWayMediaTelemetry", true));
-    });
-
-    it("should pass 'sendTwoWayTelemetry' as false to connectionSession if " +
-       "store._isDesktop is false", function() {
-      store._isDesktop = false;
-
-      store.joinedRoom(new sharedActions.JoinedRoom(fakeJoinedData));
-
-      sinon.assert.calledOnce(fakeSdkDriver.connectSession);
-      sinon.assert.calledWithMatch(fakeSdkDriver.connectSession,
-        sinon.match.has("sendTwoWayMediaTelemetry", false));
-    });
-
     // XXX akita Will be fixed in Bug 1268826
     it.skip("should call LoopAPI.AddConversationContext", function() {
       var actionData = new sharedActions.JoinedRoom(fakeJoinedData);
@@ -1740,21 +1718,6 @@ describe("loop.store.ActiveRoomStore", function() {
       }));
 
       assertWeDidNothing();
-    });
-
-    it("should ping telemetry when a chat message arrived or is to be sent", function() {
-      store._handleTextChatMessage(new sharedActions.ReceivedTextChatMessage({
-        contentType: CHAT_CONTENT_TYPES.TEXT,
-        message: "Hello!",
-        receivedTimestamp: "1970-01-01T00:00:00.000Z"
-      }));
-
-      sinon.assert.calledOnce(requestStubs.TelemetryAddValue);
-      sinon.assert.calledWithExactly(requestStubs.TelemetryAddValue,
-        "LOOP_ROOM_SESSION_WITHCHAT", 1);
-      expect(store.getStoreState().chatMessageExchanged).eql(true);
-      expect(dispatcher._eventData.hasOwnProperty("receivedTextChatMessage")).eql(false);
-      expect(dispatcher._eventData.hasOwnProperty("sendTextChatMessage")).eql(false);
     });
   });
 

@@ -24,7 +24,6 @@ pref("loop.copy.ticket", -1);
 pref("loop.debug.loglevel", "Error");
 pref("loop.debug.dispatcher", false);
 pref("loop.debug.sdk", false);
-pref("loop.debug.twoWayMediaTelemetry", false);
 pref("loop.feedback.dateLastSeenSec", 0);
 pref("loop.feedback.periodSec", 15770000); // 6 months.
 pref("loop.feedback.formURL", "https://www.surveygizmo.com/s3/2651383/Firefox-Hello-Product-Survey-II?version=%APP_VERSION%");

@@ -479,9 +479,6 @@ loop.store.ActiveRoomStore = (function() {
         roomState: ROOM_STATES.JOINED
       });
 
-      // Only send media telemetry on one side of the call: the desktop side.
-      actionData.sendTwoWayMediaTelemetry = this._isDesktop;
-
       this._sdkDriver.connectSession(actionData);
 
       loop.request("AddConversationContext", this._storeState.windowId,
@@ -969,8 +966,6 @@ loop.store.ActiveRoomStore = (function() {
         "receivedTextChatMessage",
         "sendTextChatMessage"
       ]);
-      // Ping telemetry of this session with successful message(s) exchange.
-      loop.request("TelemetryAddValue", "LOOP_ROOM_SESSION_WITHCHAT", 1);
     },
 
     /**

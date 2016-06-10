@@ -346,10 +346,7 @@ loop.store = loop.store || {};
         console.error("No URL sharing type bucket found for '" + from + "'");
         return;
       }
-      loop.requestMulti(
-        ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
-        ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
-      );
+      loop.request("TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE);
     },
 
     /**
@@ -371,7 +368,6 @@ loop.store = loop.store || {};
       }
       loop.requestMulti(
         ["NotifyUITour", "Loop:RoomURLEmailed"],
-        ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
         ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
       );
     },
@@ -409,10 +405,7 @@ loop.store = loop.store || {};
         console.error("No URL sharing type bucket found for '" + from + "'");
         return;
       }
-      loop.requestMulti(
-        ["TelemetryAddValue", "LOOP_SHARING_ROOM_URL", bucket],
-        ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE]
-      );
+      loop.request("TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_SHARE);
     },
 
     /**
@@ -426,12 +419,7 @@ loop.store = loop.store || {};
         if (isError) {
           this.dispatchAction(new sharedActions.DeleteRoomError({ error: result }));
         }
-        var buckets = this._constants.ROOM_DELETE;
-        loop.requestMulti(
-          ["TelemetryAddValue", "LOOP_ROOM_DELETE", buckets[isError ?
-            "DELETE_FAIL" : "DELETE_SUCCESS"]],
-          ["TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_DELETE]
-        );
+        loop.request("TelemetryAddValue", "LOOP_ACTIVITY_COUNTER", this._constants.LOOP_MAU_TYPE.ROOM_DELETE);
       }.bind(this));
     },
 

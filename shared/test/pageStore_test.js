@@ -56,12 +56,8 @@ describe("loop.store.PageStore", () => {
 
     it("should include the user name in page data", () => {
       let metadata = {
-        description: "fakeDescription",
-        favicon_url: "fakeFavicon",
-        images: [{
-          url: "fakeUrl"
-        }],
         title: "fakeTitle",
+        thumbnail_img: "fakeThumbnail",
         url: "fakeUrl"
       };
       let action = new actions.AddPage(metadata);
@@ -76,13 +72,9 @@ describe("loop.store.PageStore", () => {
   describe("AddedPage", () => {
     it("should add a page to the store", () => {
       let action = new actions.AddedPage({
-        description: "fakeDescription",
-        favicon_url: "fakeFavicon",
-        images: [{
-          url: "fakeUrl"
-        }],
         pageId: "fakeId",
         title: "fakeTitle",
+        thumbnail_img: "fakeThumbnail",
         url: "fakeUrl",
         userName: "fake user"
       });
@@ -108,13 +100,9 @@ describe("loop.store.PageStore", () => {
     beforeEach(() => {
       let pages = store.getStoreState("pages");
       pages.push({
-        description: "fakeDescription",
-        favicon_url: "fakeFavicon",
         id: "fakeId",
-        images: [{
-          url: "fakeUrl"
-        }],
         title: "fakeTitle",
+        thumbnail_img: "fakeThumbnail",
         url: "fakeUrl",
         userName: "fake user"
       });

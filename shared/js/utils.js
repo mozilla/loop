@@ -21,8 +21,6 @@ if (inChrome) {
   }
 }
 
-const API_KEY = "b0bbaba8774f4134b503644bfac12acd";
-
 (function() {
   "use strict";
 
@@ -819,19 +817,23 @@ const API_KEY = "b0bbaba8774f4134b503644bfac12acd";
       let result = { url };
       let request = new XMLHttpRequest();
       request.open("GET",
-        `https://api.embedly.com/1/extract?url=${encodeURIComponent(url)}&key=${encodeURIComponent(API_KEY)}`);
+        "https://www.googleapis.com/pagespeedonline/v1/runPagespeed?screenshot=true&strategy=desktop&url=" + encodeURIComponent(url));  // &key=${encodeURIComponent(API_KEY)}
       request.onload = () => {
         if (request.status !== 200) {
           reject(request);
           return;
         }
-
-        let extracted = JSON.parse(request.responseText);
-        result.url = extracted.provider_url;
-        result.description = extracted.description || "";
+        let extracted = JSON.parse(request.response);
+        result.url = extracted.id;
         result.title = extracted.title;
-        result.images = extracted.images;
-        result.favicon_url = extracted.favicon_url;
+
+        var screenshot = extracted.screenshot;
+        var src = "data:" + screenshot.mime_type + ";base64,";
+        var base64 = screenshot.data;
+        base64 = base64.replace(/_/g, "/");
+        base64 = base64.replace(/\-/g, "+");
+        src += base64;
+        result.thumbnail_img = src;
         resolve(result);
       };
 

@@ -49,12 +49,11 @@ loop.store.PageStore = function() {
     /**
      * Handle AddPage action by saving the specific page.
      */
+     // XXX akita: Update data saved into Firebase according to the action `AddPage`
     addPage(actionData) {
       this._dataDriver.addPage({
-        description: actionData.description,
-        favicon_url: actionData.favicon_url,
-        images: actionData.images,
         title: actionData.title,
+        thumbnail_img: actionData.thumbnail_img,
         url: actionData.url,
         userName: this._currentUserName
       });
@@ -65,11 +64,9 @@ loop.store.PageStore = function() {
      */
     addedPage(actionData) {
       let page = {
-        description: actionData.description,
-        favicon_url: actionData.favicon_url,
         id: actionData.pageId,
-        images: actionData.images,
         title: actionData.title,
+        thumbnail_img: actionData.thumbnail_img,
         url: actionData.url,
         userName: actionData.userName
       };

@@ -160,17 +160,17 @@ loop.shared.actions = (function() {
     /**
      * Used to add a page to the current room
      */
+     // XXX akita: Update actions when metadata extraction bug is landed (Bug 1273497)
     AddPage: Action.define("addPage", {
-      description: String,
-      favicon_url: String,
-      images: Object,
       title: String,
+      thumbnail_img: String,
       url: String
     }),
 
     /**
      * Notifies that a tile has been received from the other peer.
      */
+    // XXX akita rename for readability
     AddedPage: Action.define("addedPage", {
       pageId: String,
       title: String,
@@ -188,6 +188,7 @@ loop.shared.actions = (function() {
     /**
     * Notifies that a tile has been removed.
      */
+    // XXX akita rename for readability
     DeletedPage: Action.define("deletedPage", {
       deletedTime: Number,
       pageId: String

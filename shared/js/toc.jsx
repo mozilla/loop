@@ -50,21 +50,6 @@ loop.shared.toc = (function(mozL10n) {
     componentWillUnmount() {
       this.props.pageStore.off("change", null, this);
     },
-    /**
-     * Adds a new tile to the ToC
-     */
-    addTile: function(metadata) {
-      var tiles = this.state.tiles;
-      tiles.push({
-        location: metadata.url,
-        description: metadata.description,
-        thumbnail_img: metadata.thumbnail_img
-      });
-
-      this.setState({
-        tiles: tiles
-      });
-    },
 
     render: function() {
       var cssClasses = classNames({

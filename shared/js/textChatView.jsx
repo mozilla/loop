@@ -90,15 +90,6 @@ loop.shared.views.chat = (function(mozL10n) {
         );
       }
 
-      // Only render messages after they've come back from the server to avoid
-      // dups in a simple way for early product standup.
-      //
-      // XXX akita Filed bug 1279054 to unregress the fact that all speech bubbles
-      // are now blue on and on the left side.
-      if (this.props.type === CHAT_MESSAGE_TYPES.SENT) {
-        return null;
-      }
-
       var linkClickHandler;
       if (loop.shared.utils.isDesktop()) {
         linkClickHandler = function(url) {

@@ -123,6 +123,7 @@ loop.store.TextChatStore = (function() {
       } else {
         newList.push(message);
       }
+
       this.setStoreState({ messageList: newList });
 
       // Notify MozLoopService if appropriate that a message has been appended
@@ -151,7 +152,17 @@ loop.store.TextChatStore = (function() {
         return;
       }
 
-      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.RECEIVED, actionData);
+      var sender = CHAT_MESSAGE_TYPES.RECEIVED;
+
+      // XXX bug 1279792
+      // comparing displayedName only works if user does not change it
+      // We need to check for userId instead of name
+      if (actionData.contentType === CHAT_CONTENT_TYPES.TEXT &&
+          actionData.displayName === this.getStoreState("displayName")) {
+        sender = CHAT_MESSAGE_TYPES.SENT;
+      }
+
+      this._appendTextChatMessage(sender, actionData);
     },
 
     /**
@@ -170,8 +181,15 @@ loop.store.TextChatStore = (function() {
           Object.assign(messageToSend, { displayName: displayName }); // XXX no tst cov
         }
       }
-
-      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.SENT, messageToSend);
+      // XXX bug 1279792
+      // Need to save messages in Firebase with a userId, so we can
+      // compare the sender with current user when we load them.
+      // Right now all saved chat messages have a displayedName that might be
+      // changed during a session, so the check does not work
+      // For this, we only add to the chat what we receive (sent are duplicated)
+      if (actionData.contentType !== CHAT_CONTENT_TYPES.TEXT) {
+        this._appendTextChatMessage(CHAT_MESSAGE_TYPES.SENT, messageToSend);
+      }
       this._dataDriver.sendTextChatMessage(messageToSend);
     },
 

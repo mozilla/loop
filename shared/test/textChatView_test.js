@@ -101,14 +101,27 @@ describe("loop.shared.views.TextChatView", function() {
       store.setStoreState({ textChatEnabled: true });
     });
 
-    it("should render message entries when message are received but not sent", function() {
+    it("should render message entries for received messages", function() {
       view = mountTestComponent({
         messageList: [{
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
           receivedTimestamp: "2015-06-25T17:53:55.357Z"
-        }, {
+        }]
+      });
+
+      node = ReactDOM.findDOMNode(view);
+      expect(node).to.not.eql(null);
+
+      var entries = node.querySelectorAll(".text-chat-entry");
+      expect(entries.length).to.eql(1);
+      expect(entries[0].classList.contains("received")).to.eql(true);
+    });
+
+    it("should render message entries for sent messages", function() {
+      view = mountTestComponent({
+        messageList: [{
           type: CHAT_MESSAGE_TYPES.SENT,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Is it me you're looking for?",
@@ -121,7 +134,7 @@ describe("loop.shared.views.TextChatView", function() {
 
       var entries = node.querySelectorAll(".text-chat-entry");
       expect(entries.length).to.eql(1);
-      expect(entries[0].classList.contains("received")).to.eql(true);
+      expect(entries[0].classList.contains("sent")).to.eql(true);
     });
 
     it("should play a sound when a message is received", function() {
@@ -513,10 +526,9 @@ describe("loop.shared.views.TextChatView", function() {
       expect(ReactDOM.findDOMNode(view).classList.contains("text-chat-entries-empty")).eql(true);
     });
 
-    it("should not add an empty class when the entries list is has items", function() {
+    it("should not add an empty class when the entries list has items", function() {
       view = mountTestComponent();
-
-      store.sendTextChatMessage({
+      store.receivedTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "Hello!",
         sentTimestamp: "1970-01-01T00:02:00.000Z",
@@ -554,13 +566,14 @@ describe("loop.shared.views.TextChatView", function() {
       expect(entries[1].classList.contains("received")).to.eql(true);
     });
 
-    // XXX akita need to test against userIds since SENT messages are no
-    // longer rendered
-    it.skip("should add `sent` CSS class selector to msg of type SENT", function() {
+    it("should add `sent` CSS class selector to msg received from own self",
+      function() {
       var node = ReactDOM.findDOMNode(mountTestComponent());
+      store.setStoreState({ "displayName": "Myself" });
 
-      store.sendTextChatMessage({
+      store.receivedTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
+        displayName: "Myself",
         message: "Foo",
         sentTimestamp: "2015-06-25T17:53:55.357Z"
       });
@@ -568,12 +581,14 @@ describe("loop.shared.views.TextChatView", function() {
       expect(node.querySelector(".sent")).to.not.eql(null);
     });
 
-    it("should add `received` CSS class selector to msg of type RECEIVED",
+    it("should add `received` CSS class selector to msg received from other users",
       function() {
         var node = ReactDOM.findDOMNode(mountTestComponent());
+        store.setStoreState({ "displayName": "Myself" });
 
         store.receivedTextChatMessage({
           contentType: CHAT_CONTENT_TYPES.TEXT,
+          displayName: "Other user",
           message: "Foo",
           sentTimestamp: "1970-01-01T00:03:00.000Z",
           receivedTimestamp: "1970-01-01T00:03:00.000Z"
@@ -721,9 +736,11 @@ describe("loop.shared.views.TextChatView", function() {
 
     it("should show a placeholder when no messages have been sent", function() {
       view = mountTestComponent();
+      store.setStoreState({ "displayName": "Myself" });
 
       store.receivedTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
+        displayName: "Other user",
         message: "Foo",
         sentTimestamp: "1970-01-01T00:03:00.000Z",
         receivedTimestamp: "1970-01-01T00:03:00.000Z"
@@ -736,9 +753,11 @@ describe("loop.shared.views.TextChatView", function() {
 
     it("should not show a placeholder when messages have been sent", function() {
       view = mountTestComponent();
+      store.setStoreState({ "displayName": "Myself" });
 
-      store.sendTextChatMessage({
+      store.receivedTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
+        displayName: "Myself",
         message: "Foo",
         sentTimestamp: "2015-06-25T17:53:55.357Z"
       });

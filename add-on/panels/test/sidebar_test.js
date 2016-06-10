@@ -8,7 +8,7 @@ describe("loop.sidebar", function() {
   var expect = chai.expect;
   var TestUtils = React.addons.TestUtils;
   var fakeWindow, sandbox, setLoopPrefStub, dispatcher, requestStubs,
-    activeRoomStore, textChatStore;
+    activeRoomStore, remoteCursorStore, textChatStore;
   var ROOM_STATES = loop.store.ROOM_STATES;
 
   beforeEach(function() {
@@ -85,6 +85,10 @@ describe("loop.sidebar", function() {
 
     dispatcher = new loop.Dispatcher();
     sinon.stub(dispatcher, "dispatch");
+
+    remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+      sdkDriver: {}
+    });
   });
 
   afterEach(function() {
@@ -156,11 +160,12 @@ describe("loop.sidebar", function() {
   });
 
   describe("SidebarControllerView", function() {
-    var ccView;
+    var ccView, addRemoteCursorStub, clickRemoteCursorStub;
 
     function mountTestComponent() {
       return TestUtils.renderIntoDocument(
         React.createElement(loop.sidebar.SidebarControllerView, {
+          cursorStore: remoteCursorStore,
           dispatcher: dispatcher
         }));
     }
@@ -178,6 +183,13 @@ describe("loop.sidebar", function() {
       loop.store.StoreMixin.register({
         activeRoomStore: activeRoomStore,
         textChatStore: textChatStore
+      });
+
+      addRemoteCursorStub = sandbox.stub();
+      clickRemoteCursorStub = sandbox.stub();
+      LoopMochaUtils.stubLoopRequest({
+        AddRemoteCursorOverlay: addRemoteCursorStub,
+        ClickRemoteCursor: clickRemoteCursorStub
       });
     });
 
@@ -202,6 +214,62 @@ describe("loop.sidebar", function() {
         loop.sidebar.DesktopSidebarView);
 
       expect(desktopSidebarView).to.not.eql(null);
+    });
+
+    it("should request AddRemoteCursorOverlay when cursor position changes", function() {
+      mountTestComponent();
+
+      remoteCursorStore.setStoreState({
+        "remoteCursorPosition": {
+          "ratioX": 10,
+          "ratioY": 10
+        }
+      });
+
+      sinon.assert.calledOnce(addRemoteCursorStub);
+    });
+
+    it("should NOT request AddRemoteCursorOverlay when cursor position DOES NOT changes", function() {
+      mountTestComponent();
+
+      remoteCursorStore.setStoreState({
+        "realVideoSize": {
+          "height": 400,
+          "width": 600
+        }
+      });
+
+      sinon.assert.notCalled(addRemoteCursorStub);
+    });
+
+    it("should request ClickRemoteCursor when click event detected", function() {
+      mountTestComponent();
+
+      remoteCursorStore.setStoreState({
+        "remoteCursorClick": true
+      });
+
+      sinon.assert.calledOnce(clickRemoteCursorStub);
+    });
+
+    it("should reset cursor click to false when click event detected", function() {
+      mountTestComponent();
+
+      remoteCursorStore.setStoreState({
+        "remoteCursorClick": true
+      });
+
+      expect(remoteCursorStore.getStoreState().remoteCursorClick).eql(false);
+    });
+
+    it("should NOT request ClickRemoteCursor when reset click on store", function() {
+      mountTestComponent();
+
+      remoteCursorStore.setStoreState({
+        "remoteCursorClick": false
+      });
+
+      sinon.assert.notCalled(clickRemoteCursorStub);
     });
   });
 

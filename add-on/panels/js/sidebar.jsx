@@ -12,10 +12,41 @@ loop.sidebar = (function(mozL10n) {
   var sharedUtils = loop.shared.utils;
 
   var SidebarControllerView = React.createClass({
-    mixins: [loop.store.StoreMixin("activeRoomStore")],
+    mixins: [
+      Backbone.Events,
+      loop.store.StoreMixin("activeRoomStore")
+    ],
 
     propTypes: {
+      cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
+    },
+
+    componentWillMount: function() {
+      this.listenTo(this.props.cursorStore, "change:remoteCursorPosition",
+                    this._onRemoteCursorPositionChange);
+      this.listenTo(this.props.cursorStore, "change:remoteCursorClick",
+                    this._onRemoteCursorClick);
+    },
+
+    _onRemoteCursorPositionChange: function() {
+      loop.request("AddRemoteCursorOverlay",
+                   this.props.cursorStore.getStoreState("remoteCursorPosition"));
+    },
+
+    _onRemoteCursorClick: function() {
+      let click = this.props.cursorStore.getStoreState("remoteCursorClick");
+      // If the click is 'false', assume it is a storeState reset,
+      // so don't do anything.
+      if (!click) {
+        return;
+      }
+
+      this.props.cursorStore.setStoreState({
+        remoteCursorClick: false
+      });
+
+      loop.request("ClickRemoteCursor", click);
     },
 
     getInitialState: function() {
@@ -158,16 +189,20 @@ loop.sidebar = (function(mozL10n) {
       var textChatStore = new loop.store.TextChatStore(dispatcher, {
         dataDriver: dataDriver
       });
+      let remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+        sdkDriver
+      });
 
       // XXX akita bug 1279042 Use user set name instead of fake name.
       dispatcher.dispatch(
         new sharedActions.SetOwnDisplayName({ displayName: "Room Owner" }));
 
       loop.store.StoreMixin.register({
-        activeRoomStore: activeRoomStore,
+        activeRoomStore,
         participantStore,
-        serverConnectionStore: serverConnectionStore,
-        textChatStore: textChatStore
+        remoteCursorStore,
+        serverConnectionStore,
+        textChatStore
       });
 
       window.addEventListener("unload", function() {
@@ -175,6 +210,7 @@ loop.sidebar = (function(mozL10n) {
       });
 
       ReactDOM.render(<SidebarControllerView
+                        cursorStore={remoteCursorStore}
                         dispatcher={dispatcher} />, document.querySelector("#main"));
 
       dispatcher.dispatch(new sharedActions.SetupWindowData({

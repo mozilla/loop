@@ -107,7 +107,7 @@
 }
 
 .toc-wrapper > .toc-room-info-bar > .room-active-users > .room-user:hover:after,
-.toc-wrapper > .room-toc > .toc-tile > .room-user:hover:after {
+.toc-item > .toc-tile > .tile-wrapper > .tile-footer > .tile-creator:hover:after {
   background: #333;
   background: rgba(0,0,0,.8);
   border-radius: 5px;
@@ -121,13 +121,14 @@
   transform: translateX(-50%);
 }
 
-.toc-wrapper > .room-toc > .toc-tile > .room-user:hover:after {
-  left: 0;
-  transform: none;
+.toc-item > .toc-tile > .tile-wrapper > .tile-footer > .tile-creator:hover:after {
+  line-height: 20px;
+  text-align: center;
+  top: 28px;
 }
 
 .toc-wrapper > .toc-room-info-bar > .room-active-users > .room-user:hover:before,
-.toc-wrapper > .room-toc > .toc-tile > .room-user:hover:before {
+.toc-item > .toc-tile > .tile-wrapper > .tile-footer > .tile-creator:hover:before {
   border: solid;
   border-color: #333 transparent;
   border-width: 0 6px 6px;
@@ -139,55 +140,152 @@
   transform: translateX(-50%);
 }
 
+.toc-item > .toc-tile > .tile-wrapper > .tile-footer > .tile-creator:hover:before {
+  top: 22px;
+}
+
+.toc-item > .tile-delete-btn {
+  background-color: #565656;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  height: 26px;
+  width: 26px;
+  position: absolute;
+  right: -13px;
+  top: -13px;
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 200ms, opacity 200ms;
+}
+
+.toc-item:hover > .tile-delete-btn {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: 500ms;
+}
+
+.toc-item > .tile-delete-btn:after {
+  content: url("../img/close-02.svg");
+}
+
 /* TOC items */
 
 .toc-wrapper > .room-toc {
-  width: 100%;
   display: flex;
   flex-wrap: wrap;
-  overflow: scroll;
   margin-bottom: 30px;
+  width: 100%;
 }
 
-.toc-wrapper > .room-toc > .toc-tile {
-  border-radius: 4px;
-  width: 250px;
-  background: #a6a6a6;
-  box-shadow: 1px 2px 4px rgba(0,0,0,.4);
+.toc-item {
+  box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  background: #fff;
+  height: 264px;
   margin: 0 20px 20px 0;
   position: relative;
+  transition: box-shadow 150ms;
+  width: 218px;
 }
 
-.toc-wrapper > .room-toc > .toc-tile > .room-user {
+.toc-item:hover {
+  box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.1), 0 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.toc-item > .toc-tile {
+  background: #fff;
+  display: block;
+  height: 100%;
+  text-decoration: none;
+}
+
+.toc-item > .toc-tile > .tile-wrapper > .tile-icon {
+  align-items: center;
+  background-color:rgba(255, 255, 255, 0.8);
+  border-radius: 3px;
+  display: flex;
+  flex-grow: 1;
+  height: 40px;
+  justify-content: center;
+  left: 12px;
+  overflow: hidden;
   position: absolute;
-  top: 15px;
-  left: 15px;
+  top: 12px;
+  width: 40px;
+}
+
+.toc-item > .toc-tile > .tile-wrapper > .tile-icon > img {
+  max-width: 32px;
+}
+
+.toc-item > .toc-tile > .tile-wrapper > .tile-screenshot {
+  display: block;
+  height: 130px;
+  width: 100%;
+}
+
+.toc-item > .toc-tile > .tile-wrapper > .tile-info-wrapper {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  height: 100%;
+  justify-content: space-between;
+  padding: 12px;
+  text-align: left;
+}
+
+.toc-item > .toc-tile > .tile-wrapper > .tile-info-wrapper > .tile-info {
+  max-height: 86px;
+  overflow: hidden;
+}
+
+.toc-item > .toc-tile > .tile-wrapper > .tile-info-wrapper > .tile-info > .tile-title {
+  color: #333;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0 0 2px;
+  word-wrap: break-word;
+}
+
+.toc-item > .toc-tile > .tile-wrapper > .tile-footer {
+  align-items: center;
+  bottom: 0;
+  display: flex;
+  left: 0;
+  padding: 12px;
+  position: absolute;
+  right: 0;
+}
+
+.toc-item > .toc-tile > .tile-wrapper > .tile-info-wrapper > .tile-info > .tile-description {
   margin: 0;
 }
 
-.toc-wrapper > .room-toc > .toc-tile > .tile-screenshot {
-  width: 100%;
+.toc-item > .toc-tile > .tile-wrapper > .tile-footer > .tile-url {
   display: block;
-}
-
-.toc-wrapper > .room-toc > .toc-tile > .tile-info {
-  padding: 15px;
-  height: 75px;
-  background: #fff;
-  text-align: left;
-  display: flex;
-  justify-content: space-between;
-  flex-direction: column;
-  font-size: 12px;
-}
-
-.toc-wrapper > .room-toc > .toc-tile > .tile-info > .tile-name,
-.toc-wrapper > .room-toc > .toc-tile > .tile-info > .tile-url {
-  width: calc(200px - 30px);
-  white-space: nowrap;
   overflow: hidden;
+  flex-grow: 2;
+  margin-right: 10px;
   text-overflow: ellipsis;
+  width: calc(200px - 20px);
+  white-space: nowrap;
+}
+
+.toc-item > .toc-tile > .tile-wrapper > .tile-footer > .tile-creator {
+  position: relative;
+}
+
+.toc-item > .toc-tile > .tile-wrapper > .tile-footer > .tile-creator > span {
+  background: #a3a3a3;
+  border-radius: 50%;
+  color: #fff;
   display: block;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  width: 20px;
 }
 
 .screen {

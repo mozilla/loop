@@ -288,26 +288,42 @@ loop.shared.toc = (function(mozL10n) {
       page: React.PropTypes.object.isRequired
     },
 
+    deleteTile: function() {
+      // XXX akita delete tile from firebase
+      console.info("Tile should be deleted from Firebase at this point");
+    },
+
     // XXX akita: add tile screenshot
     // XXX akita: follow-up -> how presence is handled on the UI
     render: function() {
       return (
-        <div className="toc-tile">
-          <div className="room-user" data-name={this.props.page.userName}>
-            <span>{this.props.page.userName[0].toUpperCase()}</span>
-          </div>
-          <img className="tile-screenshot" src={this.props.page.thumbnail_img} />
-          <div className="tile-info">
-            <a
-              className="tile-name"
-              href={this.props.page.url}
-              rel="noopener noreferrer"
-              target="_blank"
-              title={this.props.page.title}>
-                {this.props.page.title}
-            </a>
-            <h3 className="tile-url">{this.props.page.url}</h3>
-          </div>
+        <div className="toc-item">
+          <a
+            className="toc-tile"
+            href={this.props.page.url}
+            rel="noopener noreferrer"
+            target="_blank"
+            title={this.props.page.title}>
+            <div className="tile-wrapper">
+              <div className="tile-icon">
+                <img className="tile-icon-favicon" src={this.props.page.favicon || "shared/img/helloicon.svg"} />
+              </div>
+              <img className="tile-screenshot" src={this.props.page.thumbnail_img} />
+              <div className="tile-info-wrapper">
+                <div className="tile-info">
+                  <h4 className="tile-title">{this.props.page.title}</h4>
+                  <p className="tile-description">{this.props.page.description}</p>
+                </div>
+              </div>
+              <div className="tile-footer">
+                <h3 className="tile-url">{this.props.page.url}</h3>
+                <div className="tile-creator" data-name={this.props.page.userName}>
+                  <span>{this.props.page.userName[0].toUpperCase()}</span>
+                </div>
+              </div>
+            </div>
+          </a>
+          <button className="tile-delete-btn" onClick={this.deleteTile}></button>
         </div>
       );
     }

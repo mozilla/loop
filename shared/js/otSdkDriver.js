@@ -823,9 +823,6 @@ loop.OTSdkDriver = (function() {
       this._notifyMetricsEvent("Session.streamDestroyed");
 
       if (event.stream.videoType !== "screen") {
-        this.dispatcher.dispatch(new sharedActions.DataChannelsAvailable({
-          available: false
-        }));
         this.dispatcher.dispatch(new sharedActions.MediaStreamDestroyed({
           isLocal: false
         }));
@@ -847,9 +844,6 @@ loop.OTSdkDriver = (function() {
      */
     _onLocalStreamDestroyed: function() {
       this._notifyMetricsEvent("Publisher.streamDestroyed");
-      this.dispatcher.dispatch(new sharedActions.DataChannelsAvailable({
-        available: false
-      }));
       this.dispatcher.dispatch(new sharedActions.MediaStreamDestroyed({
         isLocal: true
       }));

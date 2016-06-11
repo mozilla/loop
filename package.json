@@ -22,7 +22,7 @@
     "react-dom": "15.1.0"
   },
   "devDependencies": {
-    "babel-cli": "6.9.0",
+    "babel-cli": "6.10.1",
     "babel-plugin-check-es2015-constants": "6.8.0",
     "babel-plugin-transform-es2015-arrow-functions": "6.8.0",
     "babel-plugin-transform-es2015-block-scoped-functions": "6.8.0",

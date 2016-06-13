@@ -6,7 +6,8 @@ describe("loop.store.PageStore", () => {
 
   let { expect } = chai;
   let { actions } = loop.shared;
-  let dispatcher, fakeDataDriver, sandbox, store;
+  let dispatcher, fakeDataDriver, fakePageMetadata, fakeStoredPage, sandbox,
+    store;
 
   beforeEach(() => {
     sandbox = LoopMochaUtils.createSandbox();
@@ -18,6 +19,16 @@ describe("loop.store.PageStore", () => {
       addPage: sinon.stub(),
       deletePage: sinon.stub()
     };
+
+    fakePageMetadata = {
+      title: "fakeTitle",
+      thumbnail_img: "fakeThumbnail",
+      url: "someFakeUrl"
+    };
+
+    fakeStoredPage =
+      Object.assign({ id: "fakeId", userName: "fakeUserName" },
+                    fakePageMetadata);
 
     store = new loop.store.PageStore(dispatcher, {
       dataDriver: fakeDataDriver
@@ -59,30 +70,56 @@ describe("loop.store.PageStore", () => {
     });
 
     it("should include the user name in page data", () => {
-      let metadata = {
-        title: "fakeTitle",
-        thumbnail_img: "fakeThumbnail",
-        url: "fakeUrl"
-      };
-      let action = new actions.AddPage(metadata);
+      let action = new actions.AddPage(fakePageMetadata);
       store.addPage(action);
 
       sinon.assert.calledOnce(fakeDataDriver.addPage);
       sinon.assert.calledWithExactly(fakeDataDriver.addPage, Object.assign(
-        { userName: "user name" }, metadata));
+        { userName: "user name" }, fakePageMetadata));
+    });
+
+    it("should not call dataDriver.addPage if the URL is already there", () => {
+      let pages = store.getStoreState("pages");
+      pages.push(fakeStoredPage);
+      store.setStoreState({ pages });
+
+      let action = new actions.AddPage(fakePageMetadata);
+      store.addPage(action);
+
+      sinon.assert.notCalled(fakeDataDriver.addPage);
     });
   });
 
   describe("AddedPage", () => {
-    it("should add a page to the store", () => {
-      let action = new actions.AddedPage({
+    let action;
+
+    beforeEach(() => {
+      action = new actions.AddedPage({
         pageId: "fakeId",
         title: "fakeTitle",
         thumbnail_img: "fakeThumbnail",
         url: "fakeUrl",
         userName: "fake user"
       });
+    });
+
+    it("should add a page to the store", () => {
       store.addedPage(action);
+
+      expect(store.getStoreState("pages")).to.have.lengthOf(1);
+    });
+
+    it("should not add a second copy of a URL to the page store", () => {
+      let action2 = new actions.AddedPage({
+        pageId: "fakeId2",
+        title: "fakeTitle2",
+        thumbnail_img: "fakeThumbnail2",
+        url: "fakeUrl",
+        userName: "fake user2"
+      });
+
+      store.addedPage(action);
+      store.addedPage(action2);
 
       expect(store.getStoreState("pages")).to.have.lengthOf(1);
     });
@@ -103,13 +140,7 @@ describe("loop.store.PageStore", () => {
   describe("DeletedPage", () => {
     beforeEach(() => {
       let pages = store.getStoreState("pages");
-      pages.push({
-        id: "fakeId",
-        title: "fakeTitle",
-        thumbnail_img: "fakeThumbnail",
-        url: "fakeUrl",
-        userName: "fake user"
-      });
+      pages.push(fakeStoredPage);
       store.setStoreState({ pages });
     });
 
@@ -148,5 +179,10 @@ describe("loop.store.PageStore", () => {
 
       sinon.assert.notCalled(dispatcher.dispatch);
     });
+  });
+
+  describe("UpdateRoomInfo", () => {
+    // XXX akita-alpha implement as part of bug 1281066
+    it.skip("should dispatch an appropriate AddPage action");
   });
 });

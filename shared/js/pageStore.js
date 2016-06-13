@@ -38,7 +38,8 @@ loop.store.PageStore = function(mozL10n) {
       "addedPage",
       "deletePage",
       "deletedPage",
-      "setOwnDisplayName"
+      "setOwnDisplayName",
+      "updateRoomInfo"
     ],
 
     /**
@@ -50,9 +51,22 @@ loop.store.PageStore = function(mozL10n) {
 
     /**
      * Handle AddPage action by saving the specific page.
+     *
+     * @note If actionData.url already exists in the store, it will not
+     * be added a second time.
      */
      // XXX akita: Update data saved into Firebase according to the action `AddPage`
     addPage(actionData) {
+
+      // This prevents a race if the link-clicker is opened very
+      // quickly, particularly since the page currently isn't added until
+      // after the metadata fetch completes.  There will still be some kind of
+      // race here even after bug 1281066 lands, but we'l be much less likely to
+      // hit it with any frequency.
+      if (this._hasPageForUrl(actionData.url)) {
+        return;
+      }
+
       this._dataDriver.addPage({
         title: actionData.title,
         thumbnail_img: actionData.thumbnail_img,
@@ -63,8 +77,15 @@ loop.store.PageStore = function(mozL10n) {
 
     /**
      * Handle AddedPage action by updating the store state.
+     *
+     * @note If actionData.url already exists in the store, it will not
+     * be added a second time.
      */
     addedPage(actionData) {
+      if (this._hasPageForUrl(actionData.url)) {
+        return;
+      }
+
       let page = {
         id: actionData.pageId,
         title: actionData.title,
@@ -100,6 +121,73 @@ loop.store.PageStore = function(mozL10n) {
           label: mozL10n.get("snackbar_page_deleted")
         }));
       }
+    },
+
+    /**
+     * Check whether this store already contains this URL.  Note that
+     * we currently use an exact string compare for this.
+     *
+     * XXX akita we might want to consider switching to something less strict
+     * if it makes sense from a product standpoint.
+     *
+     * @param {String} url - the thing we're looking for
+     * @return {Boolean}
+     */
+    _hasPageForUrl(url) {
+      let pages = this._storeState.pages;
+      pages = pages.filter(page =>
+        page.url === url
+      );
+
+      if (pages.length === 1) {
+        return true;
+      }
+
+      // the store is corrupt
+      if (pages.length > 1) {
+        throw new Error("Page store contains mutiple pages with the same URL");
+      }
+
+      return false;
+    },
+
+    /**
+     * Handle updateRoomInfo action.  Used to add the first URL to the
+     * PageStore.
+     */
+    updateRoomInfo(actionData) {
+      if (!("roomContextUrls" in actionData)) {
+        console.warn("this room doesn't have a context url!");
+        return;
+      }
+
+      // XXX do we really care about multiple context urls?  I suspect
+      // we don't.
+      let firstContextUrl = actionData.roomContextUrls[0];
+
+      if (this._hasPageForUrl(firstContextUrl.location)) {
+        return;
+      }
+
+      let thumbnail_img;
+      loop.shared.utils.getPageMetadata(firstContextUrl.location).then(result => {
+        thumbnail_img = result.thumbnail_img;
+      }).catch(() => {
+        // fall back to the thing in firstContextUrl
+        thumbnail_img = firstContextUrl.thumbnail;
+      }).then(() => {
+        // XXX akita (bug 1281066) we should not do this in the then,
+        // but instead should immediately both dispatch an AddPage to add the
+        // page quickly, and then start a getPageMetadata(), which, upon
+        // resolution, will call a (to-be-written) dataDriver.updatePage.
+        // As part of that bug, we need to also test that this dispatchAction
+        // actually fires; there's an it.skip in UpdateRoomInfo for this test.
+        this.dispatchAction(new sharedActions.AddPage({
+              title: firstContextUrl.description,
+              thumbnail_img: thumbnail_img,
+              url: firstContextUrl.location
+            }));
+      });
     }
   });
 

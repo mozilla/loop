@@ -485,7 +485,7 @@ loop.store.ActiveRoomStore = (function() {
       this._sdkDriver.connectSession(this._storeState.webrtcTokens);
 
       loop.request("AddConversationContext", this._storeState.windowId,
-        this._storeState.webrtcTokens.sessionId, "");
+        this._storeState.webrtcTokens.sessionId);
     },
 
     /**

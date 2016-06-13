@@ -233,24 +233,22 @@ const kMessageHandlers = {
   },
 
   /**
-   * Associates a session-id and a call-id with a window for debugging.
+   * Associates a session-id with a window for debugging.
    *
    * @param {Object}   message Message meant for the handler function, containing
    *                           the following parameters in its `data` property:
    *                           [
    *                             {String} windowId  The window id.
    *                             {String} sessionId OT session id.
-   *                             {String} callId    The callId on the server.
    *                           ]
    * @param {Function} reply   Callback function, invoked with the result of this
    *                           message handler. The result will be sent back to
    *                           the senders' channel.
    */
   AddConversationContext: function(message, reply) {
-    let [windowId, sessionId, callid] = message.data;
-    MozLoopService.addConversationContext(windowId, {
-      sessionId: sessionId,
-      callId: callid
+    let [windowId, sessionId] = message.data;
+    LoopSidebar.addConversationContext(windowId, {
+      sessionId: sessionId
     });
     reply();
   },

@@ -19,6 +19,10 @@ body {
   overflow: hidden;
 }
 
+#main {
+  height: 100%;
+}
+
 img {
   border: none;
 }

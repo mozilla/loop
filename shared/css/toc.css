@@ -176,7 +176,9 @@
   display: flex;
   flex-wrap: wrap;
   margin-bottom: 30px;
+  padding-top: 15px; /* to not cover the X on hover*/
   width: 100%;
+  overflow: auto;
 }
 
 .toc-item {

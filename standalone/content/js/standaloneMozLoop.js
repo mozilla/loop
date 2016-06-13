@@ -91,8 +91,8 @@ loop.StandaloneMozLoop = (function() {
         if (request.readyState === 4 && request.status >= 200 && request.status < 300) {
           try {
             // XXX akita bug 1278849 Actually get the userId from the server.
-            let { userId } = localStorage;
-            if (userId === undefined) {
+            let userId = localStorage.getItem("userId");
+            if (userId === null) {
               localStorage.userId = userId = Math.random().toFixed(20).slice(2);
             }
             responseJSON.userId = userId;

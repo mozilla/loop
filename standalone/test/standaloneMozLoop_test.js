@@ -90,6 +90,26 @@ describe("loop.StandaloneMozLoop", function() {
   });
 
   describe("#rooms.get", function() {
+    let originalLocalStorage;
+
+    beforeEach(() => {
+      originalLocalStorage = window.localStorage;
+
+      Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: function() {
+            return "test.id";
+          }
+        }
+      });
+    });
+
+    afterEach(() => {
+      Object.defineProperty(window, "localStorage", {
+        value: originalLocalStorage
+      });
+    });
+
     it("should GET to the server", function() {
       loop.request("Rooms:Get", "fakeToken");
 
@@ -99,7 +119,6 @@ describe("loop.StandaloneMozLoop", function() {
     });
 
     it("should call the callback with success parameters", function() {
-      localStorage.userId = "test.id";
       var promise = loop.request("Rooms:Get", "fakeToken").then(function(result) {
         expect(result).eql(roomDetails);
       });

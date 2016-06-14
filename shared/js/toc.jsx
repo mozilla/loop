@@ -304,6 +304,10 @@ loop.shared.toc = (function(mozL10n) {
     // XXX akita: add tile screenshot
     // XXX akita: follow-up -> how presence is handled on the UI
     render: function() {
+      // XXX akita: Code below is just for testing purpose
+      var url = new URL(this.props.page.url);
+      var favicon = url.origin + "/favicon.ico";
+
       return (
         <div className="toc-item">
           <a
@@ -314,7 +318,7 @@ loop.shared.toc = (function(mozL10n) {
             title={this.props.page.title}>
             <div className="tile-wrapper">
               <div className="tile-icon">
-                <img className="tile-icon-favicon" src={this.props.page.favicon || "shared/img/helloicon.svg"} />
+                <img className="tile-icon-favicon" src={this.props.page.favicon || favicon} />
               </div>
               <img className="tile-screenshot" src={this.props.page.thumbnail_img} />
               <div className="tile-info-wrapper">

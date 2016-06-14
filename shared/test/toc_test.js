@@ -175,7 +175,7 @@ describe("loop.TableOfContents", () => {
             id: "fakeId",
             title: "fakeTitle",
             thumbnail_img: "fakeImg",
-            url: "fakeUrl",
+            url: "http://www.invalidurl.com",
             userName: "Cool name"
           }
         }));

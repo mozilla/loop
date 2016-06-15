@@ -24,7 +24,6 @@
     "FxAccountsOAuthClient": false,
     "FxAccountsProfileClient": false,
     "gBrowser": false,
-    "gDNSService": false,
     "gLoopBundle": false,
     "gWM": false,
     "HawkClient": false,
@@ -61,7 +60,7 @@
     "WebChannel": false,
     "XPCOMUtils": false,
     "UpdateUtils": false,
-    "uuidgen": true,
+    "uuidgen": false,
     // Test Related
     "Assert": false,
   },

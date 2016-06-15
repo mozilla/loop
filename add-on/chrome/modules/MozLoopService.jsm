@@ -84,7 +84,6 @@ const kChatboxHangupButton = {
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Promise.jsm");
-Cu.import("resource://gre/modules/osfile.jsm", this);
 Cu.import("resource://gre/modules/Task.jsm");
 Cu.import("resource://gre/modules/Timer.jsm");
 Cu.import("resource://gre/modules/FxAccountsOAuthClient.jsm");
@@ -103,8 +102,6 @@ XPCOMUtils.defineConstant(this, "LOOP_MAU_TYPE", LOOP_MAU_TYPE);
 XPCOMUtils.defineLazyModuleGetter(this, "LoopAPI",
   "chrome://loop/content/modules/MozLoopAPI.jsm");
 
-XPCOMUtils.defineLazyModuleGetter(this, "convertToRTCStatsReport",
-  "resource://gre/modules/media/RTCStatsReport.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "loopUtils",
   "chrome://loop/content/modules/utils.js", "utils");
 XPCOMUtils.defineLazyModuleGetter(this, "loopCrypto",
@@ -138,14 +135,6 @@ XPCOMUtils.defineLazyModuleGetter(this, "MozLoopPushHandler",
 
 XPCOMUtils.defineLazyModuleGetter(this, "UITour",
                                   "resource:///modules/UITour.jsm");
-
-XPCOMUtils.defineLazyServiceGetter(this, "uuidgen",
-                                   "@mozilla.org/uuid-generator;1",
-                                   "nsIUUIDGenerator");
-
-XPCOMUtils.defineLazyServiceGetter(this, "gDNSService",
-                                   "@mozilla.org/network/dns-service;1",
-                                   "nsIDNSService");
 
 XPCOMUtils.defineLazyServiceGetter(this, "gWM",
                                    "@mozilla.org/appshell/window-mediator;1",
@@ -187,7 +176,6 @@ var gAddonVersion = "unknown";
  * and register with the Loop server.
  */
 var MozLoopServiceInternal = {
-  conversationContexts: new Map(),
   pushURLs: new Map(),
 
   mocks: {
@@ -776,82 +764,6 @@ var MozLoopServiceInternal = {
   },
 
   /**
-   * Saves loop logs to the saved-telemetry-pings folder.
-   *
-   * @param {nsIDOMWindow} window The window object which can be communicated with
-   * @param {Object}        The peerConnection in question.
-   */
-  stageForTelemetryUpload: function(window, details) {
-    let mm = window.messageManager;
-    mm.addMessageListener("Loop:GetAllWebrtcStats", function getAllStats(message) {
-      mm.removeMessageListener("Loop:GetAllWebrtcStats", getAllStats);
-
-      let { allStats, logs } = message.data;
-      let internalFormat = allStats.reports[0]; // filtered on peerConnectionID
-
-      let report = convertToRTCStatsReport(internalFormat);
-        let logStr = "";
-        logs.forEach(s => {
-          logStr += s + "\n";
-        });
-
-        // We have stats and logs.
-
-        // Create worker job. ping = saved telemetry ping file header + payload
-        //
-        // Prepare payload according to https://wiki.mozilla.org/Loop/Telemetry
-
-        let ai = Services.appinfo;
-        let uuid = uuidgen.generateUUID().toString();
-        uuid = uuid.substr(1, uuid.length - 2); // remove uuid curly braces
-
-        let directory = OS.Path.join(OS.Constants.Path.profileDir,
-                                     "saved-telemetry-pings");
-        let job = {
-          directory: directory,
-          filename: uuid + ".json",
-          ping: {
-            reason: "loop",
-            slug: uuid,
-            payload: {
-              ver: 1,
-              info: {
-                appUpdateChannel: ai.defaultUpdateChannel,
-                appBuildID: ai.appBuildID,
-                appName: ai.name,
-                appVersion: ai.version,
-                reason: "loop",
-                OS: ai.OS,
-                version: Services.sysinfo.getProperty("version")
-              },
-              report: "ice failure",
-              connectionstate: details.iceConnectionState,
-              stats: report,
-              localSdp: internalFormat.localSdp,
-              remoteSdp: internalFormat.remoteSdp,
-              log: logStr
-            }
-          }
-        };
-
-        // Send job to worker to do log sanitation, transcoding and saving to
-        // disk for pickup by telemetry on next startup, which then uploads it.
-
-        let worker = new ChromeWorker("MozLoopWorker.js");
-        worker.onmessage = function(e) {
-          log.info(e.data.ok ?
-            "Successfully staged loop report for telemetry upload." :
-            ("Failed to stage loop report. Error: " + e.data.fail));
-        };
-        worker.postMessage(job);
-    });
-
-    mm.sendAsyncMessage("Loop:GetAllWebrtcStats", {
-      peerConnectionID: details.peerConnectionID
-    });
-  },
-
-  /**
    * Gets an id for the chat window, for now we just use the roomToken.
    *
    * @param  {Object} conversationWindowData The conversation window data.
@@ -1005,37 +917,6 @@ var MozLoopServiceInternal = {
           messageName = "Social:DOMWindowClose";
           mm.addMessageListener(messageName, listeners[messageName] = () => {
             chatbox.close();
-          });
-
-          mm.sendAsyncMessage("Loop:MonitorPeerConnectionLifecycle");
-          messageName = "Loop:PeerConnectionLifecycleChange";
-          mm.addMessageListener(messageName, listeners[messageName] = message => {
-            // Chat Window Id, this is different that the internal winId
-            let chatWindowId = message.data.locationHash.slice(1);
-            var context = this.conversationContexts.get(chatWindowId);
-            var peerConnectionID = message.data.peerConnectionID;
-            var exists = peerConnectionID.match(/session=(\S+)/);
-            if (context && !exists) {
-              // Not ideal but insert our data amidst existing data like this:
-              // - 000 (id=00 url=http)
-              // + 000 (session=000 call=000 id=00 url=http)
-              var pair = peerConnectionID.split("(");
-              if (pair.length == 2) {
-                peerConnectionID = pair[0] + "(session=" + context.sessionId +
-                    (context.callId ? " call=" + context.callId : "") + " " + pair[1];
-              }
-            }
-
-            if (message.data.type == "iceconnectionstatechange") {
-              switch (message.data.iceConnectionState) {
-                case "failed":
-                case "disconnected":
-                  if (Services.telemetry.canRecordExtended) {
-                    this.stageForTelemetryUpload(chatbox.content, message.data);
-                  }
-                  break;
-              }
-            }
           });
 
           let closeListener = function() {
@@ -1275,7 +1156,6 @@ var gServiceInitialized = false;
  * Public API
  */
 this.MozLoopService = {
-  _DNSService: gDNSService,
   _activeScreenShares: new Set(),
 
   get channelIDs() {
@@ -1560,14 +1440,6 @@ this.MozLoopService = {
     // remove "alpha", "beta" or any non numeric appended to the version string
     let numericAddonVersion = gAddonVersion.replace(/[^0-9\.]/g, "");
     return numericAddonVersion;
-  },
-
-  /**
-   *
-   * Returns a new GUID (UUID) in curly braces format.
-   */
-  generateUUID: function() {
-    return uuidgen.generateUUID().toString();
   },
 
   /**
@@ -2059,14 +1931,6 @@ this.MozLoopService = {
 
     log.error("Window data was already fetched before. Possible race condition!");
     return null;
-  },
-
-  getConversationContext: function(winId) {
-    return MozLoopServiceInternal.conversationContexts.get(winId);
-  },
-
-  addConversationContext: function(windowId, context) {
-    MozLoopServiceInternal.conversationContexts.set(windowId, context);
   },
 
   /**

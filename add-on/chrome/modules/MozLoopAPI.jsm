@@ -337,20 +337,6 @@ const kMessageHandlers = {
   },
 
   /**
-   * Returns a new GUID (UUID) in curly braces format.
-   *
-   * @param {Object}   message Message meant for the handler function, containing
-   *                           the following parameters in its `data` property:
-   *                           [ ]
-   * @param {Function} reply   Callback function, invoked with the result of this
-   *                           message handler. The result will be sent back to
-   *                           the senders' channel.
-   */
-  GenerateUUID: function(message, reply) {
-    reply(MozLoopService.generateUUID());
-  },
-
-  /**
    * Fetch the JSON blob of localized strings from the loop.properties bundle.
    * @see MozLoopService#getStrings
    *

@@ -11,8 +11,8 @@ Assuming you have the basic utilities, then you also need:
 
 * [node.js](https://nodejs.org/). Version 0.10 is currently required.
 * [Python](https://www.python.org/). Version 2.7 is currently used.
-** [pip](https://pip.pypa.io/en/stable/)
-** [virtualenv](https://pypi.python.org/pypi/virtualenv), installed globally via pip.
+  * [pip](https://pip.pypa.io/en/stable/)
+  * [virtualenv](https://pypi.python.org/pypi/virtualenv), installed globally via pip.
 * For testing and developing the add-on:
   * Any Firefox build later than 45.0a1, although
     [nightly](https://nightly.mozilla.org/) is typically used by Loop's developers.

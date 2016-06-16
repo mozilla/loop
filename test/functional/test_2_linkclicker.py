@@ -53,6 +53,8 @@ class Test2Linkclicker(LoopTestDriver, MarionetteTestCase):
         self.marionette.set_context("chrome")
 
     def navigate_to_standalone(self, url):
+        self.marionette.switch_to_window(self.main_window)
+
         self.switch_to_standalone()
         self.marionette.navigate(url)
 
@@ -62,12 +64,10 @@ class Test2Linkclicker(LoopTestDriver, MarionetteTestCase):
                                                          30)
         self.assertEqual(view_container.tag_name, "div", "expect a error container")
 
-    def local_leave_room(self):
-        self.open_panel()
-        self.switch_to_panel()
-        button = self.marionette.find_element(By.CLASS_NAME, "stop-sharing-button")
+    def local_close_room(self, window):
+        self.marionette.switch_to_window(window)
 
-        button.click()
+        self.marionette.close_chrome_window()
 
     def standalone_join_own_room(self):
         button = self.wait_for_element_displayed(By.CLASS_NAME, "btn-info", 30)
@@ -83,7 +83,7 @@ class Test2Linkclicker(LoopTestDriver, MarionetteTestCase):
     def test_2_own_room_test(self):
         # Marionette doesn't make it easy to set up a page to load automatically
         # on start. So lets load about:home. We need this for now, so that the
-        # various browser checks believe we've enabled e10s.
+        # various browser checks believe we've enabled e10s (when testing e10s).
         self.load_homepage()
 
         self.open_panel()
@@ -92,11 +92,11 @@ class Test2Linkclicker(LoopTestDriver, MarionetteTestCase):
         self.local_start_a_conversation()
 
         # Force to close the share panel
-        self.local_close_share_panel()
+        room_url = self.local_copy_url_and_close_share_panel()
 
-        room_url = self.local_get_and_verify_room_url()
+        room_window = self.find_new_room_window()
 
-        self.local_leave_room()
+        self.local_close_room(room_window)
 
         # load the link clicker interface into the current content browser
         self.navigate_to_standalone(room_url)
@@ -108,7 +108,8 @@ class Test2Linkclicker(LoopTestDriver, MarionetteTestCase):
         # Ensure we're on a different page so that we can navigate back to the room url later.
         self.load_homepage()
 
-        self.local_check_room_self_video()
+        # Check the room loaded
+        room_window = self.find_new_room_window()
 
         # reload the link clicker interface into the current content browser
         self.navigate_to_standalone(room_url)
@@ -116,6 +117,8 @@ class Test2Linkclicker(LoopTestDriver, MarionetteTestCase):
         self.standalone_join_own_room()
 
         self.standalone_check_error_text()
+
+        self.local_close_room(room_window)
 
     def tearDown(self):
         self.loop_test_servers.shutdown()

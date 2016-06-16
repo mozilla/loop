@@ -117,9 +117,6 @@ loop.store.ActiveRoomStore = (function() {
         remoteAudioEnabled: false,
         remoteVideoEnabled: false,
         failureReason: undefined,
-        // Whether or not Firefox can handle this room in the conversation
-        // window, rather than us handling it in the standalone.
-        userAgentHandlesRoom: undefined,
         // Tracks if the room has been used during this
         // session. 'Used' means at least one call has been placed
         // with it. Entering and leaving the room without seeing
@@ -176,7 +173,7 @@ loop.store.ActiveRoomStore = (function() {
         failureExitState: exitState
       });
 
-      this._leaveRoom(actionData.error.errno === REST_ERRNOS.ROOM_FULL ?
+      this._endWebRTC(actionData.error.errno === REST_ERRNOS.ROOM_FULL ?
           ROOM_STATES.FULL : ROOM_STATES.FAILED);
     },
 
@@ -229,7 +226,6 @@ loop.store.ActiveRoomStore = (function() {
         "roomFailure",
         "retryAfterRoomFailure",
         "updateRoomInfo",
-        "userAgentHandlesRoom",
         "gotMediaPermission",
         "initiateWebRTC",
         "joinedRoom",
@@ -331,17 +327,6 @@ loop.store.ActiveRoomStore = (function() {
     },
 
     /**
-     * Handles the userAgentHandlesRoom action. Updates the store's data with
-     * the new state.
-     *
-     */
-    userAgentHandlesRoom: function(actionData) {
-      this.setStoreState({
-        userAgentHandlesRoom: actionData.handlesRoom
-      });
-    },
-
-    /**
      * Handles the deletion of a room, notified by the Loop rooms API.
      *
      */
@@ -375,53 +360,6 @@ loop.store.ActiveRoomStore = (function() {
     },
 
     /**
-     * Hands off the room join to Firefox.
-     */
-    _handoffRoomJoin: function() {
-      var channelListener;
-
-      function handleRoomJoinResponse(e) {
-        if (e.detail.id !== "loop-link-clicker") {
-          return;
-        }
-
-        window.removeEventListener("WebChannelMessageToContent", channelListener);
-
-        if (!e.detail.message || !e.detail.message.response) {
-          // XXX Firefox didn't handle this, even though it said it could
-          // previously. We should add better user feedback here.
-          console.error("Firefox didn't handle room it said it could.");
-        } else if (e.detail.message.alreadyOpen) {
-          this.dispatcher.dispatch(new sharedActions.ConnectionFailure({
-            reason: FAILURE_DETAILS.ROOM_ALREADY_OPEN
-          }));
-        } else {
-          this.dispatcher.dispatch(new sharedActions.JoinedRoom({
-            apiKey: "",
-            sessionToken: "",
-            sessionId: "",
-            expires: 0
-          }));
-        }
-      }
-
-      channelListener = handleRoomJoinResponse.bind(this);
-
-      window.addEventListener("WebChannelMessageToContent", channelListener);
-
-      // Now we're set up, dispatch an event.
-      window.dispatchEvent(new window.CustomEvent("WebChannelMessageToChrome", {
-        detail: {
-          id: "loop-link-clicker",
-          message: {
-            command: "openRoom",
-            roomToken: this._storeState.roomToken
-          }
-        }
-      }));
-    },
-
-    /**
      * Handles the action to join to a room.
      */
     initiateWebRTC: function() {
@@ -430,22 +368,6 @@ loop.store.ActiveRoomStore = (function() {
         this.setStoreState({ failureReason: undefined });
       }
 
-      // If we're standalone and we know Firefox can handle the room, then hand
-      // it off.
-      if (this._storeState.standalone && this._storeState.userAgentHandlesRoom) {
-        this.dispatcher.dispatch(new sharedActions.MetricsLogJoinRoom({
-          userAgentHandledRoom: true,
-          ownRoom: true
-        }));
-        this._handoffRoomJoin();
-        return;
-      }
-
-      this.dispatcher.dispatch(new sharedActions.MetricsLogJoinRoom({
-        userAgentHandledRoom: false
-      }));
-
-      // Otherwise, we handle the room ourselves.
       this._checkDevicesAndInitiateWebRTC();
     },
 
@@ -469,15 +391,6 @@ loop.store.ActiveRoomStore = (function() {
      * granted and starts joining the room.
      */
     gotMediaPermission: function() {
-      // If we're standalone and firefox is handling, then just store the new
-      // state. No need to do anything else.
-      if (this._storeState.standalone && this._storeState.userAgentHandlesRoom) {
-        this.setStoreState({
-          roomState: ROOM_STATES.JOINED
-        });
-        return;
-      }
-
       this.setStoreState({
         roomState: ROOM_STATES.JOINED
       });
@@ -514,7 +427,7 @@ loop.store.ActiveRoomStore = (function() {
         failureExitState: exitState
       });
 
-      this._leaveRoom(ROOM_STATES.FAILED);
+      this._endWebRTC(ROOM_STATES.FAILED);
     },
 
     /**
@@ -814,7 +727,7 @@ loop.store.ActiveRoomStore = (function() {
      * Handles the window being unloaded. Ensures the room is left.
      */
     windowUnload: function() {
-      this._leaveRoom(ROOM_STATES.CLOSING);
+      this._endWebRTC(ROOM_STATES.CLOSING);
 
       if (!this._onUpdateListener) {
         return;
@@ -833,7 +746,7 @@ loop.store.ActiveRoomStore = (function() {
      * Handles a room being left.
      */
     leaveRoom: function() {
-      this._leaveRoom(ROOM_STATES.ENDED,
+      this._endWebRTC(ROOM_STATES.ENDED,
                       false);
     },
 
@@ -846,16 +759,7 @@ loop.store.ActiveRoomStore = (function() {
      *
      * @param {ROOM_STATES} nextState         The next state to switch to.
      */
-    _leaveRoom: function(nextState) {
-      if (this._storeState.standalone && this._storeState.userAgentHandlesRoom) {
-        // If the user agent is handling the room, all we need to do is advance
-        // to the next state.
-        this.setStoreState({
-          roomState: nextState
-        });
-        return;
-      }
-
+    _endWebRTC: function(nextState) {
       if (loop.standaloneMedia) {
         loop.standaloneMedia.multiplexGum.reset();
       }

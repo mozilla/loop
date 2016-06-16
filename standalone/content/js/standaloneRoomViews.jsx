@@ -62,7 +62,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
   var StandaloneHandleUserAgentView = React.createClass({
     mixins: [
-      loop.store.StoreMixin("activeRoomStore")
+      loop.store.StoreMixin("serverConnectionStore")
     ],
 
     propTypes: {
@@ -73,41 +73,42 @@ loop.standaloneRoomViews = (function(mozL10n) {
       return this.getStoreState();
     },
 
-    // XXX Rename JoinButton etc.
-    handleJoinButton: function() {
-      this.props.dispatcher.dispatch(new sharedActions.InitiateWebRTC());
+    handleOpenButton: function() {
+      this.props.dispatcher.dispatch(new sharedActions.OpenUserAgentRoom());
     },
 
-    _renderJoinButton: function() {
-      var buttonMessage = this.state.roomState === ROOM_STATES.JOINED ?
+    _renderOpenButton: function() {
+      let opened =
+        this.state.userAgentRoomsStatus === this.getStore().USER_AGENT_ROOM_STATUS.OPENED;
+
+      let buttonMessage = opened ?
         mozL10n.get("rooms_room_joined_own_conversation_label") :
         mozL10n.get("rooms_room_join_label");
 
       var buttonClasses = classNames({
         btn: true,
         "btn-info": true,
-        disabled: this.state.roomState === ROOM_STATES.JOINED
+        disabled: opened
       });
 
       return (
         <button
           className={buttonClasses}
-          onClick={this.handleJoinButton}>
+          onClick={this.handleOpenButton}>
           {buttonMessage}
         </button>
       );
     },
 
-    _renderFailureText: function() {
+    _renderAlreadyOpenText: function() {
       return (
         <p className="failure">{mozL10n.get("rooms_already_joined")}</p>
       );
     },
 
     render: function() {
-      var roomName = this.state.roomName ||
-                     this.state.roomContextUrls[0].description ||
-                     this.state.roomContextUrls[0].location;
+      // XXX Akita - Bug 1280809 Add a proper fallback here.
+      var roomName = this.state.roomName || "BUG: no room name";
       // The extra scroller div here is for providing a scroll view for shorter
       // screens, as the common.css specifies overflow:hidden for the body which
       // we need in some places.
@@ -119,9 +120,9 @@ loop.standaloneRoomViews = (function(mozL10n) {
               <p className="roomName">{roomName}</p>
               <p className="loop-logo" />
               {
-                this.state.failureReason ?
-                  this._renderFailureText() :
-                  this._renderJoinButton()
+                this.state.userAgentRoomsStatus === this.getStore().USER_AGENT_ROOM_STATUS.ALREADY_OPEN ?
+                  this._renderAlreadyOpenText() :
+                  this._renderOpenButton()
               }
             </div>
             <ToSView dispatcher={this.props.dispatcher} />
@@ -575,6 +576,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
   var StandaloneRoomView = React.createClass({
     mixins: [
+      loop.store.StoreMixin("activeRoomStore"),
       Backbone.Events,
       sharedMixins.MediaSetupMixin,
       sharedMixins.RoomsAudioMixin,
@@ -584,7 +586,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
     propTypes: {
       // We pass conversationStore here rather than use the mixin, to allow
       // easy configurability for the ui-showcase.
-      activeRoomStore: React.PropTypes.instanceOf(loop.store.ActiveRoomStore).isRequired,
       cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       introSeen: React.PropTypes.bool,
@@ -612,22 +613,12 @@ loop.standaloneRoomViews = (function(mozL10n) {
       } else if (localStorage.getItem("introSeen") !== null) {
         introSeen = true;
       }
-      var storeState = this.props.activeRoomStore.getStoreState();
+      var storeState = this.getStoreState();
       return _.extend({}, storeState, {
         // Used by the UI showcase.
         roomState: this.props.roomState || storeState.roomState,
         introSeen: introSeen
       });
-    },
-
-    componentWillMount: function() {
-      this.props.activeRoomStore.on("change", function() {
-        this.setState(this.props.activeRoomStore.getStoreState());
-      }, this);
-    },
-
-    componentWillUnmount: function() {
-      this.props.activeRoomStore.off("change", null, this);
     },
 
     componentDidMount: function() {
@@ -841,7 +832,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
             screenSharePosterUrl={this.props.screenSharePosterUrl}
             screenSharingPaused={this.state.streamPaused} />
           <sharedToc.SidebarView
-            activeRoomStore={this.props.activeRoomStore}
+            activeRoomStore={this.getStore()}
             audio={{ enabled: !this.state.audioMuted,
                      visible: this._roomIsActive() }}
             dispatcher={this.props.dispatcher}
@@ -956,7 +947,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
 
   var StandaloneRoomControllerView = React.createClass({
     mixins: [
-      loop.store.StoreMixin("activeRoomStore")
+      loop.store.StoreMixin("serverConnectionStore")
     ],
 
     propTypes: {
@@ -978,17 +969,15 @@ loop.standaloneRoomViews = (function(mozL10n) {
         return null;
       }
 
-      // XXX akita
-      // if (this.state.userAgentHandlesRoom) {
-      //   return (
-      //     <StandaloneHandleUserAgentView
-      //       dispatcher={this.props.dispatcher} />
-      //   );
-      // }
+      if (this.state.userAgentHandlesRoom) {
+        return (
+          <StandaloneHandleUserAgentView
+            dispatcher={this.props.dispatcher} />
+        );
+      }
 
       return (
         <StandaloneRoomView
-          activeRoomStore={this.getStore()}
           cursorStore={this.props.cursorStore}
           dispatcher={this.props.dispatcher}
           isFirefox={this.props.isFirefox}

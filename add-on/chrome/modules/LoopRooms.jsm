@@ -1095,6 +1095,43 @@ var LoopRoomsInternal = {
   },
 
   /**
+   * Determine if a room is open or not.
+   *
+   * @param {String} roomToken   The room token.
+   * @return {null|nsIDOMWindow} Returns the window if a room is open, null
+   *                             otherwise.
+   */
+  _getOpenRoom: function(roomToken) {
+    let windowEnum = Services.wm.getEnumerator("navigator:browser");
+    while (windowEnum.hasMoreElements()) {
+      let windowItem = windowEnum.getNext();
+
+      let sidebar = windowItem.document.getElementById("loop-side-browser");
+
+      if (!sidebar) {
+        continue;
+      }
+
+      let URI;
+      try {
+        URI = Services.io.newURI(sidebar.getAttribute("src"), null, null);
+      } catch (ex) {
+        continue;
+      }
+
+      let path = URI.path;
+
+      let hashIndex = path.lastIndexOf("#");
+
+      if (path.substr(hashIndex + 1 - path.length) === roomToken) {
+        return windowItem;
+      }
+    }
+
+    return null;
+  },
+
+  /**
    * Handles a message received from the content channel.
    *
    * @param {String} id              The channel id.
@@ -1121,7 +1158,9 @@ var LoopRoomsInternal = {
         break;
       case "openRoom":
         if (hasRoom) {
-          if (MozLoopService.isChatWindowOpen(message.roomToken)) {
+          let roomWindow = this._getOpenRoom(message.roomToken);
+          if (roomWindow) {
+            roomWindow.focus();
             sendResponse(hasRoom, true);
           } else {
             this.open(message.roomToken);

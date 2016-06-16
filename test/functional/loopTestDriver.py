@@ -103,12 +103,37 @@ class LoopTestDriver():
 
         button.click()
 
-    def local_close_share_panel(self):
+    def local_copy_url_and_close_share_panel(self):
         copyLink = self.wait_for_element_displayed(By.CLASS_NAME, "btn-copy")
 
         self.wait_for_element_enabled(copyLink, 120)
 
         copyLink.click()
+
+        room_url = pyperclip.paste()
+
+        room_url = self.adjust_url(room_url)
+
+        self.assertIn(urlparse.urlparse(room_url).scheme, ['http', 'https'],
+                      "room URL returned by server: '" + room_url +
+                      "' has invalid scheme")
+
+        return room_url
+
+    def find_new_room_window(self, timeout=10):
+        if not hasattr(self, "main_window"):
+            self.main_window = self.marionette.current_chrome_window_handle
+
+        Wait(self.marionette, timeout)\
+            .until(lambda m: len(self.marionette.chrome_window_handles) == 2)
+
+        handles = self.marionette.chrome_window_handles
+
+        handles.remove(self.main_window)
+
+        self.marionette.switch_to_window(handles[0])
+
+        return handles[0]
 
     def switch_to_standalone(self):
         self.set_context("content")

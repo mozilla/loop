@@ -514,6 +514,16 @@ loop.shared.actions = (function() {
       handlesRoom: Boolean
     }),
 
+    UpdateUserAgentRoomState: Action.define("updateUserAgentRoomState", {
+      status: String
+    }),
+
+    /**
+     * Opens a room via the user agent chrome, e.g. Firefox.
+     */
+    OpenUserAgentRoom: Action.define("openUserAgentRoom", {
+    }),
+
     /**
      * Starts the process for the user to start the WebRTC connection.
      * XXX: should move to some roomActions module - refs bug 1079284

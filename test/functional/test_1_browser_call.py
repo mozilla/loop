@@ -179,7 +179,7 @@ class Test1BrowserCall(LoopTestDriver, MarionetteTestCase):
         self.local_start_a_conversation()
 
         # Force to close the share panel
-        self.local_close_share_panel()
+        self.local_copy_url_and_close_share_panel()
 
         # Check the self video in the conversation window
         self.local_check_room_self_video()

@@ -3,7 +3,8 @@ from os import environ
 # Loop server configuration
 CONTENT_SERVER_PORT = 3001
 LOOP_SERVER_PORT = environ.get("LOOP_SERVER_PORT") or 5001
-TEST_SERVER = environ.get("TEST_SERVER") or "dev"
+# XXX akita - reset default to "dev" when merge to master.
+TEST_SERVER = environ.get("TEST_SERVER") or "demo"
 USE_LOCAL_STANDALONE = environ.get("USE_LOCAL_STANDALONE") or "1"
 
 CONTENT_SERVER_URL = environ.get("CONTENT_SERVER_URL") or \
@@ -12,6 +13,7 @@ CONTENT_SERVER_URL = environ.get("CONTENT_SERVER_URL") or \
 LOOP_SERVER_URLS = {
     "local": "http://localhost:" + str(LOOP_SERVER_PORT),
     "dev": "https://loop.dev.mozaws.net",
+    "demo": "https://loop-demo.dev.mozaws.net",
     "stage": "https://loop.stage.mozaws.net",
     "prod": "https://loop.services.mozilla.com"
 }

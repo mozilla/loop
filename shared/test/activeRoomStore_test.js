@@ -414,20 +414,6 @@ describe("loop.store.ActiveRoomStore", function() {
     });
   });
 
-  describe("#userAgentHandlesRoom", function() {
-    it("should update the store state", function() {
-      store.setStoreState({
-        UserAgentHandlesRoom: false
-      });
-
-      store.userAgentHandlesRoom(new sharedActions.UserAgentHandlesRoom({
-        handlesRoom: true
-      }));
-
-      expect(store.getStoreState().userAgentHandlesRoom).eql(true);
-    });
-  });
-
   describe("#initiateWebRTC", function() {
     var hasDevicesStub;
 
@@ -444,162 +430,32 @@ describe("loop.store.ActiveRoomStore", function() {
       expect(store.getStoreState().failureReason).eql(undefined);
     });
 
-    describe("Standalone Handles Room", function() {
-      it("should dispatch a MetricsLogJoinRoom action", function() {
-        store.initiateWebRTC();
+    it("should set the state to MEDIA_WAIT if media devices are present", function() {
+      hasDevicesStub.callsArgWith(0, true);
 
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.MetricsLogJoinRoom({
-            userAgentHandledRoom: false
-          }));
-      });
+      store.initiateWebRTC();
 
-      it("should set the state to MEDIA_WAIT if media devices are present", function() {
-        hasDevicesStub.callsArgWith(0, true);
-
-        store.initiateWebRTC();
-
-        expect(store.getStoreState().roomState).eql(ROOM_STATES.MEDIA_WAIT);
-      });
-
-      it("should not set the state to MEDIA_WAIT if no media devices are present", function() {
-        hasDevicesStub.callsArgWith(0, false);
-
-        store.initiateWebRTC();
-
-        expect(store.getStoreState().roomState).eql(ROOM_STATES.READY);
-      });
-
-      it("should dispatch `ConnectionFailure` if no media devices are present", function() {
-        hasDevicesStub.callsArgWith(0, false);
-
-        store.initiateWebRTC();
-
-        sinon.assert.called(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.ConnectionFailure({
-            reason: FAILURE_DETAILS.NO_MEDIA
-          }));
-      });
+      expect(store.getStoreState().roomState).eql(ROOM_STATES.MEDIA_WAIT);
     });
 
-    describe("User Agent Handles Room", function() {
-      var channelListener;
+    it("should not set the state to MEDIA_WAIT if no media devices are present", function() {
+      hasDevicesStub.callsArgWith(0, false);
 
-      beforeEach(function() {
-        store.setStoreState({
-          userAgentHandlesRoom: true,
-          roomToken: "fakeToken",
-          standalone: true
-        });
+      store.initiateWebRTC();
 
-        sandbox.stub(window, "addEventListener", function(eventName, listener) {
-          if (eventName === "WebChannelMessageToContent") {
-            channelListener = listener;
-          }
-        });
-        sandbox.stub(window, "removeEventListener", function(eventName, listener) {
-          if (eventName === "WebChannelMessageToContent" &&
-              listener === channelListener) {
-            channelListener = null;
-          }
-        });
+      expect(store.getStoreState().roomState).eql(ROOM_STATES.READY);
+    });
 
-        sandbox.stub(console, "error");
-      });
+    it("should dispatch `ConnectionFailure` if no media devices are present", function() {
+      hasDevicesStub.callsArgWith(0, false);
 
-      it("should dispatch a MetricsLogJoinRoom action", function() {
-        store.initiateWebRTC();
+      store.initiateWebRTC();
 
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.MetricsLogJoinRoom({
-            userAgentHandledRoom: true,
-            ownRoom: true
-          }));
-      });
-
-      it("should dispatch an event to Firefox", function() {
-        sandbox.stub(window, "dispatchEvent");
-
-        store.initiateWebRTC();
-
-        sinon.assert.calledOnce(window.dispatchEvent);
-        sinon.assert.calledWithExactly(window.dispatchEvent, new window.CustomEvent(
-          "WebChannelMessageToChrome", {
-          detail: {
-            id: "loop-link-clicker",
-            message: {
-              command: "openRoom",
-              roomToken: "fakeToken"
-            }
-          }
+      sinon.assert.called(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new sharedActions.ConnectionFailure({
+          reason: FAILURE_DETAILS.NO_MEDIA
         }));
-      });
-
-      it("should log an error if Firefox doesn't handle the room", function() {
-        // Start the join.
-        store.initiateWebRTC();
-
-        // Pretend Firefox calls back.
-        channelListener({
-          detail: {
-            id: "loop-link-clicker",
-            message: null
-          }
-        });
-
-        sinon.assert.calledOnce(console.error);
-      });
-
-      // XXX akita - move the in-browser window opening code.
-      it.skip("should dispatch a JoinedRoom action if the room was successfully opened", function() {
-        // Start the join.
-        store.initiateWebRTC();
-
-        // Pretend Firefox calls back.
-        channelListener({
-          detail: {
-            id: "loop-link-clicker",
-            message: {
-              response: true,
-              alreadyOpen: false
-            }
-          }
-        });
-
-        sinon.assert.called(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.JoinedRoom({
-            apiKey: "",
-            sessionToken: "",
-            sessionId: "",
-            expires: 0
-          }));
-      });
-
-      it("should dispatch a ConnectionFailure action if the room was already opened", function() {
-        // Start the join.
-        store.initiateWebRTC();
-
-        // Pretend Firefox calls back.
-        channelListener({
-          detail: {
-            id: "loop-link-clicker",
-            message: {
-              response: true,
-              alreadyOpen: true
-            }
-          }
-        });
-
-        sinon.assert.called(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.ConnectionFailure({
-            reason: FAILURE_DETAILS.ROOM_ALREADY_OPEN
-          }));
-      });
     });
   });
 
@@ -736,29 +592,6 @@ describe("loop.store.ActiveRoomStore", function() {
       store.connectionFailure(connectionFailureAction);
 
       expect(store.getStoreState().roomState).eql(ROOM_STATES.FAILED);
-    });
-
-    it("should set the state to `FAILED` if the user agent is handling the room", function() {
-      store.setStoreState({
-        standalone: true,
-        userAgentHandlesRoom: true
-      });
-
-      store.connectionFailure(connectionFailureAction);
-
-      expect(store.getStoreState().roomState).eql(ROOM_STATES.FAILED);
-    });
-
-    it("should not do any other cleanup if the user agent is handling the room", function() {
-      store.setStoreState({
-        standalone: true,
-        userAgentHandlesRoom: true
-      });
-
-      store.connectionFailure(connectionFailureAction);
-
-      sinon.assert.notCalled(fakeMultiplexGum.reset);
-      sinon.assert.notCalled(fakeSdkDriver.disconnectSession);
     });
   });
 

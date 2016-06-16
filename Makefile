@@ -505,7 +505,8 @@ karma: build
 
 # Which test server to run against. Defaults to the dev server so that anyone
 # can run the tests. Possible values: local, dev, stage, production.
-TEST_SERVER := $(shell echo $${TEST_SERVER-dev})
+# XXX akita set default back to "dev" when merging to master.
+TEST_SERVER := $(shell echo $${TEST_SERVER-demo})
 
 # Defaults to using the local standalone. If 0 will use the standalone associated
 # with the server defined by TEST_SERVER.

@@ -25,6 +25,12 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
    *                                      and registering to consume actions.
    */
   var ServerConnectionStore = loop.store.createStore({
+    USER_AGENT_ROOM_STATUS: {
+      UNKNOWN: "unknown",
+      OPENED: "opened",
+      ALREADY_OPEN: "alreadyopen"
+    },
+
     /**
      * The time factor to adjust the expires time to ensure that we send a refresh
      * before the expiry. Currently set as 90%.
@@ -37,9 +43,12 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
      */
     actions: [
       "fetchServerData",
+      "openUserAgentRoom",
       "setupWebRTCTokens",
       "setupWindowData",
       "updateRoomInfo",
+      "updateUserAgentRoomState",
+      "userAgentHandlesRoom",
       "windowUnload"
     ],
 
@@ -66,7 +75,12 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
         // The encryption key for the room.
         roomCryptoKey: null,
         // True if this is running in the standalone context.
-        standalone: false
+        standalone: false,
+        // Whether or not Firefox can handle this room in the conversation
+        // window, rather than us handling it in the standalone.
+        userAgentHandlesRoom: undefined,
+        // The state of the user agent room, e.g. already opened or opened.
+        userAgentRoomsStatus: this.USER_AGENT_ROOM_STATUS.UNKNOWN
       };
     },
 
@@ -149,9 +163,7 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
 
       var userAgentHandlesPromise = this._promiseDetectUserAgentHandles();
 
-      var joinRoomPromise = this._joinRoom();
-
-      return Promise.all([dataPromise, userAgentHandlesPromise, joinRoomPromise]).then(function(results) {
+      return Promise.all([dataPromise, userAgentHandlesPromise]).then(function(results) {
         this._initRoomListeners();
 
         // We batch up actions and send them once we've got all the data, so that
@@ -368,6 +380,97 @@ loop.store.ServerConnectionStore = (function(mozL10n) {
 
         this._setRefreshTimeout(result.expires);
       }.bind(this));
+    },
+
+    /**
+     * Updates the status record for the user agent room.
+     *
+     * @param  {sharedActions.UpdateUserAgentRoomState} actionData
+     */
+    updateUserAgentRoomState: function(actionData) {
+      this.setStoreState({
+        userAgentRoomsStatus: actionData.status
+      });
+    },
+
+    /**
+     * Hands off the room join to Firefox.
+     */
+    openUserAgentRoom: function() {
+      var channelListener;
+
+      function handleRoomOpenResponse(e) {
+        if (e.detail.id !== "loop-link-clicker") {
+          return;
+        }
+
+        window.removeEventListener("WebChannelMessageToContent", channelListener);
+
+        if (!e.detail.message || !e.detail.message.response) {
+          // XXX Firefox didn't handle this, even though it said it could
+          // previously. We should add better user feedback here.
+          console.error("Firefox didn't handle room it said it could.");
+        } else if (e.detail.message.alreadyOpen) {
+          this.dispatcher.dispatch(new sharedActions.UpdateUserAgentRoomState({
+            status: this.USER_AGENT_ROOM_STATUS.ALREADY_OPEN
+          }));
+        } else {
+          this.dispatcher.dispatch(new sharedActions.UpdateUserAgentRoomState({
+            status: this.USER_AGENT_ROOM_STATUS.OPENED
+          }));
+        }
+      }
+
+      channelListener = handleRoomOpenResponse.bind(this);
+
+      window.addEventListener("WebChannelMessageToContent", channelListener);
+
+      // Now we're set up, dispatch an event.
+      window.dispatchEvent(new window.CustomEvent("WebChannelMessageToChrome", {
+        detail: {
+          id: "loop-link-clicker",
+          message: {
+            command: "openRoom",
+            roomToken: this._storeState.roomToken
+          }
+        }
+      }));
+    },
+
+    /**
+     * Handles the userAgentHandlesRoom action. Updates the store's data with
+     * the new state.
+     *
+     */
+    userAgentHandlesRoom: function(actionData) {
+      this.setStoreState({
+        userAgentHandlesRoom: actionData.handlesRoom
+      });
+
+      // If we're desktop, then this is an error as we don't expect to hit this.
+      if (!this._storeState.standalone) {
+        console.error("Shouldn't have called UserAgentHandlesRoom for non-standalone");
+        return;
+      }
+
+      // If we're handing off the room, then just log it.
+      // XXX akita - Bug 1280808. This is probably wrong, we should be logging
+      // this in openUserAgentRoom, but then the "false" case below is wrong.
+      // This needs general stats tidy up.
+      if (this._storeState.userAgentHandlesRoom) {
+        this.dispatcher.dispatch(new sharedActions.MetricsLogJoinRoom({
+          userAgentHandledRoom: true,
+          ownRoom: true
+        }));
+        return;
+      }
+
+      // Otherwise, go ahead and start the join.
+      this.dispatcher.dispatch(new sharedActions.MetricsLogJoinRoom({
+        userAgentHandledRoom: false
+      }));
+
+      this._joinRoom();
     },
 
     /**

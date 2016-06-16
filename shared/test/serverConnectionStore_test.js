@@ -129,7 +129,6 @@ describe("loop.store.ServerConnectionStore", function() {
         windowType: "room",
         token: "fakeToken"
       });
-      sandbox.stub(store, "_joinRoom").returns(Promise.resolve());
     });
 
     it("should store the room token", function() {
@@ -138,15 +137,6 @@ describe("loop.store.ServerConnectionStore", function() {
         windowType: "room"
       })).then(() => {
         expect(store.getStoreState("roomToken")).eql("fake");
-      });
-    });
-
-    it("should call `_joinRoom`", function() {
-      return store.fetchServerData(new sharedActions.FetchServerData({
-        token: "fake",
-        windowType: "room"
-      })).then(() => {
-        sinon.assert.calledOnce(store._joinRoom);
       });
     });
 
@@ -286,6 +276,7 @@ describe("loop.store.ServerConnectionStore", function() {
         });
       });
     });
+
     describe("User Agent Room Handling", function() {
       var channelListener, roomDetails;
 
@@ -443,6 +434,161 @@ describe("loop.store.ServerConnectionStore", function() {
     });
   });
 
+  describe("#userAgentHandlesRoom", function() {
+    beforeEach(function() {
+      store.setStoreState({
+        userAgentHandlesRoom: false,
+        standalone: true
+      });
+
+      sandbox.stub(store, "_joinRoom").returns(Promise.resolve());
+    });
+
+    it("should update the store state", function() {
+      store.userAgentHandlesRoom(new sharedActions.UserAgentHandlesRoom({
+        handlesRoom: true
+      }));
+
+      expect(store.getStoreState().userAgentHandlesRoom).eql(true);
+    });
+
+    it("should dispatch a MetricsLogJoinRoom action when the user agent handles the room", function() {
+      store.userAgentHandlesRoom(new sharedActions.UserAgentHandlesRoom({
+        handlesRoom: true
+      }));
+
+      sinon.assert.calledOnce(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new sharedActions.MetricsLogJoinRoom({
+          userAgentHandledRoom: true,
+          ownRoom: true
+        }));
+    });
+
+    it("should dispatch a MetricsLogJoinRoom action when the standalone handles the room", function() {
+      store.userAgentHandlesRoom(new sharedActions.UserAgentHandlesRoom({
+        handlesRoom: false
+      }));
+
+      sinon.assert.calledOnce(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new sharedActions.MetricsLogJoinRoom({
+          userAgentHandledRoom: false
+        }));
+    });
+
+    it("should call _joinRoom when the standalone handles the room", function() {
+      store.userAgentHandlesRoom(new sharedActions.UserAgentHandlesRoom({
+        handlesRoom: false
+      }));
+
+      sinon.assert.calledOnce(store._joinRoom);
+    });
+  });
+
+  describe("#openUserAgentRoom", function() {
+    var channelListener;
+
+    beforeEach(function() {
+      store.setStoreState({
+        userAgentHandlesRoom: true,
+        roomToken: "fakeToken",
+        standalone: true
+      });
+
+      sandbox.stub(window, "addEventListener", function(eventName, listener) {
+        if (eventName === "WebChannelMessageToContent") {
+          channelListener = listener;
+        }
+      });
+      sandbox.stub(window, "removeEventListener", function(eventName, listener) {
+        if (eventName === "WebChannelMessageToContent" &&
+            listener === channelListener) {
+          channelListener = null;
+        }
+      });
+
+      sandbox.stub(console, "error");
+    });
+
+    it("should dispatch an event to Firefox", function() {
+      sandbox.stub(window, "dispatchEvent");
+
+      store.openUserAgentRoom();
+
+      sinon.assert.calledOnce(window.dispatchEvent);
+      sinon.assert.calledWithExactly(window.dispatchEvent, new window.CustomEvent(
+        "WebChannelMessageToChrome", {
+        detail: {
+          id: "loop-link-clicker",
+          message: {
+            command: "openRoom",
+            roomToken: "fakeToken"
+          }
+        }
+      }));
+    });
+
+    it("should log an error if Firefox doesn't handle the room", function() {
+      // Start the join.
+      store.openUserAgentRoom();
+
+      // Pretend Firefox calls back.
+      channelListener({
+        detail: {
+          id: "loop-link-clicker",
+          message: null
+        }
+      });
+
+      sinon.assert.calledOnce(console.error);
+    });
+
+    it("should dispatch a UpdateUserAgentRoomState action if the room was successfully opened", function() {
+      // Start the join.
+      store.openUserAgentRoom();
+
+      // Pretend Firefox calls back.
+      channelListener({
+        detail: {
+          id: "loop-link-clicker",
+          message: {
+            response: true,
+            alreadyOpen: false
+          }
+        }
+      });
+
+      sinon.assert.called(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new sharedActions.UpdateUserAgentRoomState({
+          status: store.USER_AGENT_ROOM_STATUS.OPENED
+        }));
+    });
+
+    it("should dispatch a UpdateUserAgentRoomState action if the room was already opened", function() {
+      // Start the join.
+      store.openUserAgentRoom();
+
+      // Pretend Firefox calls back.
+      channelListener({
+        detail: {
+          id: "loop-link-clicker",
+          message: {
+            response: true,
+            alreadyOpen: true
+          }
+        }
+      });
+
+      sinon.assert.called(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new sharedActions.UpdateUserAgentRoomState({
+          status: store.USER_AGENT_ROOM_STATUS.ALREADY_OPEN
+        }));
+    });
+  });
+
   describe("#SetupWebRTCTokens", function() {
     it("should store the session token", function() {
       store.setupWebRTCTokens(new sharedActions.SetupWebRTCTokens({
@@ -515,7 +661,6 @@ describe("loop.store.ServerConnectionStore", function() {
           failedJoinRequest: true
         }));
     });
-
 
     it("should call Rooms:RefreshMembership before the expiresTime",
       function() {

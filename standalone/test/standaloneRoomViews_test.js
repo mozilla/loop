@@ -18,6 +18,7 @@ describe("loop.standaloneRoomViews", function() {
       dispatch,
       dispatcher,
       activeRoomStore,
+      serverConnectionStore,
       textChatStore,
       remoteCursorStore;
 
@@ -27,12 +28,18 @@ describe("loop.standaloneRoomViews", function() {
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
+    LoopMochaUtils.stubLoopRequest({
+      GetDoNotDisturb: sinon.stub().returns(true),
+      GetLoopPref: sinon.stub()
+    });
+
     dispatcher = new loop.Dispatcher();
     dispatch = sandbox.stub(dispatcher, "dispatch");
     activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, {
       mozLoop: {},
       sdkDriver: {}
     });
+    serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher);
     textChatStore = new loop.store.TextChatStore(dispatcher, {
       dataDriver: {}
     });
@@ -40,8 +47,9 @@ describe("loop.standaloneRoomViews", function() {
       sdkDriver: {}
     });
     loop.store.StoreMixin.register({
-      cursorStore: remoteCursorStore,
       activeRoomStore: activeRoomStore,
+      cursorStore: remoteCursorStore,
+      serverConnectionStore: serverConnectionStore,
       textChatStore: textChatStore
     });
 
@@ -70,10 +78,6 @@ describe("loop.standaloneRoomViews", function() {
     // Prevents audio request errors in the test console.
     sandbox.useFakeXMLHttpRequest();
     sandbox.stub(sharedUtils, "isDesktop").returns(true);
-    LoopMochaUtils.stubLoopRequest({
-      GetDoNotDisturb: sinon.stub().returns(true),
-      GetLoopPref: sinon.stub()
-    });
   });
 
   afterEach(function() {
@@ -153,10 +157,9 @@ describe("loop.standaloneRoomViews", function() {
           }));
     }
 
-    it("should display a join room button if the state is not ROOM_JOINED", function() {
-      activeRoomStore.setStoreState({
-        roomState: ROOM_STATES.READY,
-        roomName: "fakeName"
+    it("should display a join room button if the state is not ALREADY_OPEN", function() {
+      serverConnectionStore.setStoreState({
+        userAgentRoomsStatus: serverConnectionStore.USER_AGENT_ROOM_STATUS.UNKNOWN
       });
 
       view = mountTestComponent();
@@ -165,10 +168,9 @@ describe("loop.standaloneRoomViews", function() {
       expect(button.textContent).eql("rooms_room_join_label");
     });
 
-    it("should dispatch a InitiateWebRTC action when the join room button is clicked", function() {
-      activeRoomStore.setStoreState({
-        roomState: ROOM_STATES.READY,
-        roomName: "fakeName"
+    it("should dispatch an OpenUserAgentRoom action when the join room button is clicked", function() {
+      serverConnectionStore.setStoreState({
+        userAgentRoomsStatus: serverConnectionStore.USER_AGENT_ROOM_STATUS.UNKNOWN
       });
 
       view = mountTestComponent();
@@ -177,13 +179,12 @@ describe("loop.standaloneRoomViews", function() {
       TestUtils.Simulate.click(button);
 
       sinon.assert.calledOnce(dispatcher.dispatch);
-      sinon.assert.calledWithExactly(dispatcher.dispatch, new sharedActions.InitiateWebRTC());
+      sinon.assert.calledWithExactly(dispatcher.dispatch, new sharedActions.OpenUserAgentRoom());
     });
 
-    it("should display a enjoy your conversation button if the state is ROOM_JOINED", function() {
-      activeRoomStore.setStoreState({
-        roomState: ROOM_STATES.JOINED,
-        roomName: "fakeName"
+    it("should display a enjoy your conversation button if the status is OPENED", function() {
+      serverConnectionStore.setStoreState({
+        userAgentRoomsStatus: serverConnectionStore.USER_AGENT_ROOM_STATUS.OPENED
       });
 
       view = mountTestComponent();
@@ -192,10 +193,9 @@ describe("loop.standaloneRoomViews", function() {
       expect(button.textContent).eql("rooms_room_joined_own_conversation_label");
     });
 
-    it("should disable the enjoy your conversation button if the state is ROOM_JOINED", function() {
-      activeRoomStore.setStoreState({
-        roomState: ROOM_STATES.JOINED,
-        roomName: "fakeName"
+    it("should disable the enjoy your conversation button if the status is OPENED", function() {
+      serverConnectionStore.setStoreState({
+        userAgentRoomsStatus: serverConnectionStore.USER_AGENT_ROOM_STATUS.OPENED
       });
 
       view = mountTestComponent();
@@ -204,10 +204,9 @@ describe("loop.standaloneRoomViews", function() {
       expect(button.classList.contains("disabled")).eql(true);
     });
 
-    it("should not display a join button if there is a failure reason", function() {
-      activeRoomStore.setStoreState({
-        failureReason: FAILURE_DETAILS.ROOM_ALREADY_OPEN,
-        roomName: "fakeName"
+    it("should not display a join button if the state is ALREADY_OPEN", function() {
+      serverConnectionStore.setStoreState({
+        userAgentRoomsStatus: serverConnectionStore.USER_AGENT_ROOM_STATUS.ALREADY_OPEN
       });
 
       view = mountTestComponent();
@@ -216,10 +215,9 @@ describe("loop.standaloneRoomViews", function() {
       expect(button).eql(null);
     });
 
-    it("should display a room already joined message if opening failed", function() {
-      activeRoomStore.setStoreState({
-        failureReason: FAILURE_DETAILS.ROOM_ALREADY_OPEN,
-        roomName: "fakeName"
+    it("should display a room already joined message if the state is ALREADY_OPEN", function() {
+      serverConnectionStore.setStoreState({
+        userAgentRoomsStatus: serverConnectionStore.USER_AGENT_ROOM_STATUS.ALREADY_OPEN
       });
 
       view = mountTestComponent();
@@ -230,9 +228,9 @@ describe("loop.standaloneRoomViews", function() {
 
     describe("Room name priority", function() {
       it("should use room name", function() {
-        activeRoomStore.setStoreState({
-          roomState: ROOM_STATES.JOINED,
-          roomName: "fakeName"
+        serverConnectionStore.setStoreState({
+          roomName: "fakeName",
+          userAgentRoomsStatus: serverConnectionStore.USER_AGENT_ROOM_STATUS.UNKNOWN
         });
 
         view = mountTestComponent();
@@ -243,15 +241,10 @@ describe("loop.standaloneRoomViews", function() {
         .eql("fakeName");
       });
 
-      it("should use context title when there's no room title", function() {
-        activeRoomStore.setStoreState({
-          roomState: ROOM_STATES.JOINED,
-          roomContextUrls: [
-            {
-              description: "Website title",
-              location: "https://fakeurl.com"
-            }
-          ]
+      it.skip("should use context title when there's no room title", function() {
+        serverConnectionStore.setStoreState({
+          roomName: "fakeName",
+          userAgentRoomsStatus: serverConnectionStore.USER_AGENT_ROOM_STATUS.UNKNOWN
         });
 
         view = mountTestComponent();
@@ -262,14 +255,10 @@ describe("loop.standaloneRoomViews", function() {
         .eql("Website title");
       });
 
-      it("should use website url when there's no room title nor website", function() {
-        activeRoomStore.setStoreState({
-          roomState: ROOM_STATES.JOINED,
-          roomContextUrls: [
-            {
-              location: "https://fakeurl.com"
-            }
-          ]
+      it.skip("should use website url when there's no room title nor website", function() {
+        serverConnectionStore.setStoreState({
+          roomName: "fakeName",
+          userAgentRoomsStatus: serverConnectionStore.USER_AGENT_ROOM_STATUS.UNKNOWN
         });
 
         view = mountTestComponent();

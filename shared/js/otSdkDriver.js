@@ -502,6 +502,8 @@ loop.OTSdkDriver = (function() {
           break;
         case "Session.networkDisconnected":
         case "Session.forceDisconnected":
+        case "Session.subscribeCompleted":
+        case "Session.screen.subscribeCompleted":
           break;
         default:
           // We don't want unexpected events being sent to the server, so
@@ -622,6 +624,7 @@ loop.OTSdkDriver = (function() {
         srcMediaElement: sdkSubscriberVideo
       }));
 
+      this._notifyMetricsEvent("Session.subscribeCompleted");
       this._subscribedRemoteStream = true;
       if (this._checkAllStreamsConnected()) {
         this.dispatcher.dispatch(new sharedActions.MediaConnected());
@@ -655,6 +658,7 @@ loop.OTSdkDriver = (function() {
         receiving: true, srcMediaElement: sdkSubscriberVideo
       }));
 
+      this._notifyMetricsEvent("Session.screen.subscribeCompleted");
     },
 
     /**
@@ -974,13 +978,18 @@ loop.OTSdkDriver = (function() {
      * @param  {OT.Event} event
      */
     _onOTException: function(event) {
+      var baseException = "sdk.exception.";
+      if (event.target && event.target === this.screenshare) {
+        baseException += "screen.";
+      }
+
       switch (event.code) {
         case OT.ExceptionCodes.PUBLISHER_ICE_WORKFLOW_FAILED:
         case OT.ExceptionCodes.SUBSCRIBER_ICE_WORKFLOW_FAILED:
           this.dispatcher.dispatch(new sharedActions.ConnectionFailure({
             reason: FAILURE_DETAILS.ICE_FAILED
           }));
-          this._notifyMetricsEvent("sdk.exception." + event.code);
+          this._notifyMetricsEvent(baseException + event.code);
           break;
         case OT.ExceptionCodes.TERMS_OF_SERVICE_FAILURE:
           this.dispatcher.dispatch(new sharedActions.ConnectionFailure({
@@ -988,21 +997,17 @@ loop.OTSdkDriver = (function() {
           }));
           // We still need to log the exception so that the server knows why this
           // attempt failed.
-          this._notifyMetricsEvent("sdk.exception." + event.code);
+          this._notifyMetricsEvent(baseException + event.code);
           break;
         case OT.ExceptionCodes.UNABLE_TO_PUBLISH:
           // Don't report errors for GetUserMedia events as these are expected if
           // the user denies the prompt.
           if (event.message !== "GetUserMedia") {
-            var baseException = "sdk.exception.";
-            if (event.target && event.target === this.screenshare) {
-              baseException += "screen.";
-            }
             this._notifyMetricsEvent(baseException + event.code + "." + event.message);
           }
           break;
         default:
-          this._notifyMetricsEvent("sdk.exception." + event.code);
+          this._notifyMetricsEvent(baseException + event.code);
           break;
       }
     },

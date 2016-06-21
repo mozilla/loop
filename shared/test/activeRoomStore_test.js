@@ -13,8 +13,7 @@ describe("loop.store.ActiveRoomStore", function() {
   var FAILURE_DETAILS = loop.shared.utils.FAILURE_DETAILS;
   var SCREEN_SHARE_STATES = loop.shared.utils.SCREEN_SHARE_STATES;
   var ROOM_INFO_FAILURES = loop.shared.utils.ROOM_INFO_FAILURES;
-  var sandbox, dispatcher, store, requestStubs, fakeSdkDriver, fakeMultiplexGum;
-  var standaloneMediaRestore;
+  var sandbox, dispatcher, store, requestStubs, fakeSdkDriver;
   var clock;
 
   beforeEach(function() {
@@ -55,15 +54,6 @@ describe("loop.store.ActiveRoomStore", function() {
       endScreenShare: sinon.stub().returns(true)
     };
 
-    fakeMultiplexGum = {
-      reset: sandbox.spy()
-    };
-
-    standaloneMediaRestore = loop.standaloneMedia;
-    loop.standaloneMedia = {
-      multiplexGum: fakeMultiplexGum
-    };
-
     store = new loop.store.ActiveRoomStore(dispatcher, {
       sdkDriver: fakeSdkDriver
     });
@@ -76,7 +66,6 @@ describe("loop.store.ActiveRoomStore", function() {
   afterEach(function() {
     sandbox.restore();
     LoopMochaUtils.restore();
-    loop.standaloneMedia = standaloneMediaRestore;
   });
 
   describe("#constructor", function() {
@@ -180,15 +169,6 @@ describe("loop.store.ActiveRoomStore", function() {
         expect(store._storeState.roomState).eql(ROOM_STATES.FAILED);
         expect(store._storeState.failureReason).eql(FAILURE_DETAILS.EXPIRED_OR_INVALID);
       });
-
-    it("should reset the multiplexGum", function() {
-      store.roomFailure(new sharedActions.RoomFailure({
-        error: fakeError,
-        failedJoinRequest: false
-      }));
-
-      sinon.assert.calledOnce(fakeMultiplexGum.reset);
-    });
 
     it("should disconnect from the servers via the sdk", function() {
       store.roomFailure(new sharedActions.RoomFailure({
@@ -1199,12 +1179,6 @@ describe("loop.store.ActiveRoomStore", function() {
       expect(store.getStoreState().failureReason).eql("FAIL");
     });
 
-    it("should reset the multiplexGum", function() {
-      store.connectionFailure(connectionFailureAction);
-
-      sinon.assert.calledOnce(fakeMultiplexGum.reset);
-    });
-
     it("should disconnect from the servers via the sdk", function() {
       store.connectionFailure(connectionFailureAction);
 
@@ -1266,7 +1240,6 @@ describe("loop.store.ActiveRoomStore", function() {
 
       store.connectionFailure(connectionFailureAction);
 
-      sinon.assert.notCalled(fakeMultiplexGum.reset);
       sinon.assert.notCalled(fakeSdkDriver.disconnectSession);
     });
   });
@@ -1912,12 +1885,6 @@ describe("loop.store.ActiveRoomStore", function() {
       sinon.assert.calledWithExactly(requestStubs.SetScreenShareState, "1234", false);
     });
 
-    it("should reset the multiplexGum", function() {
-      store.windowUnload();
-
-      sinon.assert.calledOnce(fakeMultiplexGum.reset);
-    });
-
     it("should disconnect from the servers via the sdk", function() {
       store.windowUnload();
 
@@ -1979,12 +1946,6 @@ describe("loop.store.ActiveRoomStore", function() {
         roomToken: "fakeToken",
         sessionToken: "1627384950"
       });
-    });
-
-    it("should reset the multiplexGum", function() {
-      store.leaveRoom();
-
-      sinon.assert.calledOnce(fakeMultiplexGum.reset);
     });
 
     it("should disconnect from the servers via the sdk", function() {

@@ -1123,10 +1123,6 @@ loop.store.ActiveRoomStore = (function(mozL10n) {
         return;
       }
 
-      if (loop.standaloneMedia) {
-        loop.standaloneMedia.multiplexGum.reset();
-      }
-
       if (this._browserSharingListener) {
         // Remove the browser sharing listener as we don't need it now.
         loop.unsubscribe("BrowserSwitch", this._browserSharingListener);

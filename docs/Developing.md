@@ -11,8 +11,8 @@ Assuming you have the basic utilities, then you also need:
 
 * [node.js](https://nodejs.org/). Version 0.10 is currently required.
 * [Python](https://www.python.org/). Version 2.7 is currently used.
-** [pip](https://pip.pypa.io/en/stable/)
-** [virtualenv](https://pypi.python.org/pypi/virtualenv), installed globally via pip.
+  * [pip](https://pip.pypa.io/en/stable/)
+  * [virtualenv](https://pypi.python.org/pypi/virtualenv), installed globally via pip.
 * For testing and developing the add-on:
   * Any Firefox build later than 45.0a1, although
     [nightly](https://nightly.mozilla.org/) is typically used by Loop's developers.
@@ -291,7 +291,7 @@ $ LOOP_SERVER_URL=https://path/to/server make runserver
 
 Replace the server path with one of:
 
-* Development server: https://loop-dev.stage.mozaws.net
+* Development server: https://loop.dev.mozaws.net
 * Production server: https://loop.services.mozilla.com
 
 (Generally its better to use the development server than the production one to
@@ -304,7 +304,7 @@ server:
 (since changing the pref below will loose your previously created conversations).
 See the [Running](#running) section above for how to create a profile and use it.
 * Visit about:config, change the loop.server preference to be
-https://loop-dev.stage.mozaws.net/v0
+https://loop.dev.mozaws.net/v0
 * Restart Firefox after changing the pref
 * From the Hello panel, select "Browse this page with a friend"
 * Copy the url, and paste it into a browser window, but change the url

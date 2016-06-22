@@ -32,8 +32,8 @@ There are various parts to creating a release:
 * [Test it](#testing-before-release)
 * [Tag the release](#tagging-a-release)
 * Ship to one or all of:
-  * [Standalone](#shipping-standalone)
-  * [mozilla-central](#shipping-to-mozilla-central)
+  * [Standalone](#shipping-standalone-web-pages-andor-mozilla-central)
+  * [mozilla-central](#shipping-standalone-web-pages-andor-mozilla-central)
   * [AMO](#shipping-to-amo)
 * [Update version number of master](#bumping-version-number-of-master)
 
@@ -136,63 +136,101 @@ $ # Push the tag, if the version is 0.3.0, then the tag will be v0.3.0
 $ git push upstream <tag>
 ```
 
-### Shipping Standalone
+### Shipping standalone web pages and/or mozilla-central
 
-* Once tagged, create a bug similar to bug [1245912](https://bugzilla.mozilla.org/show_bug.cgi?id=1245912)
-* In the bug:
-  * Provide the tag and changelog details
-  * Provide any extra information about changes, e.g. any configuration changes
-    require for the release.
-  * Provide any details of required timescales.
+Both the standalone web pages, and shipping to mozilla-central may be done via
+one script.
 
-### Shipping to mozilla-central
+Prerequisites:
+* The version to release has been tagged, and the tags pushed to the main loop repo.
+  * The tag is assumed to be in the format `v1.1.1` as created by `npm version`
+* A bugzilla account and API key
+* A git repo for fx-team
+  * git-cinnibar is recommended, especially for using the faster artifact builds.
 
-Note: Normally we land onto an integration branch before it moves to master.
+Running the script:
 
-Note: This process assumes you have gecko-dev git repo checked out, and the
-[git-moz-tools](https://old.etherpad-mozilla.org/moz-git-tools) installed.
-
-```shell
-$ cd ../gecko-dev
-$ git checkout fx-team
-$ git pull upstream fx-team
-$ cd ../loop
-$ # Assuming nothing else is landed on the release branch. Could equally check
-$ # out the tag here.
-$ git checkout release
-$ make export_mc
-$ cd ../gecko-dev
-$ make build
-$ ./browser/extensions/loop/run-all-loop-tests.sh
-```
-
-If the tests don't pass, stop and figure out why. Re-release if necessary.
-
-File a bug for merging the version of the add-on, e.g.
-[bug 1245912](https://bugzilla.mozilla.org/show_bug.cgi?id=1245912).
+This will run it against the development bugzilla instance. To run against production
+add the argument `--prod`.
 
 ```shell
-$ git checkout -b bug-<number>
-$ # Add/remove files as necessary
-$ git add ...
-$ git remove ...
-$ # For merges to mozilla-central, we are landing this with r=self for approved Firefox reviews.
-$ git commit -m "Bug <number> - Update Loop system add-on to version <version>. r=<ircnick> for already reviewed code" -a
-$ git-bz attach -n -e <number> HEAD
+$ ./bin/create_releases.py --username <bugzilla username> --apikey <bugzilla api key> \
+    --rel-version <release version> --mozilla-central-repo ../fx-team-git \
+    --irc-nick coolperson
 ```
 
-In the editor, uncomment `:me+`, add any extra notes, and let the patch upload.
+The script will check the tag and your login for bugzilla, and then it will prompt
+for what to release.
+
+#### Shipping standalone
+
+When asked for the previous release version, this should be the previous release
+to *standalone*, not necessarily the previous tag.
 
 ```shell
-$ # Now push to fx-team
-$ cd ../fx-team
-$ hg pull -u
-$ cd ../gecko-dev
-$ git-push-to-hg -t ../fx-team HEAD
-$ cd ../fx-team
-$ hg qfinish -a
-$ hg push
+Release standalone?
+(y/n): y
+Creating a bug for standalone
+Please enter the previous release version:
+1.2.5
+Please enter required timescales, e.g.:
+We'd like this to be deployed to production this week please, assuming no issues found.
+--> No particular requirement, as soon as reasonably possible.
 ```
+
+Once entered, the script will create a bug, the id and url will be output.
+
+You will then need to co-ordinate with QA and Cloud Services ops to get them to
+do the release to staging, then to production. It is advisable to cc them on the
+bug.
+
+#### Shipping mozilla-central.
+
+Note: as part of its work, the script will do a build, followed by a test run
+to ensure there are no obvious errors with the release.
+
+```shell
+Release to mozilla-central
+(y/n): y
+Exporting to m-c
+Push result to try (assumes git-cinnibar)?
+(y/n): n
+Checking out default
+Creating new branch for version 1.3.2
+Doing a git export...
+```
+
+Follow by lots of build and test output.
+
+If the tests fail, you will need to reset the git repo, and delete the temporary
+branch:
+
+```shell
+fx-team-git$ git reset --hard HEAD
+fx-team-git$ git clean -f browser/extensions/loop
+fx-team-git$ git checkout master
+fx-team-git$ git branch -D <version number>
+```
+
+If asked about what files to attach, just exit the editor.
+
+When successful the script ends with:
+
+```shell
+Filing bug...
+Bug id is: 1154362
+Attaching patch to bug
+runProcess  ['git-bz', 'attach', '-n', 'bugzilla-dev.allizom.org:1154362', 'HEAD']
+Attached Bug-1154362---Land-version-132-of-the-Loop-system-.patch
+Done, please:
+- Check the diffs in the bug
+- Add r+ as the review flag
+- Merge branch 1.3.2 and push to fx-team
+```
+
+Do what the script says to get the patch pushed to fx-team. If it then lands
+successfully, sheriffs will typically merge it to mozilla-central within about
+24 hours.
 
 ### Shipping to AMO
 

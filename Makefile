@@ -14,12 +14,35 @@ LOOP_PRODUCT_HOMEPAGE_URL := $(shell echo $${LOOP_PRODUCT_HOMEPAGE_URL-"https://
 # This should always be a nn.* version, so that the add-on is compatible with not
 # only the release but any security/stability releases as well.
 # Note that MOZ_APP_MAXVERSION is the variable name used by mozilla-central.
-MOZ_APP_MAXVERSION=49.*
+MOZ_APP_MAXVERSION=50.*
 
 # Work around for realpath not working as expected
 NODE_LOCAL_BIN := $(abspath ./node_modules/.bin)
 REPO_BIN_DIR := ./bin
 RSYNC := rsync --archive --exclude='*.jsx'
+
+BUILT := ./built
+ADD-ON := add-on
+BUILT_ADD_ON := $(BUILT)/$(ADD-ON)
+DIST := ./dist
+DIST_EXPORT_DIR := ./dist/export-gecko
+XPI_NAME := loop@mozilla.org.xpi
+XPI_FILE := $(BUILT)/$(XPI_NAME)
+
+VENV := .venv
+BABEL := $(NODE_LOCAL_BIN)/babel --retain-lines
+ESLINT := $(NODE_LOCAL_BIN)/eslint
+FLAKE8 := $(NODE_LOCAL_BIN)/flake8
+
+# For building a dev xpi, set this in the environment/on the command line, e.g.
+# `DEV_XPI=1 make build`.
+ifdef DEV_XPI
+LOOP_XPI_DATE=`date +"%Y%m%d%H%M"`
+LOOP_DEV_XPI_DEFS=-D LOOP_DEV_XPI=1
+else
+LOOP_XPI_DATE=
+LOOP_DEV_XPI_DEFS=
+endif
 
 .PHONY: install
 install: node_modules
@@ -36,35 +59,12 @@ dist: build dist_xpi dist_export dist_standalone
 
 .PHONY: distclean
 distclean: clean
-	rm -rf dist
 	rm -rf node_modules
+	rm -rf $(VENV)
 
 .PHONY: distserver
 distserver: remove_old_config dist_standalone
 	LOOP_CONTENT_DIR=`pwd`/dist/standalone node bin/server.js
-
-BUILT := ./built
-ADD-ON := add-on
-BUILT_ADD_ON := $(BUILT)/$(ADD-ON)
-DIST := ./dist
-DIST_EXPORT_DIR := ./dist/export-gecko
-XPI_NAME := loop@mozilla.org.xpi
-XPI_FILE := $(BUILT)/$(XPI_NAME)
-
-VENV := $(BUILT)/.venv
-BABEL := $(NODE_LOCAL_BIN)/babel --retain-lines
-ESLINT := $(NODE_LOCAL_BIN)/eslint
-FLAKE8 := $(NODE_LOCAL_BIN)/flake8
-
-# For building a dev xpi, set this in the environment/on the command line, e.g.
-# `DEV_XPI=1 make build`.
-ifdef DEV_XPI
-LOOP_XPI_DATE=`date +"%Y%m%d%H%M"`
-LOOP_DEV_XPI_DEFS=-D LOOP_DEV_XPI=1
-else
-LOOP_XPI_DATE=
-LOOP_DEV_XPI_DEFS=
-endif
 
 # In the PACKAGE_VERSION below we:
 # - parse package.json
@@ -489,6 +489,10 @@ eslint:
 flake8: $(VENV)
 	. $(VENV)/bin/activate && flake8 .
 
+.PHONY: check_strings
+check_strings:
+	@$(VENV)/bin/python bin/stringsCompletenessTest.py
+
 .PHONY: lint
 lint: eslint flake8
 
@@ -510,8 +514,9 @@ LOOP_SERVER := $(shell echo $${LOOP_SERVER-../loop-server})
 # Either path to the browser, or one of nightly, aurora, beta, firefox.
 TEST_BROWSER := $(shell echo $${TEST_BROWSER-nightly})
 
-ifdef TEST_E10S
-E10S_ARGS = --e10s
+# Disable e10s by default until bug 1254132 is fixed.
+ifndef TEST_E10S
+E10S_ARGS = --disable-e10s
 endif
 
 # Note: the path can be a file path or a url.
@@ -531,7 +536,6 @@ functional: build $(XPI_FILE)
 	 USE_LOCAL_STANDALONE=$(USE_LOCAL_STANDALONE) \
 	 LOOP_XPI_FILE=$(XPI_FILE) \
 	$(VENV)/bin/marionette --binary `./bin/getfx.js -b $(TEST_BROWSER)` \
-	                       --type=browser \
 	                       --gecko-log $(BUILT)/functional/gecko.log \
 	                       $(E10S_ARGS) \
 	                       $(SYMBOLS_ARGS) \
@@ -567,6 +571,7 @@ export_mc: build dist_export
 .PHONY: clean
 clean:
 	rm -rf $(BUILT)
+	rm -rf $(DIST)
 
 .PHONY: cleanbuild
 cleanbuild: clean build

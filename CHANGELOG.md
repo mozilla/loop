@@ -1,6 +1,83 @@
 # Changelog
 
-## 1.4.0
+## 1.4.1
+
+### New
+
+* Bug 1276672 - disable browser_mozLoop_telemetry.js on win7_opt for zombieleak failures. r=RyanVM. [Joel Maher]
+
+* Bug 1281252 - Add better logging for subscribing completing and improve exception logging. r=dmose. [Mark Banner]
+
+* No bug. Remove obsolete references to standaloneMedia/multiplexGum. r=Mardak. [Mark Banner]
+
+* Bug 1261845 - Wrong background and tooltip for Hello icon during the tour. r=Standard8. [Chris Rafuse]
+
+* Bug 1275088 - Remove unused histograms. r=Standard8. [David Critchley]
+
+* Bug 1253825 - Fix intermittent issue with clearInterval attempting to clear the wrong timers, caused by missing stubs. r=mancas. [Mark Banner]
+
+* Bug 1266041 - Disable copypanel test for linux. rs=dmose. [Ed Lee]
+
+* Bug 1261005 - Remove old SocialShareDropdown and associated code. r=mancas. [Mark Banner]
+
+* Bug 1276182 - Upgrade marionette and get functional tests working with the new API. r=dmose. [Mark Banner]
+
+* Bug 1272414 - rip out qemu/browser/b2g flags from marionette manifests, r=AutomatedTester. [Gijs Kruitbosch]
+
+* No bug. Update urls for dev servers following server configuration change. r=dcritch. [Mark Banner]
+
+* Bug 1262540 - Prototype simple en-US string properties completeness test (#356) [Chris Rafuse]
+
+* Bug 1268539 - Add a script to simplify the standalone and release to m-c processes. r=dmose. [Mark Banner]
+
+* No bug. Follow-up to bug 1270525 - Change the babel plugin versions to be fixed. rs=fzzzy. [Mark Banner]
+
+### Chores
+
+* Update L10n from changeset c456463d0c7668e477eba384cf9ab57ce183ef36. [Mark Banner]
+
+* Update babel-plugin-transform-es2015-modules-commonjs to version 6.10.3. r=Standard8. [Greenkeeper]
+
+* Update eslint to version 2.13.1. r=Mardak. [Greenkeeper]
+
+* Update express to version 4.14.0. r=Standard8. [Greenkeeper]
+
+* Update babel-cli to version 6.10.1. r=Standard8. [Greenkeeper]
+
+* Update babel-plugin-transform-es2015-block-scoping to version 6.10.1. r=Standard8. [Greenkeeper]
+
+* Update eslint to version 2.12.0. r=Mardak. [Greenkeeper]
+
+* Update fx-runner to version 1.0.3. r=Standard8. [Greenkeeper]
+
+* Update Firefox max version to match the new nightly version. rs=release-bump. [Mark Banner]
+
+* Update eslint to version 2.11.1. r=fcampo. [greenkeeperio-bot]
+
+* Update mocha to version 2.5.3. r=Standard8. [Greenkeeper]
+
+* Update mocha to version 2.5.2. r=Standard8. [Greenkeeper]
+
+* Update mocha to version 2.5.1. r=Standard8. [Greenkeeper]
+
+* Update mocha to version 2.5.0. r=Standard8. [Greenkeeper]
+
+* Update react* to version 15.1.0. r=Standard8. [Greenkeeper]
+
+* Update firefox-profile to version 0.4.0. r=Standard8. [Greenkeeper]
+
+* Update webpack to version 1.13.1. r=Standard8. [Greenkeeper]
+
+* Update babel-cli and various babel-plugin-transform-es2015-* to version 6.9.0. r=Standard8. [greenkeeperio-bot]
+
+* Update master version following 1.4.x releases. [Mark Banner]
+
+### Other
+
+* Fix document formatting in install requirements for developers. r=mancas. [Mark Banner]
+
+
+## v1.4.0 (2016-05-17)
 
 ### New
 
@@ -87,6 +164,8 @@
 * Update eslint to version 2.9.0. [greenkeeperio-bot]
 
 ### Other
+
+* 1.4.0. [Mark Banner]
 
 * Follow-up to bug 1262441 - Add back the string that's used on the standalone infobar. r=dcritch. [Mark Banner]
 

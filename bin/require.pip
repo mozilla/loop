@@ -1,5 +1,5 @@
-# If you add new dependencies, please regenerate with `pip freeze` to ensure
-# all sub-dependencies are included.
+# If you add new dependencies, please regenerate with `.venv/bin/pip freeze` to
+# ensure all sub-dependencies are included.
 blessings==1.6
 bugsy==0.9.0
 browsermob-proxy==0.7.1
@@ -27,7 +27,6 @@ moztest==0.7
 mozversion==1.4
 pep8==1.7.0
 pyflakes==1.1.0
-pyperclip==1.5.27
 pystache==0.5.4
 requests==2.9.1
 smmap==0.9.0

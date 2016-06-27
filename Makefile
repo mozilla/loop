@@ -486,9 +486,11 @@ update_locale: $(VENV)
 # Tests
 #
 
-eslint:
+.PHONY: eslint
+eslint: install
 	$(ESLINT) --ext .js --ext .jsm --ext .jsx .
 
+.PHONY: flake8
 flake8: $(VENV)
 	. $(VENV)/bin/activate && flake8 .
 

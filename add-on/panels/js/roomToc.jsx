@@ -47,9 +47,16 @@ loop.roomToc = (function(mozL10n) {
 
       let pageStore = new loop.store.PageStore(dispatcher, { dataDriver });
 
-      // XXX akita bug 1279042 Use user set name instead of fake name.
-      dispatcher.dispatch(
-        new sharedActions.SetOwnDisplayName({ displayName: "Room Owner" }));
+      // Load the username from storage, or use random guest name
+      loop.request("GetLoopPref", "username")
+        .then(storedName => {
+          let username = storedName ||
+                         "Room Owner"; // XXX akita localize me
+          dispatcher.dispatch(
+            new sharedActions.SetOwnDisplayName({
+              displayName: username
+            }));
+        });
 
       loop.store.StoreMixin.register({
         participantStore,

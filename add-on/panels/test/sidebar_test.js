@@ -24,15 +24,17 @@ describe("loop.sidebar", function() {
         return "en-US";
       },
       SetLoopPref: setLoopPrefStub,
-      GetLoopPref: function(prefName) {
+      GetLoopPref: sandbox.spy(function(prefName) {
         switch (prefName) {
           case "debug.sdk":
           case "debug.dispatcher":
             return false;
+          case "username":
+            return "Fake Username";
           default:
             return "http://fake";
         }
-      },
+      }),
       GetAllConstants: function() {
         return {
           LOOP_SESSION_TYPE: {
@@ -156,6 +158,17 @@ describe("loop.sidebar", function() {
       sinon.assert.calledOnce(requestStubs["TelemetryAddValue"]);
       sinon.assert.calledWithExactly(requestStubs["TelemetryAddValue"],
         "LOOP_ACTIVITY_COUNTER", constants.LOOP_MAU_TYPE.OPEN_CONVERSATION);
+    });
+
+    it("should call SetOwnDisplayName with the username returned by GetLoopPref if set",
+      function() {
+        loop.sidebar.init();
+
+        sinon.assert.calledWithExactly(requestStubs["GetLoopPref"], "username");
+
+        sinon.assert.calledWithExactly(loop.Dispatcher.prototype.dispatch,
+          new loop.shared.actions.SetOwnDisplayName(
+            { displayName: "Fake Username" }));
     });
   });
 

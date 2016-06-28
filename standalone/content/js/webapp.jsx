@@ -211,12 +211,20 @@ loop.webapp = (function(_, OT, mozL10n) {
     let snackbarStore = new loop.store.SnackbarStore(dispatcher);
     let pageStore = new loop.store.PageStore(dispatcher, { dataDriver });
 
-    // XXX akita bug 1279042 - need to get displayname from username pref
-    // rather than defaulting
-    dispatcher.dispatch(
-      new sharedActions.SetOwnDisplayName({
-        displayName: "Guest " + Math.random().toFixed(1).slice(-1)
-      }));
+    // Load the username from storage, or use random guest name
+    loop.request("GetLoopPref", "username")
+      .then(storedName => {
+        let username = storedName ||
+                       "Guest " + Math.random().toFixed(1).slice(-1);
+        // save it for future (so it's not random anymore)
+        loop.request("SetLoopPref", "username", username);
+
+        // from now on, use this name (till changed by user / session)
+        dispatcher.dispatch(
+          new sharedActions.SetOwnDisplayName({
+            displayName: username
+          }));
+      });
 
     loop.store.StoreMixin.register({
       activeRoomStore,

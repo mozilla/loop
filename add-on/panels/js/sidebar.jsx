@@ -196,9 +196,14 @@ loop.sidebar = (function(mozL10n) {
         dataDriver
       });
 
-      // XXX akita bug 1279042 Use user set name instead of fake name.
-      dispatcher.dispatch(
-        new sharedActions.SetOwnDisplayName({ displayName: "Room Owner" }));
+      // Load the username from storage, or fallback to "Room Owner"
+      loop.request("GetLoopPref", "username").then(storedName => {
+          let username = storedName || "Room Owner"; // XXX akita localize this
+          dispatcher.dispatch(
+            new sharedActions.SetOwnDisplayName({
+              displayName: username
+            }));
+        });
 
       loop.store.StoreMixin.register({
         activeRoomStore,

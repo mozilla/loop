@@ -12,10 +12,32 @@ describe("loop.webapp", function() {
       sandbox,
       dispatcher,
       mozL10nGet,
-      remoteCursorStore;
+      remoteCursorStore,
+      requestStubs;
 
   beforeEach(function() {
-    sandbox = sinon.sandbox.create();
+    function fakeGetPref(prefName) {
+        console.error("in fakeGetPref");
+        switch (prefName) {
+          case "debug.sdk":
+          case "debug.dispatcher":
+            return false;
+          case "username":
+            return "Fake Username";
+          default:
+            return "http://fake";
+        }
+    }
+
+    sandbox = LoopMochaUtils.createSandbox();
+    LoopMochaUtils.stubLoopRequest(requestStubs = {
+      GetLoopPref: sinon.spy(fakeGetPref),
+      SetLoopPref: sinon.stub()
+    });
+
+    sandbox.stub(localStorage, "getItem", fakeGetPref);
+    sandbox.stub(loop.shared.utils, "isDesktop").returns(false);
+
     dispatcher = new loop.Dispatcher();
 
     mozL10nGet = sandbox.stub(navigator.mozL10n, "get", function(x) {
@@ -74,6 +96,20 @@ describe("loop.webapp", function() {
           windowPath: "/c/faketoken",
           windowHash: "#fakeKey"
         }));
+    });
+
+    it.skip("should call SetOwnDisplayName with the username returned by GetLoopPref if set",
+      function() {
+        loop.webapp.init();
+
+        // XXX akita for some reason the stub isn't being called at all.  It
+        // kinda looks like SyncThenable isn't being (properly?) installed
+        // over the global Promise object, or else it has some internal bug.
+        sinon.assert.calledOnce(requestStubs.GetLoopPref);
+        sinon.assert.calledWithExactly(requestStubs.GetLoopPref, "username");
+        sinon.assert.calledWithExactly(loop.Dispatcher.prototype.dispatch,
+          new loop.shared.actions.SetOwnDisplayName(
+            { displayName: "Fake Username" }));
     });
   });
 

@@ -221,6 +221,7 @@
 
 .toc-item > .toc-tile > .tile-wrapper > .tile-icon > img {
   max-width: 32px;
+  object-fit: contain;
 }
 
 .toc-item > .toc-tile > .tile-wrapper > .tile-screenshot {

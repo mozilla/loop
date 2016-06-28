@@ -1,6 +1,23 @@
 # Changelog
 
-## 1.4.1
+## 1.4.2
+
+### New
+
+* Bug 1270081 - 'Start a conversation...' menu item title capitalization fixed. r=Standard8. [Towkir Ahmed]
+
+* Bug 1282765 - Update OpenTok SDK to 2.7.6 to include iceRestart fixes. r=fcampo. [Mark Banner]
+
+* Bug 1274237 - Make the tab sharing UI handle better following delaying the sharing until after media connection. r=Mardak. [Mark Banner]
+
+* Bug 1274237 - Delay tab sharing startup until after AV start. r=Mardak. [David Critchley]
+
+### Chores
+
+* Update L10n from changeset 5cd217c8f35f7f17509946a011ea312e54268dac. [Mark Banner]
+
+
+## v1.4.1 (2016-06-22)
 
 ### New
 
@@ -73,6 +90,8 @@
 * Update master version following 1.4.x releases. [Mark Banner]
 
 ### Other
+
+* 1.4.1. [Mark Banner]
 
 * Fix document formatting in install requirements for developers. r=mancas. [Mark Banner]
 

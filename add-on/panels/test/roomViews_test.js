@@ -374,39 +374,6 @@ describe("loop.roomViews", function() {
               }
             }));
         });
-
-      it("should dispatch a `StartBrowserShare` action when the SESSION_CONNECTED state is entered", function() {
-        activeRoomStore.setStoreState({ roomState: ROOM_STATES.READY });
-        mountTestComponent();
-
-        activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
-
-        sinon.assert.calledOnce(dispatcher.dispatch);
-        sinon.assert.calledWithExactly(dispatcher.dispatch,
-          new sharedActions.StartBrowserShare());
-      });
-
-      it("should not dispatch a `StartBrowserShare` action when the previous state was HAS_PARTICIPANTS", function() {
-        activeRoomStore.setStoreState({ roomState: ROOM_STATES.HAS_PARTICIPANTS });
-        mountTestComponent();
-
-        activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
-
-        sinon.assert.notCalled(dispatcher.dispatch);
-      });
-
-      it("should not dispatch a `StartBrowserShare` action when the previous state was SESSION_CONNECTED", function() {
-        activeRoomStore.setStoreState({ roomState: ROOM_STATES.SESSION_CONNECTED });
-        mountTestComponent();
-
-        activeRoomStore.setStoreState({
-          roomState: ROOM_STATES.SESSION_CONNECTED,
-          // Additional change to force an update.
-          screenSharingState: "fake"
-        });
-
-        sinon.assert.notCalled(dispatcher.dispatch);
-      });
     });
 
     describe("#render", function() {

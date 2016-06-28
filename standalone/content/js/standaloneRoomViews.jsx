@@ -251,6 +251,13 @@ loop.standaloneRoomViews = (function(mozL10n) {
       }
     },
 
+    componentWillUnmount: function() {
+      if (this._waitTimer) {
+        clearTimeout(this._waitTimer);
+        delete this._waitTimer;
+      }
+    },
+
     componentWillReceiveProps: function(nextProps) {
       switch (nextProps.roomState) {
         // Reset waiting for the next time the user joins.
@@ -802,8 +809,14 @@ loop.standaloneRoomViews = (function(mozL10n) {
     },
 
     render: function() {
+      // We make the screen share div displayed any time we've got a screen
+      // share, or when the remote video is displayed. This ensures we don't ever
+      // get a "large" remote video.
+      // XXX Really this should be refactored to avoid the re-ordering
+      // characteristics that were available for the original design.
       var displayScreenShare = !!(this.state.receivingScreenShare ||
-        this.props.screenSharePosterUrl);
+        this.props.screenSharePosterUrl || this._isRemoteLoading() ||
+        this.props.remotePosterUrl || this.state.remoteSrcMediaElement);
 
       return (
         <div className="room-conversation-wrapper standalone-room-wrapper">
@@ -833,7 +846,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
             renderRemoteVideo={this.shouldRenderRemoteVideo()}
             screenShareMediaElement={this.state.screenShareMediaElement}
             screenSharePosterUrl={this.props.screenSharePosterUrl}
-            screenSharingPaused={this.state.streamPaused}
+            screenSharingPaused={this.state.streamPaused && !this._isScreenShareLoading()}
             showInitialContext={true}
             showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
             showTile={this._shouldRenderTile()}>

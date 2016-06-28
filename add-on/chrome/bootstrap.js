@@ -877,6 +877,25 @@ var WindowListener = {
       _browserSharePaused: false,
 
       /**
+       * Stores details about the last notification.
+       *
+       * @type {Object}
+       */
+      _lastNotification: {},
+
+      /**
+       * Used to determine if the browser sharing info bar is currently being
+       * shown or not.
+       */
+      _showingBrowserSharingInfoBar: function() {
+        let browser = gBrowser.selectedBrowser;
+        let box = gBrowser.getNotificationBox(browser);
+        let notification = box.getNotificationWithValue(kBrowserSharingNotificationId);
+
+        return !!notification;
+      },
+
+      /**
        * Shows an infobar notification at the top of the browser window that warns
        * the user that their browser tabs are being broadcasted through the current
        * conversation.
@@ -884,9 +903,24 @@ var WindowListener = {
        * @return {void}
        */
       _maybeShowBrowserSharingInfoBar: function(currentRoomToken) {
-        this._hideBrowserSharingInfoBar();
-
         let participantsCount = this.LoopRooms.getNumParticipants(currentRoomToken);
+
+        if (this._showingBrowserSharingInfoBar()) {
+          // When we first open the room, there will be one or zero partipicants
+          // in the room. The notification box changes when there's more than one,
+          // so work that out here.
+          let notAlone = participantsCount > 1;
+          let previousNotAlone = this._lastNotification.participantsCount <= 1;
+
+          // If we're not actually changing the notification bar, then don't
+          // re-display it. This avoids the bar sliding in twice.
+          if (notAlone !== previousNotAlone &&
+              this._browserSharePaused === this._lastNotification.paused) {
+            return;
+          }
+
+          this._hideBrowserSharingInfoBar();
+        }
 
         let initStrings = this._setInfoBarStrings(participantsCount > 1, this._browserSharePaused);
 
@@ -936,6 +970,9 @@ var WindowListener = {
 
         // Keep showing the notification bar until the user explicitly closes it.
         bar.persistence = -1;
+
+        this._lastNotification.participantsCount = participantsCount;
+        this._lastNotification.paused = this._browserSharePaused;
       },
 
       /**

@@ -189,15 +189,6 @@ loop.roomViews = (function(mozL10n) {
           })
         }));
       }
-
-      // Now that we're ready to share, automatically start sharing a tab only
-      // if we're not already connected to the room via the sdk, e.g. not in the
-      // case a remote participant just left.
-      if (nextState.roomState === ROOM_STATES.SESSION_CONNECTED &&
-          !(this.state.roomState === ROOM_STATES.SESSION_CONNECTED ||
-            this.state.roomState === ROOM_STATES.HAS_PARTICIPANTS)) {
-        this.props.dispatcher.dispatch(new sharedActions.StartBrowserShare());
-      }
     },
 
     /**

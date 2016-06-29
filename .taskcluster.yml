@@ -18,7 +18,7 @@ tasks:
       command:
         - "/bin/bash"
         - "-lc"
-        - "git clone {{event.head.repo.url}} repo && cd repo && git checkout {{event.base.repo.branch}} && make lint"
+        - "git clone {{event.head.repo.url}} repo && cd repo && git checkout {{event.head.repo.branch}} && make lint"
     extra:
       github:
         env: true
@@ -40,7 +40,7 @@ tasks:
       command:
         - "/bin/bash"
         - "-lc"
-        - "./bin/setup-x11.sh && sudo apt-get update && sudo apt-get upgrade -y google-chrome-stable && git clone {{event.head.repo.url}} repo && cd repo && git checkout {{event.base.repo.branch}} && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2 && FIREFOX_BIN=`pwd`/firefox/firefox make karma"
+        - "./bin/setup-x11.sh && sudo apt-get update && sudo apt-get upgrade -y google-chrome-stable && git clone {{event.head.repo.url}} repo && cd repo && git checkout {{event.head.repo.branch}} && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2 && FIREFOX_BIN=`pwd`/firefox/firefox make karma"
     extra:
       github:
         env: true
@@ -62,7 +62,7 @@ tasks:
       command:
         - "/bin/bash"
         - "-lc"
-        - "./bin/setup.sh && git clone {{event.head.repo.url}} repo && cd repo && git checkout {{event.base.repo.branch}} && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2 && TEST_BROWSER=`pwd`/firefox/firefox TEST_SERVER=dev make functional"
+        - "./bin/setup.sh && git clone {{event.head.repo.url}} repo && cd repo && git checkout {{event.head.repo.branch}} && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2 && TEST_BROWSER=`pwd`/firefox/firefox TEST_SERVER=dev make functional"
       artifacts:
         'public':
           type: 'directory'

@@ -23,7 +23,9 @@ tasks:
       github:
         env: true
         events:
-          - pull_request.*
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.reopened
           - push
   - provisionerId: "{{ taskcluster.docker.provisionerId }}"
     metadata:
@@ -43,7 +45,9 @@ tasks:
       github:
         env: true
         events:
-          - pull_request.*
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.reopened
           - push
   - provisionerId: "{{ taskcluster.docker.provisionerId }}"
     metadata:
@@ -67,5 +71,7 @@ tasks:
       github:
         env: true
         events:
-          - pull_request.*
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.reopened
           - push

@@ -13,11 +13,11 @@ describe("loop.shared.views.TextChatView", function() {
   var fixtures = document.querySelector("#fixtures");
   var mozL10n = navigator.mozL10n || document.mozL10n;
 
-  var dispatcher, fakeDataDriver, originalLanguage, sandbox, store;
+  let dispatcher, clock, fakeDataDriver, originalLanguage, sandbox, store;
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
-    sandbox.useFakeTimers();
+    clock = sandbox.useFakeTimers();
 
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
@@ -53,6 +53,7 @@ describe("loop.shared.views.TextChatView", function() {
 
   afterEach(function() {
     sandbox.restore();
+    clock.restore();
     ReactDOM.unmountComponentAtNode(fixtures);
     mozL10n.language = originalLanguage;
   });
@@ -790,5 +791,93 @@ describe("loop.shared.views.TextChatView", function() {
           var node = ReactDOM.findDOMNode(view);
           expect(node.querySelectorAll(".notification-icon").length).to.eql(1);
         });
+  });
+
+  describe("Add page button", () => {
+    let metadataStub, view;
+
+    function mountTestComponent() {
+      return TestUtils.renderIntoDocument(
+        React.createElement(loop.shared.views.chat.TextChatInputView, {
+          dispatcher: dispatcher,
+          showPlaceholder: false,
+          textChatEnabled: true
+        }));
+    }
+
+    beforeEach(() => {
+      metadataStub = sandbox.stub();
+      LoopMochaUtils.stubLoopRequest({
+        GetSelectedTabMetadata: metadataStub
+      });
+      sandbox.stub(loop.shared.utils, "getPageMetadata", arg => {
+        if (arg !== "error") {
+          return Promise.resolve({
+                                  title: "FakeTitle",
+                                  thumbnail_img: "FakeThumbnail",
+                                  url: "http://fakeurl.com"
+                                });
+        }
+
+        return {
+          then: function() {
+            return {
+              catch: function(cb) {
+                cb();
+              }
+            };
+          }
+        };
+      });
+      view = mountTestComponent();
+    });
+
+    afterEach(() => {
+      LoopMochaUtils.restore();
+    });
+
+    function stubRequest(isValid = true) {
+      metadataStub.returns({
+        title: "FakeTitle",
+        thumbnail_img: "FakeThumbnail",
+        url: isValid ? "http://fakeurl.com" : "error"
+      });
+    }
+
+    it("should change state to `success` a page has been added", () => {
+      stubRequest();
+      view.handleAddURL();
+
+      expect(view.state.success).eql(true);
+    });
+
+    it("should change state to `error` a page has been added", () => {
+      stubRequest(false);
+      view.handleAddURL();
+
+      expect(view.state.error).eql(true);
+    });
+
+    it("should reset state after a few seconds", () => {
+      stubRequest();
+      view.handleAddURL();
+      clock.tick(view.constructor.RESET_TIMEOUT);
+      expect(view.state.error).eql(false);
+      expect(view.state.success).eql(false);
+      expect(view.state.working).eql(false);
+    });
+
+    it("should dispatch an action to add a page", () => {
+      stubRequest();
+      view.handleAddURL();
+
+      sinon.assert.calledOnce(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new sharedActions.AddPage({
+        title: "FakeTitle",
+        thumbnail_img: "FakeThumbnail",
+        url: "http://fakeurl.com"
+      }));
+    });
   });
 });

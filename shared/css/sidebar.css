@@ -491,11 +491,16 @@ html[dir="rtl"] .text-chat-entry.received .speech-bubble-arrow {
 }
 
 .text-chat-box {
+  display: flex;
   margin: auto;
   flex: 0 0 auto;
   max-height: 40px;
   min-height: 40px;
   width: 100%;
+}
+
+.text-chat-box > form {
+  flex-grow: 1;
 }
 
 .text-chat-box > form > input {
@@ -535,6 +540,56 @@ html[dir="rtl"] .text-chat-entry.received .speech-bubble-arrow {
 /* turn the visible border blue as a visual indicator of focus */
 .text-chat-box > form > input:focus {
   border-top: 1px solid #66c9f2;
+}
+
+.text-chat-box > .add-url {
+  width: 40px;
+  height: 40px;
+  background-color: inherit;
+  border: solid 1px #ebebeb;
+  padding: initial;
+}
+
+.text-chat-box > .add-urlr:hover {
+  background-color: rgba(51, 51, 51, 0.1);
+}
+
+.text-chat-box > .add-url:after {
+  content: url("../img/icons-16x16.svg#add");
+}
+
+.text-chat-box > .add-url:hover:after {
+  content: url("../img/icons-16x16.svg#add-hover");
+}
+
+/* XXX akita use final assets */
+.text-chat-box > .add-url.loading:after {
+  content: "";
+  /* place the animation */
+  background-image: url("../img/spinner.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 40%;
+  /* 12 is the number of lines in the spinner image */
+  animation: rotate-spinner 1s steps(12, end) infinite;
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+
+.text-chat-box > .add-url.success:after {
+  content: url("../img/icons-16x16.svg#checkmark");
+}
+
+.text-chat-box > .add-url.error:after {
+  content: "";
+  background-image: url("../img/sad_hello_icon_64x64.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 30px 30px;
+  display: block;
+  width: 40px;
+  height: 40px;
 }
 
 /*------------------------------------*\

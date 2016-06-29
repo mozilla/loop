@@ -332,6 +332,10 @@ loop.shared.views.chat = (function(mozL10n) {
    *                                        text chat box won't be displayed.
    */
   var TextChatInputView = React.createClass({
+    statics: {
+      RESET_TIMEOUT: 3000
+    },
+
     mixins: [
       React.addons.PureRenderMixin
     ],
@@ -344,7 +348,10 @@ loop.shared.views.chat = (function(mozL10n) {
 
     getInitialState: function() {
       return {
-        messageDetail: ""
+        error: false,
+        messageDetail: "",
+        success: false,
+        working: false
       };
     },
 
@@ -387,10 +394,58 @@ loop.shared.views.chat = (function(mozL10n) {
       this.setState({ messageDetail: "" });
     },
 
+    _resetState: function() {
+      this.setState({
+        error: false,
+        success: false
+      });
+    },
+
+    /**
+     * Handles clicking add button - dispatches an add page action.
+     */
+    handleAddURL: function() {
+      if (this.state.working) {
+        return;
+      }
+
+      this.setState({
+        working: true
+      });
+
+      // XXX akita: this is a workaround till Bug 1273497 is landed
+      loop.request("GetSelectedTabMetadata").then(metadata => {
+        loop.shared.utils.getPageMetadata(metadata.url).then(result => {
+          this.setState({
+            success: true,
+            working: false
+          });
+          // Reset state after 3 seconds
+          setTimeout(this._resetState, this.constructor.RESET_TIMEOUT);
+          this.props.dispatcher.dispatch(new sharedActions.AddPage(result));
+        }).catch(() => {
+          this.setState({
+            error: true,
+            working: false
+          });
+          // Reset state after 3 seconds
+          setTimeout(this._resetState, this.constructor.RESET_TIMEOUT);
+        });
+      });
+    },
+
     render: function() {
       if (!this.props.textChatEnabled) {
         return null;
       }
+
+      var addUrlBtnClasses = {
+        "btn": true,
+        "add-url": true,
+        "loading": this.state.working,
+        "error": this.state.error,
+        "success": this.state.success
+      };
 
       return (
         <div className="text-chat-box">
@@ -402,6 +457,10 @@ loop.shared.views.chat = (function(mozL10n) {
               type="text"
               value={this.state.messageDetail} />
           </form>
+          <button
+            className={classNames(addUrlBtnClasses)}
+            onClick={this.handleAddURL}
+            title={"Add url to ToC"}></button>
         </div>
       );
     }
@@ -471,6 +530,7 @@ loop.shared.views.chat = (function(mozL10n) {
   return {
     TextChatEntriesView: TextChatEntriesView,
     TextChatEntry: TextChatEntry,
+    TextChatInputView: TextChatInputView,
     TextChatView: TextChatView
   };
 })(navigator.mozL10n || document.mozL10n);

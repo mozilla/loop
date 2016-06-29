@@ -192,6 +192,9 @@ loop.sidebar = (function(mozL10n) {
       let remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
         sdkDriver
       });
+      let pageStore = new loop.store.PageStore(dispatcher, {
+        dataDriver
+      });
 
       // XXX akita bug 1279042 Use user set name instead of fake name.
       dispatcher.dispatch(
@@ -199,6 +202,7 @@ loop.sidebar = (function(mozL10n) {
 
       loop.store.StoreMixin.register({
         activeRoomStore,
+        pageStore,
         participantStore,
         remoteCursorStore,
         serverConnectionStore,

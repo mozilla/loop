@@ -164,6 +164,10 @@ loop.store.ParticipantStore = function() {
      * Handle UpdateRoomInfo action by saving the id for the current user.
      */
     updateRoomInfo({ userId }) {
+      if (!userId) {
+        return;
+      }
+
       this._currentUserId = userId;
 
       // Only update if this store is tracking the current user.

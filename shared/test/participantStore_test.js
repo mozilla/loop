@@ -229,6 +229,10 @@ describe("loop.store.ParticipantStore", () => {
   });
 
   describe("updateRoomInfo", () => {
+    beforeEach(() => {
+      store._currentUserId = null;
+    });
+
     it("should remember the user id", () => {
       let action = new actions.UpdateRoomInfo({
         roomUrl: "fake",
@@ -237,6 +241,16 @@ describe("loop.store.ParticipantStore", () => {
       store.updateRoomInfo(action);
 
       expect(store._currentUserId).eql("myID");
+    });
+
+    it("should not add a new participant if user id is not defined", () => {
+      let action = new actions.UpdateRoomInfo({
+        roomUrl: "fake",
+        userId: undefined
+      });
+      store.updateRoomInfo(action);
+
+      expect(store._currentUserId).eql(null);
     });
 
     it("should update the participant record", () => {

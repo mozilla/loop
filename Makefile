@@ -486,9 +486,11 @@ update_locale: $(VENV)
 # Tests
 #
 
-eslint:
+.PHONY: eslint
+eslint: install
 	$(ESLINT) --ext .js --ext .jsm --ext .jsx .
 
+.PHONY: flake8
 flake8: $(VENV)
 	. $(VENV)/bin/activate && flake8 .
 
@@ -528,6 +530,10 @@ ifdef SYMBOLS_PATH
 SYMBOLS_ARGS = --symbols-path=$(SYMBOLS_PATH)
 endif
 
+ifndef ARTIFACT_UPLOAD_PATH
+ARTIFACT_UPLOAD_PATH=$(BUILT)/functional
+endif
+
 .PHONY: functional
 ifeq ($(SKIP_FUNCTIONAL),1)
 functional:
@@ -540,7 +546,7 @@ functional: build $(XPI_FILE)
 	 USE_LOCAL_STANDALONE=$(USE_LOCAL_STANDALONE) \
 	 LOOP_XPI_FILE=$(XPI_FILE) \
 	$(VENV)/bin/marionette --binary `./bin/getfx.js -b $(TEST_BROWSER)` \
-	                       --gecko-log $(BUILT)/functional/gecko.log \
+	                       --gecko-log $(ARTIFACT_UPLOAD_PATH)/gecko.log \
 	                       $(E10S_ARGS) \
 	                       $(SYMBOLS_ARGS) \
 	                       test/functional/manifest.ini

@@ -254,6 +254,13 @@ loop.standaloneRoomViews = (function(mozL10n) {
       }
     },
 
+    componentWillUnmount: function() {
+      if (this._waitTimer) {
+        clearTimeout(this._waitTimer);
+        delete this._waitTimer;
+      }
+    },
+
     componentWillReceiveProps: function(nextProps) {
       switch (nextProps.roomState) {
         // Reset waiting for the next time the user joins.
@@ -801,8 +808,14 @@ loop.standaloneRoomViews = (function(mozL10n) {
     },
 
     render: function() {
+      // We make the screen share div displayed any time we've got a screen
+      // share, or when the remote video is displayed. This ensures we don't ever
+      // get a "large" remote video.
+      // XXX Really this should be refactored to avoid the re-ordering
+      // characteristics that were available for the original design.
       var displayScreenShare = !!(this.state.receivingScreenShare ||
-        this.props.screenSharePosterUrl);
+        this.props.screenSharePosterUrl || this._isRemoteLoading() ||
+        this.props.remotePosterUrl || this.state.remoteSrcMediaElement);
 
       return (
         // XXX akita if we're not using / going to use StandaloneInfoBar,

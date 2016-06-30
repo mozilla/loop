@@ -19,7 +19,6 @@ describe("loop.standaloneRoomViews", function() {
       dispatcher,
       activeRoomStore,
       serverConnectionStore,
-      textChatStore,
       remoteCursorStore;
 
   var clock,
@@ -28,30 +27,9 @@ describe("loop.standaloneRoomViews", function() {
 
   beforeEach(function() {
     sandbox = LoopMochaUtils.createSandbox();
-    LoopMochaUtils.stubLoopRequest({
-      GetDoNotDisturb: sinon.stub().returns(true),
-      GetLoopPref: sinon.stub()
-    });
 
     dispatcher = new loop.Dispatcher();
     dispatch = sandbox.stub(dispatcher, "dispatch");
-    activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, {
-      mozLoop: {},
-      sdkDriver: {}
-    });
-    serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher);
-    textChatStore = new loop.store.TextChatStore(dispatcher, {
-      dataDriver: {}
-    });
-    remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
-      sdkDriver: {}
-    });
-    loop.store.StoreMixin.register({
-      activeRoomStore: activeRoomStore,
-      cursorStore: remoteCursorStore,
-      serverConnectionStore: serverConnectionStore,
-      textChatStore: textChatStore
-    });
 
     clock = sandbox.useFakeTimers();
     fakeWindow = {
@@ -78,6 +56,25 @@ describe("loop.standaloneRoomViews", function() {
     // Prevents audio request errors in the test console.
     sandbox.useFakeXMLHttpRequest();
     sandbox.stub(sharedUtils, "isDesktop").returns(true);
+
+    LoopMochaUtils.stubLoopRequest({
+      GetDoNotDisturb: sinon.stub().returns(true),
+      GetLoopPref: sinon.stub()
+    });
+
+    activeRoomStore = new loop.store.ActiveRoomStore(dispatcher, {
+      mozLoop: {},
+      sdkDriver: {}
+    });
+    serverConnectionStore = new loop.store.ServerConnectionStore(dispatcher);
+    remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
+      sdkDriver: {}
+    });
+    loop.store.StoreMixin.register({
+      cursorStore: remoteCursorStore,
+      activeRoomStore: activeRoomStore,
+      serverConnectionStore: serverConnectionStore
+    });
   });
 
   afterEach(function() {
@@ -654,6 +651,10 @@ describe("loop.standaloneRoomViews", function() {
       beforeEach(function() {
         view = mountTestComponent();
         activeRoomStore.setStoreState({
+          // XXX Pretend we've been receiving a screenshare. This might be indicative
+          // of the displayScreenShare in StandaloneRoomView#render being calculated
+          // wrongly. However, it seems to work for now.
+          receivingScreenShare: true,
           roomContextUrls: [{
             description: "fakeStartPage",
             location: null

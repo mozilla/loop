@@ -962,6 +962,24 @@ describe("loop.OTSdkDriver", function() {
             new sharedActions.MediaConnected({}));
         });
 
+        it("should dispatch a connectionStatus action if both streams are up", function() {
+          driver._publishedLocalStream = true;
+
+          session.trigger("streamCreated", { stream: fakeStream });
+
+          // Called twice due to the VideoDimensionsChanged above.
+          sinon.assert.called(dispatcher.dispatch);
+          sinon.assert.calledWithMatch(dispatcher.dispatch,
+            new sharedActions.ConnectionStatus({
+              event: "Session.subscribeCompleted",
+              state: "receiving",
+              // Local stream connection is faked, so connections/sendStreams=0.
+              connections: 0,
+              sendStreams: 0,
+              recvStreams: 1
+            }));
+        });
+
         describe("Data channel setup", function() {
           beforeEach(function() {
             fakeStream.connection = fakeConnection;
@@ -1082,6 +1100,44 @@ describe("loop.OTSdkDriver", function() {
           sinon.assert.called(dispatcher.dispatch);
           sinon.assert.calledWithExactly(dispatcher.dispatch,
             new sharedActions.ReceivingScreenShare({ receiving: true }));
+        });
+
+        describe("screen share subscribe completed", function() {
+          beforeEach(function() {
+            fakeStream.videoType = "screen";
+
+            session.subscribe.yieldsOn(driver, null, fakeSubscriberObject,
+              videoElement).returns(this.fakeSubscriberObject);
+          });
+
+          it("should dispatch ReceivingScreenShare on completion", function() {
+            fakeStream.connection = fakeConnection;
+            fakeStream.hasVideo = false;
+
+            session.trigger("streamCreated", { stream: fakeStream });
+
+            sinon.assert.called(dispatcher.dispatch);
+            sinon.assert.calledWithExactly(dispatcher.dispatch,
+              new sharedActions.ReceivingScreenShare({
+                receiving: true,
+                srcMediaElement: videoElement
+              }));
+          });
+
+          it("should dispatch a connectionStatus action", function() {
+            session.trigger("streamCreated", { stream: fakeStream });
+
+            // Called twice due to the VideoDimensionsChanged above.
+            sinon.assert.called(dispatcher.dispatch);
+            sinon.assert.calledWithMatch(dispatcher.dispatch,
+              new sharedActions.ConnectionStatus({
+                event: "Session.screen.subscribeCompleted",
+                state: "receiving",
+                connections: 0,
+                sendStreams: 0,
+                recvStreams: 1
+              }));
+          });
         });
       });
     });

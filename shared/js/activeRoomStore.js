@@ -469,6 +469,13 @@ loop.store.ActiveRoomStore = (function() {
         remoteVideoEnabled: actionData.hasVideo,
         remoteSrcMediaElement: actionData.srcMediaElement
       });
+
+      // We start browser sharing here so that it starts *after* the audio/video
+      // has connected. This is to attempt to help performance when a room is
+      // initially joined.
+      if (this._isDesktop) {
+        this.startBrowserShare();
+      }
     },
 
     /**
@@ -553,10 +560,9 @@ loop.store.ActiveRoomStore = (function() {
       if (Array.isArray(windowId)) {
         windowId = windowId[0];
       }
-      if (!windowId) {
-        return;
-      }
-      if (windowId.isError) {
+
+      // There was an error getting the windowId, so lets just reset things.
+      if (windowId && windowId.isError) {
         console.error("Error getting the windowId: " + windowId.message);
         this.dispatchAction(new sharedActions.ScreenSharingState({
           state: SCREEN_SHARE_STATES.INACTIVE
@@ -564,7 +570,26 @@ loop.store.ActiveRoomStore = (function() {
         return;
       }
 
+      // If there's no windowId, see if we've got one saved.
+      if (!windowId) {
+        // If we really don't have a window Id, then don't do anything.
+        if (!this._savedWindowId) {
+          return;
+        }
+
+        windowId = this._savedWindowId;
+        delete this._savedWindowId;
+      }
+
       var screenSharingState = this.getStoreState().screenSharingState;
+
+      // If we're inactive, or screen sharing is paused, just save the windowId
+      // for when we're ready.
+      if (screenSharingState === SCREEN_SHARE_STATES.INACTIVE ||
+          this._storeState.sharingPaused) {
+        this._savedWindowId = windowId;
+        return;
+      }
 
       if (screenSharingState === SCREEN_SHARE_STATES.PENDING) {
         // Screen sharing is still pending, so assume that we need to kick it off.
@@ -637,11 +662,11 @@ loop.store.ActiveRoomStore = (function() {
       this._browserSharingListener = this._handleSwitchBrowserShare.bind(this);
 
       // Set up a listener for watching screen shares. This will get notified
-      // with the first windowId when it is added, so we start off the sharing
+      // with the first windowId when it is added, so we may start off the sharing
       // from within the listener.
-      loop.request("AddBrowserSharingListener", this.getStoreState().windowId)
-        .then(this._browserSharingListener);
       loop.subscribe("BrowserSwitch", this._browserSharingListener);
+
+      loop.request("AddBrowserSharingListener", this.getStoreState().windowId);
     },
 
     /**
@@ -671,6 +696,16 @@ loop.store.ActiveRoomStore = (function() {
       this.setStoreState({
         sharingPaused: !actionData.enabled
       });
+
+      // If we've un-paused screen sharing, but we haven't started sharing, then
+      // we need to start that off.
+      if (actionData.enabled &&
+          this._storeState.screenSharingState === SCREEN_SHARE_STATES.PENDING) {
+        this._handleSwitchBrowserShare();
+      } else {
+        // Otherwise just toggle the stream.
+        this._sdkDriver.toggleBrowserSharing(actionData.enabled);
+      }
 
       // If unpausing, check the context as it might have changed.
       if (actionData.enabled) {

@@ -267,6 +267,7 @@ loop.StandaloneMozLoop = (function() {
   };
 
   var kMessageHandlers = {
+    AddBrowserSharingListener: function() {},
     AddConversationContext: function() {},
     HangupNow: function(data, reply) {
       var roomToken = data[0];

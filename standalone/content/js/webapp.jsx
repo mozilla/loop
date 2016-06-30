@@ -34,13 +34,15 @@ loop.webapp = (function(_, OT, mozL10n) {
 
     render: function() {
       return (
-        <div className="highlight-issue-box">
-          <div className="info-panel">
-            <div className="firefox-logo" />
-            <h1>{mozL10n.get("incompatible_browser_heading")}</h1>
-            <h4>{mozL10n.get("incompatible_browser_message")}</h4>
+        <div className="issue-box issue-unsupported-browser">
+          <div className="issue-box-content">
+            <div className="info-panel">
+              <h1>{mozL10n.get("incompatible_browser_heading2")}</h1>
+              <PromoteFirefoxView isFirefox={this.props.isFirefox} />
+              <div className="hello-logo" />
+            </div>
+            <div className="hello-supported-browser" />
           </div>
-          <PromoteFirefoxView isFirefox={this.props.isFirefox} />
         </div>
       );
     }
@@ -79,17 +81,21 @@ loop.webapp = (function(_, OT, mozL10n) {
       if (this.props.isFirefox) {
         return null;
       }
+
       return (
         <div className="promote-firefox">
-          <h3>{mozL10n.get("promote_firefox_hello_heading", { brandShortname: mozL10n.get("brandShortname") })}</h3>
           <p>
-            <a className="btn btn-large btn-accept"
+            {mozL10n.get("promote_firefox_hello_heading2", { brandShortname: mozL10n.get("brandShortname") })}
+            <a className="promote-firefox-link" href=""> {mozL10n.get("promote_firefox_hello_link_text")}</a>
+          </p>
+          <div className="get-firefox">
+            <a className="btn"
                href={loop.config.downloadFirefoxUrl}>
-              {mozL10n.get("get_firefox_button", {
+              {mozL10n.get("get_firefox_button2", {
                 brandShortname: mozL10n.get("brandShortname")
               })}
             </a>
-          </p>
+          </div>
         </div>
       );
     }

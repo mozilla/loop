@@ -19,7 +19,8 @@ loop.sidebar = (function(mozL10n) {
 
     propTypes: {
       cursorStore: React.PropTypes.instanceOf(loop.store.RemoteCursorStore).isRequired,
-      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired
     },
 
     componentWillMount: function() {
@@ -60,7 +61,8 @@ loop.sidebar = (function(mozL10n) {
 
       return (
          <DesktopSidebarView
-           dispatcher={this.props.dispatcher} />
+           dispatcher={this.props.dispatcher}
+           participantStore={this.props.participantStore} />
       );
     }
   });
@@ -69,7 +71,8 @@ loop.sidebar = (function(mozL10n) {
     mixins: [loop.store.StoreMixin("activeRoomStore")],
 
     propTypes: {
-      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired
     },
 
     getInitialState: function() {
@@ -101,6 +104,7 @@ loop.sidebar = (function(mozL10n) {
           introSeen={true}
           isFirefox={true}
           leaveRoom={this.leaveRoom}
+          participantStore={this.props.participantStore}
           video={{ enabled: !this.state.videoMuted,
                    visible: this._roomIsActive() }} />
       );
@@ -220,7 +224,8 @@ loop.sidebar = (function(mozL10n) {
 
       ReactDOM.render(<SidebarControllerView
                         cursorStore={remoteCursorStore}
-                        dispatcher={dispatcher} />, document.querySelector("#main"));
+                        dispatcher={dispatcher}
+                        participantStore={participantStore} />, document.querySelector("#main"));
 
       dispatcher.dispatch(new sharedActions.SetupWindowData({
         roomToken: roomToken

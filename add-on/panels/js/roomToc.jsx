@@ -41,8 +41,6 @@ loop.roomToc = (function(mozL10n) {
 
       var roomStore = new loop.store.RoomStore(dispatcher, { constants });
 
-      let participantStore = new loop.store.ParticipantStore(dispatcher, { dataDriver });
-
       let snackbarStore = new loop.store.SnackbarStore(dispatcher);
 
       let pageStore = new loop.store.PageStore(dispatcher, { dataDriver });
@@ -59,7 +57,6 @@ loop.roomToc = (function(mozL10n) {
         });
 
       loop.store.StoreMixin.register({
-        participantStore,
         pageStore,
         serverConnectionStore,
         roomStore
@@ -73,7 +70,6 @@ loop.roomToc = (function(mozL10n) {
                         dispatcher={dispatcher}
                         isScreenShareActive={false}
                         pageStore={pageStore}
-                        participantStore={participantStore}
                         snackbarStore={snackbarStore} />, document.querySelector("#main"));
 
       var locationData = sharedUtils.locationData();

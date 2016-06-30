@@ -859,12 +859,10 @@ loop.shared.views = (function(_, mozL10n) {
 
   var MediaLayoutView = React.createClass({
     propTypes: {
-      audio: React.PropTypes.object.isRequired,
       children: React.PropTypes.node,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isLocalLoading: React.PropTypes.bool.isRequired,
       isRemoteLoading: React.PropTypes.bool.isRequired,
-      leaveRoom: React.PropTypes.func.isRequired,
       // The poster URLs are for UI-showcase testing and development.
       localPosterUrl: React.PropTypes.string,
       localSrcMediaElement: React.PropTypes.object,
@@ -872,9 +870,7 @@ loop.shared.views = (function(_, mozL10n) {
       remotePosterUrl: React.PropTypes.string,
       remoteSrcMediaElement: React.PropTypes.object,
       renderRemoteVideo: React.PropTypes.bool.isRequired,
-      screen: React.PropTypes.object.isRequired,
-      showMediaWait: React.PropTypes.bool.isRequired,
-      video: React.PropTypes.object.isRequired
+      showMediaWait: React.PropTypes.bool.isRequired
     },
 
     _shouldShowRemoteStream: function() {
@@ -905,12 +901,6 @@ loop.shared.views = (function(_, mozL10n) {
             mediaType="local"
             posterUrl={this.props.localPosterUrl}
             srcMediaElement={this.props.localSrcMediaElement} />
-          <MediaButtonsView
-            audio={this.props.audio}
-            dispatcher={this.props.dispatcher}
-            leaveRoom={this.props.leaveRoom}
-            screen={this.props.screen}
-            video={this.props.video} />
           <MediaWaitView
             showMediaWait={this.props.showMediaWait} />
         </div>
@@ -955,7 +945,6 @@ loop.shared.views = (function(_, mozL10n) {
     propTypes: {
       audio: React.PropTypes.object.isRequired,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
-      leaveRoom: React.PropTypes.func.isRequired,
       screen: React.PropTypes.object.isRequired,
       video: React.PropTypes.object.isRequired
     },
@@ -983,9 +972,6 @@ loop.shared.views = (function(_, mozL10n) {
                 dispatcher={this.props.dispatcher}
                 muted={!this.props.screen.enabled} /> : null
           }
-          <HangUpControlButton
-            action={this.props.leaveRoom}
-            title={mozL10n.get("rooms_leave_button_label")} />
         </div>
       );
     }
@@ -1338,6 +1324,7 @@ loop.shared.views = (function(_, mozL10n) {
     ConversationToolbar: ConversationToolbar,
     EditableFieldView: EditableFieldView,
     HangUpControlButton: HangUpControlButton,
+    MediaButtonsView: MediaButtonsView,
     MediaControlButton: MediaControlButton,
     MediaLayoutView: MediaLayoutView,
     MediaView: MediaView,

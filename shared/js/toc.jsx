@@ -27,7 +27,6 @@ loop.shared.toc = (function(mozL10n) {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isScreenShareActive: React.PropTypes.bool.isRequired,
       pageStore: React.PropTypes.instanceOf(loop.store.PageStore).isRequired,
-      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
       snackbarStore: React.PropTypes.instanceOf(loop.store.SnackbarStore).isRequired
     },
 
@@ -62,7 +61,6 @@ loop.shared.toc = (function(mozL10n) {
           <RoomInfoBarView
             dispatcher={this.props.dispatcher}
             isDesktop={loop.shared.utils.isDesktop()}
-            participantStore={this.props.participantStore}
             roomName={this.state.roomName ? this.state.roomName
               : "BUG: NO NAME SPECIFIED"}
             roomToken={this.state.roomToken} />
@@ -80,7 +78,6 @@ loop.shared.toc = (function(mozL10n) {
     propTypes: {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       isDesktop: React.PropTypes.bool.isRequired,
-      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
       roomName: React.PropTypes.string.isRequired,
       roomToken: React.PropTypes.string.isRequired
     },
@@ -115,8 +112,6 @@ loop.shared.toc = (function(mozL10n) {
               label={this.state.roomName}
               onEditionComplete={this.exitEditMode} />
           </div>
-          <RoomPresenceView
-            participantStore={this.props.participantStore} />
           <RoomActionsView
             dispatcher={this.props.dispatcher} />
         </div>
@@ -361,9 +356,9 @@ loop.shared.toc = (function(mozL10n) {
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
       introSeen: React.PropTypes.bool,
       isFirefox: React.PropTypes.bool.isRequired,
-      leaveRoom: React.PropTypes.func.isRequired,
       // The poster URLs are for UI-showcase testing and development
       localPosterUrl: React.PropTypes.string,
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
       remotePosterUrl: React.PropTypes.string,
       roomState: React.PropTypes.string,
       video: React.PropTypes.object.isRequired
@@ -385,6 +380,7 @@ loop.shared.toc = (function(mozL10n) {
       }
       var storeState = this.props.activeRoomStore.getStoreState();
       return _.extend({}, storeState, {
+        hasParticipants: this.props.participantStore._hasOnlineParticipants(),
         // Used by the UI showcase.
         roomState: this.props.roomState || storeState.roomState,
         introSeen: introSeen
@@ -395,10 +391,17 @@ loop.shared.toc = (function(mozL10n) {
       this.props.activeRoomStore.on("change", function() {
         this.setState(this.props.activeRoomStore.getStoreState());
       }, this);
+
+      this.props.participantStore.on("change", function() {
+        this.setState({
+          hasParticipants: this.props.participantStore._hasOnlineParticipants()
+        });
+      }, this);
     },
 
     componentWillUnmount: function() {
       this.props.activeRoomStore.off("change", null, this);
+      this.props.participantStore.off("change", null, this);
     },
 
     /**
@@ -532,29 +535,111 @@ loop.shared.toc = (function(mozL10n) {
                 !this.state.mediaConnected);
     },
 
-    // XXX akita display MediaLayoutView only if room has participants
-    render: function() {
+    renderMediaLayoutIfNeeded: function() {
+      if (!this.state.hasParticipants) {
+        return null;
+      }
+
       return (
-        <div className="sidebar-wrapper">
-          <sharedViews.MediaLayoutView
+        <sharedViews.MediaLayoutView
+          dispatcher={this.props.dispatcher}
+          isLocalLoading={this._isLocalLoading()}
+          isRemoteLoading={this._isRemoteLoading()}
+          localPosterUrl={this.props.localPosterUrl}
+          localSrcMediaElement={this.state.localSrcMediaElement}
+          localVideoMuted={this.state.videoMuted}
+          matchMedia={this.state.matchMedia || window.matchMedia.bind(window)}
+          participantStore={this.props.participantStore}
+          remotePosterUrl={this.props.remotePosterUrl}
+          remoteSrcMediaElement={this.state.remoteSrcMediaElement}
+          renderRemoteVideo={this.shouldRenderRemoteVideo()}
+          showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT} />
+      );
+    },
+
+    render: function() {
+      let sidebarCSSClasses = {
+        "sidebar-wrapper": true,
+        "has-participants": this.state.hasParticipants
+      };
+
+      return (
+        <div className={classNames(sidebarCSSClasses)}>
+          <RoomControlsView
             audio={this.props.audio}
             dispatcher={this.props.dispatcher}
-            isLocalLoading={this._isLocalLoading()}
-            isRemoteLoading={this._isRemoteLoading()}
-            leaveRoom={this.props.leaveRoom}
-            localPosterUrl={this.props.localPosterUrl}
-            localSrcMediaElement={this.state.localSrcMediaElement}
-            localVideoMuted={this.state.videoMuted}
-            matchMedia={this.state.matchMedia || window.matchMedia.bind(window)}
-            remotePosterUrl={this.props.remotePosterUrl}
-            remoteSrcMediaElement={this.state.remoteSrcMediaElement}
-            renderRemoteVideo={this.shouldRenderRemoteVideo()}
+            hasParticipants={this.state.hasParticipants}
+            participantStore={this.props.participantStore}
             screen={{ enabled: this.state.screenSharingState !== SCREEN_SHARE_STATES.INACTIVE }}
-            showMediaWait={this.state.roomState === ROOM_STATES.MEDIA_WAIT}
             video={this.props.video} />
+          {this.renderMediaLayoutIfNeeded()}
           <loop.shared.views.chat.TextChatView
             dispatcher={this.props.dispatcher}
             showInitialContext={true} />
+        </div>
+      );
+    }
+  });
+
+  var RoomControlsView = React.createClass({
+    statics: {
+      OPEN_DELAY: 200,
+      CLOSE_DELAY: 350
+    },
+
+    propTypes: {
+      audio: React.PropTypes.object.isRequired,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      hasParticipants: React.PropTypes.bool.isRequired,
+      participantStore: React.PropTypes.instanceOf(loop.store.ParticipantStore).isRequired,
+      screen: React.PropTypes.object.isRequired,
+      video: React.PropTypes.object.isRequired
+    },
+
+    getInitialState: function() {
+      return {
+        showRoomControls: this.props.hasParticipants
+      };
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+      if (this.props.hasParticipants !== nextProps.hasParticipants) {
+        // Let's render the controls if needed
+        if (nextProps.hasParticipants) {
+          this.setState({ showRoomControls: true });
+        } else {
+          // If the controls were already rendered, let's animate them and
+          // update the state after the animation
+          ReactDOM.findDOMNode(this).classList.remove("rooms-controls-open");
+          setTimeout(() => {
+            this.setState({ showRoomControls: false });
+          }, this.constructor.CLOSE_DELAY);
+        }
+      }
+    },
+
+    componentDidUpdate: function(prevProps, prevState) {
+      if (this.state.showRoomControls !== prevState.showRoomControls && this.state.showRoomControls) {
+        setTimeout(() => {
+          ReactDOM.findDOMNode(this).classList.add("rooms-controls-open");
+        }, this.constructor.OPEN_DELAY);
+      }
+    },
+
+    render: function() {
+      if (!this.state.showRoomControls) {
+        return null;
+      }
+
+      return (
+        <div className="room-controls-wrapper">
+          <RoomPresenceView
+            participantStore={this.props.participantStore} />
+          <sharedViews.MediaButtonsView
+            audio={this.props.audio}
+            dispatcher={this.props.dispatcher}
+            screen={this.props.screen}
+            video={this.props.video} />
         </div>
       );
     }
@@ -615,6 +700,7 @@ loop.shared.toc = (function(mozL10n) {
   return {
     AddUrlPanelView: AddUrlPanelView,
     PageView: PageView,
+    RoomControlsView: RoomControlsView,
     RoomPresenceView: RoomPresenceView,
     SidebarView: SidebarView,
     TableOfContentView: TableOfContentView

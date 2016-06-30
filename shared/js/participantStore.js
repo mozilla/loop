@@ -202,6 +202,15 @@ loop.store.ParticipantStore = function() {
       // yet, so use 1 minute now. If changing this, don't forget the test.
       return [...this._storeState.participants.values()].filter(participant =>
         participant.isHere && Date.now() - participant.localPingTime <= PING_TIME);
+    },
+
+    /*
+     * Gets if the room has online participants or not.
+     *
+     * @return {Boolean} True if the room has online participants.
+     */
+    _hasOnlineParticipants() {
+      return this.getOnlineParticipants().length > 0;
     }
   });
 

@@ -677,6 +677,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
       this.props.dispatcher.dispatch(new sharedActions.InitiateWebRTC());
     },
 
+    // XXX akita leave room on page unload
     leaveRoom: function() {
       this.props.dispatcher.dispatch(new sharedActions.LeaveRoom());
     },
@@ -821,7 +822,6 @@ loop.standaloneRoomViews = (function(mozL10n) {
             dispatcher={this.props.dispatcher}
             isScreenShareActive={displayScreenShare}
             pageStore={this.props.pageStore}
-            participantStore={this.props.participantStore}
             snackbarStore={this.props.snackbarStore} />
           <sharedViews.ScreenShareView
             cursorStore={this.props.cursorStore}
@@ -837,7 +837,7 @@ loop.standaloneRoomViews = (function(mozL10n) {
                      visible: this._roomIsActive() }}
             dispatcher={this.props.dispatcher}
             isFirefox={this.props.isFirefox}
-            leaveRoom={this.leaveRoom}
+            participantStore={this.props.participantStore}
             video={{ enabled: !this.state.videoMuted,
                      visible: this._roomIsActive() }} />
         </div>

@@ -21,8 +21,8 @@ body.sidebar {
 .sidebar-wrapper > .media-layout {
   display: flex;
   flex-flow: column wrap;
-  /* 188px video height + 40px media buttons height */
-  height: calc(188px + 40px);
+  /* 188px video height */
+  height: 188px;
   position: relative;
 }
 
@@ -103,106 +103,183 @@ body.sidebar {
 }
 
 /*------------------------------------*\
+    ROOM CONTROLS
+\*------------------------------------*/
+
+.room-controls-wrapper {
+  display: flex;
+  position: relative;
+  transform: translateY(-100%);
+  transition: transform .3s ease 0s;
+  width: 100%;
+}
+
+.room-controls-wrapper.rooms-controls-open {
+  transform: translateY(0);
+}
+
+.room-controls-wrapper:after {
+  bottom: 0;
+  border-bottom: solid 1px #d8d8d8;
+  content: "";
+  display: block;
+  left: 0;
+  position: absolute;
+  width: 100%;
+}
+
+/*------------------------------------*\
     MEDIA CONTROL BUTTONS
 \*------------------------------------*/
 
-.media-layout > .media-control-buttons {
+.media-control-buttons {
   display: flex;
-  justify-content: space-around;
-  order: 2;
+  justify-content: flex-end;
+  flex-grow: 2;
 }
 
-.media-layout > .media-control-buttons > .btn,
-.media-layout > .media-control-buttons > .general-support-url {
+.media-control-buttons .btn,
+.media-control-buttons .general-support-url {
   height: 40px;
   margin-left: 1px;
   width: 42px;
 }
 
-.media-layout > .media-control-buttons > .btn-hangup {
+.media-control-buttons .btn-hangup {
   background-color: #c33c32;
 }
 
-.media-layout > .media-control-buttons > .btn-hangup:after {
+.media-control-buttons .btn-hangup:after {
   content: url("../img/leave.svg");
   margin-right: -2px;
 }
 
-html[dir="rtl"] .media-layout >
-.media-control-buttons > .btn-hangup:after {
+html[dir="rtl"] .media-control-buttons .btn-hangup:after {
   display: inline-block;
   margin-left: -2px;
   margin-right: 0;
   transform: scaleX(-1);
 }
 
-.media-layout > .media-control-buttons > .btn-hangup:hover {
+.media-control-buttons .btn-hangup:hover {
   background-color: #AF352C;
 }
 
-.media-layout > .media-control-buttons > .btn-mute-audio,
-.media-layout > .media-control-buttons > .btn-mute-video,
-.media-layout > .media-control-buttons > .btn-mute-screen {
+.media-control-buttons .btn-mute-audio,
+.media-control-buttons .btn-mute-video,
+.media-control-buttons .btn-mute-screen {
   background-color: inherit;
 }
 
-.media-layout > .media-control-buttons > .btn-mute-audio:after,
-.media-layout > .media-control-buttons > .btn-mute-audio:hover:after,
-.media-layout > .media-control-buttons > .btn-mute-audio:active:after {
+.media-control-buttons .btn-mute-audio:after,
+.media-control-buttons .btn-mute-audio:hover:after,
+.media-control-buttons .btn-mute-audio:active:after {
   content: url("../img/audio.svg");
 }
 
-.media-layout > .media-control-buttons > .btn-mute-audio.muted:after {
+.media-control-buttons .btn-mute-audio.muted:after {
   content: url("../img/audio-muted-darkgrey.svg");
 }
 
-.media-layout > .media-control-buttons > .btn-mute-video:after {
+.media-control-buttons .btn-mute-video:after {
   margin-left: -4px;
 }
 
-.media-layout > .media-control-buttons > .btn-mute-video:after,
-.media-layout > .media-control-buttons > .btn-mute-video:hover:after,
-.media-layout > .media-control-buttons > .btn-mute-video:active:after {
+.media-control-buttons .btn-mute-video:after,
+.media-control-buttons .btn-mute-video:hover:after,
+.media-control-buttons .btn-mute-video:active:after {
   content: url("../img/video.svg");
 }
 
-.media-layout > .media-control-buttons > .btn-mute-video.muted:after {
+.media-control-buttons .btn-mute-video.muted:after {
   content: url("../img/video-muted-darkgrey.svg");
 }
 
-.media-layout > .media-control-buttons > .btn-mute-screen:after {
+.media-control-buttons .btn-mute-screen:after {
   content: url("../img/screen.svg");
 }
-.media-layout > .media-control-buttons > .btn-mute-screen:after,
-.media-layout > .media-control-buttons > .btn-mute-screen:hover:after,
-.media-layout > .media-control-buttons > .btn-mute-screen:active:after {
+.media-control-buttons .btn-mute-screen:after,
+.media-control-buttons .btn-mute-screen:hover:after,
+.media-control-buttons .btn-mute-screen:active:after {
   content: url("../img/screen.svg");
 }
 
-.media-layout > .media-control-buttons > .btn-mute-screen.muted:after {
+.media-control-buttons .btn-mute-screen.muted:after {
   content: url("../img/screen-muted.svg");
 }
 
-.media-layout > .media-control-buttons > .general-support-url {
+.media-control-buttons .general-support-url {
   align-items: center;
   display: flex;
   justify-content: center;
 }
 
 /* Highlight on hover. */
-.media-layout > .media-control-buttons > .general-support-url:hover,
-.media-layout > .media-control-buttons > .btn:not(.btn-hangup):hover {
+.media-control-buttons .general-support-url:hover,
+.media-control-buttons .btn:not(.btn-hangup):hover {
   background-color: rgba(51, 51, 51, 0.1);
 }
+
+/*------------------------------------*\
+    ROOM PRESENCE
+\*------------------------------------*/
+
+.room-active-users {
+  align-items: center;
+  display: flex;
+}
+
+.room-active-users .room-user {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  background-color: #333;
+  color: #fff;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.room-active-users .room-user:hover:after {
+  background: #333;
+  background: rgba(0,0,0,.8);
+  border-radius: 5px;
+  top: 37px;
+  color: #fff;
+  content: attr(data-name);
+  position: absolute;
+  z-index: 98;
+  min-width: 120px;
+  left: 0;
+}
+
+.room-active-users .room-user:hover:before {
+  border: solid;
+  border-color: #333 transparent;
+  border-width: 0 6px 6px;
+  top: 31px;
+  content: "";
+  left: 50%;
+  position: absolute;
+  z-index: 99;
+  transform: translateX(-50%);
+}
+
 
 /*------------------------------------*\
     TEXT CHAT
 \*------------------------------------*/
 
+.sidebar-wrapper:not(.has-participants) .text-chat-view {
+  height: 100%;
+}
+
 .text-chat-view {
   flex: 0 0 auto;
   /* Leaves enough room for the streams and the media buttons */
-  height: calc(100% - 228px);
+  height: calc(100% - 188px - 40px);
   width: 250px;
   background-color: #fff;
 }

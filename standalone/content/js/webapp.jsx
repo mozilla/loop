@@ -86,7 +86,8 @@ loop.webapp = (function(_, OT, mozL10n) {
         <div className="promote-firefox">
           <p>
             {mozL10n.get("promote_firefox_hello_heading2", { brandShortname: mozL10n.get("brandShortname") })}
-            <a className="promote-firefox-link" href=""> {mozL10n.get("promote_firefox_hello_link_text")}</a>
+            {' '}
+            <a className="promote-firefox-link" href={loop.config.learnMoreUrl}>{mozL10n.get("promote_firefox_hello_link_text")}</a>
           </p>
           <div className="get-firefox">
             <a className="btn"

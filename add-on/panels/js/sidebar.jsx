@@ -193,6 +193,7 @@ loop.sidebar = (function(mozL10n) {
       var textChatStore = new loop.store.TextChatStore(dispatcher, {
         dataDriver: dataDriver
       });
+
       let remoteCursorStore = new loop.store.RemoteCursorStore(dispatcher, {
         sdkDriver
       });

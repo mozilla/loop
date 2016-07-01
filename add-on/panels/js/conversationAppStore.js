@@ -38,8 +38,13 @@ loop.store.ConversationAppStore = (function() {
 
       // Start listening for specific events, coming from the window object.
       this._eventHandlers = {};
-      ["unload", "LoopHangupNow", "socialFrameAttached", "socialFrameDetached", "ToggleBrowserSharing"]
-        .forEach(function(eventName) {
+      [
+        "unload",
+        "LoopHangupNow",
+        "socialFrameAttached",
+        "socialFrameDetached",
+        "ToggleBrowserSharing"
+      ].forEach(function(eventName) {
           var handlerName = eventName + "Handler";
           this._eventHandlers[eventName] = this[handlerName].bind(this);
           this._rootObj.addEventListener(eventName, this._eventHandlers[eventName]);

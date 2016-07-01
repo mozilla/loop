@@ -568,7 +568,7 @@ loop.shared.views = (function(_, mozL10n) {
     }
   });
 
-  /**
+ /**
    * Renders a url that's part of context on the display.
    *
    * @property {Boolean} allowClick         Set to true to allow the url to be clicked. If this
@@ -580,6 +580,8 @@ loop.shared.views = (function(_, mozL10n) {
    *                                        shown.
    * @property {String}  url                The url to be displayed. If not present or invalid,
    *                                        then this view won't be displayed.
+   * @property {String}  username           The name of the user that modified the ToC page
+   *
    */
   var ContextUrlView = React.createClass({
     mixins: [React.addons.PureRenderMixin],
@@ -634,6 +636,84 @@ loop.shared.views = (function(_, mozL10n) {
       );
     }
   });
+
+  /**
+   * Renders a tile with information about the page that has been added/deleted from the ToC.
+   *
+   * @property {Boolean} allowClick         Set to true to allow the url to be clicked. If this
+   *                                        is specified, then 'dispatcher' is also required.
+   * @property {String}  description        The description for the context url.
+   * @property {loop.Dispatcher} dispatcher
+   * @property {String}  thumbnail          The thumbnail url (expected to be a data url) to
+   *                                        display. If not specified, a fallback url will be
+   *                                        shown.
+   * @property {String}  url                The url to be displayed. If not present or invalid,
+   *                                        then this view won't be displayed.
+   * @property {String}  username           The name of the user that modified the ToC page
+   *
+   */
+  var ChatPageTileView = React.createClass({
+    mixins: [React.addons.PureRenderMixin],
+
+    propTypes: {
+      allowClick: React.PropTypes.bool.isRequired,
+      description: React.PropTypes.string,
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher),
+      thumbnail: React.PropTypes.string,
+      url: React.PropTypes.string,
+      username: React.PropTypes.string
+    },
+
+    getDefaultProps: function() {
+      return {
+        description: null,
+        thumbnail: null,
+        url: null,
+        username: null
+      };
+    },
+
+    /**
+     * Dispatches an action to record when the link is clicked.
+     */
+    handleLinkClick: function() {
+      if (!this.props.allowClick) {
+        return;
+      }
+
+      this.props.dispatcher.dispatch(new sharedActions.RecordClick({
+        linkInfo: "Shared URL"
+      }));
+    },
+
+    render: function() {
+      var description = this.props.description;
+      var thumbnail = this.props.thumbnail ||
+                      "shared/img/icons-16x16.svg#globe";
+      var url = this.props.url;
+      var username = this.props.username;
+      var sanitizedURL = loop.shared.utils.formatSanitizedContextURL(url) || {};
+
+      return (
+        <div className="context-content">
+          <p>{mozL10n.get("chat_added_page_tile", { username: username })}</p>
+          <ContextUrlLink allowClick={this.props.allowClick}
+                          description={description}
+                          handleClick={this.handleLinkClick}
+                          url={url}>
+            <img className="context-preview" src={thumbnail} />
+            <span className="context-info">
+              {description}
+              <span className="context-url">
+                {sanitizedURL.hostname}
+              </span>
+            </span>
+          </ContextUrlLink>
+        </div>
+      );
+    }
+  });
+
 
   /**
    * Renders a media element for display. This also handles displaying an avatar
@@ -1318,6 +1398,7 @@ loop.shared.views = (function(_, mozL10n) {
     AvatarView: AvatarView,
     Button: Button,
     ButtonGroup: ButtonGroup,
+    ChatPageTileView: ChatPageTileView,
     Checkbox: Checkbox,
     ContextUrlLink: ContextUrlLink,
     ContextUrlView: ContextUrlView,

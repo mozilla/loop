@@ -90,6 +90,21 @@ loop.shared.views.chat = (function(mozL10n) {
         );
       }
 
+      if (this.props.contentType === CHAT_CONTENT_TYPES.TILE_EVENT) {
+        return (
+          <div className={classes}>
+            <sharedViews.ChatPageTileView
+              allowClick={true}
+              description={this.props.extraData.tile_title}
+              dispatcher={this.props.dispatcher}
+              thumbnail={this.props.extraData.tile_thumbnail}
+              url={this.props.extraData.tile_url}
+              username={this.props.displayName} />
+            {this.props.showTimestamp ? this._renderTimestamp() : null}
+          </div>
+        );
+      }
+
       var linkClickHandler;
       if (loop.shared.utils.isDesktop()) {
         linkClickHandler = function(url) {
@@ -225,28 +240,21 @@ loop.shared.views.chat = (function(mozL10n) {
             }
             {
               this.props.messageList.map(function(entry, i) {
-                if (entry.type === CHAT_MESSAGE_TYPES.SPECIAL) {
-                  if (!this.props.showInitialContext) {
-                    return null;
-                  }
+                // if we have to show context tile,
+                // return special view
+                if (entry.type === CHAT_MESSAGE_TYPES.SPECIAL &&
+                    entry.contentType === CHAT_CONTENT_TYPES.CONTEXT) {
 
-                  switch (entry.contentType) {
-                    case CHAT_CONTENT_TYPES.CONTEXT:
-                      return (
-                        <div className="context-url-view-wrapper" key={i}>
-                          <sharedViews.ContextUrlView
-                            allowClick={true}
-                            description={entry.message}
-                            dispatcher={this.props.dispatcher}
-                            thumbnail={entry.extraData.thumbnail}
-                            url={entry.extraData.location} />
-                        </div>
-                      );
-                    default:
-                      console.error("Unsupported contentType",
-                                    entry.contentType);
-                      return null;
-                  }
+                  return !this.props.showInitialContext ? null : (
+                    <div className="context-url-view-wrapper" key={i}>
+                      <sharedViews.ContextUrlView
+                        allowClick={true}
+                        description={entry.message}
+                        dispatcher={this.props.dispatcher}
+                        thumbnail={entry.extraData.thumbnail}
+                        url={entry.extraData.location} />
+                    </div>
+                  );
                 }
 
                 /* For SENT messages there is no received timestamp. */
@@ -496,7 +504,7 @@ loop.shared.views.chat = (function(mozL10n) {
       if (!this.props.showInitialContext) {
         messageList = messageList.filter(function(item) {
           return item.type !== CHAT_MESSAGE_TYPES.SPECIAL ||
-             item.contentType !== CHAT_CONTENT_TYPES.CONTEXT;
+                 item.contentType !== CHAT_CONTENT_TYPES.CONTEXT;
         });
       }
 

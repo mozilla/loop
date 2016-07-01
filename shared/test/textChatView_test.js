@@ -567,19 +567,20 @@ describe("loop.shared.views.TextChatView", function() {
       expect(entries[1].classList.contains("received")).to.eql(true);
     });
 
-    it("should add `sent` CSS class selector to msg received from own self",
-      function() {
+    it("should not add received message if sent before", function() {
       var node = ReactDOM.findDOMNode(mountTestComponent());
       store.setStoreState({ "displayName": "Myself" });
-
-      store.receivedTextChatMessage({
+      let message = {
         contentType: CHAT_CONTENT_TYPES.TEXT,
         displayName: "Myself",
         message: "Foo",
         sentTimestamp: "2015-06-25T17:53:55.357Z"
-      });
+      };
+      store.sendTextChatMessage(message);
+      store.receivedTextChatMessage(message);
 
       expect(node.querySelector(".sent")).to.not.eql(null);
+      expect(node.querySelector(".received")).to.eql(null);
     });
 
     it("should add `received` CSS class selector to msg received from other users",
@@ -756,7 +757,7 @@ describe("loop.shared.views.TextChatView", function() {
       view = mountTestComponent();
       store.setStoreState({ "displayName": "Myself" });
 
-      store.receivedTextChatMessage({
+      store.sendTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
         displayName: "Myself",
         message: "Foo",

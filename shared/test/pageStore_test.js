@@ -11,6 +11,7 @@ describe("loop.store.PageStore", () => {
 
   beforeEach(() => {
     sandbox = LoopMochaUtils.createSandbox();
+    sandbox.useFakeTimers();
 
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
@@ -23,7 +24,8 @@ describe("loop.store.PageStore", () => {
     fakePageMetadata = {
       title: "fakeTitle",
       thumbnail_img: "fakeThumbnail",
-      url: "someFakeUrl"
+      url: "someFakeUrl",
+      timestamp: "1970-01-01T00:00:00.000Z"
     };
 
     fakeStoredPage =

@@ -191,7 +191,7 @@ loop.DataDriver = function() {
             // Remove the leading "/" from the path.
             this._processRecord(path.slice(1), data);
           } catch (ex) {
-            console.log(`Error handling EventSource.put: ${event.data}`, ex);
+            console.error(`Error handling EventSource.put: ${event.data}`, ex);
           }
           break;
 

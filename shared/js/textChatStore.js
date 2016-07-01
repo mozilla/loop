@@ -29,7 +29,8 @@ loop.store.TextChatStore = (function() {
       "updateRoomContext",
       "remotePeerDisconnected",
       "remotePeerConnected",
-      "setOwnDisplayName"
+      "setOwnDisplayName",
+      "addedPage"
     ],
 
     /**
@@ -91,19 +92,7 @@ loop.store.TextChatStore = (function() {
     _appendTextChatMessage: function(type, messageData) {
       // We create a new list to avoid updating the store's state directly,
       // which confuses the views.
-      var message = {
-        type: type,
-        contentType: messageData.contentType,
-        message: messageData.message,
-        extraData: messageData.extraData,
-        sentTimestamp: messageData.sentTimestamp,
-        receivedTimestamp: messageData.receivedTimestamp
-      };
-
-      // only chat messages will have this
-      if ("displayName" in messageData) {
-        message.displayName = messageData.displayName;
-      }
+      var message = Object.assign({}, messageData, { type: type });
 
       var newList = [].concat(this._storeState.messageList);
       var isContext = message.contentType === CHAT_CONTENT_TYPES.CONTEXT;
@@ -147,22 +136,23 @@ loop.store.TextChatStore = (function() {
       // If we don't know how to deal with this content, then skip it
       // as this version doesn't support it.
       if (actionData.contentType !== CHAT_CONTENT_TYPES.TEXT &&
-        actionData.contentType !== CHAT_CONTENT_TYPES.CONTEXT_TILE &&
-        actionData.contentType !== CHAT_CONTENT_TYPES.NOTIFICATION) {
+          actionData.contentType !== CHAT_CONTENT_TYPES.CONTEXT_TILE &&
+          actionData.contentType !== CHAT_CONTENT_TYPES.NOTIFICATION &&
+          actionData.contentType !== CHAT_CONTENT_TYPES.TILE_EVENT) {
         return;
       }
 
-      var sender = CHAT_MESSAGE_TYPES.RECEIVED;
+      // Check if the message already on the chat (sent by self)
+      let dup = this._storeState.messageList.findIndex(function(element) {
+        return element.message === actionData.message &&
+               element.displayName === actionData.displayName &&
+               element.sentTimestamp === actionData.sentTimestamp &&
+               !element.receivedTimestamp;
+      }) !== -1;
 
-      // XXX bug 1279792
-      // comparing displayedName only works if user does not change it
-      // We need to check for userId instead of name
-      if (actionData.contentType === CHAT_CONTENT_TYPES.TEXT &&
-          actionData.displayName === this.getStoreState("displayName")) {
-        sender = CHAT_MESSAGE_TYPES.SENT;
+      if (!dup) {
+        this._appendTextChatMessage(CHAT_MESSAGE_TYPES.RECEIVED, actionData);
       }
-
-      this._appendTextChatMessage(sender, actionData);
     },
 
     /**
@@ -172,24 +162,13 @@ loop.store.TextChatStore = (function() {
      * @param {sharedActions.SendTextChatMessage} actionData
      */
     sendTextChatMessage: function(actionData) {
-      var messageToSend = Object.assign({}, actionData);
 
-      // text chat types get the sender's name added
-      if (actionData.contentType === CHAT_CONTENT_TYPES.TEXT) {
-        var displayName = this.getStoreState("displayName");
-        if (displayName) {
-          Object.assign(messageToSend, { displayName: displayName }); // XXX no tst cov
-        }
-      }
-      // XXX bug 1279792
-      // Need to save messages in Firebase with a userId, so we can
-      // compare the sender with current user when we load them.
-      // Right now all saved chat messages have a displayedName that might be
-      // changed during a session, so the check does not work
-      // For this, we only add to the chat what we receive (sent are duplicated)
-      if (actionData.contentType !== CHAT_CONTENT_TYPES.TEXT) {
-        this._appendTextChatMessage(CHAT_MESSAGE_TYPES.SENT, messageToSend);
-      }
+      // XXX should use userId instead of displayName, as it can change
+      var displayName = this.getStoreState("displayName");
+      var messageToSend = Object.assign({}, actionData, { displayName: displayName });
+      // XXX no test coverage for displayName
+
+      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.SENT, messageToSend);
       this._dataDriver.sendTextChatMessage(messageToSend);
     },
 
@@ -330,6 +309,40 @@ loop.store.TextChatStore = (function() {
      */
     setOwnDisplayName(actionData) {
       this.setStoreState({ displayName: actionData.displayName });
+    },
+
+    /**
+     *  Appends a notification to the chat with the information of the tile
+     *  that has just been added to the ToC
+     *
+     *  @param {sharedActions.AddedPage} actionData
+     */
+    addedPage: function(actionData) {
+      // XXX Because the action is triggered everytime the page records are
+      // processed, we need to filter out the non recent occurrences.
+      // If the page was added more than 2s ago, consider that we're retrieving
+      // all the existing tiles (e.g. on ToC load).
+      // Not an optimal solution, but needed until we have
+      // direct communication between sidebar and ToC
+      let now = Date.now();
+      let then = Date.parse(actionData.timestamp);
+      if (now - then > 2000) {
+        return;
+      }
+
+      var message = {
+        displayName: actionData.userName,
+        contentType: CHAT_CONTENT_TYPES.TILE_EVENT,
+        extraData: {
+          tile_url: actionData.url,
+          tile_thumbnail: actionData.thumbnail_img,
+          tile_title: actionData.title
+        },
+        sentTimestamp: actionData.timestamp
+      };
+
+      // show it on the chat
+      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.SPECIAL, message);
     }
   });
 

@@ -71,7 +71,8 @@ loop.store.PageStore = function(mozL10n) {
         title: actionData.title,
         thumbnail_img: actionData.thumbnail_img,
         url: actionData.url,
-        userName: this._currentUserName
+        userName: this._currentUserName,
+        timestamp: (new Date()).toISOString()
       });
     },
 
@@ -91,7 +92,8 @@ loop.store.PageStore = function(mozL10n) {
         title: actionData.title,
         thumbnail_img: actionData.thumbnail_img,
         url: actionData.url,
-        userName: actionData.userName
+        userName: actionData.userName,
+        timestamp: actionData.timestamp
       };
 
       this._storeState.pages.push(page);

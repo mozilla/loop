@@ -235,8 +235,6 @@ describe("loop.store.TextChatStore", function() {
           type: CHAT_MESSAGE_TYPES.SPECIAL,
           contentType: CHAT_CONTENT_TYPES.CONTEXT,
           message: "A wonderful event",
-          sentTimestamp: undefined,
-          receivedTimestamp: undefined,
           extraData: {
             location: "http://wonderful.invalid",
             thumbnail: "fake"
@@ -259,8 +257,6 @@ describe("loop.store.TextChatStore", function() {
         type: CHAT_MESSAGE_TYPES.SPECIAL,
         contentType: CHAT_CONTENT_TYPES.CONTEXT,
         message: "A wonderful event",
-        sentTimestamp: undefined,
-        receivedTimestamp: undefined,
         extraData: {
           location: "http://wonderful.invalid",
           thumbnail: "fake"
@@ -280,8 +276,6 @@ describe("loop.store.TextChatStore", function() {
         type: CHAT_MESSAGE_TYPES.SPECIAL,
         contentType: CHAT_CONTENT_TYPES.CONTEXT,
         message: "A wonderful event2",
-        sentTimestamp: undefined,
-        receivedTimestamp: undefined,
         extraData: {
           location: "http://wonderful.invalid2",
           thumbnail: "fake2"
@@ -311,18 +305,9 @@ describe("loop.store.TextChatStore", function() {
     });
 
     it("should add the room context to the list", function() {
-      expect(store.getStoreState("messageList")).eql([{
-        type: CHAT_MESSAGE_TYPES.SENT,
-        contentType: CHAT_CONTENT_TYPES.CONTEXT_TILE,
-        message: "fake",
-        extraData: {
-          roomToken: "fakeRoomToken",
-          newRoomThumbnail: "favicon",
-          newRoomURL: "https://www.fakeurl.com"
-        },
-        sentTimestamp: "1970-01-01T00:00:00.000Z",
-        receivedTimestamp: undefined
-      }]);
+      expect(store.getStoreState("messageList").length).eql(1);
+      expect(store.getStoreState("messageList")[0].contentType)
+        .eql(CHAT_CONTENT_TYPES.CONTEXT_TILE);
     });
 
     it("should not add the room context if the last tile has the same domain", function() {

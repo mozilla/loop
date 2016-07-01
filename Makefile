@@ -495,7 +495,7 @@ flake8: $(VENV)
 	. $(VENV)/bin/activate && flake8 .
 
 .PHONY: check_strings
-check_strings:
+check_strings: $(VENV)
 	@$(VENV)/bin/python bin/stringsCompletenessTest.py
 
 .PHONY: lint
@@ -585,7 +585,8 @@ clean:
 .PHONY: cleanbuild
 cleanbuild: clean build
 
-test: lint karma functional
+# If you add things here, also consider what to update in .taskcluster.yml.
+test: check_strings lint karma functional
 
 .PHONY: runserver
 runserver: remove_old_config

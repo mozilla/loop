@@ -148,20 +148,6 @@ describe("loop.TableOfContents", () => {
       sinon.assert.notCalled(dispatcher.dispatch);
     });
 
-    it("should dispatch a `showSnackbar` action if url is valid", () => {
-      var input = view.refs.siteUrl;
-      input.value = "http://fakeurl.com";
-      TestUtils.Simulate.change(input);
-      var button = ReactDOM.findDOMNode(view).querySelector("button");
-      TestUtils.Simulate.click(button);
-
-      sinon.assert.called(dispatcher.dispatch);
-      sinon.assert.calledWithExactly(dispatcher.dispatch,
-        new sharedActions.ShowSnackbar({
-          label: "snackbar_page_added"
-        }));
-    });
-
     it("should dispatch a `showSnackbar` action if url isn't valid", () => {
       var input = view.refs.siteUrl;
       input.value = "invalidurl";
@@ -174,6 +160,17 @@ describe("loop.TableOfContents", () => {
         new sharedActions.ShowSnackbar({
           label: "snackbar_page_not_added"
         }));
+    });
+
+    it("should reset button and input field if url isn't valid", () => {
+      var input = view.refs.siteUrl;
+      input.value = "invalidurl";
+      TestUtils.Simulate.change(input);
+      var button = ReactDOM.findDOMNode(view).querySelector("button");
+      TestUtils.Simulate.click(button);
+
+      expect(button.textContent).to.eql("Add site");
+      expect(button.disabled).to.eql(false);
     });
   });
 

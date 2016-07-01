@@ -92,6 +92,31 @@ describe("loop.store.PageStore", () => {
     });
   });
 
+  describe("UpdatePage", () => {
+    beforeEach(() => {
+      let pages = [{ id: "fakeId" }];
+      sandbox.stub(store, "getStoreState").withArgs("pages").returns(pages);
+      sandbox.stub(store, "setStoreState");
+    });
+
+    it("should correctly update page matching the id", () => {
+      let updatedPage = {
+        pageId: "fakeId",
+        thumbnail_img: "fakeThumb",
+        title: "fakeTitle"
+      };
+
+      store.updatePage(new actions.UpdatePage(updatedPage));
+
+      let newPages = store.getStoreState("pages");
+      expect(newPages).to.be.a("array");
+      expect(newPages.length).to.eql(1);
+      // Can't compare objects. Object method "id/pageId" is different.
+      expect(newPages[0].thumbnail_img).to.eql(updatedPage.thumbnail_img);
+      expect(newPages[0].title).to.eql(updatedPage.title);
+    });
+  });
+
   describe("AddedPage", () => {
     let action;
 
@@ -103,12 +128,21 @@ describe("loop.store.PageStore", () => {
         url: "fakeUrl",
         userName: "fake user"
       });
+
+      sandbox.stub(store, "fetchPageMetadata");
     });
 
     it("should add a page to the store", () => {
       store.addedPage(action);
 
       expect(store.getStoreState("pages")).to.have.lengthOf(1);
+    });
+
+    it("should call fetchPageMetadata with the correct args", () => {
+      store.addedPage(action);
+
+      sinon.assert.calledOnce(store.fetchPageMetadata);
+      sinon.assert.calledWithExactly(store.fetchPageMetadata, action);
     });
 
     it("should not add a second copy of a URL to the page store", () => {
@@ -183,8 +217,95 @@ describe("loop.store.PageStore", () => {
     });
   });
 
+  describe("fetchPageMetadata", () => {
+    let actionData;
+    let response;
+
+    beforeEach(() => {
+      actionData = {
+        pageId: "fakeId",
+        url: "http://fakeurl.com",
+        title: "faketitle",
+        thumbnail_img: "fakethumb"
+      };
+
+      response = {
+        title: "fake title",
+        thumbnail_img: "fake thumb"
+      };
+
+      sandbox.stub(loop.shared.utils, "getPageMetadata", url => {
+        if (url === actionData.url) {
+          return Promise.resolve(response);
+        }
+
+        return {
+          then: function() {
+            return {
+              catch: function(cb) {
+                cb();
+              }
+            };
+          }
+        };
+      });
+    });
+
+    it("should dispatch UpdatePage with results", () => {
+      store.fetchPageMetadata(actionData);
+
+      sinon.assert.calledOnce(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new actions.UpdatePage({
+          pageId: actionData.pageId,
+          thumbnail_img: response.thumbnail_img,
+          title: response.title
+        }));
+    });
+
+    it("should dispatch UpdatePage with fallback", () => {
+      var fakeActionData = _.clone(actionData);
+      fakeActionData.url = "fake";
+      store.fetchPageMetadata(fakeActionData);
+
+      sinon.assert.calledOnce(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new actions.UpdatePage({
+          pageId: actionData.pageId,
+          thumbnail_img: actionData.thumbnail_img,
+          title: actionData.title
+        }));
+    });
+  });
+
   describe("UpdateRoomInfo", () => {
-    // XXX akita-alpha implement as part of bug 1281066
-    it.skip("should dispatch an appropriate AddPage action");
+    let contextUrl;
+    let actionData;
+
+    beforeEach(() => {
+      contextUrl = {
+        pageId: "fakeId2",
+        title: "fakeTitle2",
+        thumbnail: "fakeThumbnail2",
+        url: "fakeUrl",
+        description: "fake description",
+        location: "fake location"
+      };
+      actionData = {
+        roomContextUrls: [contextUrl]
+      };
+    });
+
+    it("should dispatch AddPage with correct args", () => {
+      store.updateRoomInfo(actionData);
+
+      sinon.assert.calledOnce(dispatcher.dispatch);
+      sinon.assert.calledWithExactly(dispatcher.dispatch,
+        new actions.AddPage({
+          title: contextUrl.description,
+          thumbnail_img: contextUrl.thumbnail,
+          url: contextUrl.location
+        }));
+    });
   });
 });

@@ -179,9 +179,8 @@ loop.shared.toc = (function(mozL10n) {
       });
     },
 
-    handleAddUrlClick: function(metadata) {
+    handleAddUrlClick: function() {
       this.toggleAddUrlPanel();
-      this.props.dispatcher.dispatch(new sharedActions.AddPage(metadata));
     },
 
     render: function() {
@@ -212,6 +211,7 @@ loop.shared.toc = (function(mozL10n) {
 
     handleClick: function(event) {
       event.preventDefault();
+      var urlObj;
       var input = this.refs.siteUrl;
       var url = input.value;
 
@@ -219,25 +219,25 @@ loop.shared.toc = (function(mozL10n) {
         return;
       }
 
-      // XXX akita: Code below is just for testing purpose
-      var btn = this.refs.addSiteBtn;
-      btn.textContent = "Loading...";
-      btn.disabled = true;
-
-      loop.shared.utils.getPageMetadata(url).then(result => {
-        this.props.dispatcher.dispatch(new sharedActions.ShowSnackbar({
-          label: mozL10n.get("snackbar_page_added")
-        }));
-        this.props.handleAddUrlClick(result);
-      }).catch(() => {
-        // XXX akita: Code below is just for testing purpose
-        btn.textContent = "Add site";
-        btn.disabled = false;
-
+      // Create an URL object in order to use a favicon until the actual
+      // metadata and thumbnail is ready.
+      try {
+        urlObj = new URL(url);
+      } catch (e) {
         this.props.dispatcher.dispatch(new sharedActions.ShowSnackbar({
           label: mozL10n.get("snackbar_page_not_added")
         }));
-      });
+      }
+
+      if (urlObj) {
+        this.props.dispatcher.dispatch(new sharedActions.AddPage({
+          url: url,
+          title: url,
+          thumbnail_img: urlObj.origin + "/favicon.ico"
+        }));
+
+        this.props.handleAddUrlClick();
+      }
     },
 
     render: function() {

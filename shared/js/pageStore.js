@@ -38,6 +38,7 @@ loop.store.PageStore = function(mozL10n) {
       "addedPage",
       "deletePage",
       "deletedPage",
+      "updatePage",
       "setOwnDisplayName",
       "updateRoomInfo"
     ],
@@ -100,6 +101,8 @@ loop.store.PageStore = function(mozL10n) {
       this.setStoreState({
         pages: this._storeState.pages
       });
+
+      this.fetchPageMetadata(actionData);
     },
 
     /**
@@ -123,6 +126,23 @@ loop.store.PageStore = function(mozL10n) {
           label: mozL10n.get("snackbar_page_deleted")
         }));
       }
+    },
+
+    /**
+     * Updates a page in the store based on new metadata information obtained.
+     */
+    updatePage(actionData) {
+      let pages = this.getStoreState("pages");
+      pages = pages.map(page => {
+        if (page.id === actionData.pageId) {
+          page.thumbnail_img = actionData.thumbnail_img;
+          page.title = actionData.title;
+        }
+
+        return page;
+      });
+
+      this.setStoreState({ pages });
     },
 
     /**
@@ -153,6 +173,26 @@ loop.store.PageStore = function(mozL10n) {
       return false;
     },
 
+    /*
+     * Handle metadata fetch call success or error.
+     */
+    fetchPageMetadata(actionData) {
+      loop.shared.utils.getPageMetadata(actionData.url).then(result => {
+        this.dispatchAction(new sharedActions.UpdatePage({
+              pageId: actionData.pageId,
+              thumbnail_img: result.thumbnail_img,
+              title: result.title
+            }));
+      }).catch(() => {
+        // Fall back if the fetch failed.
+        this.dispatchAction(new sharedActions.UpdatePage({
+              pageId: actionData.pageId,
+              thumbnail_img: actionData.thumbnail_img,
+              title: actionData.title
+            }));
+      });
+    },
+
     /**
      * Handle updateRoomInfo action.  Used to add the first URL to the
      * PageStore.
@@ -171,25 +211,11 @@ loop.store.PageStore = function(mozL10n) {
         return;
       }
 
-      let thumbnail_img;
-      loop.shared.utils.getPageMetadata(firstContextUrl.location).then(result => {
-        thumbnail_img = result.thumbnail_img;
-      }).catch(() => {
-        // fall back to the thing in firstContextUrl
-        thumbnail_img = firstContextUrl.thumbnail;
-      }).then(() => {
-        // XXX akita (bug 1281066) we should not do this in the then,
-        // but instead should immediately both dispatch an AddPage to add the
-        // page quickly, and then start a getPageMetadata(), which, upon
-        // resolution, will call a (to-be-written) dataDriver.updatePage.
-        // As part of that bug, we need to also test that this dispatchAction
-        // actually fires; there's an it.skip in UpdateRoomInfo for this test.
-        this.dispatchAction(new sharedActions.AddPage({
-              title: firstContextUrl.description,
-              thumbnail_img: thumbnail_img,
-              url: firstContextUrl.location
-            }));
-      });
+      this.dispatchAction(new sharedActions.AddPage({
+        title: firstContextUrl.description,
+        thumbnail_img: firstContextUrl.thumbnail,
+        url: firstContextUrl.location
+      }));
     }
   });
 

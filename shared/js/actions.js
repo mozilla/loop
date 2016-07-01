@@ -195,6 +195,15 @@ loop.shared.actions = (function() {
     }),
 
     /**
+     * Update a page with newly obtained metadata information.
+     */
+    UpdatePage: Action.define("updatePage", {
+      thumbnail_img: String,
+      title: String,
+      pageId: String
+    }),
+
+    /**
      *  Used to send cursor data to the other peer
      */
     SendCursorData: Action.define("sendCursorData", {

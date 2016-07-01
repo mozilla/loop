@@ -22,7 +22,7 @@ import glob
 import re
 import sys
 
-NOT_USED_EXPECTED_AMOUNT = 28
+NOT_USED_EXPECTED_AMOUNT = 8
 
 DEFAULT_PROPERTY_LOCALE = "en-US"
 
@@ -69,19 +69,26 @@ def find_l10n_strings(file_path, l10n_properties, not_found_string_list):
             \"\)
         """, re.VERBOSE),
         re.compile(r"""
-            localizedStrings\.get\(\"  # Used in MozLoopService.jsm
+            (?:                   # Match for various string bundles
+            bundle|               # Used in MozLoopService.jsm
+            localizedStrings)     # Used in MozLoopService.jsm
+            \.get\(\"
             ([a-zA-Z0-9_\.]*?)    # Match any valid string character
             \"\)
         """, re.VERBOSE),
         re.compile(r"""
             mozL10n\.get\(\"      # mozL10n.get is content code.
             ([a-zA-Z0-9_\.]*?)    # Match any valid string character
-            \"\)                  # Only match mozL10n.get("...")
+            \"[\),]               # Match both mozL10n.get("...") and mozL10n.get("...", ...)
         """, re.VERBOSE),
         re.compile(r"""
-            mozL10n\.get\(\"      # mozL10n.get is content code.
+            (?:                   # Match for various string variables
+            detailsString|        # Used in MozLoopService.jsm
+            messageString|        # Used in MozLoopService.jsm
+            notificationTextKey)  # Used in textChatStore.js
+            \s+=\s+\"             # Match variable assignment
             ([a-zA-Z0-9_\.]*?)    # Match any valid string character
-            \",.*                 # Only match mozL10n.get("...", ...)
+            \"
         """, re.VERBOSE),
     ]
 
@@ -144,7 +151,6 @@ def check_strings_in_code(l10n_properties, not_found_string_list, **list):
         "add-on/chrome",
         "add-on/chrome/modules",
         "add-on/panels/js",
-        "add-on/panels/vendor",
         "shared/js",
         "standalone/content/js"
     ]

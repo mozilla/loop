@@ -486,9 +486,15 @@ update_locale: $(VENV)
 # Tests
 #
 
+NODE_VERSION = $(shell node --version | sed -e 's/v\([0-9]*\)\..*/\1/')
+
 .PHONY: eslint
 eslint: install
-	$(ESLINT) --ext .js --ext .jsm --ext .jsx .
+	@if [ $(NODE_VERSION) -lt 4 ]; then \
+		echo "WARNING: Skipping Lint due to old node version."; \
+	else \
+		$(ESLINT) --ext .js --ext .jsm --ext .jsx .; \
+	fi
 
 .PHONY: flake8
 flake8: $(VENV)

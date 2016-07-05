@@ -872,7 +872,19 @@
                            dashed={true}
                            height={430}
                            summary="Standalone Unsupported Browser"
-                           width={480}>
+                           width={768}>
+              <div className="standalone">
+                <UnsupportedBrowserView isFirefox={false} />
+              </div>
+            </FramedExample>
+          </Section>
+
+          <Section name="UnsupportedBrowserView">
+            <FramedExample cssClass="standalone"
+                           dashed={true}
+                           height={485}
+                           summary="Standalone Unsupported Browser (Wide screen)"
+                           width={1280}>
               <div className="standalone">
                 <UnsupportedBrowserView isFirefox={false} />
               </div>

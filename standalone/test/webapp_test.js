@@ -226,8 +226,8 @@ describe("loop.webapp", function() {
               isFirefox: false
         }));
 
-        sinon.assert.calledWith(mozL10nGet, "promote_firefox_hello_heading");
-        sinon.assert.calledWith(mozL10nGet, "get_firefox_button");
+        sinon.assert.calledWith(mozL10nGet, "promote_firefox_hello_heading2");
+        sinon.assert.calledWith(mozL10nGet, "get_firefox_button2");
       });
     });
   });

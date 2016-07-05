@@ -437,28 +437,123 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
   width: 138px;
 }
 
-/**
-* Expired views
-*/
-.highlight-issue-box {
-  width: 400px;
-  margin: 0 auto;
+.issue-unsupported-browser > .issue-box-content {
+  width: 1114px;
+}
+
+.issue-unsupported-browser > .issue-box-content > .info-panel {
+  float: left;
+}
+
+html[dir="rtl"] .issue-unsupported-browser > .issue-box-content > .info-panel {
+  float: right;
+}
+
+.issue-unsupported-browser > .issue-box-content > .info-panel > h1:before {
+  width: 60px;
+  height: 58px;
+  top: 50%;
+  transform: translate(0, -50%);
+  left: 0;
+  background-size: 60px 58px;
+}
+
+html[dir="rtl"] .issue-unsupported-browser > .issue-box-content > .info-panel > h1:before {
+  right: 0;
+}
+
+.issue-unsupported-browser > .issue-box-content > .info-panel > h1 {
+  font-size: 22px;
+  padding: 0 0 0 80px;
+  line-height: 26px;
+  text-align: start;
+}
+
+html[dir="rtl"] .issue-unsupported-browser > .issue-box-content > .info-panel > h1 {
+  padding: 0 80px 0;
+}
+
+.issue-unsupported-browser > .issue-box-content > .info-panel > .hello-logo {
+  margin: 0;
+  width: 153px;
+  height: 25px;
+  background: transparent url(../img/Hello_Logo.svg) no-repeat center center;
+  background-size: contain;
+}
+
+.issue-unsupported-browser > .issue-box-content > .hello-supported-browser {
+  margin-left: 50px;
+  display: inline-block;
+  width: 634px;
+  height: 443px;
+  background: transparent url(../img/BrowserWindow_Minimal.svg) no-repeat center center;
+}
+
+html[dir="rtl"] .issue-unsupported-browser > .issue-box-content > .hello-supported-browser {
+  margin-right: 50px;
+  margin-left: 0;
+  background: transparent url(../img/BrowserWindow_Minimal_RTL.svg) no-repeat center center;
 }
 
 .promote-firefox {
+  font-size: 16px;
+  line-height: 22px;
+  color: #666;
+  border-top: solid 1px #ddd;
+  padding: 30px 0 20px 0;
+  text-align: start;
+}
+
+.promote-firefox > p {
+  display: inline-block;
+  margin: 0;
+}
+
+.issue-unsupported-browser > .promote-firefox-link {
+  font-size: 16px;
+  line-height: 22px;
+  color: #00a9dc;
+  text-decoration: none;
+}
+
+.promote-firefox > .get-firefox > .btn {
+  color: #fff;
+  font-size: 16px;
+  line-height: 55px;
+  font-weight: bold;
+  width: 260px;
+  height: 55px;
   text-align: center;
-  font-size: 18px;
-  line-height: 24px;
-  margin: 2em 0;
+  border-radius: 4px;
+  background-color: #00a9dc;
+  position: relative;
+  /* Update .promote-firefox .get-firefox .btn:before left rule accordingly */
+  margin: 40px;
 }
 
-.promote-firefox h3 {
-  font-weight: 300;
+.promote-firefox > .get-firefox > .btn:hover {
+  background-color: #5cccee;
 }
 
-.btn-unsupported-device {
-  width: 80%;
-  line-height: 24px;
+.promote-firefox > .get-firefox > .btn:before {
+  content: "";
+  display: block;
+  width: 77px;
+  height: 79px;
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
+  left: -44px;
+  background: url("../img/Firefox_Logo.svg") center center;
+  background-size: 77px 79px;
+}
+
+html[dir="rtl"] .promote-firefox > .get-firefox > .btn:before {
+  right: -44px;
+}
+
+.promote-firefox > .copy-link {
+  color: #909090;
 }
 
 /**
@@ -702,6 +797,80 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
   }
 }
 
+@media screen and (max-width:1160px) {
+  .issue-unsupported-browser.issue-box:after {
+    content: '';
+    display: block;
+    width: 183px;
+    height: 31px;
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    background: transparent url(../img/Hello_Logo.svg) no-repeat center center;
+    background-size: contain;
+  }
+
+  .issue-unsupported-browser .issue-box-content .hello-supported-browser {
+    display: none;
+  }
+
+  .issue-unsupported-browser .issue-box-content {
+    width: 550px;
+  }
+
+  .issue-unsupported-browser .issue-box-content .info-panel {
+    float: none;
+    text-align: center;
+    max-width: 550px;
+  }
+
+  .issue-unsupported-browser .info-panel .hello-logo {
+    display: none;
+  }
+
+  .issue-unsupported-browser .issue-box-content .info-panel h1 {
+    text-align: center;
+    font-size: 28px;
+    line-height: 40px;
+    padding: 130px 0 0;
+    margin-bottom: 30px;
+  }
+
+  .issue-unsupported-browser .issue-box-content .info-panel h1:before {
+    left: 50%;
+    top: 0;
+    transform: translate(-50%, 0);
+    width: 93px;
+    height: 90px;
+    background-size: 93px 90px;
+  }
+
+  html[dir="rtl"] .issue-unsupported-browser .issue-box-content .info-panel h1:before {
+    right: initial;
+  }
+
+  .issue-unsupported-browser .issue-box-content .promote-firefox {
+    font-size: 20px;
+    line-height: 30px;
+    padding: 30px 20px;
+    text-align: center;
+  }
+
+  .issue-unsupported-browser .promote-firefox .get-firefox .btn {
+    font-size: 18px;
+    padding-left: 40px;
+  }
+
+  .issue-unsupported-browser .promote-firefox .get-firefox .btn::before {
+    left: -20px;
+  }
+
+  .issue-unsupported-browser .promote-firefox-link {
+    font-size: 20px;
+  }
+}
+
 @media screen and (max-width:620px) {
   .issue-unsupported-platform .issue-box-content {
     width: 100%;
@@ -731,6 +900,75 @@ html[dir="rtl"] .standalone-info-bar > .media-control-buttons > .btn-hangup:afte
     bottom: 30px;
     height: 18px;
     width: 109px;
+  }
+}
+
+@media screen and (max-width:560px) {
+  .issue-unsupported-browser.issue-box:after {
+    width: 109px;
+    height: 18px;
+    bottom: 30px;
+  }
+
+  .issue-unsupported-browser .issue-box-content {
+    width: 100%;
+  }
+
+  .issue-unsupported-browser .issue-box-content .info-panel {
+    max-width: 290px;
+    float: none;
+    margin: auto;
+  }
+
+  .issue-unsupported-browser .issue-box-content .info-panel .hello-logo {
+    width: 181px;
+    height: 30px;
+  }
+
+  .issue-unsupported-browser .issue-box-content .info-panel h1 {
+    text-align: center;
+    font-size: 17px;
+    line-height: 20px;
+    padding: 90px 0 0;
+    margin-bottom: 25px;
+  }
+
+  html[dir="rtl"] .issue-unsupported-browser .issue-box-content .info-panel h1 {
+    padding: 90px 0 0;
+  }
+
+
+  .issue-unsupported-browser .issue-box-content .info-panel h1:before {
+    width: 62px;
+    height: 60px;
+    background-size: 62px 60px;
+  }
+
+  .issue-unsupported-browser .issue-box-content .promote-firefox {
+    font-size: 14px;
+    line-height: 20px;
+    padding: 25px 20px;
+  }
+
+  .issue-unsupported-browser .issue-box-content .promote-firefox .get-firefox .btn {
+    font-size: 16px;
+    width: 220px;
+    height: 44px;
+    line-height: 45px;
+    margin: 30px;
+    padding: 0;
+  }
+
+  .issue-unsupported-browser .issue-box-content .promote-firefox .get-firefox .btn::before {
+    width: 60px;
+    height: 62px;
+    background: transparent url("../img/Firefox_Logo.svg") repeat scroll center center;
+    background-size: 60px 62px;
+    left: -35px;
+  }
+
+  .issue-unsupported-browser .issue-box-content .promote-firefox-link {
+    font-size: 14px;
   }
 }
 

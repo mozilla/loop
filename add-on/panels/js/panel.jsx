@@ -1252,6 +1252,7 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
         gettingStartedSeen: loop.getStoredRequest(["GetLoopPref", "gettingStarted.latestFTUVersion"]) >= FTU_VERSION,
         multiProcessActive: loop.getStoredRequest(["IsMultiProcessActive"]),
         remoteAutoStart: loop.getStoredRequest(["GetLoopPref", "remote.autostart"]),
+        loop_deprecate_url: loop.getStoredRequest(["GetLoopUrl", "legal.loop_deprecate_url"]),
         renameRoom: null,
         sharePanelOpened: false
       };
@@ -1384,6 +1385,15 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
     },
 
     render: function() {
+      var learnMoreString =
+        '<a href="' + this.state.loop_deprecate_url + '" target="_blank">' +
+          mozL10n.get("loop_deprecate_learn_more") +
+        "</a>";
+
+      var warningHTML = mozL10n.get("loop_deprecate_notice_and_link", {
+        "learn_more": learnMoreString
+      });
+
       if (this.state.multiProcessActive && !this.state.remoteAutoStart) {
         return (
           <E10sNotSupported onClick={this.launchNonE10sWindow} />
@@ -1394,6 +1404,8 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
         return (
           <div className="fte-get-started-container"
                onContextMenu={this.handleContextMenu}>
+            <div className="loop-warning-banner"
+                 dangerouslySetInnerHTML={{ __html: warningHTML }} />
             <NotificationListView
               clearOnDocumentHidden={true}
               notifications={this.props.notifications} />
@@ -1424,7 +1436,8 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
       return (
         <div className={cssClasses}
              onContextMenu={this.handleContextMenu} >
-          <div className="beta-ribbon" />
+           <div className="loop-warning-banner"
+                dangerouslySetInnerHTML={{ __html: warningHTML }} />
           <NotificationListView
             clearOnDocumentHidden={true}
             notifications={this.props.notifications} />
@@ -1543,6 +1556,7 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
     var prefetch = [
       ["GetLoopPref", "gettingStarted.latestFTUVersion"],
       ["GetLoopPref", "legal.ToS_url"],
+      ["GetLoopUrl", "legal.loop_deprecate_url"],
       ["GetLoopPref", "legal.privacy_url"],
       ["GetLoopPref", "remote.autostart"],
       ["GetUserProfile"],

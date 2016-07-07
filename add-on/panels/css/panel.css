@@ -245,6 +245,19 @@ html[dir="rtl"] .rename-container > .input-group {
   line-height: 3rem;
 }
 
+.loop-warning-banner {
+  padding: 2rem;
+  border-bottom: 1px dashed #d1d1d1;
+  background: #F7E27B;
+  color: #222;
+  font-weight: bold;
+}
+
+.loop-warning-banner > a {
+  color: #5192DD;
+  text-decoration: none;
+}
+
 .new-room-view {
   display: flex;
   flex-direction: column;

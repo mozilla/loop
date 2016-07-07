@@ -69,6 +69,9 @@ describe("loop.panel", function() {
 
         return 1;
       },
+      GetLoopUrl: function(urlKey) {
+        return "http://" + urlKey;
+      },
       SetPanelHeight: function() { return null; },
       GetPluralForm: function() {
         return "fakeText";
@@ -100,6 +103,7 @@ describe("loop.panel", function() {
       "GetLoopPref|legal.ToS_url": "",
       "GetLoopPref|legal.privacy_url": "",
       "GetLoopPref|remote.autostart": false,
+      "GetLoopUrl|legal.loop_deprecate_url": "fakeurl.com",
       IsMultiProcessActive: false
     };
 

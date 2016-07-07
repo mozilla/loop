@@ -2022,6 +2022,16 @@ this.MozLoopService = {
   },
 
   /**
+   * Get a url and properly format it with platform and version specifics.
+   *
+   * @param {String} url_key The key that corresponds to the URL we are
+   *                         want to retrieve.
+   */
+  getLoopUrl: function(urlKey) {
+    return Services.urlFormatter.formatURL(this.getLoopPref(urlKey));
+  },
+
+  /**
    * Performs a hawk based request to the loop server.
    *
    * @param {LOOP_SESSION_TYPE} sessionType The type of session to use for the request.

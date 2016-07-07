@@ -575,6 +575,15 @@ const kMessageHandlers = {
   },
 
   /**
+   * Returns any URL preference under "loop.". Used to retrieve properly
+   * formatted URL strings which include platform and version number.
+   */
+  GetLoopUrl: function(message, reply) {
+    let [prefName, prefType] = message.data;
+    reply(MozLoopService.getLoopUrl(prefName, prefType));
+  },
+
+  /**
    * Retrieve the plural rule number of the active locale.
    *
    * @param {Object}   message Message meant for the handler function, containing

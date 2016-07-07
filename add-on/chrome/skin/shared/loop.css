@@ -16,6 +16,10 @@
     margin: 0;
   }
 
+  #loop-notification-panel .panel-arrow[side="top"] {
+    list-style-image: url("chrome://loop/skin/panelarrow-vertical-warning.png") !important;
+  }
+
   #loop-button {
     list-style-image: url(chrome://loop/skin/toolbar.png);
     -moz-image-region: rect(0, 16px, 16px, 0);
@@ -60,6 +64,10 @@
   }
 
   @media (min-resolution: 1.1dppx) {
+    #loop-notification-panel .panel-arrow[side="top"] {
+      list-style-image: url("chrome://loop/skin/panelarrow-vertical-warning@2x.png") !important;
+    }
+
     #loop-button {
       list-style-image: url("chrome://loop/skin/toolbar@2x.png");
       -moz-image-region: rect(0, 32px, 32px, 0);

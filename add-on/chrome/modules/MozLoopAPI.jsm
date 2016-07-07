@@ -760,6 +760,19 @@ const kMessageHandlers = {
   },
 
   /**
+   * Broadcast message from chrome to content side.
+   *
+   * @param {sharedActions.SetOwnDisplayName} message
+   * @param {Function} reply   Callback function, invoked with the result of this
+   *                           message handler. The result will be sent back to
+   *                           the senders' channel.
+   */
+  SetOwnDisplayName: function(message, reply) {
+    LoopAPI.broadcastPushMessage("Panel:SetOwnDisplayName", message);
+    reply();
+  },
+
+  /**
    * Logout completely from FxA.
    * @see MozLoopService#logOutFromFxA
    *

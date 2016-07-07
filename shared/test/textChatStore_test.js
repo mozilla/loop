@@ -11,16 +11,30 @@ describe("loop.store.TextChatStore", function() {
 
   var dispatcher, fakeDataDriver, sandbox, store;
 
+  var callCount, sendMessage;
+
   beforeEach(function() {
+    callCount = 0;
     sandbox = sinon.sandbox.create();
     sandbox.useFakeTimers();
 
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
+    // Spy must be created before initialize is called.
+    sandbox.spy(loop.store.TextChatStore.prototype, "setOwnDisplayName");
+    sandbox.spy(loop.store.TextChatStore.prototype, "updateOwnDisplayName");
 
     fakeDataDriver = {
       sendTextChatMessage: sinon.stub()
     };
+
+    // stubs for loop.subscribe events
+    window.addMessageListener = (name, cb) => {
+      sendMessage = cb;
+      ++callCount;
+    };
+    window.removeMessageListener = sinon.stub();
+    window.sendAsyncMessage = sinon.stub();
 
     store = new loop.store.TextChatStore(dispatcher, {
       dataDriver: fakeDataDriver
@@ -34,6 +48,51 @@ describe("loop.store.TextChatStore", function() {
 
   afterEach(function() {
     sandbox.restore();
+
+    loop.request.reset();
+    loop.subscribe.reset();
+
+    sendMessage = null;
+    delete window.addMessageListener;
+    delete window.removeMessageListener;
+    delete window.sendAsyncMessage;
+  });
+
+  describe("#initialize", () => {
+    it("should subscribe to 'Panel:SetOwnDisplayName' actions", () => {
+      // initialize called in main 'beforeEach' block where TextChatStore
+      // is initialized.
+      var subscriptions = loop.subscribe.inspect();
+
+      expect(callCount).to.eql(1);
+      expect(Object.getOwnPropertyNames(subscriptions).length).to.eql(1);
+      expect(subscriptions["Panel:SetOwnDisplayName"].length).to.eql(1);
+    });
+
+    it("should call updateOwnDisplayName on 'Panel:SetOwnDisplayName' events", () => {
+      var setNameAction = new sharedActions.SetOwnDisplayName({
+        displayName: "FooBar"
+      });
+      var actionData = { data: [setNameAction] };
+
+      sendMessage({ data: ["Panel:SetOwnDisplayName", actionData] });
+
+      sinon.assert.calledOnce(store.updateOwnDisplayName);
+      sinon.assert.calledWithExactly(store.updateOwnDisplayName, actionData);
+    });
+
+    it("should pass the new username to setOwnDisplayName", () => {
+      var setNameAction = new sharedActions.SetOwnDisplayName({
+        displayName: "FooBar"
+      });
+      var actionData = { data: [setNameAction] };
+
+      sendMessage({ data: ["Panel:SetOwnDisplayName", actionData] });
+
+      sinon.assert.calledOnce(store.setOwnDisplayName);
+      sinon.assert.calledWithExactly(store.setOwnDisplayName,
+                                     actionData.data[0]);
+    });
   });
 
   describe("#actions", function() {

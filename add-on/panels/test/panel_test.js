@@ -90,7 +90,8 @@ describe("loop.panel", function() {
       OpenURL: sinon.stub(),
       OpenGettingStartedTour: sinon.stub(),
       GetSelectedTabMetadata: sinon.stub().returns({}),
-      GetUserProfile: function() { return null; }
+      GetUserProfile: function() { return null; },
+      SetOwnDisplayName: sinon.stub()
     });
 
     loop.storedRequests = {
@@ -385,6 +386,19 @@ describe("loop.panel", function() {
           ));
 
           sinon.assert.notCalled(warnstub);
+      });
+
+      it("should dispatch a 'SetOwnDisplayName' request", () => {
+        var action = new sharedActions.SetOwnDisplayName({
+          displayName: "FooBar"
+        });
+        var view = createTestPanelView();
+
+        view.onEditComplete(action.displayName);
+
+        // Extra call from componentDidMount.
+        sinon.assert.calledOnce(requestStubs.SetOwnDisplayName);
+        sinon.assert.calledWithExactly(requestStubs.SetOwnDisplayName, action);
       });
     });
 

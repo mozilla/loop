@@ -1484,11 +1484,9 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
       loop.request("SetLoopPref", "username", newUsername, PREF_STRING)
         .then(() => {
           // publish the changes to it takes effect in all the stores
-          this.props.dispatcher.dispatch(
-            new sharedActions.SetOwnDisplayName({
-              displayName: newUsername
-            })
-          );
+          loop.request("SetOwnDisplayName", new sharedActions.SetOwnDisplayName({
+            displayName: newUsername
+          }));
           // reset the UI back to normal
           this.toggleEditUsername({
             editionCancelled: true,

@@ -43,6 +43,9 @@ loop.store.ParticipantStore = function() {
       }
 
       this._expireTimer = null;
+
+      loop.subscribe("Panel:SetOwnDisplayName",
+                     this.updateOwnDisplayName.bind(this));
     },
 
     getInitialStoreState() {
@@ -69,6 +72,16 @@ loop.store.ParticipantStore = function() {
      */
     leaveRoom() {
       this._updatePresence(false);
+    },
+
+    /**
+     * Receives action from chrome space.
+     *
+     * @param {sharedActions.SetOwnDisplayName[]} actionData.data
+     */
+    updateOwnDisplayName(actionData) {
+      this.setOwnDisplayName(actionData.data[0]);
+      this.updateRoomInfo({ userId: this._currentUserId });
     },
 
     /**

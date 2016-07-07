@@ -16,6 +16,8 @@ describe("loop.TableOfContents", () => {
 
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
+    // stubs for loop.subscribe events
+    window.addMessageListener = sandbox.stub();
 
     fakeDataDriver = {
       updateCurrentParticipant: sinon.stub(),

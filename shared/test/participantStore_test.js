@@ -7,10 +7,12 @@ describe("loop.store.ParticipantStore", () => {
   let { expect } = chai;
   let { actions } = loop.shared;
   let clock, dispatcher, fakeDataDriver, now, sandbox, store;
+  let callCount, sendMessage;
 
   beforeEach(() => {
     clock = sinon.useFakeTimers();
     sandbox = LoopMochaUtils.createSandbox();
+    callCount = 0;
 
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
@@ -23,6 +25,18 @@ describe("loop.store.ParticipantStore", () => {
     now = Date.now();
     sandbox.stub(Date, "now", () => now);
 
+    // Spy must be created before initialize is called.
+    sandbox.spy(loop.store.ParticipantStore.prototype, "setOwnDisplayName");
+    sandbox.spy(loop.store.ParticipantStore.prototype, "updateOwnDisplayName");
+
+    // stubs for loop.subscribe events
+    window.addMessageListener = (name, cb) => {
+      sendMessage = cb;
+      ++callCount;
+    };
+    window.removeMessageListener = sinon.stub();
+    window.sendAsyncMessage = sinon.stub();
+
     store = new loop.store.ParticipantStore(dispatcher, {
       dataDriver: fakeDataDriver,
       updateParticipant: true
@@ -33,6 +47,66 @@ describe("loop.store.ParticipantStore", () => {
     clock.restore();
     sandbox.restore();
     LoopMochaUtils.restore();
+
+    loop.request.reset();
+    loop.subscribe.reset();
+
+    sendMessage = null;
+    delete window.addMessageListener;
+    delete window.removeMessageListener;
+    delete window.sendAsyncMessage;
+  });
+
+  describe("#initialize", () => {
+    it("should subscribe to 'Panel:SetOwnDisplayName' actions", () => {
+      // initialize called in main 'beforeEach' block where TextChatStore
+      // is initialized.
+      let subscriptions = loop.subscribe.inspect();
+
+      expect(callCount).to.eql(1);
+      expect(Object.getOwnPropertyNames(subscriptions).length).to.eql(1);
+      expect(subscriptions["Panel:SetOwnDisplayName"].length).to.eql(1);
+    });
+
+    it("should call updateOwnDisplayName on 'Panel:SetOwnDisplayName' events", () => {
+      let setNameAction = new actions.SetOwnDisplayName({
+        displayName: "FooBar"
+      });
+      let actionData = { data: [setNameAction] };
+
+      sendMessage({ data: ["Panel:SetOwnDisplayName", actionData] });
+
+      sinon.assert.calledOnce(store.updateOwnDisplayName);
+      sinon.assert.calledWithExactly(store.updateOwnDisplayName, actionData);
+    });
+
+    it("should pass the new username to setOwnDisplayName", () => {
+      let setNameAction = new actions.SetOwnDisplayName({
+        displayName: "FooBar"
+      });
+      let actionData = { data: [setNameAction] };
+
+      sendMessage({ data: ["Panel:SetOwnDisplayName", actionData] });
+
+      sinon.assert.calledOnce(store.setOwnDisplayName);
+      sinon.assert.calledWithExactly(store.setOwnDisplayName,
+        actionData.data[0]);
+    });
+
+    it("should updateRoomInfo on 'Panel:SetOwnDisplayName'", () => {
+      let setNameAction = new actions.SetOwnDisplayName({
+        displayName: "FooBar"
+      });
+      let actionData = { data: [setNameAction] };
+      let userId = "42";
+      store._currentUserId = userId;
+      sandbox.stub(store, "updateRoomInfo");
+
+      sendMessage({ data: ["Panel:SetOwnDisplayName", actionData] });
+
+      sinon.assert.calledOnce(store.updateRoomInfo);
+      sinon.assert.calledWithExactly(store.updateRoomInfo, { userId });
+    });
   });
 
   describe("#getInitialStoreState", () => {

@@ -21,6 +21,8 @@ describe("loop.shared.views.TextChatView", function() {
 
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
+    // stubs for loop.subscribe events
+    window.addMessageListener = sandbox.stub();
 
     fakeDataDriver = {
       sendTextChatMessage: sinon.stub()

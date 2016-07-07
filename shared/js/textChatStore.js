@@ -49,6 +49,9 @@ loop.store.TextChatStore = (function() {
       }
 
       this._dataDriver = options.dataDriver;
+
+      loop.subscribe("Panel:SetOwnDisplayName",
+                     this.updateOwnDisplayName.bind(this));
     },
 
     /**
@@ -300,6 +303,15 @@ loop.store.TextChatStore = (function() {
       };
 
       this.sendTextChatMessage(msgData);
+    },
+
+    /**
+     * Receives action from chrome space.
+     *
+     * @param {sharedActions.SetOwnDisplayName[]} actionData.data
+     */
+    updateOwnDisplayName(actionData) {
+      this.setOwnDisplayName(actionData.data[0]);
     },
 
     /**

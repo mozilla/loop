@@ -826,6 +826,21 @@ const kMessageHandlers = {
   },
 
   /**
+   * Open the Submit Feedback page.
+   *
+   * @param {Object}   message Message meant for the handler function, containing
+   *                           the following parameters in its `data` property:
+   *                           [ ]
+   * @param {Function} reply   Callback function, invoked with the result of this
+   *                           message handler. The result will be sent back to
+   *                           the senders' channel.
+   */
+  SubmitFeedback: function(message, reply) {
+    MozLoopService.submitFeedback();
+    reply();
+  },
+
+  /**
    * Open the FxA profile/ settings page.
    *
    * @param {Object}   message Message meant for the handler function, containing

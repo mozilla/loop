@@ -12,6 +12,7 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
   var sharedViews = loop.shared.views;
   var panelModels = loop.panel.models;
   var Button = sharedViews.Button;
+  var SettingsDropdown = sharedViews.SettingsDropdown;
 
   // XXX This must be kept in sync with the number in MozLoopService.jsm.
   // We should expose that one through MozLoopAPI and kill this constant.
@@ -173,175 +174,6 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
              dangerouslySetInnerHTML={{ __html: tosHTML }}
              onClick={this.handleLinkClick} />
          </div>
-      );
-    }
-  });
-
-  /**
-   * Panel settings (gear) menu entry.
-   */
-  var SettingsDropdownEntry = React.createClass({
-    propTypes: {
-      displayed: React.PropTypes.bool,
-      extraCSSClass: React.PropTypes.string,
-      label: React.PropTypes.string.isRequired,
-      onClick: React.PropTypes.func.isRequired
-    },
-
-    getDefaultProps: function() {
-      return { displayed: true };
-    },
-
-    render: function() {
-      var cx = classNames;
-
-      if (!this.props.displayed) {
-        return null;
-      }
-
-      var extraCSSClass = {
-        "dropdown-menu-item": true
-      };
-      if (this.props.extraCSSClass) {
-        extraCSSClass[this.props.extraCSSClass] = true;
-      }
-
-      return (
-        <li className={cx(extraCSSClass)} onClick={this.props.onClick}>
-          {this.props.label}
-        </li>
-      );
-    }
-  });
-
-  /**
-   * Panel settings (gear) menu.
-   */
-  var SettingsDropdown = React.createClass({
-    mixins: [sharedMixins.DropdownMenuMixin(), sharedMixins.WindowCloseMixin],
-
-    propTypes: {
-      handleEditUsernameButtonClick: React.PropTypes.func.isRequired
-    },
-
-    getInitialState: function() {
-      return {
-        signedIn: !!loop.getStoredRequest(["GetUserProfile"]),
-        doNotDisturb: loop.getStoredRequest(["GetDoNotDisturb"])
-      };
-    },
-
-    componentWillUpdate: function(nextProps, nextState) {
-      if (nextState.showMenu !== this.state.showMenu) {
-        loop.requestMulti(
-          ["GetUserProfile"],
-          ["GetDoNotDisturb"]
-        ).then(function(results) {
-          this.setState({
-            signedIn: !!results[0],
-            doNotDisturb: results[1]
-          });
-        }.bind(this));
-      }
-    },
-
-    handleClickSettingsEntry: function() {
-      // XXX to be implemented at the same time as unhiding the entry
-    },
-
-    handleClickAccountEntry: function() {
-      loop.request("OpenFxASettings");
-      this.closeWindow();
-    },
-
-    handleClickAuthEntry: function() {
-      if (this.state.signedIn) {
-        loop.request("LogoutFromFxA");
-        // Close the menu but leave the panel open
-        this.hideDropdownMenu();
-      } else {
-        loop.request("LoginToFxA");
-        // Close the panel, the menu will be closed by on blur listener of DropdownMenuMixin
-        this.closeWindow();
-      }
-    },
-
-    handleHelpEntry: function(event) {
-      event.preventDefault();
-      loop.request("GetLoopPref", "support_url").then(function(helloSupportUrl) {
-        loop.request("OpenURL", helloSupportUrl);
-        this.closeWindow();
-      }.bind(this));
-    },
-
-    handleToggleNotifications: function() {
-      loop.request("GetDoNotDisturb").then(function(result) {
-        loop.request("SetDoNotDisturb", !result);
-      });
-      this.hideDropdownMenu();
-    },
-
-    /**
-     * Load on the browser the feedback url from prefs
-     */
-    handleSubmitFeedback: function(event) {
-      event.preventDefault();
-      loop.request("GetLoopPref", "feedback.manualFormURL").then(function(helloFeedbackUrl) {
-        loop.request("OpenURL", helloFeedbackUrl);
-        this.closeWindow();
-      }.bind(this));
-    },
-
-    openGettingStartedTour: function() {
-      loop.request("OpenGettingStartedTour");
-      this.closeWindow();
-    },
-
-    render: function() {
-      var cx = classNames;
-      var accountEntryCSSClass = this.state.signedIn ? "entry-settings-signout" :
-                                                       "entry-settings-signin";
-      var notificationsLabel = this.state.doNotDisturb ? "settings_menu_item_turnnotificationson" :
-                                                         "settings_menu_item_turnnotificationsoff";
-
-      return (
-        <div className="settings-menu dropdown">
-          <button className="button-settings"
-             onClick={this.toggleDropdownMenu}
-             ref="menu-button"
-             title={mozL10n.get("settings_menu_button_tooltip")} />
-          <ul className={cx({ "dropdown-menu": true, hide: !this.state.showMenu })}>
-            <SettingsDropdownEntry
-                extraCSSClass="entry-settings-username entries-divider"
-                label={mozL10n.get("settings_menu_item_change_username")}
-                onClick={this.props.handleEditUsernameButtonClick} />
-            <SettingsDropdownEntry
-                extraCSSClass="entry-settings-notifications entries-divider"
-                label={mozL10n.get(notificationsLabel)}
-                onClick={this.handleToggleNotifications} />
-            <SettingsDropdownEntry
-                displayed={this.state.signedIn}
-                extraCSSClass="entry-settings-account"
-                label={mozL10n.get("settings_menu_item_account")}
-                onClick={this.handleClickAccountEntry} />
-            <SettingsDropdownEntry displayed={false}
-                                   label={mozL10n.get("settings_menu_item_settings")}
-                                   onClick={this.handleClickSettingsEntry} />
-            <SettingsDropdownEntry label={mozL10n.get("tour_label")}
-                                   onClick={this.openGettingStartedTour} />
-            <SettingsDropdownEntry extraCSSClass="entry-settings-feedback"
-                                   label={mozL10n.get("settings_menu_item_feedback")}
-                                   onClick={this.handleSubmitFeedback} />
-            <SettingsDropdownEntry extraCSSClass={accountEntryCSSClass}
-                                   label={this.state.signedIn ?
-                                          mozL10n.get("settings_menu_item_signout") :
-                                          mozL10n.get("settings_menu_item_signin")}
-                                   onClick={this.handleClickAuthEntry} />
-            <SettingsDropdownEntry extraCSSClass="entry-settings-help"
-                                   label={mozL10n.get("help_label")}
-                                   onClick={this.handleHelpEntry} />
-          </ul>
-        </div>
       );
     }
   });
@@ -1203,7 +1035,8 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
 
       return (
         <div className={sharePanelClasses}>
-          <div className="share-panel-overlay" onClick={this.handleClosePanel} />
+          <div className="share-panel-overlay"
+               onClick={this.handleClosePanel} />
           <sharedDesktopViews.SharePanelView
             callback={this.handleClosePanel}
             dispatcher={this.props.dispatcher}
@@ -1565,6 +1398,7 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
                 this.state.editUsername ?
                   <button onClick={this.cancelEditUsername}>{mozL10n.get("cancel_edit_mode")}</button> :
                   <SettingsDropdown
+                    calledFromPanel={true}
                     handleEditUsernameButtonClick={this.toggleEditUsername} />
               }
               </div>
@@ -1678,7 +1512,6 @@ loop.panel = _.extend(loop.panel || {}, (function(_, mozL10n) {
       ["GetLoopPref", "legal.privacy_url"],
       ["GetLoopPref", "remote.autostart"],
       ["GetUserProfile"],
-      ["GetDoNotDisturb"],
       ["GetHasEncryptionKey"],
       ["IsMultiProcessActive"]
     ];

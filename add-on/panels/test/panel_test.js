@@ -46,8 +46,6 @@ describe("loop.panel", function() {
     notifications = new loop.panel.models.NotificationCollection();
 
     LoopMochaUtils.stubLoopRequest(requestStubs = {
-      GetDoNotDisturb: function() { return true; },
-      SetDoNotDisturb: sinon.stub(),
       GetErrors: function() { return null; },
       GetAllStrings: function() {
         return JSON.stringify({ textContent: "fakeText" });
@@ -59,7 +57,7 @@ describe("loop.panel", function() {
       GetPluralRule: function() {
         return 1;
       },
-      SetLoopPref: sinon.stub(),
+      SetLoopPref: sandbox.stub(),
       GetLoopPref: function(prefName) {
         if (prefName === "debug.dispatcher") {
           return false;
@@ -78,8 +76,8 @@ describe("loop.panel", function() {
       "Rooms:GetAll": function() {
         return [];
       },
-      "Rooms:PushSubscription": sinon.stub(),
-      Confirm: sinon.stub(),
+      "Rooms:PushSubscription": sandbox.stub(),
+      Confirm: sandbox.stub(),
       GetHasEncryptionKey: function() { return true; },
       HangupAllChatWindows: function() {},
       IsMultiProcessActive: sinon.stub(),
@@ -91,13 +89,14 @@ describe("loop.panel", function() {
       OpenGettingStartedTour: sinon.stub(),
       GetSelectedTabMetadata: sinon.stub().returns({}),
       GetUserProfile: function() { return null; },
-      SetOwnDisplayName: sinon.stub()
+      SetOwnDisplayName: sinon.stub(),
+      SubmitFeedback: sinon.stub()
     });
 
     loop.storedRequests = {
       GetHasEncryptionKey: true,
       GetUserProfile: null,
-      GetDoNotDisturb: false,
+      "GetLoopPref|do_not_disturb": false,
       "GetLoopPref|gettingStarted.latestFTUVersion": 2,
       "GetLoopPref|legal.ToS_url": "",
       "GetLoopPref|legal.privacy_url": "",
@@ -304,8 +303,9 @@ describe("loop.panel", function() {
 
       var view = TestUtils.renderIntoDocument(
         React.createElement(loop.panel.SettingsDropdown, {
-            handleEditUsernameButtonClick: sinon.stub()
-          }));
+          calledFromPanel: true,
+          handleEditUsernameButtonClick: sandbox.stub()
+        }));
 
       expect(ReactDOM.findDOMNode(view).querySelectorAll(".entry-settings-account"))
         .to.have.length.of(0);
@@ -408,6 +408,7 @@ describe("loop.panel", function() {
       function mountTestComponent() {
         return TestUtils.renderIntoDocument(
           React.createElement(loop.panel.SettingsDropdown, {
+            calledFromPanel: true,
             handleEditUsernameButtonClick: usernameEditModeStub
           }));
       }
@@ -420,7 +421,16 @@ describe("loop.panel", function() {
         LoopMochaUtils.stubLoopRequest({
           OpenFxASettings: openFxASettingsStub
         });
-        usernameEditModeStub = sinon.stub();
+
+        usernameEditModeStub = sandbox.stub();
+      });
+
+      it("should not show Change Room Name option when called from panel",
+        function() {
+        var view = mountTestComponent();
+        var item = ReactDOM.findDOMNode(view.refs["item-changeRoomName"]);
+
+        expect(item).to.not.exist;
       });
 
       describe("UserLoggedOut", function() {
@@ -430,17 +440,17 @@ describe("loop.panel", function() {
           });
         });
 
-        it("should show a signin entry when user is not authenticated",
-           function() {
-             var view = mountTestComponent();
+        it("should show a sign-in entry when user is not authenticated",
+          function() {
+            var view = mountTestComponent();
 
-             expect(ReactDOM.findDOMNode(view).querySelectorAll(".entry-settings-signout"))
-               .to.have.length.of(0);
-             expect(ReactDOM.findDOMNode(view).querySelectorAll(".entry-settings-signin"))
-               .to.have.length.of(1);
-           });
+            expect(ReactDOM.findDOMNode(view.refs["item-signin"]).textContent)
+              .to.be.eql("settings_menu_item_signin");
+          }
+        );
 
-        it("should hide any account entry when user is not authenticated",
+        // new Settings version does not have Account entry
+        it.skip("should hide any account entry when user is not authenticated",
            function() {
              var view = mountTestComponent();
 
@@ -451,8 +461,9 @@ describe("loop.panel", function() {
         it("should sign in the user on click when unauthenticated", function() {
           var view = mountTestComponent();
 
-          TestUtils.Simulate.click(ReactDOM.findDOMNode(view)
-                                     .querySelector(".entry-settings-signin"));
+          TestUtils.Simulate.click(
+            ReactDOM.findDOMNode(view.refs["item-signin"])
+          );
 
           sinon.assert.calledOnce(requestStubs.LoginToFxA);
         });
@@ -460,8 +471,9 @@ describe("loop.panel", function() {
         it("should close the menu on clicking sign in", function() {
           var view = mountTestComponent();
 
-          TestUtils.Simulate.click(ReactDOM.findDOMNode(view)
-                                     .querySelector(".entry-settings-signin"));
+          TestUtils.Simulate.click(
+            ReactDOM.findDOMNode(view.refs["item-signin"])
+          );
 
           expect(view.state.showMenu).eql(false);
         });
@@ -469,8 +481,9 @@ describe("loop.panel", function() {
         it("should close the panel on clicking sign in", function() {
           var view = mountTestComponent();
 
-          TestUtils.Simulate.click(ReactDOM.findDOMNode(view)
-                                     .querySelector(".entry-settings-signin"));
+          TestUtils.Simulate.click(
+            ReactDOM.findDOMNode(view.refs["item-signin"])
+          );
 
           sinon.assert.calledOnce(fakeWindow.close);
         });
@@ -485,18 +498,17 @@ describe("loop.panel", function() {
         });
 
         it("should show a signout entry when user is authenticated", function() {
-          expect(ReactDOM.findDOMNode(view).querySelectorAll(".entry-settings-signout"))
-              .to.have.length.of(1);
-          expect(ReactDOM.findDOMNode(view).querySelectorAll(".entry-settings-signin"))
-              .to.have.length.of(0);
+          expect(ReactDOM.findDOMNode(view.refs["item-signin"]).textContent)
+              .to.be.eql("settings_menu_item_signout");
         });
 
-        it("should show an account entry when user is authenticated", function() {
+        // new settings version does not have Account entry
+        it.skip("should show an account entry when user is authenticated", function() {
           expect(ReactDOM.findDOMNode(view).querySelectorAll(".entry-settings-account"))
               .to.have.length.of(1);
         });
 
-        it("should open the FxA settings when the account entry is clicked",
+        it.skip("should open the FxA settings when the account entry is clicked",
             function() {
               TestUtils.Simulate.click(ReactDOM.findDOMNode(view)
                                          .querySelector(".entry-settings-account"));
@@ -505,28 +517,31 @@ describe("loop.panel", function() {
             });
 
         it("should sign out the user on click when authenticated", function() {
-          TestUtils.Simulate.click(ReactDOM.findDOMNode(view)
-                                     .querySelector(".entry-settings-signout"));
+          TestUtils.Simulate.click(
+            ReactDOM.findDOMNode(view.refs["item-signin"])
+          );
 
           sinon.assert.calledOnce(requestStubs.LogoutFromFxA);
         });
 
         it("should close the dropdown menu on clicking sign out", function() {
           LoopMochaUtils.stubLoopRequest({
-            GetUserProfile: function() { return { email: "test@example.com" }; }
+            GetUserProfile: sandbox.stub().returns({ email: "test@example.com" })
           });
 
           view.setState({ showMenu: true });
 
-          TestUtils.Simulate.click(ReactDOM.findDOMNode(view)
-                                     .querySelector(".entry-settings-signout"));
+          TestUtils.Simulate.click(
+            ReactDOM.findDOMNode(view.refs["item-signin"])
+          );
 
           expect(view.state.showMenu).eql(false);
         });
 
         it("should not close the panel on clicking sign out", function() {
-          TestUtils.Simulate.click(ReactDOM.findDOMNode(view)
-                                     .querySelector(".entry-settings-signout"));
+          TestUtils.Simulate.click(
+            ReactDOM.findDOMNode(view.refs["item-signin"])
+          );
 
           sinon.assert.notCalled(fakeWindow.close);
         });
@@ -540,61 +555,78 @@ describe("loop.panel", function() {
         });
 
         it("should show a message to turn notifications off when they are on", function() {
+          var getPrefStub = sandbox.stub()
+            .withArgs("do_not_disturb").returns(false);
+
           LoopMochaUtils.stubLoopRequest({
-            GetDoNotDisturb: function() { return false; }
+            GetLoopPref: getPrefStub
           });
 
           view.showDropdownMenu();
 
-          var menuitem = ReactDOM.findDOMNode(view).querySelector(".entry-settings-notifications");
+          var menuitem = ReactDOM.findDOMNode(view.refs["item-notifications"]);
 
           expect(menuitem.textContent).eql("settings_menu_item_turnnotificationsoff");
         });
 
-        it("should toggle mozLoop.doNotDisturb to false", function() {
-          var stub = sinon.stub();
+        it("should turn notifications ON [toggle mozLoop.doNotDisturb to true]",
+          function() {
+          var setStub = sandbox.stub(),
+              getPrefStub = sandbox.stub()
+                .withArgs("do_not_disturb").returns(false);
+
           LoopMochaUtils.stubLoopRequest({
-            SetDoNotDisturb: stub
+            GetLoopPref: getPrefStub,
+            SetLoopPref: setStub
           });
-          var toggleNotificationsMenuOption = ReactDOM.findDOMNode(view)
-                                                .querySelector(".entry-settings-notifications");
+          var toggleNotificationsMenuOption =
+            ReactDOM.findDOMNode(view.refs["item-notifications"]);
 
           TestUtils.Simulate.click(toggleNotificationsMenuOption);
 
-          sinon.assert.calledOnce(stub);
-          sinon.assert.calledWithExactly(stub, false);
+          sinon.assert.calledOnce(setStub);
+          sinon.assert.calledWithExactly(setStub, "do_not_disturb", true);
         });
 
         it("should show a message to turn notifications on when they are off", function() {
+
+          var getPrefStub = sandbox.stub()
+            .withArgs("do_not_disturb").returns(true);
+
           LoopMochaUtils.stubLoopRequest({
-            GetDoNotDisturb: function() { return true; }
+            GetLoopPref: getPrefStub
           });
 
           view.showDropdownMenu();
 
-          var menuitem = ReactDOM.findDOMNode(view).querySelector(".entry-settings-notifications");
+          var menuitem = ReactDOM.findDOMNode(view.refs["item-notifications"]);
 
           expect(menuitem.textContent).eql("settings_menu_item_turnnotificationson");
         });
 
-        it("should toggle mozLoop.doNotDisturb to true", function() {
-          var stub = sinon.stub();
+        it("should turn them on [toggle mozLoop.doNotDisturb to false]",
+          function() {
+          var setStub = sandbox.stub(),
+              getPrefStub = sandbox.stub()
+                .withArgs("do_not_disturb").returns(false);
+
           LoopMochaUtils.stubLoopRequest({
-            GetDoNotDisturb: function() { return false; },
-            SetDoNotDisturb: stub
+            GetLoopPref: getPrefStub,
+            SetLoopPref: setStub
           });
-          var toggleNotificationsMenuOption = ReactDOM.findDOMNode(view)
-                                                .querySelector(".entry-settings-notifications");
+
+          var toggleNotificationsMenuOption =
+            ReactDOM.findDOMNode(view.refs["item-notifications"]);
 
           TestUtils.Simulate.click(toggleNotificationsMenuOption);
 
-          sinon.assert.calledOnce(stub);
-          sinon.assert.calledWithExactly(stub, true);
+          sinon.assert.calledOnce(setStub);
+          sinon.assert.calledWithExactly(setStub, "do_not_disturb", true);
         });
 
         it("should close dropdown menu", function() {
-          var toggleNotificationsMenuOption = ReactDOM.findDOMNode(view)
-                                                .querySelector(".entry-settings-notifications");
+          var toggleNotificationsMenuOption =
+            ReactDOM.findDOMNode(view.refs["item-notifications"]);
 
           view.setState({ showMenu: true });
 
@@ -612,9 +644,11 @@ describe("loop.panel", function() {
         });
 
         it("should invoke edit mode callback", function() {
-          var editUsernameEntry = ReactDOM.findDOMNode(view).querySelector(".entry-settings-username");
+          var editUsernameEntry =
+            ReactDOM.findDOMNode(view.refs["item-changeUsername"]);
 
           TestUtils.Simulate.click(editUsernameEntry);
+
           sinon.assert.calledOnce(usernameEditModeStub);
         });
       });
@@ -626,81 +660,71 @@ describe("loop.panel", function() {
       function mountTestComponent() {
         return TestUtils.renderIntoDocument(
           React.createElement(loop.panel.SettingsDropdown, {
-            handleEditUsernameButtonClick: sinon.stub()
+            calledFromPanel: true,
+            handleEditUsernameButtonClick: sandbox.stub()
           }));
       }
 
       beforeEach(function() {
         supportUrl = "https://example.com";
         LoopMochaUtils.stubLoopRequest({
-          GetLoopPref: function(pref) {
-            if (pref === "support_url") {
-              return supportUrl;
-            }
-
-            return 1;
-          }
+          GetLoopPref: sandbox.stub()
+                        .withArgs("support_url")
+                        .returns(supportUrl)
         });
+
+        view = mountTestComponent();
       });
 
       it("should open a tab to the support page", function() {
-        view = mountTestComponent();
 
-        TestUtils.Simulate
-          .click(ReactDOM.findDOMNode(view).querySelector(".entry-settings-help"));
+        TestUtils.Simulate.click(
+          ReactDOM.findDOMNode(view.refs["item-help"])
+        );
 
         sinon.assert.calledOnce(requestStubs.OpenURL);
         sinon.assert.calledWithExactly(requestStubs.OpenURL, supportUrl);
       });
 
       it("should close the panel", function() {
-        view = mountTestComponent();
 
-        TestUtils.Simulate
-          .click(ReactDOM.findDOMNode(view).querySelector(".entry-settings-help"));
+        TestUtils.Simulate.click(
+          ReactDOM.findDOMNode(view.refs["item-help"])
+        );
 
         sinon.assert.calledOnce(fakeWindow.close);
       });
     });
 
     describe("Submit feedback", function() {
-      var view, feedbackUrl;
+      var view;
 
       function mountTestComponent() {
         return TestUtils.renderIntoDocument(
           React.createElement(loop.panel.SettingsDropdown, {
-            handleEditUsernameButtonClick: sinon.stub()
+            calledFromPanel: true,
+            handleEditUsernameButtonClick: sandbox.stub()
           }));
       }
 
       beforeEach(function() {
-        feedbackUrl = "https://example.com";
-        LoopMochaUtils.stubLoopRequest({
-          GetLoopPref: function(pref) {
-            if (pref === "feedback.manualFormURL") {
-              return feedbackUrl;
-            }
-
-            return 1;
-          }
-        });
+        view = mountTestComponent();
       });
 
-      it("should open a tab to the feedback page", function() {
-        view = mountTestComponent();
+      it("should call SubmitFeedback", function() {
 
-        TestUtils.Simulate
-          .click(ReactDOM.findDOMNode(view).querySelector(".entry-settings-feedback"));
+        TestUtils.Simulate.click(
+          ReactDOM.findDOMNode(view.refs["item-feedback"])
+        );
 
-        sinon.assert.calledOnce(requestStubs.OpenURL);
-        sinon.assert.calledWithExactly(requestStubs.OpenURL, feedbackUrl);
+        sinon.assert.calledOnce(requestStubs.SubmitFeedback);
       });
 
       it("should close the panel", function() {
-        view = mountTestComponent();
 
-        TestUtils.Simulate
-          .click(ReactDOM.findDOMNode(view).querySelector(".entry-settings-feedback"));
+        TestUtils.Simulate.click(
+          ReactDOM.findDOMNode(view.refs["item-feedback"])
+        );
 
         sinon.assert.calledOnce(fakeWindow.close);
       });
@@ -1473,7 +1497,7 @@ describe("loop.panel", function() {
     });
 
     it("should hangup any window when stop sharing is clicked", function() {
-      var stub = sinon.stub();
+      var stub = sandbox.stub();
       LoopMochaUtils.stubLoopRequest({
         HangupAllChatWindows: stub
       });
@@ -1638,7 +1662,7 @@ describe("loop.panel", function() {
     function createTestComponent(extraProps) {
       var props = _.extend({
         dispatcher: dispatcher,
-        onSharePanelDisplayChange: sinon.stub(),
+        onSharePanelDisplayChange: sandbox.stub(),
         store: roomStore
       }, extraProps);
       return TestUtils.renderIntoDocument(
@@ -1941,7 +1965,7 @@ describe("loop.panel", function() {
     }
 
     beforeEach(function() {
-      editCompleteStub = sinon.stub();
+      editCompleteStub = sandbox.stub();
     });
 
     it("should render the username if edition mode is disabled", function() {

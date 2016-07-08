@@ -1883,6 +1883,11 @@ this.MozLoopService = {
       "chrome://loop/content/panels/slideshow.html");
   }),
 
+  submitFeedback: function() {
+    let url = this.getLoopPref("feedback.manualFormURL");
+    this.openURL(url);
+  },
+
   /**
    * Opens a URL in a new tab in the browser.
    *

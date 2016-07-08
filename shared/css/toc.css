@@ -44,8 +44,9 @@
   font-family: sans-serif;
 }
 
-.toc-wrapper > .toc-room-info-bar > .room-actions-buttons > [class^="room-action"] > button {
-  border: solid 1px #ebebeb;
+.toc-wrapper > .toc-room-info-bar > .room-actions-buttons > [class^="room-action"] button {
+  border: solid 1px #8f8f8f;
+  border-radius: 4px;
   background: rgba(51, 51, 51, 0.1);
   height: 30px;
   width: 30px;
@@ -58,19 +59,19 @@
   margin-left: 15px;
 }
 
-.toc-wrapper > .toc-room-info-bar > .room-actions-buttons > [class^="room-action"] > button.add-url::after {
+.toc-wrapper > .toc-room-info-bar > .room-actions-buttons > [class^="room-action"] button.add-url::after {
   content: url("../../shared/img/icons-16x16.svg#add-hover");
 }
 
-.toc-wrapper > .toc-room-info-bar > .room-actions-buttons > [class^="room-action"] > button.add-url:hover::after {
+.toc-wrapper > .toc-room-info-bar > .room-actions-buttons > [class^="room-action"] button.add-url:hover::after {
   content: url("../../shared/img/icons-16x16.svg#add-active");
 }
 
-.toc-wrapper > .toc-room-info-bar > .room-actions-buttons > [class^="room-action"] > button.settings::after {
+.toc-wrapper > .toc-room-info-bar > .room-actions-buttons > [class^="room-action"] button.button-settings::after {
   content: url("../../shared/img/icons-16x16.svg#settings-hover");
 }
 
-.toc-wrapper > .toc-room-info-bar > .room-actions-buttons > [class^="room-action"] > button.settings:hover::after {
+.toc-wrapper > .toc-room-info-bar > .room-actions-buttons > [class^="room-action"] button.button-settings:hover::after {
   content: url("../../shared/img/icons-16x16.svg#settings-active");
 }
 
@@ -92,6 +93,38 @@
 .room-panel-add-url > button {
   width: 100%;
 }
+
+/* Settings (gear) menu */
+
+.settings-menu > .dropdown-menu {
+  /* The panel can't have dropdown menu overflowing its iframe boundaries;
+     let's anchor it from the top-right, while resetting the top & left values
+     set by .dropdown-menu */
+  top: 35px; /* 30px for the height plus 5 for margin */
+  left: auto;
+  right: 1px;
+  bottom: auto;
+}
+html[dir="rtl"] > .settings-menu .dropdown-menu {
+  /* This is specified separately rather than using -moz-margin-start etc, as
+     we need to override .dropdown-menu's values which can't use the gecko
+     specific extensions. */
+  left: 1px;
+  right: auto;
+}
+
+.dropdown-menu-item {
+  font-size: 12px;
+}
+
+.dropdown-menu-item.entries-divider {
+  border-left: 0;
+  border-right: 0;
+  border-bottom: solid 1px #d8d8d8;
+}
+
+
+/* end Settings menu */
 
 .toc-wrapper > .room-toc > .toc-tile > .room-user {
   width: 30px;

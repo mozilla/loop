@@ -94,6 +94,10 @@ loop.shared.toc = (function(mozL10n) {
       };
     },
 
+    enterEditMode: function() {
+      this.refs.editRoomName.toggleEditMode();
+    },
+
     exitEditMode: function(value) {
       this.props.dispatcher.dispatch(
         new sharedActions.UpdateRoomContext({
@@ -110,10 +114,12 @@ loop.shared.toc = (function(mozL10n) {
             <sharedViews.EditableFieldView
               forceNotEditable={!this.props.isDesktop}
               label={this.state.roomName}
-              onEditionComplete={this.exitEditMode} />
+              onEditionComplete={this.exitEditMode}
+              ref="editRoomName" />
           </div>
           <RoomActionsView
-            dispatcher={this.props.dispatcher} />
+            dispatcher={this.props.dispatcher}
+            handleEditRoomNameClick={this.enterEditMode} />
         </div>
       );
     }
@@ -130,13 +136,13 @@ loop.shared.toc = (function(mozL10n) {
 
     _getOnlineParticipants() {
       return {
-        participants: this.props.participantStore.getOnlineParticipants()
+       participants: this.props.participantStore.getOnlineParticipants()
       };
     },
 
     componentWillMount() {
       this.props.participantStore.on("change", () => {
-        this.setState(this._getOnlineParticipants());
+       this.setState(this._getOnlineParticipants());
       }, this);
     },
 
@@ -163,7 +169,8 @@ loop.shared.toc = (function(mozL10n) {
 
   var RoomActionsView = React.createClass({
     propTypes: {
-      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired
+      dispatcher: React.PropTypes.instanceOf(loop.Dispatcher).isRequired,
+      handleEditRoomNameClick: React.PropTypes.func.isRequired
     },
 
     getInitialState: function() {
@@ -187,7 +194,8 @@ loop.shared.toc = (function(mozL10n) {
       return (
         <div className="room-actions-buttons">
           <div className="room-action-add-url">
-            <button className="add-url" onClick={this.toggleAddUrlPanel} />
+            <button className="add-url"
+                    onClick={this.toggleAddUrlPanel} />
             {
               this.state.showAddUrlPanel ?
                 <AddUrlPanelView
@@ -196,7 +204,10 @@ loop.shared.toc = (function(mozL10n) {
             }
           </div>
           <div className="room-action-settings">
-            <button className="settings" />
+            <sharedViews.SettingsDropdown
+              handleEditRoomNameButtonClick={this.props.handleEditRoomNameClick}
+              // XXX editUserName from ToC not yet implemented
+              handleEditUsernameButtonClick={function foo() { }} />
           </div>
         </div>
       );

@@ -22,7 +22,7 @@ import glob
 import re
 import sys
 
-NOT_USED_EXPECTED_AMOUNT = 12
+NOT_USED_EXPECTED_AMOUNT = 18
 
 DEFAULT_PROPERTY_LOCALE = "en-US"
 

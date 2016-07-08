@@ -317,6 +317,32 @@ loop.StandaloneMozLoop = (function() {
     GetLoopPref: function(data, reply) {
       var prefName = data[0];
       reply(localStorage.getItem(prefName));
+    },
+
+    // XXX load FTU for guest
+    // depends on bug 1268792
+    // current FTU is on loop/add-on/panels/slideshow.html
+    OpenGettingStartedTour: function(data, reply) {
+      reply();
+    },
+
+    // XXX load Manual Feedback url for guests
+    SubmitFeedback: function(data, reply) {
+      reply();
+    },
+
+    /**
+     * Opens a URL on a new tab.
+     * NOTE: It does not override the user preference
+     *
+     * @param {String}   url   Contains the url that will be opened
+     * @param {Function} reply Callback function to invoke when done with the
+     *                         value of the pref.
+     */
+    OpenURL: function(url, reply) {
+      let win = window.open(url, "_blank");
+      win.focus();
+      reply();
     }
   };
 

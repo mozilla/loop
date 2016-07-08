@@ -432,6 +432,7 @@ describe("loop.shared.views", function() {
       });
     });
   });
+
   describe("ContextUrlLink", function() {
     var view;
 
@@ -1274,5 +1275,171 @@ describe("loop.shared.views", function() {
       var input = testView.refs.editableInput;
       expect(input).eql(undefined);
     });
+  });
+
+  describe("Settings", function() {
+    var view;
+
+    function mountTestComponent(extra) {
+      var props = _.extend({
+        calledFromPanel: false,
+        handleEditUsernameButtonClick: function foo() {}
+      }, extra || {});
+
+      return TestUtils.renderIntoDocument(
+        React.createElement(sharedViews.SettingsDropdown, props)
+      );
+    }
+
+    function getOpenMenu() {
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(
+        view.refs["menu-button"]
+      ));
+      return ReactDOM.findDOMNode(view.refs["settings-list"]);
+
+    }
+
+    beforeEach(function() {
+      sinon.stub(loop, "getStoredRequest")
+        .withArgs(["GetLoopPref", "do_not_disturb"]).returns(false)
+        .withArgs(["GetUserProfile"]).returns(null);
+
+      sinon.stub(loop.shared.utils, "isDesktop");
+
+      LoopMochaUtils.stubLoopRequest({
+        GetUserProfile: sinon.stub()
+      });
+
+      view = mountTestComponent();
+    });
+
+    afterEach(function() {
+      loop.getStoredRequest.restore();
+      loop.shared.utils.isDesktop.restore();
+      LoopMochaUtils.restore();
+      view = null;
+    });
+
+    it("should initiate properly", function() {
+      expect(view.state.showMenu).to.eql(false, "should be hidden");
+      sinon.assert.calledTwice(loop.getStoredRequest);
+      sinon.assert.calledWith(loop.getStoredRequest,
+                              ["GetLoopPref", "do_not_disturb"]);
+      sinon.assert.calledWith(loop.getStoredRequest, ["GetUserProfile"]);
+    });
+
+    it("should show items on click", function() {
+      var options = getOpenMenu(view);
+
+      expect(view.state.showMenu).to.eql(true, "should change the state");
+      expect(options.classList.contains("hide")).eql(false, "should show menu");
+    });
+
+    it("should show Change Room Name option if user is room owner", function() {
+      loop.shared.utils.isDesktop.returns(true);
+      // remount the component because of stub change
+      view = mountTestComponent();
+
+      var item = ReactDOM.findDOMNode(
+        view.refs["item-changeRoomName"]
+      );
+      expect(item).to.exist;
+    });
+
+    it("should call handler function when Change Room Name option clicked",
+      function() {
+      loop.shared.utils.isDesktop.returns(true);
+      var stub = sandbox.stub();
+
+      // remount the component because of stub change
+      view = mountTestComponent({
+        handleEditRoomNameButtonClick: stub
+      });
+
+      TestUtils.Simulate.click(ReactDOM.findDOMNode(
+        view.refs["item-changeRoomName"]
+      ));
+
+      sinon.assert.calledOnce(stub);
+    });
+
+    it("should not show Change Room Name option if user not room owner",
+      function() {
+      loop.shared.utils.isDesktop.returns(false);
+      // remount the component because of stub change
+      view = mountTestComponent();
+
+      var item = ReactDOM.findDOMNode(
+        view.refs["item-changeRoomName"]
+      );
+
+      expect(item).to.not.exist;
+    });
+
+    it("should offer to Sign In if user is not identified yet", function() {
+      // reload the new values when updating
+      getOpenMenu();
+
+      var item = ReactDOM.findDOMNode(
+        view.refs["item-signin"]
+      );
+
+      expect(item.textContent)
+        .to.be.eql("translated:settings_menu_item_signin");
+    });
+
+    it("should offer to Sign Out if user is already in", function() {
+      // Mock user is signedIn
+      LoopMochaUtils.stubLoopRequest({
+        GetUserProfile: sinon.stub().returns({})
+      });
+
+      // reload the new values when updating
+      getOpenMenu();
+
+      var item = ReactDOM.findDOMNode(
+        view.refs["item-signin"]
+      );
+      expect(item.textContent)
+        .to.be.eql("translated:settings_menu_item_signout");
+    });
+
+    it("should offer to Turn Notifications Off when it's on", function() {
+      LoopMochaUtils.stubLoopRequest({
+        GetLoopPref: sinon.stub()
+                      .withArgs("do_not_disturb")
+                      .returns(false)
+      });
+
+      // reload the new values when updating
+      getOpenMenu();
+
+      var item = ReactDOM.findDOMNode(
+        view.refs["item-notifications"]
+      );
+
+      expect(item.textContent)
+        .to.be.eql("translated:settings_menu_item_turnnotificationsoff");
+    });
+
+    it("should offer to Turn Notifications On when it's off", function() {
+      // Mock user is signedIn
+      LoopMochaUtils.stubLoopRequest({
+        GetLoopPref: sinon.stub()
+                      .withArgs("do_not_disturb")
+                      .returns(true)
+      });
+
+      // reload the new values when updating
+      getOpenMenu();
+
+      var item = ReactDOM.findDOMNode(
+        view.refs["item-notifications"]
+      );
+      expect(item.textContent)
+        .to.be.eql("translated:settings_menu_item_turnnotificationson");
+    });
+
+
   });
 });

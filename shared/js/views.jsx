@@ -8,6 +8,7 @@ loop.shared.views = (function(_, mozL10n) {
   "use strict";
 
   var sharedActions = loop.shared.actions;
+  var sharedMixins = loop.shared.mixins;
 
   /**
    * Hang-up control button.
@@ -1199,6 +1200,268 @@ loop.shared.views = (function(_, mozL10n) {
     }
   });
 
+  /**
+   * Panel settings (gear) menu entry.
+   */
+  var SettingsDropdownEntry = React.createClass({
+    propTypes: {
+      disabled: React.PropTypes.bool,
+      displayed: React.PropTypes.bool,
+      extraCSSClass: React.PropTypes.string,
+      label: React.PropTypes.string.isRequired,
+      onClick: React.PropTypes.func.isRequired
+    },
+
+    getDefaultProps: function() {
+      return { displayed: true };
+    },
+
+    render: function() {
+      if (!this.props.displayed) {
+        return null;
+      }
+
+      var cx = classNames;
+      var extraCSSClass = {
+        "dropdown-menu-item": true
+      };
+      if (this.props.extraCSSClass) {
+        extraCSSClass[this.props.extraCSSClass] = true;
+      }
+
+      if (this.props.disabled) {
+        extraCSSClass.disabled = true;
+      }
+      return (
+        <li className={cx(extraCSSClass)}
+            disabled={!this.props.disabled}
+            onClick={this.props.onClick} >
+          {this.props.label}
+        </li>
+      );
+    }
+  });
+
+  /**
+   * Panel settings (gear) menu.
+   */
+  var SettingsDropdown = React.createClass({
+    statics: {
+      PREF_DND: "do_not_disturb"
+    },
+
+    mixins: [
+      sharedMixins.DropdownMenuMixin(),
+      sharedMixins.WindowCloseMixin
+    ],
+
+    propTypes: {
+      // Presumed false if not present
+      calledFromPanel: React.PropTypes.bool,
+      // EditRoomName is only available to owners from the ToC
+      handleEditRoomNameButtonClick: React.PropTypes.func,
+      // EditUserName is available to all users
+      handleEditUsernameButtonClick: React.PropTypes.func.isRequired
+    },
+
+    getDefaultProps: function() {
+      return {
+        calledFromPanel: false,
+        handleEditRoomNameButtonClick: function foo() {}
+      };
+    },
+
+    getInitialState: function() {
+      return {
+        doNotDisturb: loop.getStoredRequest(
+                        ["GetLoopPref", this.constructor.PREF_DND]) || false,
+        signedIn: loop.getStoredRequest(["GetUserProfile"]) || null
+      };
+    },
+
+    componentWillUpdate: function(nextProps, nextState) {
+      // no need of update if show state is not changing
+      if (nextState.showMenu === this.state.showMenu) {
+        return;
+      }
+
+      loop.requestMulti(
+        ["GetLoopPref", this.constructor.PREF_DND],
+        ["GetUserProfile"]
+      ).then(results => {
+        this.setState({
+          doNotDisturb: !results[0] || results[0].isError ? false : results[0],
+          signedIn: !results[1] || results[1].isError ? false : !!results[1]
+        });
+      });
+    },
+
+    handleClickSettingsEntry: function() {
+      // XXX to be implemented at the same time as unhiding the entry
+    },
+
+    handleClickAccountEntry: function() {
+      loop.request("OpenFxASettings");
+      this.closeWindow();
+    },
+
+    handleClickAuthEntry: function() {
+      if (this.state.signedIn) {
+        loop.request("LogoutFromFxA");
+        // Close the menu but leave the panel open
+        this.hideDropdownMenu();
+      } else {
+        loop.request("LoginToFxA");
+        // Close the panel, the menu will be closed by on blur listener of DropdownMenuMixin
+        this.closeWindow();
+      }
+    },
+
+    /**
+     * Allows the ROOM OWNER to change the room name
+     */
+    handleChangeRoomName: function() {
+      if (loop.shared.utils.isDesktop()) {
+        this.props.handleEditRoomNameButtonClick();
+      }
+
+      this.hideDropdownMenu();
+    },
+
+    /**
+     * Allows the user to change the username
+     * - When called from Hello Panel, it focus on the name input
+     * - When called from ToC Settings, it should show the FTU slide
+     * where the user chooses the username
+     */
+    handleChangeUserName: function() {
+      // If change username call comes from Loop Panel
+      if (this.props.calledFromPanel) {
+        this.props.handleEditUsernameButtonClick();
+      }
+      // XXX change username when not called from panel
+      // needs new FTU finished
+
+      this.hideDropdownMenu();
+      },
+
+    /**
+     * Toggle the Notifications preference for the user
+     */
+    handleToggleNotifications: function() {
+      loop.request("GetLoopPref", this.constructor.PREF_DND)
+      .then(result => {
+        loop.request("SetLoopPref", this.constructor.PREF_DND, !result);
+      });
+      this.hideDropdownMenu();
+    },
+
+    /**
+     *  Opens the FTU on the same tab
+     */
+    openGettingStartedTour: function() {
+      loop.request("OpenGettingStartedTour");
+      if (this.props.calledFromPanel) {
+        this.closeWindow();
+      }
+    },
+
+    /**
+     * Load the feedback url from prefs on a new tab
+     */
+    handleSubmitFeedback: function(event) {
+      event.preventDefault();
+      // It has it's own request instead of just loading a LoopPref
+      // because we don't want the manualFormURL stored for guests
+      loop.request("SubmitFeedback");
+
+      if (this.props.calledFromPanel) {
+        this.closeWindow();
+      }
+    },
+
+    /**
+     * Load the support url from prefs on a new tab
+     */
+    handleHelpEntry: function(event) {
+      event.preventDefault();
+      loop.request("GetLoopPref", "support_url")
+      .then(helloSupportUrl => {
+        loop.request("OpenURL", helloSupportUrl);
+
+        if (this.props.calledFromPanel) {
+          this.closeWindow();
+        }
+      });
+    },
+
+    render: function() {
+      var cx = classNames;
+
+      var accountAuthLabel = this.state.signedIn ?
+                               "settings_menu_item_signout" :
+                               "settings_menu_item_signin";
+
+      var notificationsLabel = this.state.doNotDisturb ?
+                                  "settings_menu_item_turnnotificationson" :
+                                  "settings_menu_item_turnnotificationsoff";
+
+      // Change Room Name option should be displayed only:
+      //  - if the user is owner
+      //  - it's not called from the Hello Panel
+      var displayChangeRoomName = loop.shared.utils.isDesktop() &&
+                                  !this.props.calledFromPanel;
+      // disable entries without functionality.
+      // For now, entries for guest should be disabled
+      var disabledEntry = !loop.shared.utils.isDesktop();
+      return (
+        <div className="settings-menu dropdown">
+          <button className="button-settings"
+             onClick={this.toggleDropdownMenu}
+             ref="menu-button"
+             title={mozL10n.get("settings_menu_button_tooltip")} />
+          <ul className={cx({
+                "dropdown-menu": true,
+                "hide": !this.state.showMenu
+              })}
+              ref="settings-list">
+            {/* Change_Room_Name option is hidden for guests */}
+            <SettingsDropdownEntry disabled={disabledEntry}
+                                   displayed={displayChangeRoomName}
+                                   label={mozL10n.get("settings_menu_item_change_roomname")}
+                                   onClick={this.handleChangeRoomName}
+                                   ref="item-changeRoomName" />
+            <SettingsDropdownEntry disabled={disabledEntry}
+                                   extraCSSClass="entries-divider"
+                                   label={mozL10n.get("settings_menu_item_change_username")}
+                                   onClick={this.handleChangeUserName}
+                                   ref="item-changeUsername" />
+            <SettingsDropdownEntry disabled={disabledEntry}
+                                   extraCSSClass="entries-divider"
+                                   label={mozL10n.get(notificationsLabel)}
+                                   onClick={this.handleToggleNotifications}
+                                   ref="item-notifications" />
+            <SettingsDropdownEntry disabled={disabledEntry}
+                                   label={mozL10n.get("settings_menu_item_starttour")}
+                                   onClick={this.openGettingStartedTour} />
+            <SettingsDropdownEntry disabled={disabledEntry}
+                                   label={mozL10n.get("settings_menu_item_feedback")}
+                                   onClick={this.handleSubmitFeedback}
+                                   ref="item-feedback" />
+            <SettingsDropdownEntry disabled={disabledEntry}
+                                   label={mozL10n.get(accountAuthLabel)}
+                                   onClick={this.handleClickAuthEntry}
+                                   ref="item-signin" />
+            <SettingsDropdownEntry disabled={disabledEntry}
+                                   label={mozL10n.get("settings_menu_item_help")}
+                                   onClick={this.handleHelpEntry}
+                                   ref="item-help" />
+          </ul>
+        </div>
+      );
+    }
+  });
+
   // XXX akita currently unused. Need to use it or remove it
   var AdsTileView = React.createClass({
     propTypes: {
@@ -1424,6 +1687,7 @@ loop.shared.views = (function(_, mozL10n) {
     MediaWaitView: MediaWaitView,
     LoadingView: LoadingView,
     RemoteCursorView: RemoteCursorView,
+    SettingsDropdown: SettingsDropdown,
     ScreenShareButton: ScreenShareButton,
     ScreenShareView: ScreenShareView,
     VideoMuteButton: VideoMuteButton

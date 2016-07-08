@@ -110,7 +110,7 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
-          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+          receivedTimestamp: 1435254835357
         }]
       });
 
@@ -128,7 +128,7 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.SENT,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Is it me you're looking for?",
-          sentTimestamp: "2015-06-25T17:53:55.357Z"
+          sentTimestamp: 1435254835357
         }]
       });
 
@@ -151,7 +151,7 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
-          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+          receivedTimestamp: 1435254835357
         }]
       });
 
@@ -173,7 +173,7 @@ describe("loop.shared.views.TextChatView", function() {
             location: "http://wonderful.invalid",
             thumbnail: "fake"
           },
-          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+          receivedTimestamp: 1435254835357
         }]
       });
 
@@ -191,7 +191,7 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.SENT,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
-          sentTimestamp: "2015-06-25T17:53:55.357Z"
+          sentTimestamp: 1435254835357
         }]
       });
 
@@ -205,12 +205,12 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
-          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+          receivedTimestamp: 1435254835357
         }, {
           type: CHAT_MESSAGE_TYPES.SENT,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Is it me you're looking for?",
-          sentTimestamp: "2015-06-25T17:53:55.357Z"
+          sentTimestamp: 1435254835357
         }]
       });
       node = ReactDOM.findDOMNode(view);
@@ -227,12 +227,12 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.SENT,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
-          sentTimestamp: "2015-06-25T17:53:55.357Z"
+          sentTimestamp: 1435254835357
         }, {
           type: CHAT_MESSAGE_TYPES.SENT,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Is it me you're looking for?",
-          sentTimestamp: "2015-06-25T17:54:55.357Z"
+          sentTimestamp: 1435254835357
         }]
       });
       node = ReactDOM.findDOMNode(view);
@@ -247,12 +247,12 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
-          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+          receivedTimestamp: 1435254835357
         }, {
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Is it me you're looking for?",
-          receivedTimestamp: "2015-06-25T17:54:55.357Z"
+          receivedTimestamp: 1435254895357
         }]
       });
       node = ReactDOM.findDOMNode(view);
@@ -267,12 +267,12 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
-          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+          receivedTimestamp: 1435254835357
         }, {
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Is it me you're looking for?",
-          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+          receivedTimestamp: 1435254835357
         }]
       });
       node = ReactDOM.findDOMNode(view);
@@ -302,7 +302,7 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
-          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+          receivedTimestamp: 1435254835357
         }];
 
         view.componentWillReceiveProps({ messageList: messageList });
@@ -317,7 +317,7 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.NOTIFICATION,
           message: "Bye!",
-          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+          receivedTimestamp: 1435254835357
         }];
 
         view.componentWillReceiveProps({ messageList: messageList });
@@ -336,7 +336,7 @@ describe("loop.shared.views.TextChatView", function() {
             roomToken: "fake",
             newRoomURL: "http://marvelous.invalid"
           },
-          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+          receivedTimestamp: 1435254835357
         }];
 
         view.componentWillReceiveProps({ messageList: messageList });
@@ -383,7 +383,7 @@ describe("loop.shared.views.TextChatView", function() {
             type: CHAT_MESSAGE_TYPES.RECEIVED,
             contentType: CHAT_CONTENT_TYPES.TEXT,
             message: "Hello!",
-            receivedTimestamp: "2015-06-25T17:53:55.357Z"
+            receivedTimestamp: 1435254835357
           }
         ];
 
@@ -402,7 +402,7 @@ describe("loop.shared.views.TextChatView", function() {
           type: CHAT_MESSAGE_TYPES.RECEIVED,
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
-          receivedTimestamp: "2015-06-25T17:53:55.357Z"
+          receivedTimestamp: 1435254835357
         }];
 
         view.componentWillReceiveProps({ messageList: messageList });
@@ -415,7 +415,7 @@ describe("loop.shared.views.TextChatView", function() {
             type: CHAT_MESSAGE_TYPES.RECEIVED,
             contentType: CHAT_CONTENT_TYPES.TEXT,
             message: "Hello!",
-            receivedTimestamp: "2015-06-25T17:53:55.357Z"
+            receivedTimestamp: 1435254835357
           }
         ];
 
@@ -435,7 +435,7 @@ describe("loop.shared.views.TextChatView", function() {
         dispatcher: dispatcher,
         message: "test",
         type: CHAT_MESSAGE_TYPES.RECEIVED,
-        timestamp: "2015-06-23T22:48:39.738Z"
+        timestamp: 1435254835357
       }, extraProps);
       return TestUtils.renderIntoDocument(
         React.createElement(loop.shared.views.chat.TextChatEntry, props));
@@ -444,7 +444,7 @@ describe("loop.shared.views.TextChatView", function() {
     it("should not render a timestamp", function() {
       view = mountTestComponent({
         showTimestamp: false,
-        timestamp: "2015-06-23T22:48:39.738Z",
+        timestamp: 1435254835357,
         type: CHAT_MESSAGE_TYPES.RECEIVED,
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "foo"
@@ -457,7 +457,7 @@ describe("loop.shared.views.TextChatView", function() {
     it("should render a timestamp", function() {
       view = mountTestComponent({
         showTimestamp: true,
-        timestamp: "2015-06-23T22:48:39.738Z",
+        timestamp: 1435254835357,
         type: CHAT_MESSAGE_TYPES.RECEIVED,
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "foo"
@@ -472,7 +472,7 @@ describe("loop.shared.views.TextChatView", function() {
     it("should linkify a URL starting with http", function() {
       view = mountTestComponent({
         showTimestamp: true,
-        timestamp: "2015-06-23T22:48:39.738Z",
+        timestamp: 1435254835357,
         type: CHAT_MESSAGE_TYPES.RECEIVED,
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "Check out http://example.com and see what you think..."
@@ -501,10 +501,12 @@ describe("loop.shared.views.TextChatView", function() {
       // Fake server to catch all XHR requests.
       fakeServer = sinon.fakeServer.create();
       store.setStoreState({ textChatEnabled: true });
+      clock.tick(1435254895357); // "2015-06-25T17:54:55.357Z"
     });
 
     afterEach(function() {
       fakeServer.restore();
+      clock.restore();
     });
 
     it("should add a disabled class when text chat is disabled", function() {
@@ -534,8 +536,8 @@ describe("loop.shared.views.TextChatView", function() {
       store.receivedTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "Hello!",
-        sentTimestamp: "1970-01-01T00:02:00.000Z",
-        receivedTimestamp: "1970-01-01T00:02:00.000Z"
+        sentTimestamp: 1401318000000,
+        receivedTimestamp: 1401318000000
       });
 
       expect(ReactDOM.findDOMNode(view).classList.contains("text-chat-entries-empty")).eql(false);
@@ -550,14 +552,14 @@ describe("loop.shared.views.TextChatView", function() {
       store.receivedTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "Hello!",
-        sentTimestamp: "1970-01-01T00:03:00.000Z",
-        receivedTimestamp: "1970-01-01T00:03:00.000Z"
+        sentTimestamp: 1401318000000,
+        receivedTimestamp: 1401318000000
       });
       store.receivedTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "Is it me you're looking for?",
-        sentTimestamp: "1970-01-01T00:03:00.000Z",
-        receivedTimestamp: "1970-01-01T00:03:00.000Z"
+        sentTimestamp: 1401318000000,
+        receivedTimestamp: 1401318000000
       });
 
       var node = ReactDOM.findDOMNode(view);
@@ -569,14 +571,14 @@ describe("loop.shared.views.TextChatView", function() {
       expect(entries[1].classList.contains("received")).to.eql(true);
     });
 
-    it("should not add received message if sent before", function() {
+    it("should not add a received message if it was sent before", function() {
       var node = ReactDOM.findDOMNode(mountTestComponent());
       store.setStoreState({ "displayName": "Myself" });
       let message = {
         contentType: CHAT_CONTENT_TYPES.TEXT,
         displayName: "Myself",
         message: "Foo",
-        sentTimestamp: "2015-06-25T17:53:55.357Z"
+        sentTimestamp: 1435254835357
       };
       store.sendTextChatMessage(message);
       store.receivedTextChatMessage(message);
@@ -594,8 +596,8 @@ describe("loop.shared.views.TextChatView", function() {
           contentType: CHAT_CONTENT_TYPES.TEXT,
           displayName: "Other user",
           message: "Foo",
-          sentTimestamp: "1970-01-01T00:03:00.000Z",
-          receivedTimestamp: "1970-01-01T00:03:00.000Z"
+          sentTimestamp: 1401318000000,
+          receivedTimestamp: 1401318000000
         });
 
         expect(node.querySelector(".received")).to.not.eql(null);
@@ -721,7 +723,8 @@ describe("loop.shared.views.TextChatView", function() {
         new sharedActions.SendTextChatMessage({
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Hello!",
-          sentTimestamp: "1970-01-01T00:00:00.000Z"
+          sentTimestamp: 1435254895357 // "2015-06-25T17:54:55.357Z"
+                                       // set on clock.tick line 502
         }));
     });
 
@@ -746,8 +749,8 @@ describe("loop.shared.views.TextChatView", function() {
         contentType: CHAT_CONTENT_TYPES.TEXT,
         displayName: "Other user",
         message: "Foo",
-        sentTimestamp: "1970-01-01T00:03:00.000Z",
-        receivedTimestamp: "1970-01-01T00:03:00.000Z"
+        sentTimestamp: 1401318000000,
+        receivedTimestamp: 1401318000000
       });
 
       var textBox = ReactDOM.findDOMNode(view).querySelector(".text-chat-box input");
@@ -763,7 +766,7 @@ describe("loop.shared.views.TextChatView", function() {
         contentType: CHAT_CONTENT_TYPES.TEXT,
         displayName: "Myself",
         message: "Foo",
-        sentTimestamp: "2015-06-25T17:53:55.357Z"
+        sentTimestamp: 1435254835357
       });
 
       var textBox = ReactDOM.findDOMNode(view).querySelector(".text-chat-box input");
@@ -783,17 +786,63 @@ describe("loop.shared.views.TextChatView", function() {
         expect(node.querySelector(".text-chat-notif")).to.not.eql(null);
     });
 
-    it("should render an icon for contentType NOTIFICATION",
-        function() {
-          view = mountTestComponent();
+    it("should render an icon for contentType NOTIFICATION", function() {
+      view = mountTestComponent();
 
-          store.remotePeerDisconnected(new sharedActions.RemotePeerDisconnected({
-            peerHungup: true
-          }));
+      store.remotePeerDisconnected(new sharedActions.RemotePeerDisconnected({
+        peerHungup: true
+      }));
 
-          var node = ReactDOM.findDOMNode(view);
-          expect(node.querySelectorAll(".notification-icon").length).to.eql(1);
+      var node = ReactDOM.findDOMNode(view);
+      expect(node.querySelectorAll(".notification-icon").length).to.eql(1);
+    });
+
+    describe("> Page events", function() {
+      let addedAction = {
+        pageId: "fake id",
+        added_by: "fakeUser",
+        added_time: 1435254895357, // "2015-06-25T17:54:55.357Z"
+        metadata: {
+          title: "TheWebTitle",
+          thumbnail_img: "the_image.ico",
+          url: "TheWebURL"
+        }
+      };
+
+      it("should render a TILE.ADDED when adding a page", function() {
+        view = mountTestComponent();
+
+        store.addedPage(new sharedActions.AddedPage(addedAction));
+
+        var eventTile = ReactDOM.findDOMNode(view)
+                        .querySelectorAll(".tile-event");
+        var addedEvent = ReactDOM.findDOMNode(view)
+                        .querySelectorAll(".added-tile");
+
+        expect(eventTile.length).to.eql(1);
+        expect(addedEvent.length).to.eql(1);
+      });
+
+      it("should render a TILE.DELETED when removing a page", function() {
+        view = mountTestComponent();
+        let deletedAction = Object.assign(addedAction, {
+          deleted: {
+            by: "deleter name",
+            timestamp: 1435254895357 // "2015-06-25T17:54:55.357Z"
+          }
         });
+
+        store.deletedPage(new sharedActions.DeletedPage(deletedAction));
+
+        var eventTile = ReactDOM.findDOMNode(view)
+                        .querySelectorAll(".tile-event");
+        var deletedEvent = ReactDOM.findDOMNode(view)
+                            .querySelectorAll(".deleted-tile");
+
+        expect(eventTile.length).to.eql(1);
+        expect(deletedEvent.length).to.eql(1);
+      });
+    });
   });
 
   describe("Add page button", () => {

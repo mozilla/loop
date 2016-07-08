@@ -116,7 +116,7 @@ loop.shared.actions = (function() {
     SendTextChatMessage: Action.define("sendTextChatMessage", {
       contentType: String,
       message: String,
-      sentTimestamp: String
+      sentTimestamp: Number
     }),
 
     /**
@@ -127,8 +127,8 @@ loop.shared.actions = (function() {
       message: String,
       // XXX (optional because we don't use this for tiles.  Should refactor)
       // displayName: String,
-      receivedTimestamp: String
-      // sentTimestamp: String (optional)
+      receivedTimestamp: Number
+      // sentTimestamp: Number (optional)
     }),
 
     /**
@@ -173,9 +173,14 @@ loop.shared.actions = (function() {
     // XXX akita rename for readability
     AddedPage: Action.define("addedPage", {
       pageId: String,
-      title: String,
-      url: String
-      // metadata: Object (optional)
+      added_by: String,
+      added_time: Number,
+      metadata: Object
+      // {
+      //   title: String,
+      //   thumbnail_img: String,
+      //   url: String
+      // }
     }),
 
     /**
@@ -190,8 +195,20 @@ loop.shared.actions = (function() {
      */
     // XXX akita rename for readability
     DeletedPage: Action.define("deletedPage", {
-      deletedTime: Number,
-      pageId: String
+      pageId: String,
+      added_by: String,
+      added_time: Number,
+      metadata: Object,
+      // {
+      //   title: String,
+      //   thumbnail_img: String,
+      //   url: String
+      // }
+      deleted: Object
+      // {
+      //   deleted_by: String
+      //   deletion_time: Number
+      // }
     }),
 
     /**
@@ -435,7 +452,7 @@ loop.shared.actions = (function() {
       // newRoomDescription: String, Optional.
       // newRoomThumbnail: String, Optional.
       // newRoomURL: String Optional.
-      // sentTimestamp: String, Optional.
+      // sentTimestamp: Number, Optional.
     }),
 
     /**

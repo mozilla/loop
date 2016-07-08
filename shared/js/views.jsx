@@ -657,19 +657,21 @@ loop.shared.views = (function(_, mozL10n) {
 
     propTypes: {
       allowClick: React.PropTypes.bool.isRequired,
-      description: React.PropTypes.string,
       dispatcher: React.PropTypes.instanceOf(loop.Dispatcher),
+      eventType: React.PropTypes.string.isRequired,
       thumbnail: React.PropTypes.string,
+      timestamp: React.PropTypes.number,
+      title: React.PropTypes.string,
       url: React.PropTypes.string,
       username: React.PropTypes.string
     },
 
     getDefaultProps: function() {
       return {
-        description: null,
-        thumbnail: null,
-        url: null,
-        username: null
+        thumbnail: "shared/img/icons-16x16.svg#globe",
+        title: "WEB_TILE",
+        url: "WEB_URL",
+        username: "DEFAULT_USER"
       };
     },
 
@@ -687,23 +689,33 @@ loop.shared.views = (function(_, mozL10n) {
     },
 
     render: function() {
-      var description = this.props.description;
-      var thumbnail = this.props.thumbnail ||
-                      "shared/img/icons-16x16.svg#globe";
       var url = this.props.url;
       var username = this.props.username;
       var sanitizedURL = loop.shared.utils.formatSanitizedContextURL(url) || {};
-
+      var date = this.props.timestamp ?
+                  new Date(this.props.timestamp) :
+                  null;
       return (
-        <div className="context-content">
-          <p>{mozL10n.get("chat_added_page_tile", { username: username })}</p>
+        <div className="tile-event">
+          <p>{mozL10n.get(this.props.eventType, { username: username })}
+            {
+              date ?
+              <span className="text-chat-entry-timestamp">
+                {date.toLocaleTimeString(mozL10n.language.code, {
+                                          hour: "numeric",
+                                          minute: "numeric",
+                                          hour12: false
+                                        })}
+              </span> : null
+            }
+          </p>
           <ContextUrlLink allowClick={this.props.allowClick}
-                          description={description}
+                          description={this.props.title}
                           handleClick={this.handleLinkClick}
                           url={url}>
-            <img className="context-preview" src={thumbnail} />
+            <img className="context-preview" src={this.props.thumbnail} />
             <span className="context-info">
-              {description}
+              {this.props.title}
               <span className="context-url">
                 {sanitizedURL.hostname}
               </span>

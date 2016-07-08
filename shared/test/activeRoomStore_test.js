@@ -1446,7 +1446,7 @@ describe("loop.store.ActiveRoomStore", function() {
       store._handleTextChatMessage(new sharedActions.SendTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "Hello!",
-        sentTimestamp: "1970-01-01T00:00:00.000Z"
+        sentTimestamp: 1401318000000
       }));
 
       assertWeDidNothing();
@@ -1458,7 +1458,7 @@ describe("loop.store.ActiveRoomStore", function() {
       store._handleTextChatMessage(new sharedActions.ReceivedTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "Hello!",
-        receivedTimestamp: "1970-01-01T00:00:00.000Z"
+        receivedTimestamp: 1401318000000
       }));
 
       sinon.assert.notCalled(requestStubs.TelemetryAddValue);
@@ -1468,7 +1468,7 @@ describe("loop.store.ActiveRoomStore", function() {
       store._handleTextChatMessage(new sharedActions.SendTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.CONTEXT,
         message: "Hello!",
-        sentTimestamp: "1970-01-01T00:00:00.000Z"
+        sentTimestamp: 1401318000000
       }));
 
       assertWeDidNothing();

@@ -6,12 +6,17 @@ describe("loop.store.PageStore", () => {
 
   let { expect } = chai;
   let { actions } = loop.shared;
-  let dispatcher, fakeDataDriver, fakePageMetadata, fakeStoredPage, sandbox,
-    store;
+  let dispatcher,
+      fakeDataDriver,
+      fakePageMetadata,
+      fakeStoredPage,
+      sandbox,
+      clock,
+      store;
 
   beforeEach(() => {
     sandbox = LoopMochaUtils.createSandbox();
-    sandbox.useFakeTimers();
+    clock = sandbox.useFakeTimers();
 
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
@@ -24,12 +29,11 @@ describe("loop.store.PageStore", () => {
     fakePageMetadata = {
       title: "fakeTitle",
       thumbnail_img: "fakeThumbnail",
-      url: "someFakeUrl",
-      timestamp: "1970-01-01T00:00:00.000Z"
+      url: "someFakeUrl"
     };
 
     fakeStoredPage =
-      Object.assign({ id: "fakeId", userName: "fakeUserName" },
+      Object.assign({ id: "fakeId", username: "fakeUserName" },
                     fakePageMetadata);
 
     store = new loop.store.PageStore(dispatcher, {
@@ -69,26 +73,88 @@ describe("loop.store.PageStore", () => {
   describe("AddPage", () => {
     beforeEach(() => {
       store._currentUserName = "user name";
+      clock.tick(362790000000);
+    });
+
+    afterEach(function() {
+      clock.restore();
     });
 
     it("should include the user name in page data", () => {
-      let action = new actions.AddPage(fakePageMetadata);
-      store.addPage(action);
+      let pageObject = {
+        metadata: {
+          title: fakePageMetadata.title,
+          thumbnail_img: fakePageMetadata.thumbnail_img,
+          url: fakePageMetadata.url
+        },
+        added_by: store._currentUserName,
+        added_time: Date.now()
+      };
+
+      store.addPage(new actions.AddPage(fakePageMetadata));
 
       sinon.assert.calledOnce(fakeDataDriver.addPage);
-      sinon.assert.calledWithExactly(fakeDataDriver.addPage, Object.assign(
-        { userName: "user name" }, fakePageMetadata));
+      sinon.assert.calledWithExactly(fakeDataDriver.addPage, pageObject);
     });
 
-    it("should not call dataDriver.addPage if the URL is already there", () => {
+    it("should not call dataDriver.addPage if URL is already added", () => {
       let pages = store.getStoreState("pages");
       pages.push(fakeStoredPage);
       store.setStoreState({ pages });
 
-      let action = new actions.AddPage(fakePageMetadata);
-      store.addPage(action);
+      store.addPage(new actions.AddPage(fakePageMetadata));
 
       sinon.assert.notCalled(fakeDataDriver.addPage);
+    });
+  });
+
+  describe("AddedPage", () => {
+    let action;
+
+    beforeEach(() => {
+      action = new actions.AddedPage({
+        pageId: "fakeId",
+        added_time: 1401318000000,
+        metadata: {
+          title: "fakeTitle",
+          thumbnail_img: "fakeThumbnail",
+          url: "fakeUrl"
+        },
+        added_by: "fake user"
+      });
+
+      sandbox.stub(store, "fetchPageMetadata");
+    });
+
+    it("should add a page to the store", () => {
+      store.addedPage(action);
+
+      expect(store.getStoreState("pages")).to.have.lengthOf(1);
+    });
+
+    it("should call fetchPageMetadata with the correct args", () => {
+      store.addedPage(action);
+
+      sinon.assert.calledOnce(store.fetchPageMetadata);
+      sinon.assert.calledWithExactly(store.fetchPageMetadata, action);
+    });
+
+    it("should not add a second copy of a URL to the page store", () => {
+      let action2 = new actions.AddedPage({
+        pageId: "fakeId2",
+        added_time: 1401319000000,
+        metadata: {
+          title: "fakeTitle2",
+          thumbnail_img: "fakeThumbnail2",
+          url: "fakeUrl"
+        },
+        added_by: "fake user2"
+      });
+
+      store.addedPage(action);
+      store.addedPage(action2);
+
+      expect(store.getStoreState("pages")).to.have.lengthOf(1);
     });
   });
 
@@ -117,51 +183,11 @@ describe("loop.store.PageStore", () => {
     });
   });
 
-  describe("AddedPage", () => {
-    let action;
-
-    beforeEach(() => {
-      action = new actions.AddedPage({
-        pageId: "fakeId",
-        title: "fakeTitle",
-        thumbnail_img: "fakeThumbnail",
-        url: "fakeUrl",
-        userName: "fake user"
-      });
-
-      sandbox.stub(store, "fetchPageMetadata");
-    });
-
-    it("should add a page to the store", () => {
-      store.addedPage(action);
-
-      expect(store.getStoreState("pages")).to.have.lengthOf(1);
-    });
-
-    it("should call fetchPageMetadata with the correct args", () => {
-      store.addedPage(action);
-
-      sinon.assert.calledOnce(store.fetchPageMetadata);
-      sinon.assert.calledWithExactly(store.fetchPageMetadata, action);
-    });
-
-    it("should not add a second copy of a URL to the page store", () => {
-      let action2 = new actions.AddedPage({
-        pageId: "fakeId2",
-        title: "fakeTitle2",
-        thumbnail_img: "fakeThumbnail2",
-        url: "fakeUrl",
-        userName: "fake user2"
-      });
-
-      store.addedPage(action);
-      store.addedPage(action2);
-
-      expect(store.getStoreState("pages")).to.have.lengthOf(1);
-    });
-  });
-
   describe("DeletePage", () => {
+    beforeEach(function() {
+      store._currentUserName = "user name";
+    });
+
     it("should get the page deleted", () => {
       let action = new actions.DeletePage({
         pageId: "fakeId"
@@ -169,22 +195,29 @@ describe("loop.store.PageStore", () => {
       store.deletePage(action);
 
       sinon.assert.calledOnce(fakeDataDriver.deletePage);
-      sinon.assert.calledWithExactly(fakeDataDriver.deletePage, "fakeId");
+      sinon.assert.calledWithExactly(fakeDataDriver.deletePage, "fakeId",
+                                                                "user name");
     });
   });
 
   describe("DeletedPage", () => {
+    let action;
+
     beforeEach(() => {
       let pages = store.getStoreState("pages");
       pages.push(fakeStoredPage);
       store.setStoreState({ pages });
+
+      action = new actions.DeletedPage({
+        added_by: "the user",
+        added_time: Date.now(),
+        pageId: "fakeId",
+        metadata: {},
+        deleted: {}
+      });
     });
 
     it("should remove a page from the store", () => {
-      let action = new actions.DeletedPage({
-        deletedTime: Date.now(),
-        pageId: "fakeId"
-      });
 
       expect(store.getStoreState("pages")).to.have.lengthOf(1);
       store.deletedPage(action);
@@ -193,10 +226,7 @@ describe("loop.store.PageStore", () => {
     });
 
     it("should dispatch a `ShowSnackbar` action", () => {
-      let action = new actions.DeletedPage({
-        deletedTime: Date.now(),
-        pageId: "fakeId"
-      });
+
       store.deletedPage(action);
 
       sinon.assert.called(dispatcher.dispatch);
@@ -206,11 +236,9 @@ describe("loop.store.PageStore", () => {
         }));
     });
 
-    it("should not dispatch a `ShowSnackbar` action on loading Firebase", () => {
-      let action = new actions.DeletedPage({
-        deletedTime: Date.now(),
-        pageId: "oldRemovedId"
-      });
+    it("should not dispatch a `ShowSnackbar` action if no page was deleted", () => {
+      action.pageId = "ID_NotInStore";
+
       store.deletedPage(action);
 
       sinon.assert.notCalled(dispatcher.dispatch);
@@ -224,9 +252,11 @@ describe("loop.store.PageStore", () => {
     beforeEach(() => {
       actionData = {
         pageId: "fakeId",
-        url: "http://fakeurl.com",
-        title: "faketitle",
-        thumbnail_img: "fakethumb"
+        metadata: {
+          url: "http://fakeurl.com",
+          title: "faketitle",
+          thumbnail_img: "fakethumb"
+        }
       };
 
       response = {
@@ -235,7 +265,7 @@ describe("loop.store.PageStore", () => {
       };
 
       sandbox.stub(loop.shared.utils, "getPageMetadata", url => {
-        if (url === actionData.url) {
+        if (url === actionData.metadata.url) {
           return Promise.resolve(response);
         }
 
@@ -264,16 +294,16 @@ describe("loop.store.PageStore", () => {
     });
 
     it("should dispatch UpdatePage with fallback", () => {
-      var fakeActionData = _.clone(actionData);
-      fakeActionData.url = "fake";
+      var fakeActionData = _.cloneDeep(actionData);
+      fakeActionData.metadata.url = "http://differentFakeURL.com";
       store.fetchPageMetadata(fakeActionData);
 
       sinon.assert.calledOnce(dispatcher.dispatch);
       sinon.assert.calledWithExactly(dispatcher.dispatch,
         new actions.UpdatePage({
           pageId: actionData.pageId,
-          thumbnail_img: actionData.thumbnail_img,
-          title: actionData.title
+          thumbnail_img: actionData.metadata.thumbnail_img,
+          title: actionData.metadata.title
         }));
     });
   });

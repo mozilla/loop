@@ -29,7 +29,7 @@ loop.shared.views.chat = (function(mozL10n) {
       extraData: React.PropTypes.object,
       message: React.PropTypes.string.isRequired,
       showTimestamp: React.PropTypes.bool.isRequired,
-      timestamp: React.PropTypes.string.isRequired,
+      timestamp: React.PropTypes.number.isRequired,
       type: React.PropTypes.string.isRequired
     },
 
@@ -56,6 +56,8 @@ loop.shared.views.chat = (function(mozL10n) {
         "received": this.props.type === CHAT_MESSAGE_TYPES.RECEIVED,
         "sent": this.props.type === CHAT_MESSAGE_TYPES.SENT,
         "special": this.props.type === CHAT_MESSAGE_TYPES.SPECIAL,
+        "added-tile": this.props.type === CHAT_MESSAGE_TYPES.ADDED,
+        "deleted-tile": this.props.type === CHAT_MESSAGE_TYPES.DELETED,
         "text-chat-notif": this.props.contentType === CHAT_CONTENT_TYPES.NOTIFICATION
       });
 
@@ -95,12 +97,14 @@ loop.shared.views.chat = (function(mozL10n) {
           <div className={classes}>
             <sharedViews.ChatPageTileView
               allowClick={true}
-              description={this.props.extraData.tile_title}
               dispatcher={this.props.dispatcher}
+              eventType={this.props.message}
               thumbnail={this.props.extraData.tile_thumbnail}
+              timestamp={this.props.showTimestamp ?
+                          this.props.timestamp : null}
+              title={this.props.extraData.tile_title}
               url={this.props.extraData.tile_url}
               username={this.props.displayName} />
-            {this.props.showTimestamp ? this._renderTimestamp() : null}
           </div>
         );
       }
@@ -258,7 +262,9 @@ loop.shared.views.chat = (function(mozL10n) {
                 }
 
                 /* For SENT messages there is no received timestamp. */
-                var timestamp = entry.receivedTimestamp || entry.sentTimestamp;
+                var timestamp = entry.receivedTimestamp ||
+                                entry.sentTimestamp ||
+                                entry.timestamp;
 
                 var timeDiff = this._isOneMinDelta(timestamp, lastTimestamp);
                 var shouldShowTimestamp = this._shouldShowTimestamp(i,
@@ -395,7 +401,7 @@ loop.shared.views.chat = (function(mozL10n) {
       this.props.dispatcher.dispatch(new sharedActions.SendTextChatMessage({
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: this.state.messageDetail,
-        sentTimestamp: (new Date()).toISOString()
+        sentTimestamp: Date.now()
       }));
 
       // Reset the form to empty, ready for the next message.

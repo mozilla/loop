@@ -293,30 +293,30 @@
   dispatcher.dispatch(new sharedActions.SendTextChatMessage({
     contentType: loop.shared.utils.CHAT_CONTENT_TYPES.TEXT,
     message: "Rheet!",
-    sentTimestamp: "2015-06-23T22:21:45.590Z"
+    sentTimestamp: 1435098105590 // "2015-06-23T22:21:45.590Z"
   }));
   dispatcher.dispatch(new sharedActions.ReceivedTextChatMessage({
     contentType: loop.shared.utils.CHAT_CONTENT_TYPES.TEXT,
     message: "Hello",
-    receivedTimestamp: "2015-06-23T23:24:45.590Z"
+    receivedTimestamp: 1435101885590 // "2015-06-23T23:24:45.590Z"
   }));
   dispatcher.dispatch(new sharedActions.SendTextChatMessage({
     contentType: loop.shared.utils.CHAT_CONTENT_TYPES.TEXT,
     message: "Nowforareallylongwordwithoutspacesorpunctuationwhichshouldcause" +
     "linewrappingissuesifthecssiswrong",
-    sentTimestamp: "2015-06-23T22:23:45.590Z"
+    sentTimestamp: 1435098225590 // "2015-06-23T22:23:45.590Z"
   }));
   dispatcher.dispatch(new sharedActions.SendTextChatMessage({
     contentType: loop.shared.utils.CHAT_CONTENT_TYPES.TEXT,
     message: "Check out this menu from DNA Pizza:" +
     " http://example.com/DNA/pizza/menu/lots-of-different-kinds-of-pizza/" +
     "%8D%E0%B8%88%E0%B8%A1%E0%B8%A3%E0%8D%E0%B8%88%E0%B8%A1%E0%B8%A3%E0%",
-    sentTimestamp: "2015-06-23T22:23:45.590Z"
+    sentTimestamp: 1435098225590 // "2015-06-23T22:23:45.590Z"
   }));
   dispatcher.dispatch(new sharedActions.ReceivedTextChatMessage({
     contentType: loop.shared.utils.CHAT_CONTENT_TYPES.TEXT,
     message: "That avocado monkey-brains pie sounds tasty!",
-    receivedTimestamp: "2015-06-23T22:25:45.590Z"
+    receivedTimestamp: 1435098345590 // "2015-06-23T22:25:45.590Z"
   }));
   dispatcher.dispatch(new sharedActions.SendTextChatMessage({
     contentType: loop.shared.utils.CHAT_CONTENT_TYPES.CONTEXT_TILE,
@@ -325,22 +325,22 @@
       roomToken: "fake",
       newRoomURL: "http://marvelous.invalid"
     },
-    sentTimestamp: "2015-06-23T22:25:46.590Z"
+    sentTimestamp: 1435098346590 // "2015-06-23T22:25:46.590Z"
   }));
   dispatcher.dispatch(new sharedActions.SendTextChatMessage({
     contentType: loop.shared.utils.CHAT_CONTENT_TYPES.TEXT,
     message: "What time should we meet?",
-    sentTimestamp: "2015-06-23T22:27:45.590Z"
+    sentTimestamp: 1435098465590 // "2015-06-23T22:27:45.590Z"
   }));
   dispatcher.dispatch(new sharedActions.ReceivedTextChatMessage({
     contentType: loop.shared.utils.CHAT_CONTENT_TYPES.TEXT,
     message: "8:00 PM",
-    receivedTimestamp: "2015-06-23T22:27:45.590Z"
+    receivedTimestamp: 1435098465590 // "2015-06-23T22:27:45.590Z"
   }));
   dispatcher.dispatch(new sharedActions.ReceivedTextChatMessage({
     contentType: loop.shared.utils.CHAT_CONTENT_TYPES.NOTIFICATION,
     message: "peer_unexpected_quit",
-    receivedTimestamp: "2015-06-23T22:28:45.590Z"
+    receivedTimestamp: 1435098525590 // "2015-06-23T22:28:45.590Z"
   }));
 
   loop.store.StoreMixin.register({

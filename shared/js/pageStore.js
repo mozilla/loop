@@ -69,32 +69,34 @@ loop.store.PageStore = function(mozL10n) {
       }
 
       this._dataDriver.addPage({
-        title: actionData.title,
-        thumbnail_img: actionData.thumbnail_img,
-        url: actionData.url,
-        userName: this._currentUserName,
-        timestamp: (new Date()).toISOString()
+        metadata: {
+          title: actionData.title,
+          thumbnail_img: actionData.thumbnail_img,
+          url: actionData.url
+        },
+        added_by: this._currentUserName,
+        added_time: Date.now()
       });
     },
 
     /**
      * Handle AddedPage action by updating the store state.
      *
-     * @note If actionData.url already exists in the store, it will not
-     * be added a second time.
+     * @note If actionData.metadata.url already exists in the store,
+     * it will not be added a second time.
      */
     addedPage(actionData) {
-      if (this._hasPageForUrl(actionData.url)) {
+      if (this._hasPageForUrl(actionData.metadata.url)) {
         return;
       }
 
       let page = {
         id: actionData.pageId,
-        title: actionData.title,
-        thumbnail_img: actionData.thumbnail_img,
-        url: actionData.url,
-        userName: actionData.userName,
-        timestamp: actionData.timestamp
+        title: actionData.metadata.title,
+        thumbnail_img: actionData.metadata.thumbnail_img,
+        url: actionData.metadata.url,
+        username: actionData.added_by,
+        timestamp: actionData.added_time
       };
 
       this._storeState.pages.push(page);
@@ -109,7 +111,8 @@ loop.store.PageStore = function(mozL10n) {
      * Handle DeletePage action by deleting the specific page.
      */
     deletePage(actionData) {
-      this._dataDriver.deletePage(actionData.pageId);
+      this._dataDriver.deletePage(actionData.pageId,
+                                  this._currentUserName);
     },
 
     /**
@@ -176,19 +179,19 @@ loop.store.PageStore = function(mozL10n) {
     /*
      * Handle metadata fetch call success or error.
      */
-    fetchPageMetadata(actionData) {
-      loop.shared.utils.getPageMetadata(actionData.url).then(result => {
+    fetchPageMetadata(pageData) {
+      loop.shared.utils.getPageMetadata(pageData.metadata.url).then(result => {
         this.dispatchAction(new sharedActions.UpdatePage({
-              pageId: actionData.pageId,
+              pageId: pageData.pageId,
               thumbnail_img: result.thumbnail_img,
               title: result.title
             }));
       }).catch(() => {
         // Fall back if the fetch failed.
         this.dispatchAction(new sharedActions.UpdatePage({
-              pageId: actionData.pageId,
-              thumbnail_img: actionData.thumbnail_img,
-              title: actionData.title
+              pageId: pageData.pageId,
+              thumbnail_img: pageData.metadata.thumbnail_img,
+              title: pageData.metadata.title
             }));
       });
     },

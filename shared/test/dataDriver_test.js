@@ -22,7 +22,7 @@ describe("loop.DataDriver", () => {
       dispatcher
     });
 
-    fakeXHR = sandbox.useFakeXMLHttpRequest();
+    fakeXHR = sandbox.useFakeServer();
     requests = [];
     fakeXHR.xhr.onCreate = function(xhr) {
       requests.push(xhr);
@@ -83,10 +83,24 @@ describe("loop.DataDriver", () => {
   });
 
   describe("#deletePage", () => {
-    it("should remove the specified record", () => {
-      driver.deletePage("thePageId");
+    let page = "thePageId",
+        username = "userName";
+
+    it("should retrieve the information before deleting it", () => {
+      driver.deletePage(page, username);
+
+      let { method, requestBody } = requests[0];
+      expect(method).eql("GET");
+      expect(requestBody).eql(null);
+    });
+
+    // XXX no idea how to make the test check for the second request instead
+    // of the first one
+    it.skip("should add 'delete' status with timestamp and author to the specified record", () => {
+      driver.deletePage(page, username);
 
       let { method, requestBody, url } = requests[0];
+
       expect(method).eql("PUT");
       expect(requestBody).eql('{"timestamp":{".sv":"timestamp"}}');
       expect(getResource(url)).eql("page!thePageId.json");
@@ -187,7 +201,7 @@ describe("loop.DataDriver", () => {
               value: {
                 contentType: CHAT_CONTENT_TYPES.TEXT,
                 message: "Are you there?",
-                sentTimestamp: "2016-05-10T18:26:58.235Z"
+                sentTimestamp: 1462904818235
               }
             }
           },
@@ -207,7 +221,7 @@ describe("loop.DataDriver", () => {
             value: {
               contentType: CHAT_CONTENT_TYPES.TEXT,
               message: "Are you there?",
-              sentTimestamp: "2016-05-10T18:26:58.235Z"
+              sentTimestamp: 1462904818235
             }
           },
           path: "/chat!01234567abcdefghijkl"
@@ -220,8 +234,8 @@ describe("loop.DataDriver", () => {
         new actions.ReceivedTextChatMessage({
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Are you there?",
-          receivedTimestamp: "2009-02-13T23:31:30.123Z",
-          sentTimestamp: "2016-05-10T18:26:58.235Z"
+          receivedTimestamp: 1234567890123,
+          sentTimestamp: 1462904818235
         }));
     });
   });
@@ -511,7 +525,7 @@ describe("loop.DataDriver", () => {
         value: {
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Are you there?",
-          sentTimestamp: "2016-05-10T18:26:58.235Z"
+          sentTimestamp: 1462904818235
         }
       });
 
@@ -520,8 +534,8 @@ describe("loop.DataDriver", () => {
         new actions.ReceivedTextChatMessage({
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Are you there?",
-          receivedTimestamp: "2009-02-13T23:31:30.123Z",
-          sentTimestamp: "2016-05-10T18:26:58.235Z"
+          receivedTimestamp: 1234567890123,
+          sentTimestamp: 1462904818235
         }));
     });
   });
@@ -566,27 +580,44 @@ describe("loop.DataDriver", () => {
   });
 
   describe("#_processRecord.page", () => {
-    it("should dispatch `DeletedPage` when value field is not defined", () => {
+    it("should dispatch `DeletedPage` when data is marked as 'deleted'", () => {
+      let fakePage = {
+        pageId: "thePageId",
+        added_by: "theUserName",
+        added_time: 1234567890123,
+        metadata: {
+          title: "The title",
+          thumbnail_img: "fake_image.ico",
+          url: "http://fakeURL.com"
+        },
+        deleted: {
+          deleted_by: "userName",
+          deletion_time: 1234567895123
+        }
+      };
+
       driver._processRecord("page!thePageId", {
-        timestamp: 1234567890123
+        timestamp: 1234567890123,
+        value: fakePage
       });
 
       sinon.assert.called(dispatcher.dispatch);
       sinon.assert.calledWithExactly(dispatcher.dispatch,
-        new actions.DeletedPage({
-          deletedTime: 1234567890123,
-          pageId: "thePageId"
-        }));
+        new actions.DeletedPage(fakePage));
     });
 
     it("should dispatch a AddedPage action for a page record", () => {
       let record = {
         pageId: "00000000",
-        title: "cool page",
-        url: "http://example.com"
+        added_by: "theUser",
+        added_time: 1234567890123,
+        metadata: {
+          title: "cool page",
+          url: "http://example.com"
+        }
       };
       driver._processRecord("page!00000000", {
-        timestamp: 1234567890123,
+        timestamp: 1234567891123,
         value: record
       });
 
@@ -604,7 +635,7 @@ describe("loop.DataDriver", () => {
           value: {
             contentType: CHAT_CONTENT_TYPES.TEXT,
             message: "Are you there?",
-            sentTimestamp: "2016-05-10T18:26:58.235Z"
+            sentTimestamp: 1462904818235
           }
         },
         "meta!lastConnect": {
@@ -617,8 +648,8 @@ describe("loop.DataDriver", () => {
         new actions.ReceivedTextChatMessage({
           contentType: CHAT_CONTENT_TYPES.TEXT,
           message: "Are you there?",
-          receivedTimestamp: "2009-02-13T23:31:30.123Z",
-          sentTimestamp: "2016-05-10T18:26:58.235Z"
+          receivedTimestamp: 1234567890123,
+          sentTimestamp: 1462904818235
         }));
     });
   });

@@ -11,7 +11,9 @@ loop.store.TextChatStore = (function() {
   var CHAT_MESSAGE_TYPES = loop.store.CHAT_MESSAGE_TYPES = {
     RECEIVED: "recv",
     SENT: "sent",
-    SPECIAL: "special"
+    SPECIAL: "special",
+    ADDED: "added",
+    DELETED: "deleted"
   };
 
   var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
@@ -30,7 +32,8 @@ loop.store.TextChatStore = (function() {
       "remotePeerDisconnected",
       "remotePeerConnected",
       "setOwnDisplayName",
-      "addedPage"
+      "addedPage",
+      "deletedPage"
     ],
 
     /**
@@ -261,7 +264,7 @@ loop.store.TextChatStore = (function() {
       var message = {
         contentType: CHAT_CONTENT_TYPES.NOTIFICATION,
         message: notificationTextKey,
-        receivedTimestamp: (new Date()).toISOString(),
+        receivedTimestamp: Date.now(),
         extraData: {
           peerStatus: "disconnected"
         }
@@ -276,7 +279,7 @@ loop.store.TextChatStore = (function() {
       var message = {
         contentType: CHAT_CONTENT_TYPES.NOTIFICATION,
         message: notificationTextKey,
-        receivedTimestamp: (new Date()).toISOString(),
+        receivedTimestamp: Date.now(),
         extraData: {
           peerStatus: "connected"
         }
@@ -299,7 +302,7 @@ loop.store.TextChatStore = (function() {
           newRoomThumbnail: data.newRoomThumbnail,
           newRoomURL: data.newRoomURL
         },
-        sentTimestamp: (new Date()).toISOString()
+        sentTimestamp: Date.now()
       };
 
       this.sendTextChatMessage(msgData);
@@ -336,25 +339,59 @@ loop.store.TextChatStore = (function() {
       // all the existing tiles (e.g. on ToC load).
       // Not an optimal solution, but needed until we have
       // direct communication between sidebar and ToC
+      // see bug 1284428
       let now = Date.now();
-      let then = Date.parse(actionData.timestamp);
-      if (now - then > 2000) {
+      let actionTime = actionData.added_time;
+
+      if (now - actionTime > 2000) {
         return;
       }
 
       var message = {
-        displayName: actionData.userName,
+        displayName: actionData.added_by,
         contentType: CHAT_CONTENT_TYPES.TILE_EVENT,
+        message: "chat_added_page_tile",
         extraData: {
-          tile_url: actionData.url,
-          tile_thumbnail: actionData.thumbnail_img,
-          tile_title: actionData.title
+          tile_url: actionData.metadata.url,
+          tile_thumbnail: actionData.metadata.thumbnail_img,
+          tile_title: actionData.metadata.title
         },
-        sentTimestamp: actionData.timestamp
+        timestamp: actionTime
       };
 
       // show it on the chat
-      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.SPECIAL, message);
+      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.ADDED, message);
+    },
+
+    deletedPage: function(actionData) {
+      // XXX Because the action is triggered everytime the page records are
+      // processed, we need to filter out the non recent occurrences.
+      // If the page was added more than 2s ago, consider that we're retrieving
+      // all the existing tiles (e.g. on ToC load).
+      // Not an optimal solution, but needed until we have
+      // direct communication between sidebar and ToC
+      // see bug 1284428
+      let now = Date.now();
+      let actionTime = actionData.deleted.timestamp;
+
+      if (now - actionTime > 2000) {
+        return;
+      }
+
+      var message = {
+        displayName: actionData.deleted.by,
+        contentType: CHAT_CONTENT_TYPES.TILE_EVENT,
+        message: "chat_deleted_page_tile",
+        extraData: {
+          tile_url: actionData.metadata.url,
+          tile_thumbnail: actionData.metadata.thumbnail_img,
+          tile_title: actionData.metadata.title
+        },
+        timestamp: actionTime
+      };
+
+      // show it on the chat
+      this._appendTextChatMessage(CHAT_MESSAGE_TYPES.DELETED, message);
     }
   });
 

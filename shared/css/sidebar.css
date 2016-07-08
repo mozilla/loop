@@ -285,6 +285,7 @@ html[dir="rtl"] .media-control-buttons .btn-hangup:after {
 }
 
 .text-chat-view > .text-chat-entries {
+  background: #f9f9f9;
   width: 100%;
   overflow: auto;
   padding-top: 15px;
@@ -534,6 +535,39 @@ html[dir="rtl"] .text-chat-entry.received .speech-bubble-arrow {
   margin-right: 0;
   margin-left: -10px;
 }
+
+/* Tile events */
+.tile-event {
+  width: 100%;
+  min-height: 70px;
+  padding: 5px 0;
+  text-align: center;
+}
+
+.tile-event > .context-wrapper {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  margin: 5px 10px;
+  text-align: left;
+  padding: 5px 10px;
+  line-height: 20px;
+}
+
+.deleted-tile .context-wrapper {
+  background: #fcf1f0;
+  border: 1px solid #d31612;
+}
+
+.tile-event .context-info {
+  color: #666666;
+}
+
+.tile-event .context-url {
+  color: #b0b0b0;
+}
+/* end tile events */
+
 
 /* Context updated */
 .text-chat-entry > .context-content > .context-wrapper {

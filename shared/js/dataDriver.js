@@ -94,13 +94,24 @@ loop.DataDriver = function() {
     }
 
     /**
-     * Delete the specified page record.
+     * Mark the specified page record as deleted
      *
      * @param {String}  pageId   The id to associate with stored page.
      */
-    deletePage(pageId) {
+    deletePage(pageId, user) {
       // XXX akita bug 1276095: Verify pageId is a valid firebase id.
-      this.update("page", pageId);
+      // First get the existing page data, then mark it as deleted
+      this.getRecord("page", pageId).then(page => {
+        let updated = Object.assign(page.value, {
+          deleted: {
+            timestamp: Date.now(),
+            by: user
+          }
+        });
+        // And update on the database
+        this.update("page", pageId, updated);
+      });
+
     }
 
     /**
@@ -310,6 +321,12 @@ loop.DataDriver = function() {
       return this._request("GET", this._buildUrl(), query);
     }
 
+    getRecord(type, id) {
+      // XXX akita bug 1274110: Validate for certain types.
+      let key = `${type}!${id}`;
+      return this._request("GET", this._buildUrl(key));
+    }
+
     /**
      * Update a record additionally storing the timestamp.
      *
@@ -418,7 +435,7 @@ loop.DataDriver = function() {
         case "chat":
           dispatchAction = "ReceivedTextChatMessage";
           dispatchExtra = {
-            receivedTimestamp: new Date(data.timestamp).toISOString()
+            receivedTimestamp: data.timestamp
           };
           break;
 
@@ -427,11 +444,10 @@ loop.DataDriver = function() {
             pageId: id
           };
 
-          if (typeof data.value !== "undefined") {
+          if (!data.value.deleted) {
             dispatchAction = "AddedPage";
           } else {
             dispatchAction = "DeletedPage";
-            dispatchExtra.deletedTime = data.timestamp;
           }
           break;
 

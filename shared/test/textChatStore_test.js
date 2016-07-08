@@ -9,14 +9,18 @@ describe("loop.store.TextChatStore", function() {
   var CHAT_MESSAGE_TYPES = loop.store.CHAT_MESSAGE_TYPES;
   var CHAT_CONTENT_TYPES = loop.shared.utils.CHAT_CONTENT_TYPES;
 
-  var dispatcher, fakeDataDriver, sandbox, store;
+  var dispatcher,
+      fakeDataDriver,
+      sandbox,
+      clock,
+      store;
 
   var callCount, sendMessage;
 
   beforeEach(function() {
     callCount = 0;
     sandbox = sinon.sandbox.create();
-    sandbox.useFakeTimers();
+    clock = sandbox.useFakeTimers();
 
     dispatcher = new loop.Dispatcher();
     sandbox.stub(dispatcher, "dispatch");
@@ -146,8 +150,8 @@ describe("loop.store.TextChatStore", function() {
         message: message,
         displayName: "Display Name",
         extraData: undefined,
-        sentTimestamp: "2015-06-24T23:58:53.848Z",
-        receivedTimestamp: "1970-01-01T00:00:00.000Z"
+        sentTimestamp: 1435190333848,
+        receivedTimestamp: 1401318000000
       });
 
       expect(store.getStoreState("messageList")).eql([{
@@ -156,8 +160,8 @@ describe("loop.store.TextChatStore", function() {
         message: message,
         displayName: "Display Name",
         extraData: undefined,
-        sentTimestamp: "2015-06-24T23:58:53.848Z",
-        receivedTimestamp: "1970-01-01T00:00:00.000Z"
+        sentTimestamp: 1435190333848,
+        receivedTimestamp: 1401318000000
       }]);
     });
 
@@ -171,8 +175,8 @@ describe("loop.store.TextChatStore", function() {
           newRoomThumbnail: "favicon",
           newRoomURL: "https://www.fakeurl.com"
         },
-        sentTimestamp: "2015-06-24T23:58:53.848Z",
-        receivedTimestamp: "1970-01-01T00:00:00.000Z"
+        sentTimestamp: 1435190333848,
+        receivedTimestamp: 1401318000000
       });
 
       expect(store.getStoreState("messageList")).eql([{
@@ -184,8 +188,8 @@ describe("loop.store.TextChatStore", function() {
           newRoomThumbnail: "favicon",
           newRoomURL: "https://www.fakeurl.com"
         },
-        sentTimestamp: "2015-06-24T23:58:53.848Z",
-        receivedTimestamp: "1970-01-01T00:00:00.000Z"
+        sentTimestamp: 1435190333848,
+        receivedTimestamp: 1401318000000
       }]);
     });
 
@@ -235,8 +239,8 @@ describe("loop.store.TextChatStore", function() {
       var messageData = {
         contentType: CHAT_CONTENT_TYPES.TEXT,
         message: "It's awesome!",
-        sentTimestamp: "2015-06-24T23:58:53.848Z",
-        receivedTimestamp: "2015-06-24T23:58:53.848Z"
+        sentTimestamp: 1435190333848,
+        receivedTimestamp: 1435190333848
       };
 
       store.sendTextChatMessage(messageData);
@@ -247,8 +251,8 @@ describe("loop.store.TextChatStore", function() {
         displayName: "John Smith",
         message: messageData.message,
         extraData: undefined,
-        sentTimestamp: "2015-06-24T23:58:53.848Z",
-        receivedTimestamp: "2015-06-24T23:58:53.848Z"
+        sentTimestamp: 1435190333848,
+        receivedTimestamp: 1435190333848
       }]);
     });
 
@@ -428,6 +432,126 @@ describe("loop.store.TextChatStore", function() {
           CHAT_CONTENT_TYPES.NOTIFICATION
       );
       expect(store.getStoreState("messageList")[0].message).eql("peer_join_session");
+    });
+  });
+
+  describe("#addedPage", function() {
+    var fakeActionData = {
+      added_by: "user name",
+      metadata: {
+        url: "http://www.fakeUrl.com",
+        thumbnail_img: "/index_nail.ico",
+        title: "Le pagè"
+      },
+      added_time: 362870100000 // "1981 July 01 22:15"
+    };
+
+    beforeEach(function() {
+      // Date.now() returns "1981 July 01 22:15"
+      clock.tick(362870100000);
+    });
+    afterEach(function() {
+      sandbox.restore();
+    });
+
+    it("should add a page tile to the chat if event is recent", function() {
+      // first check that store is empty of messages
+      expect(store.getStoreState("messageList")).to.have.lengthOf(0);
+      store.addedPage(fakeActionData);
+
+      expect(store.getStoreState("messageList")).to.have.lengthOf(1);
+    });
+
+    it("should add a page tile with proper attributes", function() {
+      sandbox.spy(store, "_appendTextChatMessage");
+
+      store.addedPage(fakeActionData);
+
+      sinon.assert.calledOnce(store._appendTextChatMessage);
+      sinon.assert.calledWithExactly(store._appendTextChatMessage,
+        CHAT_MESSAGE_TYPES.ADDED,
+        {
+          displayName: fakeActionData.added_by,
+          contentType: CHAT_CONTENT_TYPES.TILE_EVENT,
+          message: "chat_added_page_tile",
+          extraData: {
+            tile_url: fakeActionData.metadata.url,
+            tile_thumbnail: fakeActionData.metadata.thumbnail_img,
+            tile_title: fakeActionData.metadata.title
+          },
+          timestamp: fakeActionData.added_time
+        });
+    });
+
+    it("should NOT add a page tile to the chat if not recent", function() {
+      expect(store.getStoreState("messageList")).to.have.lengthOf(0);
+
+      fakeActionData.added_time = 362869800000; // "1981 July 01 22:10"
+      store.addedPage(fakeActionData);
+
+      expect(store.getStoreState("messageList")).to.have.lengthOf(0);
+    });
+  });
+
+  describe("#deletedPage", function() {
+    var fakeActionData = {
+      added_by: "creator name",
+      metadata: {
+        url: "http://www.fakeUrl.com",
+        thumbnail_img: "/index_nail.ico",
+        title: "Le pagè"
+      },
+      added_time: 362870100000, // "1981 July 01 22:15"
+      deleted: {
+        by: "deleter name",
+        timestamp: 363650400000 // "1981 July 10 23:00"
+      }
+    };
+
+    beforeEach(function() {
+      // Date.now() returns "1981 July 10 23:00"
+      clock.tick(363650400000);
+    });
+    afterEach(function() {
+      sandbox.restore();
+    });
+
+    it("should add a 'Deleted page' tile to the chat if event is recent", function() {
+      // first check that store is empty of messages
+      expect(store.getStoreState("messageList")).to.have.lengthOf(0);
+      store.deletedPage(fakeActionData);
+
+      expect(store.getStoreState("messageList")).to.have.lengthOf(1);
+    });
+
+    it("should add an event tile with proper attributes", function() {
+      sandbox.spy(store, "_appendTextChatMessage");
+
+      store.deletedPage(fakeActionData);
+
+      sinon.assert.calledOnce(store._appendTextChatMessage);
+      sinon.assert.calledWithExactly(store._appendTextChatMessage,
+        CHAT_MESSAGE_TYPES.DELETED,
+        {
+          displayName: fakeActionData.deleted.by,
+          contentType: CHAT_CONTENT_TYPES.TILE_EVENT,
+          message: "chat_deleted_page_tile",
+          extraData: {
+            tile_url: fakeActionData.metadata.url,
+            tile_thumbnail: fakeActionData.metadata.thumbnail_img,
+            tile_title: fakeActionData.metadata.title
+          },
+          timestamp: fakeActionData.deleted.timestamp
+        });
+    });
+
+    it("should NOT add an event tile to the chat if not recent", function() {
+      expect(store.getStoreState("messageList")).to.have.lengthOf(0);
+
+      fakeActionData.deleted.timestamp = 363650100000; // "1981 July 10 23:15"
+      store.deletedPage(fakeActionData);
+
+      expect(store.getStoreState("messageList")).to.have.lengthOf(0);
     });
   });
 });

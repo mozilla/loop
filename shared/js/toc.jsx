@@ -324,8 +324,8 @@ loop.shared.toc = (function(mozL10n) {
               </div>
               <div className="tile-footer">
                 <h3 className="tile-url">{this.props.page.url}</h3>
-                <div className="tile-creator" data-name={this.props.page.userName}>
-                  <span>{this.props.page.userName[0].toUpperCase()}</span>
+                <div className="tile-creator" data-name={this.props.page.username}>
+                  <span>{this.props.page.username[0].toUpperCase()}</span>
                 </div>
               </div>
             </div>

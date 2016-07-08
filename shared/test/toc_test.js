@@ -188,7 +188,7 @@ describe("loop.TableOfContents", () => {
             title: "fakeTitle",
             thumbnail_img: "fakeImg",
             url: "http://www.invalidurl.com",
-            userName: "Cool name"
+            username: "Cool name"
           }
         }));
     }

@@ -1,0 +1,77 @@
+version: 0
+metadata:
+  name: Loop
+  description: Loop CI Tasks
+  owner: "{{ event.head.user.email }}"
+  source: "{{ event.head.repo.url }}"
+tasks:
+  - provisionerId: "{{ taskcluster.docker.provisionerId }}"
+    metadata:
+      name: Loop Lint Tests
+      description: Loop Lint Tests
+      owner: "{{ event.head.user.email }}"
+      source: "{{ event.head.repo.url }}"
+    workerType: "{{ taskcluster.docker.workerType }}"
+    payload:
+      maxRunTime: 1200
+      image: "standard8/loop:0.1.0.201606282211"
+      command:
+        - "/bin/bash"
+        - "-lc"
+        - "git clone {{event.head.repo.url}} repo && cd repo && git checkout {{event.head.repo.branch}} && make check_strings && make lint"
+    extra:
+      github:
+        env: true
+        events:
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.reopened
+          - push
+  - provisionerId: "{{ taskcluster.docker.provisionerId }}"
+    metadata:
+      name: Loop Unit Tests
+      description: Loop Unit Tests (Karma/Mocha/Chai)
+      owner: "{{ event.head.user.email }}"
+      source: "{{ event.head.repo.url }}"
+    workerType: "{{ taskcluster.docker.workerType }}"
+    payload:
+      maxRunTime: 1200
+      image: "standard8/loop:0.1.0.201606282211"
+      command:
+        - "/bin/bash"
+        - "-lc"
+        - "./bin/setup-x11.sh && sudo apt-get update && sudo apt-get upgrade -y google-chrome-stable && git clone {{event.head.repo.url}} repo && cd repo && git checkout {{event.head.repo.branch}} && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2 && FIREFOX_BIN=`pwd`/firefox/firefox make karma"
+    extra:
+      github:
+        env: true
+        events:
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.reopened
+          - push
+  - provisionerId: "{{ taskcluster.docker.provisionerId }}"
+    metadata:
+      name: Loop Functional Tests
+      description: Loop Functional Tests (Marionette)
+      owner: "{{ event.head.user.email }}"
+      source: "{{ event.head.repo.url }}"
+    workerType: "{{ taskcluster.docker.workerType }}"
+    payload:
+      maxRunTime: 1200
+      image: "standard8/loop-functional:0.1.0.201606282210"
+      command:
+        - "/bin/bash"
+        - "-lc"
+        - "./bin/setup.sh && git clone {{event.head.repo.url}} repo && cd repo && git checkout {{event.head.repo.branch}} && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2 && TEST_BROWSER=`pwd`/firefox/firefox TEST_SERVER=dev make functional"
+      artifacts:
+        'public':
+          type: 'directory'
+          path: '/home/worker/artifacts/public'
+    extra:
+      github:
+        env: true
+        events:
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.reopened
+          - push

@@ -483,14 +483,16 @@ update_locale: $(VENV)
 # Tests
 #
 
-eslint:
+.PHONY: eslint
+eslint: install
 	$(ESLINT) --ext .js --ext .jsm --ext .jsx .
 
+.PHONY: flake8
 flake8: $(VENV)
 	. $(VENV)/bin/activate && flake8 .
 
 .PHONY: check_strings
-check_strings:
+check_strings: $(VENV)
 	@$(VENV)/bin/python bin/stringsCompletenessTest.py
 
 .PHONY: lint
@@ -524,6 +526,10 @@ ifdef SYMBOLS_PATH
 SYMBOLS_ARGS = --symbols-path=$(SYMBOLS_PATH)
 endif
 
+ifndef ARTIFACT_UPLOAD_PATH
+ARTIFACT_UPLOAD_PATH=$(BUILT)/functional
+endif
+
 .PHONY: functional
 ifeq ($(SKIP_FUNCTIONAL),1)
 functional:
@@ -536,7 +542,7 @@ functional: build $(XPI_FILE)
 	 USE_LOCAL_STANDALONE=$(USE_LOCAL_STANDALONE) \
 	 LOOP_XPI_FILE=$(XPI_FILE) \
 	$(VENV)/bin/marionette --binary `./bin/getfx.js -b $(TEST_BROWSER)` \
-	                       --gecko-log $(BUILT)/functional/gecko.log \
+	                       --gecko-log $(ARTIFACT_UPLOAD_PATH)/gecko.log \
 	                       $(E10S_ARGS) \
 	                       $(SYMBOLS_ARGS) \
 	                       test/functional/manifest.ini
@@ -576,7 +582,8 @@ clean:
 .PHONY: cleanbuild
 cleanbuild: clean build
 
-test: lint karma functional
+# If you add things here, also consider what to update in .taskcluster.yml.
+test: check_strings lint karma functional
 
 .PHONY: runserver
 runserver: remove_old_config

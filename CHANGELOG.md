@@ -1,6 +1,65 @@
 # Changelog
 
-## 1.4.2
+## 1.4.3
+
+### New
+
+* Bug 1285916 - Increase the subscribe timeout in the OpenTok SDK from 15 to 30 seconds. r=fcampo. [Mark Banner]
+
+* Bug 1285517 - Improve the metrics to provide separation for stream creates for a/v vs screen sharing, and add more information for exceptions. r=Mardak. [Mark Banner]
+
+* No bug. Match more string patterns and remove unused strings. r=Standard8. [Ed Lee]
+
+* No bug. Fix the learn more link on the unsupported browser page. r=mancas. [Mark Banner]
+
+* Bug 1203258 - Hook up the string completeness test to automation. Remove redundant strings. r=Mardak. [Mark Banner]
+
+* Bug 1136991 - Hello link viewed in IE or Safari needs a better message. r=Standard8. [Manuel Casas]
+
+* No bug. Fix TaskCluster to checkout the correct branch when running tests. rs=bustage-fix NPOTB. [Mark Banner]
+
+* No bug. List pull_request events separately rather than trying to globalise them. rs=fix-taskcluster-PRs. NPOTB. [Mark Banner]
+
+* Bug 1282764 - Part 4. Add Loop specific docker images for tests and get them running properly on taskcluster. r=fzzzy. [Mark Banner]
+
+* Bug 1282764 - Part 3. Add an initial taskcluster file. r=fzzzy. [Mark Banner]
+
+* Bug 1282764 - Part 2. Make eslint depend on install for better single-run experience. r=fzzzy. [Mark Banner]
+
+* Bug 1282764 - Part 1. Drop pyperclip requirement from functional tests. r=fzzzy. [Mark Banner]
+
+### Chores
+
+* Update react to version 15.2.1. r=Standard8. [Greenkeeper]
+
+* Update L10n from changeset 1c55f2c02c3b4ce851e157dbb8a0ffcfc68285cc. [Mark Banner]
+
+* Update karma to version 1.1.1. r=Standard8. [Greenkeeper]
+
+* Update karma-coverage to version 1.1.0. r=Standard8. [Greenkeeper]
+
+* Update pip requires versions for modules to latest and fix functional test bustage. rs=bustage-fix. [Mark Banner]
+
+* Update react to version 15.2.0. r=Standard8. [Greenkeeper]
+
+* Update rimraf to version 2.5.3. r=Standard8. [Greenkeeper]
+
+* Update babel-plugin-transform-es2015-unicode-regex to version 6.11.0. r=Standard8. [Greenkeeper]
+
+* Update babel-preset-react to version 6.11.1. r=Standard8. [Greenkeeper]
+
+* Update fx-runner to version 1.0.4. r=Standard8. [Greenkeeper]
+
+* Update karma-mocha to version 1.1.1. r=Standard8. [Greenkeeper]
+
+* Update karma to version 1.1.0. r=Standard8. [Greenkeeper]
+
+### Other
+
+* Update eslint-plugin-react to version 5.2.2. r=Standard8. [Greenkeeper]
+
+
+## v1.4.2 (2016-06-28)
 
 ### New
 
@@ -15,6 +74,10 @@
 ### Chores
 
 * Update L10n from changeset 5cd217c8f35f7f17509946a011ea312e54268dac. [Mark Banner]
+
+### Other
+
+* 1.4.2. [Mark Banner]
 
 
 ## v1.4.1 (2016-06-22)

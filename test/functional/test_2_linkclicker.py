@@ -26,6 +26,8 @@ class Test2Linkclicker(LoopTestDriver, MarionetteTestCase):
         standalone_url = CONTENT_SERVER_URL + "/"
         prefs = copy.copy(FIREFOX_PREFERENCES)
         prefs["loop.linkClicker.url"] = standalone_url
+        # No trailing slash on this one.
+        prefs["webchannel.allowObject.urlWhitelist"] = CONTENT_SERVER_URL
 
         # Although some of these preferences might require restart, we don't
         # use enforce_gecko_prefs (which would restart), as we need to restart

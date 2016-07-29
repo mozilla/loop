@@ -2,6 +2,9 @@
 # https://dxr.mozilla.org/mozilla-central/source/testing/docker/desktop-test
 FROM          taskcluster/desktop-test:0.1.8.20160218152601
 
+# This makes pyperclip happy.
+RUN apt-get update && apt-get install -y --force-yes xclip
+
 RUN pip install virtualenv virtualenvwrapper mozdownload
 
 COPY          setup.sh /home/worker/bin/

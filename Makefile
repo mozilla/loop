@@ -533,22 +533,60 @@ ifndef ARTIFACT_UPLOAD_PATH
 ARTIFACT_UPLOAD_PATH=$(BUILT)/functional
 endif
 
+GECKODRIVER_VERSION=0.9.0
+GECKODRIVER_BASE_URL=https://github.com/mozilla/geckodriver/releases/download/v$(GECKODRIVER_VERSION)
+UNAME := $(shell uname)
+ifeq ($(UNAME), Linux)
+GECKODRIVER_DOWNLOAD_NAME=geckodriver-v$(GECKODRIVER_VERSION)-linux64.tar.gz
+GECKODRIVER_ZIP=geckodriver-$(GECKODRIVER_VERSION).tar.gz
+GECKODRIVER_EXE=wires
+GECKODRIVER_UNPACK=tar xfz
+else
+  ifeq ($(UNAME), Darwin)
+  GECKODRIVER_DOWNLOAD_NAME=geckodriver-v$(GECKODRIVER_VERSION)-mac.tar.gz
+  GECKODRIVER_ZIP=geckodriver-$(GECKODRIVER_VERSION).tar.gz
+  GECKODRIVER_EXE=wires
+  GECKODRIVER_UNPACK=tar xfz
+  else
+  GECKODRIVER_DOWNLOAD_NAME=geckodriver-v$(GECKODRIVER_VERSION)-win64.zip
+  GECKODRIVER_ZIP=geckodriver-$(GECKODRIVER_VERSION).zip
+  GECKODRIVER_EXE=wires.exe
+  GECKODRIVER_UNPACK=unzip
+  endif
+endif
+BUILT_FUNC=$(BUILT)/test/functional
+
+# Although this "builds" the zip file, the side effect is that we get the
+# geckodriver executable built. We do it this way, as the executable needs to be
+# a specific name, but we want to be dependent on the geckodriver version, so that
+# if it is updated above, then we'll download a fresh one.
+$(BUILT_FUNC)/$(GECKODRIVER_ZIP):
+	@if [ ! -x $(BUILT_FUNC)/$(GECKODRIVER_ZIP) ]; then \
+		mkdir -p $(BUILT_FUNC) && \
+		rm -f wires && \
+		wget -O $(BUILT_FUNC)/$(GECKODRIVER_ZIP) $(GECKODRIVER_BASE_URL)/$(GECKODRIVER_DOWNLOAD_NAME) && \
+		cd $(BUILT_FUNC) && \
+		$(GECKODRIVER_UNPACK) $(GECKODRIVER_ZIP) && \
+		mv geckodriver $(GECKODRIVER_EXE) && \
+		chmod +x $(GECKODRIVER_EXE) && \
+		cd ../../..; \
+	fi
+
+
 .PHONY: functional
 ifeq ($(SKIP_FUNCTIONAL),1)
 functional:
 	# Do nothing.
 else
-functional: build $(XPI_FILE)
+functional: build $(XPI_FILE) $(BUILT_FUNC)/$(GECKODRIVER_ZIP)
 	@mkdir -p $(BUILT)/functional
-	TEST_SERVER=$(TEST_SERVER) \
+	PATH=$(PATH):$(abspath $(BUILT_FUNC)) \
+	 FIREFOX_EXE=`./bin/getfx.js -b $(TEST_BROWSER)` \
+	 TEST_SERVER=$(TEST_SERVER) \
 	 LOOP_SERVER=$(LOOP_SERVER) \
 	 USE_LOCAL_STANDALONE=$(USE_LOCAL_STANDALONE) \
 	 LOOP_XPI_FILE=$(XPI_FILE) \
-	$(VENV)/bin/marionette --binary `./bin/getfx.js -b $(TEST_BROWSER)` \
-	                       --gecko-log $(ARTIFACT_UPLOAD_PATH)/gecko.log \
-	                       $(E10S_ARGS) \
-	                       $(SYMBOLS_ARGS) \
-	                       test/functional/manifest.ini
+	$(VENV)/bin/python -m unittest discover -v test/functional
 endif
 
 #

@@ -52,13 +52,13 @@ tasks:
   - provisionerId: "{{ taskcluster.docker.provisionerId }}"
     metadata:
       name: Loop Functional Tests
-      description: Loop Functional Tests (Marionette)
+      description: Loop Functional Tests (Selenium)
       owner: "{{ event.head.user.email }}"
       source: "{{ event.head.repo.url }}"
     workerType: "{{ taskcluster.docker.workerType }}"
     payload:
       maxRunTime: 1200
-      image: "standard8/loop-functional:0.1.0.201606282210"
+      image: "standard8/loop-functional:0.2.0.201607060908"
       command:
         - "/bin/bash"
         - "-lc"

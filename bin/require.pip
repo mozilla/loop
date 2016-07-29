@@ -1,34 +1,19 @@
 # If you add new dependencies, please regenerate with `.venv/bin/pip freeze` to
 # ensure all sub-dependencies are included.
-blessings==1.6
 bugsy==0.9.0
-browsermob-proxy==0.7.1
 flake8==2.6.2
 gitchangelog==2.3.0
 gitdb==0.6.4
 GitPython==2.0.6
 jsmin==2.2.1
-manifestparser==1.1
-marionette-client==3.1.0
-marionette-driver==2.0.0
-marionette-transport==1.2.0
 mccabe==0.5.0
 mozbuild==0.2
-mozcrash==0.17
-mozdevice==0.48
 mozfile==1.2
 mozinfo==0.9
-mozlog==3.2
-moznetwork==0.27
 mozprocess==0.22
-mozprofile==0.28
-mozrunner==6.11
-moztest==0.7
-mozversion==1.4
-pep8==1.7.0
 pycodestyle==2.0.0
 pyflakes==1.2.3
-pystache==0.5.4
+pyperclip==1.5.27
 requests==2.10.0
+selenium==2.53.6
 smmap==0.9.0
-wptserve==1.4.0

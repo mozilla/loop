@@ -40,7 +40,7 @@ tasks:
       command:
         - "/bin/bash"
         - "-lc"
-        - "./bin/setup-x11.sh && sudo apt-get update && sudo apt-get upgrade -y google-chrome-stable && git clone {{event.head.repo.url}} repo && cd repo && git checkout {{event.head.repo.branch}} && mozdownload --type=daily --branch=mozilla-central && tar xfj *.bz2 && FIREFOX_BIN=`pwd`/firefox/firefox make karma"
+        - "./bin/setup-x11.sh && sudo apt-get update && sudo apt-get upgrade -y google-chrome-stable && git clone {{event.head.repo.url}} repo && cd repo && git checkout {{event.head.repo.branch}} && wget -O https://archive.mozilla.org/pub/firefox/tinderbox-builds/mozilla-release-linux64-add-on-devel/1469873725/firefox-48.0.en-US.linux-x86_64-add-on-devel.tar.bz2 && tar xfj *.bz2 && FIREFOX_BIN=`pwd`/firefox/firefox make karma"
     extra:
       github:
         env: true

@@ -1383,6 +1383,13 @@ function loadDefaultPrefs() {
  * Called when the add-on is started, e.g. when installed or when Firefox starts.
  */
 function startup(data) {
+  // Anything later than FF 49 we don't support, so don't try to display the
+  // button. Later this will be to uninstall the add-on itself.
+  // Note: this check exists in shutdown() as well.
+  if (Services.vc.compare(Services.appinfo.version, "49.0a1") > 0) {
+    return;
+  }
+
   // Record the add-on version for when the UI is initialised.
   WindowListener.addonVersion = data.version;
 
@@ -1439,6 +1446,10 @@ function startup(data) {
  * or just uninstall.
  */
 function shutdown(data, reason) {
+  if (Services.vc.compare(Services.appinfo.version, "49.0a1") > 0) {
+    return;
+  }
+
   // Close any open chat windows
   Cu.import("resource:///modules/Chat.jsm");
   let isLoopURL = ({ src }) => /^about:loopconversation#/.test(src);

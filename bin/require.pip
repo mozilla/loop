@@ -14,6 +14,7 @@ mozprocess==0.22
 pycodestyle==2.0.0
 pyflakes==1.2.3
 pyperclip==1.5.27
+pystache==0.5.4
 requests==2.10.0
 selenium==2.53.6
 smmap==0.9.0
